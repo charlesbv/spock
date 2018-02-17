@@ -1,0 +1,46 @@
+#BEGINNINGOFHEADER
+#ENDOFHEADER
+#NB_ENSEMBLES_CD
+100
+
+# Ram Facing 
+(1.0; 0; 0.0)             // normal (in body frame)
+100.0                     // area (cm^2)         
+0.0                       // solar cell area (cm^2)      
+2.2, 0.1                  // Cd, standard deviation on Cd               
+1			  // solar radiation coefficient	    
+
+# Zenith
+(0.0; 0.0; 1.0)                     
+100.0                              
+100.0                             
+2.2, 0.1                                 
+1				    
+
+# Nadir
+(0.0; 0; -1.0)                      
+100.0                              
+0.0                             
+2.2, 0.1                                 
+1		      	            
+
+# Port
+(0.0; 1.0; 0.0)                    
+100.0
+0.0                          
+2.2, 0.1                                
+1				    
+
+# Starboard
+(0.0; -1.0; 0.0)                    
+100.0
+0.0                          
+2.2, 0.1                                
+1				    
+
+# Wake 
+(-1.0; 0.0; 0.0)                    
+100.0
+0.0                                
+2.2, 0.1                                
+1       				    

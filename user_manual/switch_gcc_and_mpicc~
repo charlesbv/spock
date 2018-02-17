@@ -1,0 +1,53 @@
+Note on how to switch from gcc to mpicc
+
+There are two ways to run SpOCK:
+- using gcc
+- using mpicc
+Both work fine, but the advantage of mpicc is that you can use parallel programming to run SpOCK faster. This is very convenient for runs that compute specular point positions since this is a pretty heavy computation. When you run ensemble simulations (to model uncertainties in drivers for instance), using mpicc is recommended too. If you're not trying
+ to calculate specular point positions or to run ensembles, then using gcc is fine. 
+
+By default, SpOCK will use mpicc.
+
+-- GCC
+To use gcc, go to ./ and:
+1- make clean
+2- make all rundir COMPILER=gcc
+3- go back to the run directory and run SpOCK: ./spock ex_main_input_basic.txt
+
+if running find_specular_points:
+4- in ./: 
+gcc -c -o src/mpi_fake/mpi.o src/mpi_fake/mpi.c 
+ar r src/mpi_fake/libmpi.a src/mpi_fake/mpi.o 
+ranlib src/mpi_fake/libmpi.a 
+gcc -c -o src/find_specular_points.o src/find_specular_points.c
+gcc -o find_specular_points src/find_specular_points.o -L./src/mpi_fake -lmpi -lm 
+5- go back to the run directory and run find_specular_points: ./find_specular_points ex_main_input_basic.txt -lon=0 -rot=0 -min
+-> this will create binary files of the specular point positions. If you want to convert them to txt files:
+6- cd src/storm
+7- make clean
+8- make all COMPILER=gcc
+9- go back to the run directory and run run_storm: ./run_storm ex_main_input_basic.txt 0
+
+-- MPICC
+To use mpicc, go to ./ and:
+1- make clean
+2- make all rundir
+3- go back to the run directory and run SpOCK: mpirun -np 1 spock ex_main_input_basic.txt 
+
+if running find_specular_points:
+4- in ./:
+mpicc -o find_specular_points src/find_specular_points.c (you might need to add the option '-lm')
+5- go back to the run directory and run find_specular_points: mpirun -np 1 find_specular_points ex_main_input_basic.txt -lon=0 -rot=0 -min
+-> this will create binary files of the specular point positions. If you want to convert them to txt files:
+6- cd src/storm
+7- make clean
+8- make all 
+9- go back to the run directory and run run_storm: mpirun -np 1 run_storm ex_main_input_basic.txt 0
+
+--FINAL NOTE
+Using parallel programming (mpirun -np n, where n >= 1)
+Use more than one processor (mpirun -np 2 or mpirun -np 3 or etc) in one of these cases:
+- if computing ensembles within SpOCK (refer to the documents main_input_file and how_to_use_ensembles)
+- if running the executable 'find_specular_points'. ex: mpirun -np 8 find_specular_points...
+- if running the executable 'run_storm'. ex: mpirun -np 8 run_storm...
+So for now, if you run the executable 'spock', run it with more than one processor only uf runnning ensembles. Don't use it for a constellation of satellites, it won't go faster. This is something that will be changed in the future to allow to use parallel programming to propagate a constellation faster.

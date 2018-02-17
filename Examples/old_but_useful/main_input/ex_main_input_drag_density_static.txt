@@ -1,0 +1,27 @@
+#TIME
+2017-01-01T12:00:00
+2017-01-02T12:00:00
+5
+
+#SPACECRAFT
+1  
+0
+3
+-1
+cubesat_1u.txt
+
+#ORBIT
+oe
+500 35 0 0 0 0.0001
+
+#FORCES
+4
+drag 
+static
+100
+100
+15
+
+#OUTPUT
+out
+60

@@ -1,0 +1,27 @@
+running find_specular_points:
+When installing SpOCK, find_specular_points might not work because of different versions of mpicc/gcc. So you need to compile it again (in ./) (you migh need to include the option -lm):
+mpicc -o find_specular_points src/find_specular_points.c
+
+old stuff (to REMOVE from this file):
+/data/cygnss/tools/spock/mpi_installation/bin/mpicc -c -o src/find_specular_points.o src/find_specular_points.c
+/data/cygnss/tools/spock/mpi_installation/bin/mpicc -o find_specular_points src/find_specular_points.c -lm
+
+
+gcc -c -o src/mpi_fake/mpi.o src/mpi_fake/mpi.c -> create src/mpi_fake/mpi.o object file
+ar r src/mpi_fake/libmpi.a src/mpi_fake/mpi.o -> do some library stuff to tell gcc to use mpi.h from src/mpi_fake
+ranlib src/mpi_fake/libmpi.a -> do some library stuff to tell gcc to use mpi.h from src/mpi_fake
+gcc -c -o src/find_specular_points.o src/find_specular_points.c -> create src/find_specular_points.o object file
+gcc -o find_specular_points src/find_specular_points.o -L./src/mpi_fake -lmpi -lm -> create executable find_specular_points from object src/find_specular_points.o using the mpi.h from src/mpi_fake (through the library 'mpi' (see 'lmpi') that is in src/mpi_fake (see '-L./src/mpi_fake')) (-lm is something different: it's to tell gcc to use the math library 'm')
+
+
+------
+running run_storm
+5. Edit the makefile in directory 'spock/src/storm'.  The SPICE_DIR and the GSL_DIR should be changed as in the Makefile in 'spock'. Also, make sure the compiler (CC variable) is set up correctly. 
+
+------
+Using parallel programming (mpirun -np n, where n >= 1)
+Use more than one processor (mpirun -np 2 or mpirun -np 3 or etc) in one of these cases:
+- if computing ensembles within SpOCK (refer to the documents main_input_file and how_to_use_ensembles)
+- if running the executable 'find_specular_points'. ex: mpirun -np 8 find_specular_points...
+- if running the executable 'run_storm'. ex: mpirun -np 8 run_storm...
+So for now, if you run the executable 'spock', run it with more than one processor only uf runnning ensembles. Don't use it for a constellation of satellites, it won't go faster. This is something that will be changed in the future to allow to use parallel programming to propagate a constellation faster.

@@ -1,0 +1,17 @@
+orbit_force max_diff_pos max_diff_vel (distances are in meters)
+
+leo_2body 0.012 0.001
+leo_2body_drag 9.554 0.011
+leo_aspherical_earth 2.011 0.003
+leo_2body_third_body 0.012 0.001
+leo_2body_solar_pressure 5.382 0.005
+geo_2body 0.076 0.000
+geo_2body_drag 0.076 0.000
+geo_aspherical_earth 0.098 0.001
+geo_2body_third_body 0.075 0.001
+geo_2body_solar_pressure 0.714 0.001
+heo_2body 0.063 0.001
+heo_2body_drag 0.250 0.001
+heo_aspherical_earth 8.319 0.006
+heo_2body_third_body 0.063 0.001
+heo_2body_solar_pressure 1.838 0.002

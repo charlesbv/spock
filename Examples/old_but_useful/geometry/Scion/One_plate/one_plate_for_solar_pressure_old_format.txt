@@ -1,0 +1,13 @@
+#BEGINNINGOFHEADER
+#ENDOFHEADER
+# NB_ENSEMBLES
+0
+
+# Ram Facing 
+(0.0; 0; 1.0)                     
+10000.0                              
+0.0                             
+2.2, 0.1                                 
+1.0
+
+
