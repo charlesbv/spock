@@ -8609,19 +8609,20 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
 
     sscanf(line, "%s", text);
 
-     int count_space=0;
-       int  icount_space;
+     int count_bracket=0;
+       int  icount_bracket;
 
-      for (icount_space = 0; icount_space< strlen(line); icount_space++){
-	if (line[icount_space]==' '){
-	  count_space = count_space + 1;
+      for (icount_bracket = 0; icount_bracket< strlen(line); icount_bracket++){
+	if (line[icount_bracket]=='('){
+	  count_bracket = count_bracket + 1;
 	  }
       }
 
 
-      //    for (count_space=0; text[count_space]; text[count_space]==' ' ? count_space++ : *text++);
+      //    for (count_bracket=0; text[count_bracket]; text[count_bracket]==' ' ? count_bracket++ : *text++);
     // if more than 5 spaces then the file is pitch roll yaw. otherwise it's quaternion
-    if (count_space > 5){
+
+    if (count_bracket  >= 1){
       *file_is_quaternion = 0;
     }
     else{

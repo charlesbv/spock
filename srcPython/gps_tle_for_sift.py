@@ -16,7 +16,7 @@ def gps_tle_for_sift(tle_epoch, latest_tle_or_not):
 
     # get latest TLEs of operational GPS at celestrak     
     log_filename = "log_gps_tle_" + tle_epoch + ".txt"
-    os.system('wget https://www.celestrak.com/NORAD/elements/gps-ops.txt'+ " >> " + log_filename+ " 2>&1")# > /dev/null 2>&1") !!! can't redirect in windows version
+    os.system('wget --no-check-certificate https://www.celestrak.com/NORAD/elements/gps-ops.txt'+ " >> " + log_filename+ " 2>&1")# > /dev/null 2>&1") !!! can't redirect in windows version
 
     # from the TLEs at celestrak, get the NORAD IDs of the operational GPS 
     tle_celestrak = open("gps-ops.txt")
@@ -38,9 +38,9 @@ def gps_tle_for_sift(tle_epoch, latest_tle_or_not):
             link_spacetrack = link_spacetrack + "," + norad_id_operational_gps[itle]
         link_spacetrack = link_spacetrack + "/predicates/OBJECT_NAME,TLE_LINE1,TLE_LINE2/format/3le/"
         ## Download with this link
-        os.system('wget  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)# !!! can't redirect in windows version > /dev/null 2>&1")
+        os.system('wget --no-check-certificate  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)# !!! can't redirect in windows version > /dev/null 2>&1")
         name_tle = "gps_" + tle_epoch  + ".txt"
-        os.system('wget --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename+ " 2>&1")#!!! can't redirect in windows version + " > /dev/null 2>&1")
+        os.system('wget --no-check-certificate --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename+ " 2>&1")#!!! can't redirect in windows version + " > /dev/null 2>&1")
     else:
         link_spacetrack = "https://www.space-track.org/basicspacedata/query/class/tle/NORAD_CAT_ID/" + norad_id_operational_gps[0]
         for itle in range(nb_tle):
@@ -52,9 +52,9 @@ def gps_tle_for_sift(tle_epoch, latest_tle_or_not):
         ## Order by NORAD ID (each NORAD ahs many TLEs because it's all TLEs since tle_epoch)
         link_spacetrack = link_spacetrack + "orderby/NORAD_CAT_ID/"
         ## Download with this link
-        os.system('wget  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)#!!! can't redirect in windows version > /dev/null 2>&1")
+        os.system('wget --no-check-certificate  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)#!!! can't redirect in windows version > /dev/null 2>&1")
         name_tle = "gps_" + tle_epoch  + "_temp.txt"
-        os.system('wget --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename+ " 2>&1")#!!! can't redirect in windows version + " > /dev/null 2>&1")
+        os.system('wget --no-check-certificate --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename+ " 2>&1")#!!! can't redirect in windows version + " > /dev/null 2>&1")
         ## This TLE file contains too many TLEs for each GPS. Indeed, for each GPS, we only want the most recent TLE  of the list (so the TLE right "before" (older than) tle_epoch). But this file is arranged by epoch (in addition to be arranged by NORAD ID). So for each NORAD ID, take only the last TLE
         tle_spacetrack = open(name_tle)
         read_tle_spacetrack = tle_spacetrack.readlines()

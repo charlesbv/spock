@@ -1,5 +1,5 @@
 #SPICE
-/cygdrive/c/Users/kioskuser/SIFT_v1.3_dev/code/spock/cspice/data
+/Users/cbv/sift/code/spock/cspice/data
 
 #TIME
 2017-08-20T12:00:00

@@ -22,9 +22,9 @@ def cygnss_tle_for_sift(tle_epoch, latest_tle_or_not):
         link_spacetrack = link_spacetrack +  "/format/tle/"
         ## Order by NORAD ID (each NORAD has many TLEs because it's all TLEs since tle_epoch)
         ## Download with this link
-        os.system('wget  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)# > /dev/null 2>&1") !!! can't redirect in windows version
+        os.system('wget --no-check-certificate  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog'+ " >> " + log_filename)# > /dev/null 2>&1") !!! can't redirect in windows version
         name_tle = "cygnss_" + tle_epoch  + ".txt"
-        os.system('wget --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle + " >> " + log_filename + " 2>&1")# !!! can't redirect in windows version + " > /dev/null 2>&1")
+        os.system('wget --no-check-certificate --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle + " >> " + log_filename + " 2>&1")# !!! can't redirect in windows version + " > /dev/null 2>&1")
 
     else:
         ## put NORAD ID in link
@@ -38,9 +38,9 @@ def cygnss_tle_for_sift(tle_epoch, latest_tle_or_not):
         ## Order by NORAD ID (each NORAD has many TLEs because it's all TLEs since tle_epoch)
         link_spacetrack = link_spacetrack + "orderby/NORAD_CAT_ID/"
         ## Download with this link
-        os.system('wget  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog' + " >> " + log_filename)# > /dev/null 2>&1") !!! can't redirect in windows version
+        os.system('wget --no-check-certificate  --post-data="identity=cbv@umich.edu&password=cygnssisawesome" --cookies=on --keep-session-cookies --save-cookies=cookies.txt "https://www.space-track.org/ajaxauth/login" -olog' + " >> " + log_filename)# > /dev/null 2>&1") !!! can't redirect in windows version
         name_tle = "cygnss_" + tle_epoch  + "_temp.txt"
-        os.system('wget --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename + " 2>&1") # + " >> " + log_filename)#+ " > /dev/null 2>&1") !!! can't redirect in windows version
+        os.system('wget --no-check-certificate --limit-rate=100K --keep-session-cookies --load-cookies=cookies.txt ' + link_spacetrack + ' -O ' + name_tle+ " >> " + log_filename + " 2>&1") # + " >> " + log_filename)#+ " > /dev/null 2>&1") !!! can't redirect in windows version
         ## This TLE file contains too many TLEs for each CYGNSS. Indeed, for each CYGNSS, we only want the most recent TLE  of the list (so the TLE right "before" (older than) tle_epoch). This file is arranged by epoch (in addition to be arranged by NORAD ID). So for each NORAD ID, take only the last TLE
         tle_spacetrack = open(name_tle)
         read_tle_spacetrack = tle_spacetrack.readlines()
