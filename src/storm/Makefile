@@ -10,7 +10,7 @@ ifdef COMPILER
 	MPI_H_DUMMY := $(shell ln -s ./mpi_fake/mpi.h ../mpi.h)
 
 else
-	CC=${PATH_COMPILER} -DINLINE -Wall -g -std=gnu99 -O0 -Wextra
+	CC=${PATH_COMPILER} -DINLINE -Wall -g -std=gnu99 -O0 -Wextra -w
 	DEPS = ../options.h ../propagator.h ..nrlmsise-00.h prop_math.h fly_storm.h
 
 	OBJ = ./fly_storm.o ../nrlmsise-00.o ../nrlmsise-00_data.o \
