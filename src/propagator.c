@@ -901,7 +901,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
 			    int *array_sc)
 
 {
-
+  //    etprint(SC->et, "before propagate");
 
   //      printf("\n");
   // Declarations
@@ -1251,7 +1251,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
     }
   }
 
-
+  //    etprint(SC->et, "after propagate");
   return 0;
 }  /* ---------- end of function propagate_spacecraft ----------*/
 
@@ -3259,7 +3259,7 @@ int set_attitude( ATTITUDE_T attitude, int index_in_attitude_interpolated, OPTIO
 
 
   /* Declarations */
-
+  //  printf("%d\n", index_in_attitude_interpolated);
 	  //	 printf("%d %f %f\n", index_in_attitude_interpolated, OPTIONS->pitch[index_in_attitude_interpolated], attitude.pitch[index_in_attitude_interpolated]);
   if (file_is_quaternion == 0){
   attitude.pitch[index_in_attitude_interpolated] = OPTIONS->pitch[index_in_attitude_interpolated];

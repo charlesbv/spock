@@ -244,7 +244,7 @@ int main(int argc, char * argv[]) {
      fclose(KF.fp_kalman_meas);
      fclose(MEAS.fp_meas);
          	   if (iProc == 0) {
-    	printf("\n- Done running the Kalman filter.\n");
+		         	printf("\n- Done running the Kalman filter.\n");
     	        }
 /* 		   // Also propagate without kalman filter (to compare kalman vs no kalman) */
 /*     if (iDebugLevel >= 0){ */
