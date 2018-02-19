@@ -1867,7 +1867,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	strncat(final_epoch_wget, final_epoch_wget_temp, 4);
 	strncat(final_epoch_wget, final_epoch_wget_temp+5, 2);
 	strncat(final_epoch_wget, final_epoch_wget_temp+8, 2);
-	strcpy(str_wget, "wget --post-data ");
+	strcpy(str_wget, "wget --no-check-certificate  --post-data ");
 	strcat(str_wget, "\"activity=retrieve&res=hour&spacecraft=omni2&start_date=");
 	strcat(str_wget, initial_epoch_wget);
 	strcat(str_wget, "&end_date=");
@@ -1955,7 +1955,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	strncat(final_epoch_wget_plus40_5days, final_epoch_wget_plus40_5days_temp, 4);
 	strncat(final_epoch_wget_plus40_5days, final_epoch_wget_plus40_5days_temp+5, 2);
 	strncat(final_epoch_wget_plus40_5days, final_epoch_wget_plus40_5days_temp+8, 2);
-	strcpy(str_wget, "wget --post-data ");
+	strcpy(str_wget, "wget --no-check-certificate --post-data ");
 	strcat(str_wget, "\"activity=retrieve&res=daily&spacecraft=omni2&start_date=");
 	strcat(str_wget, initial_epoch_wget_minus40_5days);
 	strcat(str_wget, "&end_date=");
@@ -2016,7 +2016,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	  fclose(file_f107_to_calculate_f107_average);
 	  //      remove(filename_f107_to_calculate_f107_average);
 	  // // Since the most recent data available at omniweb is too old to compute the average of F10.7 over 81 days, download omniweb data until et_correct_end_date_omniweb
-	  strcpy(str_wget, "wget --post-data ");
+	  strcpy(str_wget, "wget --no-check-certificate --post-data ");
 	  strcat(str_wget, "\"activity=retrieve&res=daily&spacecraft=omni2&start_date=");
 	  strcat(str_wget, initial_epoch_wget_minus40_5days);
 	  strcat(str_wget, "&end_date=");
@@ -2052,7 +2052,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	//      remove(filename_f107_to_calculate_f107_average);
 
 	// Check the dates for Ap (same as we did for F10.7)
-	strcpy(str_wget, "wget --post-data ");
+	strcpy(str_wget, "wget --no-check-certificate --post-data ");
 	strcat(str_wget, "\"activity=retrieve&res=hour&spacecraft=omni2&start_date=");
 	// // remove 57 hours ot inital epoch since ap historical starts 57 hours before current time
 	et2utc_c(OPTIONS->et_oldest_tle_epoch-57*3600., "ISOC" ,0 ,11 , initial_epoch_wget_minus_57hours_temp);
@@ -2428,7 +2428,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	    if ( date_file_obs_initial_swpc[0] == 'Q' ){// epoch start year = current year 
 	      for (ooo = quarter_initial_swpc; ooo < quarter_final_swpc +1; ooo++){
 		// F10.7
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -2441,7 +2441,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -2455,7 +2455,7 @@ int load_options( OPTIONS_T *OPTIONS,
 
 		// Ap		
 	      for (ooo = quarter_initial_swpc_ap; ooo < quarter_final_swpc +1; ooo++){
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -2468,7 +2468,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");		
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		  }
@@ -2486,7 +2486,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      //  download all years from initial epoch year to curren year
 	      for (ooo = date_file_obs_initial_swpc_int; ooo < year_current; ooo++){
 		// F10.7
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -2494,7 +2494,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -2508,7 +2508,7 @@ int load_options( OPTIONS_T *OPTIONS,
 
 		// Ap	  
 	      for (ooo = date_file_obs_initial_swpc_int_ap; ooo < year_current; ooo++){
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -2516,7 +2516,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 	      
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
@@ -2537,7 +2537,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      for (ooo = 1; ooo < quarter_final_swpc +1; ooo++){
 		// F10.7
 
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -2550,7 +2550,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -2562,7 +2562,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		ifile_f107 = ifile_f107 + 1;
 
 		// Ap
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -2575,7 +2575,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -2595,7 +2595,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	  else{ // end epoch year is older than current year (so start epoch year too)
 	    for (ooo = date_file_obs_initial_swpc_int; ooo < date_file_obs_final_swpc_int + 1; ooo++){
 	      // F10.7
-	      strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+	      strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 	      strcpy(wget_swpc_quarter_to_download_temp, "");
 	      sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -2603,7 +2603,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 	      strcat(wget_swpc_quarter_to_download, "_DSD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 	      if (do_not_download_file_swpc_or_wget !=1 ){
 	     system(wget_swpc_quarter_to_download);
 	      }
@@ -2616,7 +2616,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	    }
 	      // Ap
 	    for (ooo = date_file_obs_initial_swpc_int_ap; ooo < date_file_obs_final_swpc_int + 1; ooo++){
-	      strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+	      strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 	      strcpy(wget_swpc_quarter_to_download_temp, "");
 	      sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -2624,7 +2624,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 	      strcat(wget_swpc_quarter_to_download, "_DGD.txt >/dev/null 2>&1");
-		//printf("WGET    <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate    <%s>", wget_swpc_quarter_to_download);
 	      if (do_not_download_file_swpc_or_wget !=1 ){
 	     system(wget_swpc_quarter_to_download); 
 	      }
@@ -2671,7 +2671,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	  }
 
 
-	    strcpy( wget_filename_f107_ap_pred, "wget http://services.swpc.noaa.gov/text/45-day-ap-forecast.txt -O ");
+	    strcpy( wget_filename_f107_ap_pred, "wget --no-check-certificate http://services.swpc.noaa.gov/text/45-day-ap-forecast.txt -O ");
 	    strcpy(filename_f107_ap_pred, "");
 	    //	    printf("<%s>\n",  OPTIONS->dir_input_density_msis);
 /* 	  //newstructure  */
@@ -3078,7 +3078,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	    if ( date_file_obs_initial_swpc[0] == 'Q' ){// epoch start year = current year
 	      for (ooo = quarter_initial_swpc; ooo < quarter_final_swpc +1; ooo++){
 		// F10.7
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -3091,7 +3091,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --no-check-certificate <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3105,7 +3105,7 @@ int load_options( OPTIONS_T *OPTIONS,
 
 		// Ap
 	      for (ooo = quarter_initial_swpc_ap; ooo < quarter_final_swpc +1; ooo++){
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -3118,7 +3118,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3136,7 +3136,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      //  download all years from initial epoch year to curren year
 	      for (ooo = date_file_obs_initial_swpc_int; ooo < year_current; ooo++){
 		// F10.7
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -3144,7 +3144,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3157,7 +3157,7 @@ int load_options( OPTIONS_T *OPTIONS,
 
 		// Ap
 	      for (ooo = date_file_obs_initial_swpc_int_ap; ooo < year_current; ooo++){
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -3165,7 +3165,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3183,7 +3183,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      // download all quarter files of current year
 	      for (ooo = 1; ooo < quarter_final_swpc +1; ooo++){
 		// F10.7
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -3196,7 +3196,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DSD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3208,7 +3208,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		ifile_f107 = ifile_f107 + 1;
 
 		// Ap
-		strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+		strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 		strcpy(wget_swpc_quarter_to_download_temp, "");
 		sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 		strcat(wget_swpc_quarter_to_download, year_current_str);
@@ -3221,7 +3221,7 @@ int load_options( OPTIONS_T *OPTIONS,
 		strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 		strcat(wget_swpc_quarter_to_download, "_DGD");
 		strcat(wget_swpc_quarter_to_download, ".txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 		if (do_not_download_file_swpc_or_wget !=1 ){
 		system(wget_swpc_quarter_to_download);
 		}
@@ -3240,7 +3240,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	  else{ // end epoch year is older than current year (so start epoch year too)
 	    for (ooo = date_file_obs_initial_swpc_int; ooo < date_file_obs_final_swpc_int + 1; ooo++){
 	      // F10.7
-	      strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+	      strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 	      strcpy(wget_swpc_quarter_to_download_temp, "");
 	      sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -3248,7 +3248,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 	      strcat(wget_swpc_quarter_to_download, "_DSD.txt >/dev/null 2>&1");
-		//printf("WGET <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE  <%s>", wget_swpc_quarter_to_download);
 	      if (do_not_download_file_swpc_or_wget !=1 ){
 	     system(wget_swpc_quarter_to_download);
 	      }
@@ -3260,7 +3260,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	    }
 	      // Ap
 	    for (ooo = date_file_obs_initial_swpc_int_ap; ooo < date_file_obs_final_swpc_int + 1; ooo++){
-	      strcpy(wget_swpc_quarter_to_download, "wget ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
+	      strcpy(wget_swpc_quarter_to_download, "wget --no-check-certificate  ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/");
 	      strcpy(wget_swpc_quarter_to_download_temp, "");
 	      sprintf(wget_swpc_quarter_to_download_temp, "%d", ooo );
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
@@ -3268,7 +3268,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	      strcat(wget_swpc_quarter_to_download, initial_filename_f107_obs);
 	      strcat(wget_swpc_quarter_to_download, wget_swpc_quarter_to_download_temp);
 	      strcat(wget_swpc_quarter_to_download, "_DGD.txt >/dev/null 2>&1");
-		//printf("WGET    <%s>", wget_swpc_quarter_to_download);
+		//printf("WGET --NO-CHECK-CERTIFICATE     <%s>", wget_swpc_quarter_to_download);
 	      if (do_not_download_file_swpc_or_wget !=1 ){
 	     system(wget_swpc_quarter_to_download);  
 	      }
@@ -3317,7 +3317,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	  }
 
 
-	    strcpy( wget_filename_f107_ap_pred, "wget http://services.swpc.noaa.gov/text/45-day-ap-forecast.txt -O ");
+	    strcpy( wget_filename_f107_ap_pred, "wget --no-check-certificate  http://services.swpc.noaa.gov/text/45-day-ap-forecast.txt -O ");
 /* 	    strcpy(filename_f107_ap_pred, ""); */
 /* 	  //newstructure  */
 /* /\* 	    strcat(filename_f107_ap_pred, OPTIONS->dir_input_density_msis); *\/ */

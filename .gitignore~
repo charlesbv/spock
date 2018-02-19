@@ -1,0 +1,7 @@
+cspice
+gsl_installation
+spock_*
+src/*.o
+*~
+src/mpi.h
+src/mpi_fake

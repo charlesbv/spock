@@ -7,7 +7,7 @@ int kalman_filt( MEAS_T *meas, KALMAN_T *kf, PARAMS_T *params, OPTIONS_T *OPTION
 
       read_meas(meas, meas->fp_meas, kf->init_complete, params, OPTIONS);
   //  etprint(meas->et, "newmeas");
-  if ((meas->et > OPTIONS->et_final_epoch) && (kf->sc.et >= OPTIONS->et_final_epoch) ){ // the second condition (kf->sc.et >= OPTIONS->et_final_epoch) is because if not verified then the sc still needs to be propagated to the next time step of propagation (et_next_time_step)
+       if ((meas->et > OPTIONS->et_final_epoch) && (kf->sc.et >= OPTIONS->et_final_epoch) ){ // the second condition (kf->sc.et >= OPTIONS->et_final_epoch) is because if not verified then the sc still needs to be propagated to the next time step of propagation (et_next_time_step)
     return 0;
   }  
 
@@ -945,9 +945,10 @@ int       already_propagated_until_time_step_right_after_meas = 0;
   double starttime;
   str2et_c(OPTIONS->initial_epoch, &starttime);
 
-  while ( ( kf->sc.et != meas->et ) || (kf->sc.et_next_time_step == OPTIONS->et_final_epoch)){// get in here to propagate until the next measurment or propagate one more time from the previous measurement until the final epoch
+  while ( ( kf->sc.et != meas->et ) || ( (kf->sc.et_next_time_step == OPTIONS->et_final_epoch) && (meas->et>OPTIONS->et_final_epoch)) ){// get in here to propagate until the next measurment or propagate one more time from the previous measurement until the final epoch
 
-    if ( ( meas->et - kf->sc.et  ) < kf->sc.INTEGRATOR.dt ) {
+
+    if ( ( meas->et - kf->sc.et  ) < kf->sc.INTEGRATOR.dt ){
       kf->sc.INTEGRATOR.dt = meas->et - kf->sc.et;
     }
     //        etprint(kf->sc.et, "kf->sc.et");
@@ -1103,6 +1104,7 @@ int kalman_write_out( KALMAN_T *kf, FILE *fp, MEAS_T *meas) {
   // end of cbv doesn't use that (Joel used it though (cbv made modifications to it but then stopped using it))
 
   et2utc_c(et, "ISOC", 6, 255, text2);
+
   fprintf(fp, "%s %16.8f %16.8f %16.8f %16.8f %16.8f %16.8f",
 	  text2, r[0], r[1], r[2], v[0], v[1], v[2]);
   fprintf(fp, " %e %e %e",
@@ -1122,7 +1124,7 @@ int kalman_write_out( KALMAN_T *kf, FILE *fp, MEAS_T *meas) {
 	    kf->sc.INTEGRATOR.attitude.roll_current,
 	      kf->sc.INTEGRATOR.attitude.yaw_current);
 
-
+      //      printf("%s %e\n",text2,kf->sc.INTEGRATOR.A_ref_tot);
   if (kf->is_obs == 1){ // if this time corresponds to a time where there is a measurement
     fprintf(fp, " obs");
   }
@@ -1541,6 +1543,7 @@ int propagate_spaecraft_from_initial_epoch_until_first_meas( MEAS_T *MEAS,  KALM
   double density;
       kalman_write_out( kf, kf->fp_kalman, MEAS) ;
       while (kf->sc.et + OPTIONS->dt < MEAS->et){
+       
     propagate_spacecraft( &kf->sc, PARAMS, OPTIONS->et_initial_epoch, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel,  start_ensemble, array_sc );
       kf->is_obs = 0;
       kalman_write_out( kf, kf->fp_kalman, MEAS) ;
@@ -1548,7 +1551,7 @@ int propagate_spaecraft_from_initial_epoch_until_first_meas( MEAS_T *MEAS,  KALM
       }
       // propagate one more time until first meas
       double dt_save  = kf->sc.INTEGRATOR.dt;
-          if ( ( MEAS->et - kf->sc.et  ) < kf->sc.INTEGRATOR.dt ) {
+      if ( (( MEAS->et - kf->sc.et  ) < kf->sc.INTEGRATOR.dt ) && (fabs(MEAS->et - kf->sc.et) > 1e-6)) { // (fabs(MEAS->et - kf->sc.et) > 1e-6) is to eliminate the case where MEAS->et = kf->sc.et (taking into account numerical errors)
       kf->sc.INTEGRATOR.dt = MEAS->et - kf->sc.et;
           propagate_spacecraft( &kf->sc, PARAMS, OPTIONS->et_initial_epoch, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel,  start_ensemble, array_sc );
       kf->is_obs = 0;
@@ -1556,7 +1559,9 @@ int propagate_spaecraft_from_initial_epoch_until_first_meas( MEAS_T *MEAS,  KALM
 
     }
 	  kf->sc.INTEGRATOR.dt = dt_save;
-	  //	  etprint(kf->sc.et, "first prop done");
+
+/* 	  	  etprint(kf->sc.et, "first prop done"); */
+/* 	  print_test(); */
   return 0;
 
 }

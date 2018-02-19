@@ -213,7 +213,8 @@ int kalman_init( MEAS_T *meas, KALMAN_T *kf, CONSTELLATION_T  *CONSTELLATION,   
   }
 
   if (CONSTELLATION->spacecraft[0][0].INTEGRATOR.file_is_quaternion != 0){
-    print_error(iProc, "The Kalman filter can't be run with quaternions");
+    printf("\n***! There used to be an error message saying that the Kalman filter can't be run with quaternions. cbv removed this error message on 02-15-18 but maybe cbv shoudn't have done so. !***\n\n\n");
+    //    print_error(iProc, "The Kalman filter can't be run with quaternions");
   }
 	  
  if (OPTIONS->new_cd == 1){

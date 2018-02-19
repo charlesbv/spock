@@ -1251,8 +1251,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
     }
   }
 
-  printf("AAAAAAAAAA\n");
-  MPI_Finalize();exit(0);
+
   return 0;
 }  /* ---------- end of function propagate_spacecraft ----------*/
 
@@ -2022,7 +2021,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
 {
 
-  printf("AAAAAAAAA\nAAAAAAA\n");
+
   //  printf("%d %d\n",index_in_attitude_interpolated, index_in_driver_interpolated);
 
   double total_cross_area = 0;
@@ -2902,7 +2901,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   //	printf("cd[%d]: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[0].acco_coeff );
 
 
-  printf("BBBBBBBB\nBBBBBBB\n");
+
 
 
 

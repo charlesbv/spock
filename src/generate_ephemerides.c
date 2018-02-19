@@ -3787,25 +3787,9 @@ int print_progress(double min_end_time, double et , double starttime, int iProc,
 
 int print_progress_kalman(double min_end_time, double et , double starttime, int iProc, int nb_gps){
 
-  if (iProc == 0){ // print progress
-
-
-
-       printf("\033[A\33[2K\rRunning the Kalman filter... %.0f%%\n", ( et - starttime ) / ( min_end_time - starttime ) *100.0);
-       //     printf("Propagating the constellation... %.0f\n", ( et - starttime ) / ( min_end_time - starttime ) *100.0);
-
-     //            etprint(et, "");
-      /* frac1 = (et- starttime ) / ( min_end_time - starttime )*100.0; */
-      /* frac2 = (et- starttime -dt) / ( min_end_time - starttime )*100.0; */
-
-      /* if ( (int) frac1 > (int) frac2) { */
-      /* 	printf("Propagating the constellation... %.0f%%\r",  */
-      /* 	       frac1); */
-      /* } */
-
-    
-  } // end of print progress
-
+  if (iProc == 0){ 
+    printf("\033[A\33[2K\rRunning the Kalman filter... %.0f%%\n", ( et - starttime ) / ( min_end_time - starttime ) *100.0);
+  } 
 
   return 0;
 }
