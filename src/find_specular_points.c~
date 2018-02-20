@@ -77,7 +77,7 @@ enum {nPtsGrid=1000};
 
 struct specular_point_info CourseGrid[nPtsGrid];
 
-enum {nTimesMax=2764800}; // used to be: 1209600    (14 days)
+enum {nTimesMax=604800}; // used to be: 1209600    (14 days)
 enum {nGps=31};
 enum {nCygnss=16};
 
@@ -333,6 +333,7 @@ return 0;
   AntennaInfo.dTheta = 180.0/nThetaAntenna;
   AntennaInfo.dPhi = AntennaInfo.dTheta;
 
+  
   AntennaInfo.factor = AntennaInfo.ptx * AntennaInfo.gtx *
     AntennaInfo.a0 * (AntennaInfo.lambda * AntennaInfo.lambda) /
     (4*4*pi*pi);
@@ -1322,7 +1323,7 @@ return 0;
   C2Sz = C2Sz/C2Smag;
 
   info->CygnssToSpecularPoint = C2Smag;
-
+  
   if (iDebug > 0) {
     printf("c: %f %f %f\n",CygX/1000.0, CygY/1000.0, CygZ/1000.0);
     printf("g: %f %f %f\n",GpsX/1000.0, GpsY/1000.0, GpsZ/1000.0);
@@ -1371,6 +1372,7 @@ return 0;
 
   for (iAnt=0; iAnt < AntennaInfo.nAnt; iAnt++) {
 
+
     yaw = (AntennaInfo.yaws[iAnt] + yawoverall)*dtor;
     cy = cos(yaw);
     sy = sin(yaw);
@@ -1384,6 +1386,7 @@ return 0;
     t2 = RotationAngle*dtor;
     ct = cos(t+t2);
     st = sin(t+t2);
+
     stosXr =  tmpX;
     stosYr =  tmpY * ct - tmpZ * st;
     stosZr =  tmpZ * ct + tmpY * st;
@@ -1406,6 +1409,7 @@ return 0;
     //theta_satm = acos(stosZrm)/dtor;
 
     xy = sqrt(stosXr*stosXr + stosYr*stosYr) + 1.0e-7;
+
     phi_sat = acos(stosXr/xy)/dtor + 90.0;
     if (phi_sat > 360.0) phi_sat -= 360.0;
 
@@ -1414,14 +1418,19 @@ return 0;
     //if (stosYrm < 0.0) phi_satm = 360.0-phi_satm;
     //phi_satm += 90.0;
     //if (phi_satm > 360.0) phi_satm -= 360.0;
-  
+
+    
     if (iDebug > 0) printf("find_gain: before gain lookup\n");
 
+
     ii = (int) (phi_sat / AntennaInfo.dPhi);
+
     jj = (int) (theta_sat / AntennaInfo.dTheta);
+
 
     fx = (  phi_sat - AntennaInfo.phi[ii])  /AntennaInfo.dPhi;
     fy = (theta_sat - AntennaInfo.theta[jj])/AntennaInfo.dTheta;
+
 
     gainR = (1-fx)*(1-fy) * AntennaInfo.gain[ii  ][jj  ] +
             (  fx)*(1-fy) * AntennaInfo.gain[ii+1][jj  ] +
@@ -1430,7 +1439,9 @@ return 0;
 
     if (gainR > GainHighest) GainHighest = gainR;
 
+    
   }
+  
 
 
 //  ii = (int) (phi_satm / AntennaInfo.dPhi);
@@ -1619,7 +1630,8 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 
     //    if (iCygnss == 0) fwrite(&nVars,sizeof(nVars),1,fpOutput); // CBV 05/09/16
 
-        if (iProc == 0) printf("iCygnss : %d %d\n",iCygnss, CYGNSS[iCygnss].IsGood);
+    //        if (iProc == 0) printf("iCygnss : %d %d\n",iCygnss, CYGNSS[iCygnss].IsGood);
+
 
     if (CYGNSS[iCygnss].IsGood == 1) {
 
@@ -1712,6 +1724,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 		  iYawPoint = iPt % CYGNSS[0].nYawTimes;
 		  iYawPointBefore = iYawPoint-1;
 		  if (iYawPointBefore == -1) iYawPointBefore = CYGNSS[0].nYawTimes-1;
+
 		  yawoverall = x * CYGNSS[0].yaw[iYawPoint] + (1-x) * CYGNSS[0].yaw[iYawPointBefore];
 		  //printf("Changed Yaw : %f %d %d\n", yawoverall, iPt, iYawPoint);
 		}
@@ -1719,6 +1732,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 		if (iDebug > 0)
 		  printf("find gain! iCygnss, iGps, iPts : %d %d %d\n", iCygnss, iGps, iPt);
 
+		
 		err = find_gain(specularpoint.CygX,specularpoint.CygY,specularpoint.CygZ,
 				cVx, cVy, cVz,
 				specularpoint.GpsX,specularpoint.GpsY,specularpoint.GpsZ,
@@ -1727,6 +1741,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 				45.0, rotate, yawoverall,
 				&specularpoint);
 
+		
 		// Save all of the specular point and GPS information:
 
 		// CBV 05/09/16
@@ -1773,6 +1788,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 		  MaxNormPower = NormPowerAllGps[iGps];
 		  iMaxNormPower = iGps;
 		}
+
 
 	      }
 
@@ -2016,15 +2032,14 @@ void RemoveSpaces(char* source)
 //------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-
    char sat_nb_str[10];
   int err, i, lonshift, iUseMin, LimitToOneDay = 0;
-  float rotate, yawoverall;
-  char filename[150], sProc[3];
+  float rotate=0, yawoverall=0;
+  char filename[150];
   char CygnssFilename[256], GpsFilename[256], YawFileName[150];
   float dt;
   double rCygnss, rGps;
-
+  strcpy(YawFileName, "");
   iDebug = 0;
 
   lonshift = 0;
@@ -2053,7 +2068,7 @@ int main(int argc, char *argv[]) {
  MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
  MPI_Comm_rank(MPI_COMM_WORLD, &iProc);
 
-
+ if (iProc == 0) printf("Computing the specular point locations...\n");
 
  // CBV 05/08/16
  char filename_input_propagator[150];
@@ -2073,6 +2088,7 @@ int main(int argc, char *argv[]) {
  int nCygnss_prop, nGps_prop = 0;
  int found_eoh ; char *line = NULL; size_t len = 0; char text[256];
  found_eoh = 0;
+
  while ( (found_eoh == 0 ) && (!feof(file_input_propagator)) ) {
    getline(&line, &len, file_input_propagator);
    sscanf(line, "%s", text);
@@ -2080,6 +2096,8 @@ int main(int argc, char *argv[]) {
      found_eoh = 1;
    }
  }
+
+ 
  if (feof(file_input_propagator)){
    printf("***! No section #SPACECRAFT was found in %s. The program will stop.***!\n", filename_input_propagator); MPI_Finalize(); exit(0);
  }
@@ -2253,6 +2271,7 @@ int main(int argc, char *argv[]) {
 
  fclose(file_input_propagator);
 
+ 
   /* for (sss = 0; sss<OPTIONS->n_satellites; sss++){ */
   /*   if ( (OPTIONS->nb_gps > 0 ) &&  sss >= OPTIONS->nb_satellites_not_including_gps ) { */
   /*     strcpy( OPTIONS->filename_output[sss], OPTIONS->gps_file_name[sss-OPTIONS->nb_satellites_not_including_gps]); */
@@ -2376,6 +2395,7 @@ int main(int argc, char *argv[]) {
       //printf("rotate : %f\n",rotate);
     }
     if (strstr(argv[i],"-yaw=") != NULL) {
+
       yawoverall = (float) atoi(strmid(argv[i],5,3));
       //printf("yawoverall : %f\n",yawoverall);
     }
@@ -2439,6 +2459,7 @@ return 0;
     strcat(AntennaInfo.Sigma0FileName,"sigma0_table.bin");
 
     //newstructure
+
     err = read_antenna_info();
 
     //        printf("Reading CYGNSS...\n");
@@ -2469,6 +2490,7 @@ return 0;
 return 0;
     }
 
+
     rCygnss = calc_mean_radius(CYGNSS,nCygnss_prop);
     rGps    = calc_mean_radius(GPS,   nGps_prop);
 
@@ -2482,7 +2504,11 @@ return 0;
 return 0;
     }
 
-    strcpy(sProc,c_int_str(iProc,2));
+
+
+
+
+
 
     // CBV 05/08/16
    //    strcpy(filename,argv[3]);
@@ -2495,11 +2521,15 @@ return 0;
     /* strcat(filename, "/"); */
 
     strcpy(filename,path_output_run_name_temp);
+
     strcat(filename, dir_output_run_name_temp);
+
     strcat(filename, "/");
     // END CBV 05/08/16
 
+
     err =  find_specular_points( GPS, CYGNSS, filename, lonshift, rotate, yawoverall, iUseMin, LimitToOneDay, nGps_prop, nCygnss_prop); // CBV 05/08/16
+
     if (err != 0 ) {
       MPI_Finalize();
       //newstructure
