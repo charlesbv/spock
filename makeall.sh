@@ -2,7 +2,7 @@
 # To set 
 path_spock="~" # don't include the last '/' in the path
 is_sift=1 # set this variable to 1 if you want to use SpOCK as part of SIFT. But if you want to use SpOCK independtly of SIFT, set it to 0
-py_only=1 # if set to 1 and is_sift is 1 then doesnt compile SpOCK but just move the python scripts to ../ so that the demo can be run before installing SpOCK. cbv should st py_only to 1 before distributing SIFT so that users alreay ahve all these python scripts in ../ and can run the demo without running this makeall.sh
+py_only=0 # if set to 1 and is_sift is 1 then doesnt compile SpOCK but just move the python scripts to ../ so that the demo can be run before installing SpOCK. cbv should st py_only to 1 before distributing SIFT so that users alreay ahve all these python scripts in ../ and can run the demo without running this makeall.sh
 # end of to set
 
 arg_compiler=mpicc # $1
@@ -114,7 +114,7 @@ if [ $py_only -ne 1 ];then
 	make clean PATH_EXECUTABLE="$path_spock_abso"
 	make all PATH_COMPILER=$path_compiler PATH_SPICE="$path_spice_abso" PATH_GSL="$path_gsl_abso" PATH_EXECUTABLE="$path_spock_abso"
 	# # Specular points binary files
- 	$path_compiler -o -w "$path_spock_abso"/spec ./src/find_specular_points.c -lm # change the path of the executable here  
+ 	$path_compiler -o "$path_spock_abso"/spec ./src/find_specular_points.c -lm -w # change the path of the executable here  
 	# Convert specular points binary files to txt files
 	cd ./src/storm
 	make clean PATH_EXECUTABLE="$path_spock_abso"
