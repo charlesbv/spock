@@ -79,7 +79,7 @@ int main(int argc, char * argv[]) {
 
   /* // Notify Exit */
   if (iProc == 0) {
-     printf("Done interpolating the positions of the satellites\n"); //flying over the storms.\n");
+     printf("Done interpolating the positions of the satellites.\n"); //flying over the storms.\n");
   }
 
   ierr = MPI_Finalize();    

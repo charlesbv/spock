@@ -2530,6 +2530,8 @@ return 0;
 
     err =  find_specular_points( GPS, CYGNSS, filename, lonshift, rotate, yawoverall, iUseMin, LimitToOneDay, nGps_prop, nCygnss_prop); // CBV 05/08/16
 
+ if (iProc == 0) printf("Done computing the specular point locations...\n");
+
     if (err != 0 ) {
       MPI_Finalize();
       //newstructure
@@ -2539,6 +2541,7 @@ return 0;
     }
 
   }
+
 
   free(GPS);
   free(CYGNSS);
