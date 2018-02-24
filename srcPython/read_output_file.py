@@ -45,7 +45,10 @@ def read_output_file(filename, list_variable):
     inclination = np.zeros([n])
     eccentricity = np.zeros([n])
     true_anomaly = np.zeros([n])
+    phase_angle = np.zeros([n]) # true_anomaly + argument_perigee
+    phase_rate = np.zeros([n]) # ( phase_angle[i+1] - phase_angle[i] ) / dt (0 for i = 0)
     raan = np.zeros([n])
+    beta = np.zeros([n]) # beta angle (orbit plane, Sun)
     ap = [] # !!!!! first date of given output is not necesarrily the same as for the other variables 
     f107 = [] # !!!!! first date of given output is not necesarrily the same as for the other variables 
     date_given_output = []
@@ -76,7 +79,10 @@ def read_output_file(filename, list_variable):
     calculate_inclination = 0
     calculate_eccentricity = 0
     calculate_true_anomaly = 0
+    calculate_phase_angle = 0
+    calculate_phase_rate = 0
     calculate_raan = 0
+    calculate_beta = 0
     calculate_ap = 0
     calculate_f107 = 0
     calculate_power = 0
@@ -112,7 +118,9 @@ def read_output_file(filename, list_variable):
             calculate_acceleration_eci_drag = 1
         if ( list_variable[j] == 'longitude' ):
             calculate_longitude = 1
-        if ( list_variable[j] == 'nb_seconds_since_start' ):
+        if ( list_variable[j] == 'phase_rate' ):
+            calculate_phase_rate = 1
+        if ( ( list_variable[j] == 'nb_seconds_since_start' ) | (calculate_phase_rate == 1)):
             calculate_nb_seconds_since_start = 1
 
         if ( list_variable[j] == 'latitude' ):
@@ -125,17 +133,22 @@ def read_output_file(filename, list_variable):
             calculate_inclination = 1
         if ( list_variable[j] == 'eccentricity' ):
             calculate_eccentricity = 1
-        if ( list_variable[j] == 'true_anomaly' ):
+        if (list_variable[j] == 'phase_angle' ):
+            calculate_phase_angle = 1
+        if ( (list_variable[j] == 'true_anomaly' ) | (calculate_phase_angle == 1) ):
             calculate_true_anomaly = 1
         if ( list_variable[j] == 'raan' ):
             calculate_raan = 1
+        if ( list_variable[j] == 'beta' ):
+            calculate_beta = 1
+
         if ( list_variable[j] == 'ap' ):
             calculate_ap = 1
         if ( list_variable[j] == 'f107' ):
             calculate_f107 = 1
         if ( list_variable[j] == 'power' ):
             calculate_power = 1
-        if ( list_variable[j] == 'argument_perigee' ):
+        if ( ( list_variable[j] == 'argument_perigee' ) | (calculate_phase_angle == 1) ):
             calculate_argument_perigee = 1
         if ( list_variable[j] == 'right_asc' ):
             calculate_right_asc = 1
@@ -206,11 +219,17 @@ def read_output_file(filename, list_variable):
             true_anomaly[i] = np.float(read_file_to_read[i+nb_lines_header].split()[14])
         if (calculate_raan == 1):
             raan[i] = np.float(read_file_to_read[i+nb_lines_header].split()[15])
+
         if (calculate_power == 1):
             power[i] = np.sum(np.array(read_file_power[i+13].split()[2:-2]).astype(np.float)) # !!!!! first date of given output is not necesarrily the same as for the other variables
 
         if (calculate_argument_perigee == 1):
             argument_perigee[i] = np.float(read_file_to_read[i+nb_lines_header].split()[16])
+        if (calculate_phase_angle == 1):
+            phase_angle[i] = np.float(np.mod(true_anomaly[i] + argument_perigee[i], 360))
+        if (calculate_phase_rate == 1):
+            if i >= 1:
+                phase_rate[i] = ( ( true_anomaly[i] + argument_perigee[i] ) - ( true_anomaly[i-1] + argument_perigee[i-1] ) ) / ( nb_seconds_since_start[i] - nb_seconds_since_start[i-1] )
         if (calculate_right_asc == 1):
             right_asc[i] = np.float(read_file_to_read[i+nb_lines_header].split()[17])
         if (calculate_local_time == 1):
@@ -235,6 +254,8 @@ def read_output_file(filename, list_variable):
             acceleration_eci_drag[i,0] = np.float(read_file_to_read[i+nb_lines_header].split()[31])
             acceleration_eci_drag[i,1] = np.float(read_file_to_read[i+nb_lines_header].split()[32])
             acceleration_eci_drag[i,2] = np.float(read_file_to_read[i+nb_lines_header].split()[33])
+        if (calculate_beta == 1):
+            beta[i] = np.float(read_file_to_read[i+nb_lines_header].split()[37])
 
         if (calculate_radius_perigee == 1):
             radius_perigee[i] = sma[i]*(1 - eccentricity[i])
@@ -281,9 +302,19 @@ def read_output_file(filename, list_variable):
     if (calculate_true_anomaly == 1):
         variables.append(true_anomaly)
         order_variables.append("true_anomaly | " + str(len(order_variables)))
+    if (calculate_phase_angle == 1):
+        variables.append(phase_angle)
+        order_variables.append("phase_angle | " + str(len(order_variables)))
+    if (calculate_phase_rate == 1):
+        variables.append(phase_rate)
+        order_variables.append("phase_rate | " + str(len(order_variables)))
+
     if (calculate_raan == 1):
         variables.append(raan)
         order_variables.append("raan | " + str(len(order_variables)))
+    if (calculate_beta == 1):
+        variables.append(beta)
+        order_variables.append("beta | " + str(len(order_variables)))
     if (calculate_ap == 1): # !!!!! first date of given output is not necesarrily the same as for the other variables 
         variables.append(ap)
         order_variables.append("ap | " + str(len(order_variables)))

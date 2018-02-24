@@ -200,6 +200,9 @@ typedef struct {
   int initialize_geo_with_bstar; // 1 if the geometry is initialized reading bstar from the tle and not from a geometry file; 0 othersize
   int index_in_attitude_interpolated;
   int index_in_driver_interpolated;
+  int index_in_attitude_interpolated_first; // the first value in the propagation of index_in_attitude_interpolated
+  int index_in_driver_interpolated_first; // // the first value in the propagation of index_in_driver_interpolated
+
   int isGPS;
   double sun_elevation; // value is -999 if the sc is not in light
   FILE                *file_given_output; // this is a file used to output things in particular. Not used unless hard coded

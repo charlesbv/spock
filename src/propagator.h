@@ -205,6 +205,7 @@ typedef struct {
 
   int isGPS;
   double sun_elevation; // value is -999 if the sc is not in light
+  double beta_angle;
   FILE                *file_given_output; // this is a file used to output things in particular. Not used unless hard coded
   char                filename_given_output[1000]; // this is a file used to output things in particular. Not used unless hard coded
   int sc_main_nb;

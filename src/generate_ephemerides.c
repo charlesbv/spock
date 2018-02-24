@@ -2162,7 +2162,7 @@ int write_output(   SPACECRAFT_T    *SC,
       fprintf(SC[0].fp, "// Version control of SpOCK is under Joel Getchius's Mac and Charles Bussy-Virat's Mac \n");
       fprintf(SC[0].fp, "// \n");
       fprintf(SC[0].fp, "// Trajectory is specified with: \n");
-      fprintf(SC[0].fp, "//    ET  \t\tr_i2cg_INRTL(3)(KM) \t\t     v_i2cg_INRTL(3)(KM/S) \t      LONG(DEG)    LAT(DEG)     ALT(KM)       SMA(KM)     INC(DEG)      ECC       TRUE ANO(DEG)  RAAN(DEG) ARG PERIG(DEG) RIGHT ASC(DEG) LOCAL TIME(DEG)  a_i2cg_INRTL(3)(KM/S^2) a_i2cg_LVLH(3)(KM/S^2) a_i2cg_LVLH_gravity(3)(KM/S^2) a_i2cg_LVLH_drag(3)(KM/S^2) a_i2cg_INRTL_drag(3)(KM/S^2) a_i2cg_INRTL_gravity(3)(KM/S^2)");
+      fprintf(SC[0].fp, "//    ET  \t\tr_i2cg_INRTL(3)(KM) \t\t     v_i2cg_INRTL(3)(KM/S) \t      LONG(DEG)    LAT(DEG)     ALT(KM)       SMA(KM)     INC(DEG)      ECC       TRUE ANO(DEG)  RAAN(DEG) ARG PERIG(DEG) RIGHT ASC(DEG) LOCAL TIME(DEG)  a_i2cg_INRTL(3)(KM/S^2) a_i2cg_LVLH(3)(KM/S^2) a_i2cg_LVLH_gravity(3)(KM/S^2) a_i2cg_LVLH_drag(3)(KM/S^2) a_i2cg_INRTL_drag(3)(KM/S^2) a_i2cg_INRTL_gravity(3)(KM/S^2) beta_angle(deg)");
 
       /* for (fff = 0; fff < OPTIONS->nb_storm; fff++){ */
       /*   fprintf(SC[0].fp, "SEE %s ", STORM->storm_name[fff]); */
@@ -2337,7 +2337,7 @@ int write_output(   SPACECRAFT_T    *SC,
     fprintf(SC[0].fp, " %11.10f %11.10f %11.10f", SC[0].a_i2cg_INRTL[0], SC[0].a_i2cg_INRTL[1], SC[0].a_i2cg_INRTL[2]);
     fprintf(SC[0].fp, " %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e", SC[0].a_i2cg_LVLH[0], SC[0].a_i2cg_LVLH[1], SC[0].a_i2cg_LVLH[2], SC[0].a_i2cg_LVLH_gravity[0], SC[0].a_i2cg_LVLH_gravity[1], SC[0].a_i2cg_LVLH_gravity[2], SC[0].a_i2cg_LVLH_drag[0], SC[0].a_i2cg_LVLH_drag[1], SC[0].a_i2cg_LVLH_drag[2], SC[0].a_i2cg_INRTL_drag[0], SC[0].a_i2cg_INRTL_drag[1], SC[0].a_i2cg_INRTL_drag[2],  SC[0].a_i2cg_INRTL_gravity[0], SC[0].a_i2cg_INRTL_gravity[1], SC[0].a_i2cg_INRTL_gravity[2]);
 
-
+    fprintf(SC[0].fp, " %f", SC[0].INTEGRATOR.beta_angle*RAD2DEG);
     if ( ( SC[0].GEODETIC.latitude  * RAD2DEG < 0.15 ) && ( SC[0].GEODETIC.latitude  * RAD2DEG > -0.15 ) ){
       spkez_c(10, SC[0].et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
 
@@ -2355,7 +2355,7 @@ int write_output(   SPACECRAFT_T    *SC,
       }
     }
 
-     
+
     fprintf(SC[0].fp, "\n");
 
     }

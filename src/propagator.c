@@ -1888,6 +1888,29 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
 	    }
   }
 
+
+    // !!! to comment beta angle 
+    spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
+
+    r_earth2sun_J2000[0] = x[0];
+    r_earth2sun_J2000[1] = x[1];
+    r_earth2sun_J2000[2] = x[2];
+
+    double r_earth2sun_J2000_norm[3];
+    v_norm(r_earth2sun_J2000_norm, r_earth2sun_J2000);
+    double r_cross_v[3];
+    v_cross(r_cross_v,r_i2cg_INRTL,v_i2cg_INRTL);
+    double r_cross_v_norm[3];
+    v_norm(r_cross_v_norm, r_cross_v);
+    double r_cross_v_norm_dot_r_earth2sun_J2000_norm;
+    v_dot(&r_cross_v_norm_dot_r_earth2sun_J2000_norm, r_cross_v_norm, r_earth2sun_J2000_norm);
+    double angle_h_to_earth_sun;
+    angle_h_to_earth_sun = acos(r_cross_v_norm_dot_r_earth2sun_J2000_norm);
+    
+    INTEGRATOR->beta_angle = M_PI/2. - angle_h_to_earth_sun;
+    //printf("beta: %f\n", INTEGRATOR->beta_angle*180./M_PI);
+    // !!! end of to comment beta angle
+
   if ( strcmp(shadow, "light") == 0) {
 
     spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
@@ -1895,6 +1918,8 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
     r_earth2sun_J2000[0] = x[0];
     r_earth2sun_J2000[1] = x[1];
     r_earth2sun_J2000[2] = x[2];
+
+
      
     v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL);
     v_mag( &dist_sat_to_sun, r_cg2sun_J2000 );

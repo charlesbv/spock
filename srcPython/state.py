@@ -28,7 +28,7 @@
 # - see block 'PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT' below
 
 import sys
-sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/kalman/spock_development_new_structure_kalman_dev/srcPython")
+sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
 import pickle
 from orbit_average import *
 import matplotlib.colors as colors
@@ -81,13 +81,13 @@ same_spock_input_file = 0
 
 ## Parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
-fontsize_plot = 20 
+fontsize_plot = 25
 ratio_fig_size = 4./3
 
 
 # date start and stop of plot. If set to 0 then the start and end epochs of the propagation are used by default. PLEASE follow format YYYY-MM-DDTHH:MM:SS
 date_start_plot = 0 # "2017-03-14T01:00:00"
-date_stop_plot = "2017-12-02T12:00:00.000000"
+date_stop_plot = 0#2017-12-02T12:00:00.000000"
 
 ############ end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT ############
 
@@ -110,7 +110,7 @@ else:
     plot_or_save_arg = len(sys.argv) - 2
 
 
-list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'raan', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'position','velocity'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
+list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'raan', 'beta', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'position','velocity'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
 
 
 not_in_list = 1
@@ -297,6 +297,12 @@ for irun in range(nb_run):
             if isc == 0:
                 raan = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
             raan[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'raan')]
+
+        if 'beta' in var_to_read:
+            if isc == 0:
+                beta = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
+            beta[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'beta')]
+
         if 'given_output' in var_to_read: # !!!!! first date of given output is not necesarrily the same as for the other variables  
             if isc == 0:
                 given_output = []
@@ -997,6 +1003,60 @@ for irun in range(nb_run):
                         fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
                         fig_raan.savefig(fig_save_name, facecolor=fig_raan.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
+            # BETA
+            if 'beta' in var_to_read:        
+                if ( isc == 0 ) & (irun == 0) :
+                    # Plot
+                    fig_title = ''#Beta angle as a function of time'
+                    y_label = 'Beta angle '+ u'(\N{DEGREE SIGN})'
+                    x_label = 'Real time'
+                    fig_beta = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+                    fig_beta.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+                    gs = gridspec.GridSpec(1, 1)
+                    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+                    ax_beta = fig_beta.add_subplot(gs[0, 0])
+
+                    ax_beta.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_beta.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+
+                    [i.set_linewidth(2) for i in ax_beta.spines.itervalues()] # change the width of the frame of the figure
+                    ax_beta.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+
+                colorVal = scalarMap.to_rgba(isc_irun)
+                y_axis = beta[isc,:nb_steps_new] 
+                ax_beta.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc] )
+
+                if isc == nb_sc - 1:
+                    # x axis label is in real time
+                    ## all output files of one simulation have the same number of steps, and start at the same date
+                    nb_ticks_xlabel = 8
+                    dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+                    xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
+                    date_list_str = []
+                    date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+                    for i in range(len(xticks)):
+                        if dt_xlabel >= 3*24*3600:
+                            date_list_str.append( str(date_list[i])[5:10] )
+                        else:
+                            date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+                    ax_beta.xaxis.set_ticks(xticks)
+                    ax_beta.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+                    ax_beta.margins(0,0); ax_beta.set_xlim([min(xticks), max(xticks)])
+            #        ax_beta.set_xlim([ax_beta.get_xlim()[0], most_recent_tle_among_all_sc])
+
+#                     legend = ax_beta.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+#                     legend.get_title().set_fontsize(str(fontsize_plot))
+
+                    if save_plots == 1:
+                        fig_save_name = 'beta'
+                        fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+                        fig_beta.savefig(fig_save_name, facecolor=fig_beta.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+
 
             # POWER
             if 'power' in var_to_read:         # !!!!! first date of given output is not necesarrily the same as for the other variables  
@@ -1306,6 +1366,11 @@ for irun in range(nb_run):
                 # RAAN
                 if 'raan' in var_to_read:
                     pickle.dump( raan, open( root_save_fig_name + 'raan' + ".pickle", "w" )  )
+                # BETA
+                if 'beta' in var_to_read:
+                    pickle.dump( beta, open( root_save_fig_name + 'beta' + ".pickle", "w" )  )
+
+
                 if 'given_output' in var_to_read:
                     pickle.dump( given_output, open( root_save_fig_name + 'given_output' + ".pickle", "w" )  )
                 # TEMPERATURE
