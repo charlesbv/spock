@@ -86,8 +86,8 @@ ratio_fig_size = 4./3
 
 
 # date start and stop of plot. If set to 0 then the start and end epochs of the propagation are used by default. PLEASE follow format YYYY-MM-DDTHH:MM:SS
-date_start_plot = 0 # "2017-03-14T01:00:00"
-date_stop_plot = 0#2017-12-02T12:00:00.000000"
+date_start_plot = 0 #"2018-03-02T01:00:00.000000"
+date_stop_plot = 0 #"2018-10-28T12:00:00.000000"
 
 ############ end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT ############
 
@@ -1028,7 +1028,10 @@ for irun in range(nb_run):
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = beta[isc,:nb_steps_new] 
                 ax_beta.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc] )
-
+                ax_beta.plot([x_axis[0], x_axis[-1]], [36,36], linewidth = 2, color = 'r', linestyle = 'dashed')
+                ax_beta.plot([x_axis[0], x_axis[-1]], [-36,-36], linewidth = 2, color = 'r', linestyle = 'dashed')
+                ax_beta.text(x_axis[0], 36, 'above, roll by -23' + u'\N{DEGREE SIGN}', fontsize = fontsize_plot, color = 'r', verticalalignment = 'bottom', horizontalalignment = 'left' )
+                ax_beta.text(x_axis[0], -36, 'below, roll by +23' + u'\N{DEGREE SIGN}', fontsize = fontsize_plot, color = 'r', verticalalignment = 'top', horizontalalignment = 'left' )
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
