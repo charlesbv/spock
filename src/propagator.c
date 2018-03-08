@@ -2700,6 +2700,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
 
   // openGL computation of cross-section area
+  // // compute relative speed satellite in body frame
   double v_rel_lvlh[3];
   m_x_v(v_rel_lvlh, T_inrtl_2_lvlh, v_rel_eci); 
   double v_rel_body[3];
@@ -2708,9 +2709,17 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   m_x_v(v_rel_body, T_lvlh_to_sc, v_rel_lvlh); 
   double v_rel_body_normalized[3];
   v_norm(v_rel_body_normalized, v_rel_body);
+  // // compute the azimuth and elevation of the relative speed vector in body frame. 
+  // // Actually the spherical coordinates are used. 
+  // // theta is the angle between z_body and the relative speed vector (from 0 to -180 deg). 
+  // // phi is the angle between x_body and the projection of the relative speed vector on the (x_body, y_body) plane (from 0 to 360 deg). 
+  double theta, phi;
+  double 
+  // // // theta
+  
 
-
-    // end of openGL computation of cross-section area
+  
+  // end of openGL computation of cross-section area
 
 
   double v_i2cg_NTW_mag;
