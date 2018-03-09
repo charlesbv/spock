@@ -36,6 +36,7 @@ def read_output_file(filename, list_variable):
     acceleration_lvlh = np.zeros([n, 3])
     acceleration_lvlh_gravity = np.zeros([n, 3])
     acceleration_lvlh_drag = np.zeros([n, 3])
+    acceleration_lvlh_drag_mag = np.zeros([n])
     acceleration_eci_drag = np.zeros([n, 3])
     longitude = np.zeros([n])
     nb_seconds_since_start = np.zeros([n])
@@ -70,6 +71,7 @@ def read_output_file(filename, list_variable):
     calculate_acceleration_lvlh = 0
     calculate_acceleration_lvlh_gravity = 0
     calculate_acceleration_lvlh_drag = 0
+    calculate_acceleration_lvlh_drag_mag = 0
     calculate_acceleration_eci_drag = 0
     calculate_longitude = 0
     calculate_nb_seconds_since_start = 0
@@ -113,6 +115,9 @@ def read_output_file(filename, list_variable):
         if ( list_variable[j] == 'acceleration_lvlh_gravity' ):
             calculate_acceleration_lvlh_gravity = 1
         if ( list_variable[j] == 'acceleration_lvlh_drag' ):
+            calculate_acceleration_lvlh_drag = 1
+        if ( list_variable[j] == 'acceleration_lvlh_drag_mag' ):
+            calculate_acceleration_lvlh_drag_mag = 1
             calculate_acceleration_lvlh_drag = 1
         if ( list_variable[j] == 'acceleration_eci_drag' ):
             calculate_acceleration_eci_drag = 1
@@ -250,6 +255,8 @@ def read_output_file(filename, list_variable):
             acceleration_lvlh_drag[i,0] = np.float(read_file_to_read[i+nb_lines_header].split()[28])
             acceleration_lvlh_drag[i,1] = np.float(read_file_to_read[i+nb_lines_header].split()[29])
             acceleration_lvlh_drag[i,2] = np.float(read_file_to_read[i+nb_lines_header].split()[30])
+        if (calculate_acceleration_lvlh_drag_mag == 1):
+            acceleration_lvlh_drag_mag[i] = np.linalg.norm(acceleration_lvlh_drag[i,:])
         if (calculate_acceleration_eci_drag == 1):
             acceleration_eci_drag[i,0] = np.float(read_file_to_read[i+nb_lines_header].split()[31])
             acceleration_eci_drag[i,1] = np.float(read_file_to_read[i+nb_lines_header].split()[32])
@@ -350,6 +357,10 @@ def read_output_file(filename, list_variable):
     if (calculate_acceleration_lvlh_drag == 1):
         variables.append(acceleration_lvlh_drag)
         order_variables.append("acceleration_lvlh_drag | " + str(len(order_variables)))
+    if (calculate_acceleration_lvlh_drag_mag == 1):
+        variables.append(acceleration_lvlh_drag_mag)
+        order_variables.append("acceleration_lvlh_drag_mag | " + str(len(order_variables)))
+
     if (calculate_acceleration_eci_drag == 1):
         variables.append(acceleration_eci_drag)
         order_variables.append("acceleration_eci_drag | " + str(len(order_variables)))
@@ -372,7 +383,7 @@ def read_output_file(filename, list_variable):
             if calculate_cd == 1:
                 cd[i] = np.float(density_file_read[i+nb_lines_header].split()[4]) # in K
             if calculate_tot_area_drag == 1:
-                tot_area_drag[i] = np.float(density_file_read[i+nb_lines_header].split()[5]) # in K
+                tot_area_drag[i] = np.float(density_file_read[i+nb_lines_header].split()[5]) * 1e10  # in cm^2 (output in km^2 by SpOCK)
 
 #         if calculate_density == 1:
 #             density[0] = density[1] # since the ouptut file misses the first time step of the similution, we just make this density equal to the one at the second time step

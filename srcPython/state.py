@@ -16,8 +16,10 @@
 # - 'density_average'
 # - 'temperature' # temperature of the atmosphere at the satellite postion (from NRLSMSIS if the user didn't chose "density_file" or "gitm", in which case SC->INTEGRATOR.Ta = 800K)
 # - 'cd' # total normalized Cd over all surfaces of the sc
+# - 'tot_area_drag'
 # - 'position'
 # - 'velocity'
+# - 'acceleration_lvlh_drag_mag'
 
 # To run it:
 # python state.py arg_run_dir arg_input_filename1 arg_input_filename2 arg_input_filename3 ... arg_input_filenameM plot save arg_var_to_plot1 arg_var_to_plot2 ... arg_var_to_plotN 
@@ -110,7 +112,7 @@ else:
     plot_or_save_arg = len(sys.argv) - 2
 
 
-list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'raan', 'beta', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'position','velocity'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
+list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'raan', 'beta', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'tot_area_drag', 'position','velocity','acceleration_lvlh_drag_mag'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
 
 
 not_in_list = 1
@@ -244,6 +246,11 @@ for irun in range(nb_run):
             if isc == 0:
                 altitude = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
             altitude[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'altitude')]
+        if 'acceleration_lvlh_drag_mag' in var_to_read:
+            if isc == 0:
+                acceleration_lvlh_drag_mag = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
+            acceleration_lvlh_drag_mag[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'acceleration_lvlh_drag_mag')]
+
         if 'latitude' in var_to_read:
             if isc == 0:
                 latitude = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
@@ -343,6 +350,11 @@ for irun in range(nb_run):
             if isc == 0:
                 cd = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
             cd[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'cd')]
+        if 'tot_area_drag' in var_to_read:
+            if isc == 0:
+                tot_area_drag = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
+            tot_area_drag[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'tot_area_drag')]
+
         if 'position' in var_to_read:
             if isc == 0:
                 position = np.zeros([nb_sc, nb_steps_new, 3]) # all output files of one simulation have the same number of steps
@@ -385,7 +397,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -437,7 +449,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -490,7 +502,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -512,6 +524,60 @@ for irun in range(nb_run):
                         fig_save_name = 'altitude'
                         fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
                         fig_altitude.savefig(fig_save_name, facecolor=fig_altitude.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+            # Acceleration_Lvlh_Drag_Mag
+            if 'acceleration_lvlh_drag_mag' in var_to_read:        
+                if ( isc == 0 ) & (irun == 0) :
+                    # Plot
+                    fig_title = 'Acceleration_Lvlh_Drag_Mag as a function of time'
+                    y_label = 'Acceleration_Lvlh_Drag_Mag (km)'
+                    x_label = 'Real time'
+                    fig_acceleration_lvlh_drag_mag = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+                    fig_acceleration_lvlh_drag_mag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    gs = gridspec.GridSpec(1, 1)
+                    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+                    ax_acceleration_lvlh_drag_mag = fig_acceleration_lvlh_drag_mag.add_subplot(gs[0, 0])
+
+                    ax_acceleration_lvlh_drag_mag.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_acceleration_lvlh_drag_mag.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+                    [i.set_linewidth(2) for i in ax_acceleration_lvlh_drag_mag.spines.itervalues()] # change the width of the frame of the figure
+                    ax_acceleration_lvlh_drag_mag.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+                colorVal = scalarMap.to_rgba(isc_irun)
+                y_axis = acceleration_lvlh_drag_mag[isc,:nb_steps_new]
+                ax_acceleration_lvlh_drag_mag.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc])
+
+                if isc == nb_sc - 1:
+                    # x axis label is in real time
+                    ## all output files of one simulation have the same number of steps, and start at the same date
+                    nb_ticks_xlabel = 8
+                    dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+                    xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
+                    date_list_str = []
+                    date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+                    for i in range(len(xticks)):
+                        if dt_xlabel >= 3*24*3600:
+                            date_list_str.append( str(date_list[i])[5:10] )
+                        else:
+                            date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+                    ax_acceleration_lvlh_drag_mag.xaxis.set_ticks(xticks)
+                    ax_acceleration_lvlh_drag_mag.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+                    ax_acceleration_lvlh_drag_mag.margins(0,0); ax_acceleration_lvlh_drag_mag.set_xlim([min(xticks), max(xticks)])
+            #        ax_acceleration_lvlh_drag_mag.set_xlim([ax_acceleration_lvlh_drag_mag.get_xlim()[0], most_recent_tle_among_all_sc])
+
+                    legend = ax_acceleration_lvlh_drag_mag.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    legend.get_title().set_fontsize(str(fontsize_plot))
+
+                    if save_plots == 1:
+                        fig_save_name = 'acceleration_lvlh_drag_mag'
+                        fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+                        fig_acceleration_lvlh_drag_mag.savefig(fig_save_name, facecolor=fig_acceleration_lvlh_drag_mag.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
 
             # Latitude
             if 'latitude' in var_to_read:        
@@ -542,7 +608,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -594,7 +660,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -655,7 +721,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel); 
                     date_list_str = []
@@ -710,7 +776,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -764,7 +830,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -821,7 +887,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -873,7 +939,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -927,7 +993,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
                     date_list_str = []
@@ -980,7 +1046,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1090,7 +1156,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1144,7 +1210,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1197,7 +1263,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1250,7 +1316,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1302,7 +1368,7 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 10
+                    nb_ticks_xlabel = 8
                     dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
                     xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
                     date_list_str = []
@@ -1326,6 +1392,59 @@ for irun in range(nb_run):
                         fig_cd.savefig(fig_save_name, facecolor=fig_cd.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
+           # TOT_AREA_DRAG
+            if 'tot_area_drag' in var_to_read:         # !!!!! first date of given output is not necesarrily the same as for the other variables  
+                if ( isc == 0 ) & (irun == 0) : 
+                    # Plot
+                    fig_title = 'Total drag area as a function of time'
+                    y_label = 'A (cm$^2$)'
+                    x_label = 'Real time'
+                    fig_tot_area_drag = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+                    fig_tot_area_drag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    gs = gridspec.GridSpec(1, 1)
+                    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+                    ax_tot_area_drag = fig_tot_area_drag.add_subplot(gs[0, 0])
+
+                    ax_tot_area_drag.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_tot_area_drag.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+                    [i.set_linewidth(2) for i in ax_tot_area_drag.spines.itervalues()] # change the width of the frame of the figure
+                    ax_tot_area_drag.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+                colorVal = scalarMap.to_rgba(isc_irun)        
+                y_axis = tot_area_drag[isc]
+                ax_tot_area_drag.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc] )
+
+                if isc == nb_sc - 1:
+                    # x axis label is in real time
+                    ## all output files of one simulation have the same number of steps, and start at the same date
+                    nb_ticks_xlabel = 8        
+                    dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+                    xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
+                    date_list_str = []
+                    date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+                    for i in range(len(xticks)):
+                        if dt_xlabel >= 3*24*3600:
+                            date_list_str.append( str(date_list[i])[5:10] )
+                        else:
+                            date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+                    ax_tot_area_drag.xaxis.set_ticks(xticks)
+                    ax_tot_area_drag.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+                    ax_tot_area_drag.margins(0,0); ax_tot_area_drag.set_xlim([min(xticks), max(xticks)])
+            #        ax_tot_area_drag.set_xlim([ax_tot_area_drag.get_xlim()[0], most_recent_tle_among_all_sc])
+
+                    legend = ax_tot_area_drag.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    legend.get_title().set_fontsize(str(fontsize_plot))
+
+                    if save_plots == 1:
+                        fig_save_name = 'tot_area_drag'
+                        fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+                        fig_tot_area_drag.savefig(fig_save_name, facecolor=fig_tot_area_drag.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
 
 ######## SAVE
         if want_save:
@@ -1340,6 +1459,10 @@ for irun in range(nb_run):
                 # Altitude
                 if 'altitude' in var_to_read:
                     pickle.dump( altitude, open( root_save_fig_name + 'altitude' + ".pickle", "w" ) )
+                # Acceleration_Lvlh_Drag_Mag
+                if 'acceleration_lvlh_drag_mag' in var_to_read:
+                    pickle.dump( acceleration_lvlh_drag_mag, open( root_save_fig_name + 'acceleration_lvlh_drag_mag' + ".pickle", "w" ) )
+
                 # Latitude
                 if 'latitude' in var_to_read:
                     pickle.dump( latitude, open( root_save_fig_name + 'latitude' + ".pickle", "w" ) )
@@ -1382,6 +1505,10 @@ for irun in range(nb_run):
                 # CD
                 if 'cd' in var_to_read:
                     pickle.dump( cd, open( root_save_fig_name + 'cd' + ".pickle", "w" )  )
+                # TOT_AREA_DRAG
+                if 'tot_area_drag' in var_to_read:
+                    pickle.dump( tot_area_drag, open( root_save_fig_name + 'tot_area_drag' + ".pickle", "w" )  )
+
                 # Position
                 if 'position' in var_to_read:
                     pickle.dump( position, open( root_save_fig_name + 'position' + ".pickle", "w" )  )
