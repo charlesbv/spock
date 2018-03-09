@@ -2059,6 +2059,13 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
 
   // Declarations
+  double cd;
+  double cos_angle_v_sc_normal;
+  double normal_in_ntw_normalized;
+ 
+  double A_ref;
+  double A_ref_tot = 0;
+  double cd_tot_norm =  0;
 
   int aaa_a;
   double nb_index_in_81_days;
@@ -2159,20 +2166,20 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     input.sec = hour * 3600.0 + min * 60.0 + sec;
     //    printf("%s: %d %d %f\n", timestamp, input.year, input.doy, input.sec);
 
-/*   double geodetic[3]; */
-/* 	double altitude, latitude, longitude; */
-/* 	eci2lla(r_i2cg_INRTL , et, geodetic ); */
-/* 	altitude = geodetic[2]; */
-/* 	latitude = geodetic[0]; */
-/* 	longitude = geodetic[1];  */
+    /*   double geodetic[3]; */
+    /* 	double altitude, latitude, longitude; */
+    /* 	eci2lla(r_i2cg_INRTL , et, geodetic ); */
+    /* 	altitude = geodetic[2]; */
+    /* 	latitude = geodetic[0]; */
+    /* 	longitude = geodetic[1];  */
 
-/* 	// update the planet fixed state		 */
-/* 	  geodetic_to_geocentric(PARAMS->EARTH.flattening,             */
-/* 				 altitude, */
-/* 				 latitude, */
-/* 				 longitude, */
-/* 				 PARAMS->EARTH.radius,        */
-/* 				 r_ecef2cg_ECEF) ; */
+    /* 	// update the planet fixed state		 */
+    /* 	  geodetic_to_geocentric(PARAMS->EARTH.flattening,             */
+    /* 				 altitude, */
+    /* 				 latitude, */
+    /* 				 longitude, */
+    /* 				 PARAMS->EARTH.radius,        */
+    /* 				 r_ecef2cg_ECEF) ; */
     // Geneterate the Geodetic inputs
     pxform_c("J2000", PARAMS->EARTH.earth_fixed_frame, et, T_J2000_to_ECEF);
     m_x_v(r_ecef2cg_ECEF, T_J2000_to_ECEF, r_i2cg_INRTL);
@@ -2425,14 +2432,14 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	input.ap    = INTEGRATOR->Ap[index_in_driver_interpolated];
 	if ( INTEGRATOR->sc_ensemble_nb == 0 ){
 	  if (INTEGRATOR->last_compute_dxdt == 1){
-	  if (iDebugLevel >= 5){
-	    printf("------ (compute_drag) Writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
-	  }
+	    if (iDebugLevel >= 5){
+	      printf("------ (compute_drag) Writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
+	    }
 
-	  	  fprintf(INTEGRATOR->file_given_output, "%s: %f %f %f\n", timestamp_isoc, input.f107,input.f107A, input.ap);
-	  if (iDebugLevel >= 5){
-	    printf("------ (compute_drag) Done writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
-	  }
+	    fprintf(INTEGRATOR->file_given_output, "%s: %f %f %f\n", timestamp_isoc, input.f107,input.f107A, input.ap);
+	    if (iDebugLevel >= 5){
+	      printf("------ (compute_drag) Done writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
+	    }
 	  }
 	}
 
@@ -2443,13 +2450,13 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	input.ap_a = malloc(7 * sizeof(double));
 	//		printf("%s: ", timestamp);
 	if ( INTEGRATOR->sc_ensemble_nb == 0 ){
-	if (SC->INTEGRATOR.write_given_output == 1){
-	  if (INTEGRATOR->last_compute_dxdt == 1){
-	  	    fprintf(INTEGRATOR->file_given_output, "%s: %f %f", timestamp_isoc, input.f107,input.f107A);
+	  if (SC->INTEGRATOR.write_given_output == 1){
+	    if (INTEGRATOR->last_compute_dxdt == 1){
+	      fprintf(INTEGRATOR->file_given_output, "%s: %f %f", timestamp_isoc, input.f107,input.f107A);
 		    
-		    //		    printf("%s %d %d %f\n", timestamp_isoc,SC->INTEGRATOR.sc_main_nb,index_in_driver_interpolated);
+	      //		    printf("%s %d %d %f\n", timestamp_isoc,SC->INTEGRATOR.sc_main_nb,index_in_driver_interpolated);
+	    }
 	  }
-	}
 	}
 	for (ppp = 0; ppp < 7 ; ppp ++){
 	  if (INTEGRATOR->Ap_hist[ppp][index_in_driver_interpolated] < 0){ // this can happen when running ensembles on Ap
@@ -2458,22 +2465,22 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
 	  input.ap_a->a[ppp]    = INTEGRATOR->Ap_hist[ppp][index_in_driver_interpolated];
 	  if ( INTEGRATOR->sc_ensemble_nb == 0 ){
-	if (SC->INTEGRATOR.write_given_output == 1){
-	  if (INTEGRATOR->last_compute_dxdt == 1){
-	  	        fprintf(INTEGRATOR->file_given_output, " %f", input.ap_a->a[ppp]);
-	  }
-	}
+	    if (SC->INTEGRATOR.write_given_output == 1){
+	      if (INTEGRATOR->last_compute_dxdt == 1){
+		fprintf(INTEGRATOR->file_given_output, " %f", input.ap_a->a[ppp]);
+	      }
+	    }
 	  }
 	  //	   	  	  printf("[%d] %f | ", ppp, input.ap_a->a[ppp]);
 		    
 	}
 	if ( INTEGRATOR->sc_ensemble_nb == 0 ){
 	  //	  printf("\n");
-	if (SC->INTEGRATOR.write_given_output == 1){
-	  if (INTEGRATOR->last_compute_dxdt == 1){
-	  	    fprintf(INTEGRATOR->file_given_output, "\n");
+	  if (SC->INTEGRATOR.write_given_output == 1){
+	    if (INTEGRATOR->last_compute_dxdt == 1){
+	      fprintf(INTEGRATOR->file_given_output, "\n");
+	    }
 	  }
-	}
 	}
       } // end of if historical ap    
 
@@ -2494,26 +2501,26 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     //  exit(0);
 
 
-/*     // !!!!!!!!!!!! remove block below */
-/*     double mean_earth_sun_distance = 149597870.700; */
-/*     double earth_sun_distance; */
-/*   double x[6]; */
-/*   double lt; */
-/*   double r_earth2sun_J2000[3]; */
+    /*     // !!!!!!!!!!!! remove block below */
+    /*     double mean_earth_sun_distance = 149597870.700; */
+    /*     double earth_sun_distance; */
+    /*   double x[6]; */
+    /*   double lt; */
+    /*   double r_earth2sun_J2000[3]; */
 
-/*     spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration. */
+    /*     spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration. */
 
-/*     r_earth2sun_J2000[0] = x[0]; */
-/*     r_earth2sun_J2000[1] = x[1]; */
-/*     r_earth2sun_J2000[2] = x[2]; */
+    /*     r_earth2sun_J2000[0] = x[0]; */
+    /*     r_earth2sun_J2000[1] = x[1]; */
+    /*     r_earth2sun_J2000[2] = x[2]; */
      
-/*     v_mag(&earth_sun_distance, r_earth2sun_J2000); */
-/* /\*     printf("%e %e\n", earth_sun_distance,mean_earth_sun_distance); *\/ */
-/* /\*     printf("b %f %f\n", input.f107, input.f107A ); *\/ */
-/*     input.f107 = input.f107 * ( mean_earth_sun_distance / earth_sun_distance ) * ( mean_earth_sun_distance / earth_sun_distance ); */
-/*     input.f107A = input.f107A * ( mean_earth_sun_distance / earth_sun_distance ) * ( mean_earth_sun_distance / earth_sun_distance ); */
-/* /\*     printf("a %f %f\n", input.f107, input.f107A ); *\/ */
-/*     // !!!!!!!!!!!! end of remove block below */
+    /*     v_mag(&earth_sun_distance, r_earth2sun_J2000); */
+    /* /\*     printf("%e %e\n", earth_sun_distance,mean_earth_sun_distance); *\/ */
+    /* /\*     printf("b %f %f\n", input.f107, input.f107A ); *\/ */
+    /*     input.f107 = input.f107 * ( mean_earth_sun_distance / earth_sun_distance ) * ( mean_earth_sun_distance / earth_sun_distance ); */
+    /*     input.f107A = input.f107A * ( mean_earth_sun_distance / earth_sun_distance ) * ( mean_earth_sun_distance / earth_sun_distance ); */
+    /* /\*     printf("a %f %f\n", input.f107, input.f107A ); *\/ */
+    /*     // !!!!!!!!!!!! end of remove block below */
 
     // Call the NRL-MSIS-00 Atmosphere Model
     gtd7d(&input, &PARAMS->ATMOSPHERE.flags, &output);
@@ -2536,19 +2543,19 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     // GITM outputs in longitude/latitude/altitude cordinates so the conversion ECI to longitude/latitude/altitude needs to be done before calling GITM
 	
     // // ECI to ECEF
-/*     double geodetic[3]; */
-/* 	eci2lla(r_i2cg_INRTL , et, geodetic ); */
-/* 	altitude_gitm = geodetic[2]; */
-/* 	latitude_gitm = geodetic[0]; */
-/* 	longitude_gitm = geodetic[1];  */
+    /*     double geodetic[3]; */
+    /* 	eci2lla(r_i2cg_INRTL , et, geodetic ); */
+    /* 	altitude_gitm = geodetic[2]; */
+    /* 	latitude_gitm = geodetic[0]; */
+    /* 	longitude_gitm = geodetic[1];  */
 
-/* 	// update the planet fixed state		 */
-/* 	  geodetic_to_geocentric(PARAMS->EARTH.flattening,             */
-/* 				 altitude_gitm, */
-/* 				 latitude_gitm, */
-/* 				 longitude_gitm, */
-/* 				 PARAMS->EARTH.radius,        */
-/* 				 r_ecef2cg_ECEF_gitm) ; */
+    /* 	// update the planet fixed state		 */
+    /* 	  geodetic_to_geocentric(PARAMS->EARTH.flattening,             */
+    /* 				 altitude_gitm, */
+    /* 				 latitude_gitm, */
+    /* 				 longitude_gitm, */
+    /* 				 PARAMS->EARTH.radius,        */
+    /* 				 r_ecef2cg_ECEF_gitm) ; */
 
     pxform_c("J2000", PARAMS->EARTH.earth_fixed_frame, et, T_J2000_to_ECEF_gitm);
     m_x_v(r_ecef2cg_ECEF_gitm, T_J2000_to_ECEF_gitm, r_i2cg_INRTL);
@@ -2576,36 +2583,36 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
   // !!!!!!!!!!!!!!!! the code for the rotating atmo has not been checked yet
   // Take into account the rotating atmosphere: v_rel = v_sat - v_rot_atmo
-/*   //  // Update ECEF state */
-/*   SpiceDouble       xform[6][6]; */
-/*   double estate[6], jstate[6]; */
+  /*   //  // Update ECEF state */
+  /*   SpiceDouble       xform[6][6]; */
+  /*   double estate[6], jstate[6]; */
 
-/*   estate[0] = r_i2cg_INRTL[0];estate[1] = r_i2cg_INRTL[1];estate[2] = r_i2cg_INRTL[2]; */
-/*   estate[3] = v_i2cg_INRTL[0];estate[4] = v_i2cg_INRTL[1];estate[5] = v_i2cg_INRTL[2]; */
-/*   sxform_c (  "J2000", PARAMS->EARTH.earth_fixed_frame,  et,    xform  );  */
-/*   mxvg_c   (  xform,       estate,   6,  6, jstate );  */
-/*   double r_ecef2cg_ECEF_for_rot_atmo[3], v_ecef2cg_ECEF_for_rot_atmo[3]; */
-/*   r_ecef2cg_ECEF_for_rot_atmo[0] = jstate[0]; r_ecef2cg_ECEF_for_rot_atmo[1] = jstate[1]; r_ecef2cg_ECEF_for_rot_atmo[2] = jstate[2]; */
-/*   v_ecef2cg_ECEF_for_rot_atmo[0] = jstate[3]; v_ecef2cg_ECEF_for_rot_atmo[1] = jstate[4]; v_ecef2cg_ECEF_for_rot_atmo[2] = jstate[5]; */
+  /*   estate[0] = r_i2cg_INRTL[0];estate[1] = r_i2cg_INRTL[1];estate[2] = r_i2cg_INRTL[2]; */
+  /*   estate[3] = v_i2cg_INRTL[0];estate[4] = v_i2cg_INRTL[1];estate[5] = v_i2cg_INRTL[2]; */
+  /*   sxform_c (  "J2000", PARAMS->EARTH.earth_fixed_frame,  et,    xform  );  */
+  /*   mxvg_c   (  xform,       estate,   6,  6, jstate );  */
+  /*   double r_ecef2cg_ECEF_for_rot_atmo[3], v_ecef2cg_ECEF_for_rot_atmo[3]; */
+  /*   r_ecef2cg_ECEF_for_rot_atmo[0] = jstate[0]; r_ecef2cg_ECEF_for_rot_atmo[1] = jstate[1]; r_ecef2cg_ECEF_for_rot_atmo[2] = jstate[2]; */
+  /*   v_ecef2cg_ECEF_for_rot_atmo[0] = jstate[3]; v_ecef2cg_ECEF_for_rot_atmo[1] = jstate[4]; v_ecef2cg_ECEF_for_rot_atmo[2] = jstate[5]; */
 
-/*   double v_rel[3]; */
-/*   double v_rot_atmo[3]; */
-/*   double omega_rot_atmo[3]; */
-/*   omega_rot_atmo[0] = 0; omega_rot_atmo[1] = 0; omega_rot_atmo[2] =  0.0;// !!!!!! should be 0.00007292158553; */
-/*   v_cross(v_rot_atmo, omega_rot_atmo, r_ecef2cg_ECEF_for_rot_atmo); */
-/*   v_sub(v_rel, v_ecef2cg_ECEF_for_rot_atmo, v_rot_atmo); */
+  /*   double v_rel[3]; */
+  /*   double v_rot_atmo[3]; */
+  /*   double omega_rot_atmo[3]; */
+  /*   omega_rot_atmo[0] = 0; omega_rot_atmo[1] = 0; omega_rot_atmo[2] =  0.0;// !!!!!! should be 0.00007292158553; */
+  /*   v_cross(v_rot_atmo, omega_rot_atmo, r_ecef2cg_ECEF_for_rot_atmo); */
+  /*   v_sub(v_rel, v_ecef2cg_ECEF_for_rot_atmo, v_rot_atmo); */
   
-/*   // // Back to ECI */
-/*   SpiceDouble       xform_new[6][6]; */
-/*   double estate_new[6], jstate_new[6]; */
-/*   sxform_c (  PARAMS->EARTH.earth_fixed_frame, "J2000",  et,    xform_new  );  */
-/*   estate_new[0] = r_ecef2cg_ECEF_for_rot_atmo[0];estate_new[1] = r_ecef2cg_ECEF_for_rot_atmo[1];estate_new[2] = r_ecef2cg_ECEF_for_rot_atmo[2]; */
-/*   estate_new[3] = v_rel[0];estate_new[4] = v_rel[1];estate_new[5] = v_rel[2]; */
-/*   mxvg_c   (  xform_new,       estate_new,   6,  6, jstate_new );  */
-/*   double v_rel_eci[3]; */
-/*   v_rel_eci[0] = jstate_new[3]; v_rel_eci[1] = jstate_new[4]; v_rel_eci[2] = jstate_new[5]; */
-/*   /\* v_print(v_rot_atmo, "v_rot_atmo"); *\/ */
-/*   /\* v_print(v_rel, "v_rel"); *\/ */
+  /*   // // Back to ECI */
+  /*   SpiceDouble       xform_new[6][6]; */
+  /*   double estate_new[6], jstate_new[6]; */
+  /*   sxform_c (  PARAMS->EARTH.earth_fixed_frame, "J2000",  et,    xform_new  );  */
+  /*   estate_new[0] = r_ecef2cg_ECEF_for_rot_atmo[0];estate_new[1] = r_ecef2cg_ECEF_for_rot_atmo[1];estate_new[2] = r_ecef2cg_ECEF_for_rot_atmo[2]; */
+  /*   estate_new[3] = v_rel[0];estate_new[4] = v_rel[1];estate_new[5] = v_rel[2]; */
+  /*   mxvg_c   (  xform_new,       estate_new,   6,  6, jstate_new );  */
+  /*   double v_rel_eci[3]; */
+  /*   v_rel_eci[0] = jstate_new[3]; v_rel_eci[1] = jstate_new[4]; v_rel_eci[2] = jstate_new[5]; */
+  /*   /\* v_print(v_rot_atmo, "v_rot_atmo"); *\/ */
+  /*   /\* v_print(v_rel, "v_rel"); *\/ */
   double v_rel_eci[3];
   double v_rot_atmo[3];
   double omega_rot_atmo_scal = 0.00007292158553;
@@ -2614,7 +2621,8 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   v_rel_eci[2] = v_i2cg_INRTL[2];
   // End of take into account the rotating atmosphere: v_rel = v_sat - v_rot_atmo
 
-  m_trans(T_ntw_2_inrtl, T_inrtl_2_ntw);
+
+    m_trans(T_ntw_2_inrtl, T_inrtl_2_ntw);
   m_x_v(v_i2cg_NTW, T_inrtl_2_ntw, v_rel_eci); //  !!!!!!!!!!!!!!!! v_rel_eci here is new!Before it was: v_i2cg_INRTL
   // !!!!!!!!!!!!!!!! the code for the rotating atmo has not been checked yet
   //  v_print(v_i2cg_NTW, "v_i2cg_NTW");
@@ -2646,7 +2654,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     INTEGRATOR->attitude.pitch_current = v_angle[0];
     INTEGRATOR->attitude.roll_current = v_angle[1];
     INTEGRATOR->attitude.yaw_current = v_angle[2];
-	          INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
+    INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
     INTEGRATOR->attitude.order_roll_current = order_rotation[1];
     INTEGRATOR->attitude.order_yaw_current = order_rotation[2];
 
@@ -2661,26 +2669,26 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     //  printf("et = %s ||", timestamp);
     /*  et2utc_c(et_initial_epoch, "D", 3, 35, timestamp); */
     /* printf("et_initial_epoch = %s \n", timestamp); */
-	    if (INTEGRATOR->file_is_quaternion == 0){
-    v_angle[0] = INTEGRATOR->attitude.pitch[index_in_attitude_interpolated];
-    v_angle[1] = INTEGRATOR->attitude.roll[index_in_attitude_interpolated];
-    v_angle[2] = INTEGRATOR->attitude.yaw[index_in_attitude_interpolated];
-    //    printf("%d %d %d\n", INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated], index_in_attitude_interpolated, INTEGRATOR->sc_ensemble_nb);
-    order_rotation[0] = INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated];
-    order_rotation[1] = INTEGRATOR->attitude.order_roll[index_in_attitude_interpolated];
-    order_rotation[2] = INTEGRATOR->attitude.order_yaw[index_in_attitude_interpolated];
-    // printf("%d %d %d\n", order_rotation[0], order_rotation[1],order_rotation[2]);
-    INTEGRATOR->attitude.pitch_current = v_angle[0];
-    INTEGRATOR->attitude.roll_current = v_angle[1];
-    INTEGRATOR->attitude.yaw_current = v_angle[2];
-    INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
-    INTEGRATOR->attitude.order_roll_current = order_rotation[1];
-    INTEGRATOR->attitude.order_yaw_current = order_rotation[2];
+    if (INTEGRATOR->file_is_quaternion == 0){
+      v_angle[0] = INTEGRATOR->attitude.pitch[index_in_attitude_interpolated];
+      v_angle[1] = INTEGRATOR->attitude.roll[index_in_attitude_interpolated];
+      v_angle[2] = INTEGRATOR->attitude.yaw[index_in_attitude_interpolated];
+      //    printf("%d %d %d\n", INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated], index_in_attitude_interpolated, INTEGRATOR->sc_ensemble_nb);
+      order_rotation[0] = INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated];
+      order_rotation[1] = INTEGRATOR->attitude.order_roll[index_in_attitude_interpolated];
+      order_rotation[2] = INTEGRATOR->attitude.order_yaw[index_in_attitude_interpolated];
+      // printf("%d %d %d\n", order_rotation[0], order_rotation[1],order_rotation[2]);
+      INTEGRATOR->attitude.pitch_current = v_angle[0];
+      INTEGRATOR->attitude.roll_current = v_angle[1];
+      INTEGRATOR->attitude.yaw_current = v_angle[2];
+      INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
+      INTEGRATOR->attitude.order_roll_current = order_rotation[1];
+      INTEGRATOR->attitude.order_yaw_current = order_rotation[2];
 
-	    }
-	    else{
-	      q_copy( INTEGRATOR->attitude.quaternion_current, INTEGRATOR->attitude.quaternion[index_in_attitude_interpolated]);
-	    }
+    }
+    else{
+      q_copy( INTEGRATOR->attitude.quaternion_current, INTEGRATOR->attitude.quaternion[index_in_attitude_interpolated]);
+    }
     
     //       printf("%d | %e | %e | %e \n", index_in_attitude_interpolated, v_angle[0], v_angle[1],v_angle[2]);
   }
@@ -2698,37 +2706,78 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh);
 
 
+  // openGL computation of cross-section area
+  if (OPTIONS->opengl == 1){
+    // // compute relative speed satellite in body frame
+    double v_rel_lvlh[3];
+    m_x_v(v_rel_lvlh, T_inrtl_2_lvlh, v_rel_eci); 
+    double v_rel_body[3];
+    double T_lvlh_to_sc[3][3];
+    m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
+    m_x_v(v_rel_body, T_lvlh_to_sc, v_rel_lvlh); 
+    double v_rel_body_normalized[3];
+    v_norm(v_rel_body_normalized, v_rel_body);
+    // // compute the azimuth and elevation of the relative speed vector in body frame. 
+    // // Actually the spherical coordinates are used. 
+    // // theta is the angle between z_body and the relative speed vector (from 0 to -180 deg). 
+    // // phi is the angle between x_body and the projection of the relative speed vector on the (x_body, y_body) plane (from 0 to 360 deg).
+    double x_body[3], y_body[3], z_body[3];
+    x_body[0] = 1; x_body[1] = 0; x_body[2] = 0;
+    y_body[0] = 0; y_body[1] = 1; y_body[2] = 0;
+    z_body[0] = 0; z_body[1] = 0; z_body[2] = 1;
+    double theta, phi;
+    // // // theta
+    double v_rel_body_normalized_dot_z_body;
+    v_dot(&v_rel_body_normalized_dot_z_body, v_rel_body_normalized, z_body);
+    theta = acos(v_rel_body_normalized_dot_z_body) ;
+    // // // phi
+    double v_rel_body_normalized_projected_on_xy_body[3];
+    v_rel_body_normalized_projected_on_xy_body[0] = v_rel_body_normalized[0];
+    v_rel_body_normalized_projected_on_xy_body[1] = v_rel_body_normalized[1];
+    v_rel_body_normalized_projected_on_xy_body[2] = 0;
+    double v_rel_body_normalized_projected_on_xy_body_dot_x_body;
+    v_dot(&v_rel_body_normalized_projected_on_xy_body_dot_x_body, v_rel_body_normalized_projected_on_xy_body, x_body);
+    phi = acos(v_rel_body_normalized_projected_on_xy_body_dot_x_body);
+    double v_rel_body_normalized_projected_on_xy_body_dot_y_body;
+    v_dot(&v_rel_body_normalized_projected_on_xy_body_dot_y_body, v_rel_body_normalized_projected_on_xy_body, y_body);
+    if (v_rel_body_normalized_projected_on_xy_body_dot_y_body < 0){
+      phi = 2*M_PI - phi;
+    }
+    printf("%f %f | %f %f\n", v_rel_body_normalized_projected_on_xy_body_dot_y_body, v_rel_body_normalized[1], v_rel_body_normalized_projected_on_xy_body_dot_x_body, v_rel_body_normalized[0]);
+    // // get the cross-section area from the file generated by openGL
+    // // // compute the indices itheta and iphi
+    int itheta, iphi;
+    itheta = (int)((theta - CONSTELLATION->area_attitude_opengl_theta0) / CONSTELLATION->area_attitude_opengl_dtheta);
+    iphi = (int)((phi - CONSTELLATION->area_attitude_opengl_phi0) / CONSTELLATION->area_attitude_opengl_dphi);
+    A_ref = CONSTELLATION->area_attitude_opengl[itheta][iphi];
+  } // end of if (OPTIONS->opengl == 1)
+  // end of openGL computation of cross-section area
+
+
   double v_i2cg_NTW_mag;
   v_mag(&v_i2cg_NTW_mag, v_i2cg_NTW);
 
-  double cd;
-	double cos_angle_v_sc_normal;
-	double normal_in_ntw_normalized;
- 
-	double A_ref;
-	double A_ref_tot = 0;
-	double cd_tot_norm =  0;
-	//	   	etprint(et, "");
+  //	   	etprint(et, "");
 
   if (INTEGRATOR->initialize_geo_with_bstar != 1){
 
     // to not use the new cd calculation, uncomment line below
     if (OPTIONS->new_cd !=1){
-       ballistic_coefficient = INTEGRATOR->surface[0].Cd * INTEGRATOR->surface[0].area / INTEGRATOR->mass;
-       cd =  INTEGRATOR->surface[0].Cd;
+      ballistic_coefficient = INTEGRATOR->surface[0].Cd * INTEGRATOR->surface[0].area / INTEGRATOR->mass;
+      cd =  INTEGRATOR->surface[0].Cd;
     }
-/* 	if (SC->INTEGRATOR.write_given_output == 1){ */
-/* 	  	  fprintf(INTEGRATOR->file_given_output, "%s ", timestamp_isoc ); */
-/* 	} */
+    /* 	if (SC->INTEGRATOR.write_given_output == 1){ */
+    /* 	  	  fprintf(INTEGRATOR->file_given_output, "%s ", timestamp_isoc ); */
+    /* 	} */
     for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
       //      printf("surface %d\n", sss);
       if (sss == 0){
 	/* Conversion of the normal vector from the SC reference system to the NTW reference system */
 
 	/* SC to LVLH */
-	  m_x_v(normal_in_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[0].normal );
-	  /* LVLH to inertial */
-	  m_x_v(normal_in_inertial, T_lvlh_2_inrtl, normal_in_lvlh);
+	m_x_v(normal_in_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[0].normal );
+	/* LVLH to inertial */
+	m_x_v(normal_in_inertial, T_lvlh_2_inrtl, normal_in_lvlh);
 
 
 
@@ -2752,29 +2801,29 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	if (cos_angle_v_sc_normal > 5e-3){ // 1e-3 for numerical reasons (should be 0 theoritically)
 
 	  
-    // new cd
+	  // new cd
 	  if (OPTIONS->new_cd == 1){
-	calculate_cd(&cd,
-		     OPTIONS->surface[0].acco_coeff,// !!!!!!!! shoulc be OPTIONS->surface[0].acco_coeff, 
-		     v_i2cg_NTW_mag, //in km/s
-		     SC->INTEGRATOR.Ta, // atmospheric temperature in K, from NRLSMSIS if the user didn't chose "density_file" or "gitm", in which case SC->INTEGRATOR.Ta = 800K
-		     INTEGRATOR->surface[0].area, // in m^2
-		     cos_angle_v_sc_normal,
-		     16./1000 // in kg/mol!!!!! assuming mainly atom of O
-		     );
-	//	printf("cd[%d]: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[0].acco_coeff );
-    ballistic_coefficient = cd * INTEGRATOR->surface[0].area / INTEGRATOR->mass;
+	    calculate_cd(&cd,
+			 OPTIONS->surface[0].acco_coeff,// !!!!!!!! shoulc be OPTIONS->surface[0].acco_coeff, 
+			 v_i2cg_NTW_mag, //in km/s
+			 SC->INTEGRATOR.Ta, // atmospheric temperature in K, from NRLSMSIS if the user didn't chose "density_file" or "gitm", in which case SC->INTEGRATOR.Ta = 800K
+			 INTEGRATOR->surface[0].area, // in m^2
+			 cos_angle_v_sc_normal,
+			 16./1000 // in kg/mol!!!!! assuming mainly atom of O
+			 );
+	    //	printf("cd[%d]: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[0].acco_coeff );
+	    ballistic_coefficient = cd * INTEGRATOR->surface[0].area / INTEGRATOR->mass;
 	  }
-    // end of new cd
-      A_ref = INTEGRATOR->surface[0].area * cos_angle_v_sc_normal * 1000000; // convert km^2 to m^2
+	  // end of new cd
+	  A_ref = INTEGRATOR->surface[0].area * cos_angle_v_sc_normal * 1000000; // convert km^2 to m^2
 
 	  total_cross_area = total_cross_area + INTEGRATOR->surface[0].area* 1000000 * cos_angle_v_sc_normal;
-/* 	if (SC->INTEGRATOR.write_given_output == 1){ */
-/* 	  	  fprintf(INTEGRATOR->file_given_output, "%e %d %e (%e) %e | %e || ", cd, sss, cos_angle_v_sc_normal, v_i2cg_NTW_DOT_normal_to_the_surface_NTW , A_ref, cd*A_ref); */
-/* 	} */
+	  /* 	if (SC->INTEGRATOR.write_given_output == 1){ */
+	  /* 	  	  fprintf(INTEGRATOR->file_given_output, "%e %d %e (%e) %e | %e || ", cd, sss, cos_angle_v_sc_normal, v_i2cg_NTW_DOT_normal_to_the_surface_NTW , A_ref, cd*A_ref); */
+	  /* 	} */
 
-        A_ref_tot = A_ref_tot + A_ref;
-	cd_tot_norm = cd_tot_norm + cd*A_ref;
+	  A_ref_tot = A_ref_tot + A_ref;
+	  cd_tot_norm = cd_tot_norm + cd*A_ref;
 
 
 	  a_i2cg_NTW[0] =  -0.5 * *density * v_i2cg_NTW_DOT_normal_to_the_surface_NTW * v_i2cg_NTW[0] * ballistic_coefficient; // Correction by CBV: added the factor INTEGRATOR->Cd //  first component of NTW is v normalized-> IN TRACK (CBV)
@@ -2811,36 +2860,36 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	  if (INTEGRATOR->initialize_geo_with_bstar != 1){
 
 
-    // new cd
-	  if (OPTIONS->new_cd == 1){
-	calculate_cd(&cd,
-		     OPTIONS->surface[sss].acco_coeff,// !!!!!!!! shoul be OPTIONS->surface[sss].acco_coeff, 
-		     v_i2cg_NTW_mag, //in km/s
-		     SC->INTEGRATOR.Ta, // atmospheric temperature in K, from NRLSMSIS if the user didn't chose "density_file" or "gitm", in which case SC->INTEGRATOR.Ta = 800K
-		     INTEGRATOR->surface[sss].area, // in m^2
-		     cos_angle_v_sc_normal,
-		     16./1000 // in kg/mol!!!!! assuming mainly atom of O
-		     );
-	//	printf("cd: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[sss].acco_coeff );
-    ballistic_coefficient = cd * INTEGRATOR->surface[sss].area / INTEGRATOR->mass;
-	  }
-    // end of new cd
-	        A_ref = INTEGRATOR->surface[sss].area * cos_angle_v_sc_normal * 1000000; // convert km^2 to km
+	    // new cd
+	    if (OPTIONS->new_cd == 1){
+	      calculate_cd(&cd,
+			   OPTIONS->surface[sss].acco_coeff,// !!!!!!!! shoul be OPTIONS->surface[sss].acco_coeff, 
+			   v_i2cg_NTW_mag, //in km/s
+			   SC->INTEGRATOR.Ta, // atmospheric temperature in K, from NRLSMSIS if the user didn't chose "density_file" or "gitm", in which case SC->INTEGRATOR.Ta = 800K
+			   INTEGRATOR->surface[sss].area, // in m^2
+			   cos_angle_v_sc_normal,
+			   16./1000 // in kg/mol!!!!! assuming mainly atom of O
+			   );
+	      //	printf("cd: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[sss].acco_coeff );
+	      ballistic_coefficient = cd * INTEGRATOR->surface[sss].area / INTEGRATOR->mass;
+	    }
+	    // end of new cd
+	    A_ref = INTEGRATOR->surface[sss].area * cos_angle_v_sc_normal * 1000000; // convert km^2 to km
 
-/* 	if (SC->INTEGRATOR.write_given_output == 1){ */
-/* 	  	  total_cross_area = total_cross_area + INTEGRATOR->surface[sss].area* 1000000 * cos_angle_v_sc_normal; */
-/* 		  //		  fprintf(INTEGRATOR->file_given_output, "%e %d %e (%e) %e | %e || ", cd, sss, cos_angle_v_sc_normal,v_i2cg_NTW_DOT_normal_to_the_surface_NTW, A_ref,  cd*A_ref ); */
-/* 	} */
+	    /* 	if (SC->INTEGRATOR.write_given_output == 1){ */
+	    /* 	  	  total_cross_area = total_cross_area + INTEGRATOR->surface[sss].area* 1000000 * cos_angle_v_sc_normal; */
+	    /* 		  //		  fprintf(INTEGRATOR->file_given_output, "%e %d %e (%e) %e | %e || ", cd, sss, cos_angle_v_sc_normal,v_i2cg_NTW_DOT_normal_to_the_surface_NTW, A_ref,  cd*A_ref ); */
+	    /* 	} */
 
 
 
-	if (OPTIONS->new_cd !=1){
-    	    ballistic_coefficient = INTEGRATOR->surface[sss].Cd * INTEGRATOR->surface[sss].area / INTEGRATOR->mass;
-	    cd = INTEGRATOR->surface[sss].Cd;
-	}
+	    if (OPTIONS->new_cd !=1){
+	      ballistic_coefficient = INTEGRATOR->surface[sss].Cd * INTEGRATOR->surface[sss].area / INTEGRATOR->mass;
+	      cd = INTEGRATOR->surface[sss].Cd;
+	    }
 
-        A_ref_tot = A_ref_tot + A_ref;
-	cd_tot_norm = cd_tot_norm + cd*A_ref;
+	    A_ref_tot = A_ref_tot + A_ref;
+	    cd_tot_norm = cd_tot_norm + cd*A_ref;
 
 	  }
 
@@ -2890,38 +2939,38 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   }
 
 
-/*   // # TOTAL NORMALIZED DRAG COEFFICIENT */
-/*   double A_ref_tot = 0; */
-/*   double A_ref; */
-/*   double cd_tot_norm = 0; */
-/*   for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){ */
-/*     if (cos_angle_v_sc_normal[sss] >= 0){ */
-/*       A_ref = INTEGRATOR->surface[sss].area * cos_angle_v_sc_normal[sss] * 1000000; // convert km^2 to km */
+  /*   // # TOTAL NORMALIZED DRAG COEFFICIENT */
+  /*   double A_ref_tot = 0; */
+  /*   double A_ref; */
+  /*   double cd_tot_norm = 0; */
+  /*   for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){ */
+  /*     if (cos_angle_v_sc_normal[sss] >= 0){ */
+  /*       A_ref = INTEGRATOR->surface[sss].area * cos_angle_v_sc_normal[sss] * 1000000; // convert km^2 to km */
 
-/*         A_ref_tot = A_ref_tot + A_ref; */
-/* 	cd_tot_norm = cd_tot_norm + cd[sss]*A_ref; */
-/* 	//	printf("cd[%d] * A_ref: %e\n",sss, cd[sss]*A_ref); */
-/*       } */
-/*   } */
+  /*         A_ref_tot = A_ref_tot + A_ref; */
+  /* 	cd_tot_norm = cd_tot_norm + cd[sss]*A_ref; */
+  /* 	//	printf("cd[%d] * A_ref: %e\n",sss, cd[sss]*A_ref); */
+  /*       } */
+  /*   } */
 
-/* 	etprint(et, "time"); */
-//	   printf("%e\n",cd_tot_norm);
+  /* 	etprint(et, "time"); */
+  //	   printf("%e\n",cd_tot_norm);
 
   SC->density_here = *density;
-	   SC->INTEGRATOR.sum_cd_a_cos = cd_tot_norm / 1000000;// used in the kalman filter. convert back to use km^2 on the area
+  SC->INTEGRATOR.sum_cd_a_cos = cd_tot_norm / 1000000;// used in the kalman filter. convert back to use km^2 on the area
   SC->INTEGRATOR.cd_tot_norm = cd_tot_norm / A_ref_tot;// # see sutton09a equation 9
   SC->INTEGRATOR.A_ref_tot =  A_ref_tot; // A_ref_tot in m^2 but in generate_ephemerides i convert it to km^2 for the output
   cd_tot_norm = cd_tot_norm / A_ref_tot;
 
-	if (SC->INTEGRATOR.write_given_output == 1){
-	  /* 	  fprintf(INTEGRATOR->file_given_output, "%e ", cd_tot_norm ); */
-	  /* fprintf(INTEGRATOR->file_given_output, "%e \n", total_cross_area ); */
-	  //	    printf( "%s %e\n", timestamp_isoc, SC->INTEGRATOR.cd_tot_norm );
-	}
+  if (SC->INTEGRATOR.write_given_output == 1){
+    /* 	  fprintf(INTEGRATOR->file_given_output, "%e ", cd_tot_norm ); */
+    /* fprintf(INTEGRATOR->file_given_output, "%e \n", total_cross_area ); */
+    //	    printf( "%s %e\n", timestamp_isoc, SC->INTEGRATOR.cd_tot_norm );
+  }
 
-/* 	if (cd_tot_norm < 2.9){ */
-/* 	  printf("XXXXXXXXXXXXXX\nXXXXXXXXXXXXX\n"); */
-/* 	} */
+  /* 	if (cd_tot_norm < 2.9){ */
+  /* 	  printf("XXXXXXXXXXXXXX\nXXXXXXXXXXXXX\n"); */
+  /* 	} */
   //  printf("Cd total normalized: %f %e\n",cd_tot_norm, A_ref_tot);
   //	printf("cd[%d]: %f | %e %f\n", sss, cd,cd*INTEGRATOR->surface[sss].area*cos_angle_v_sc_normal, OPTIONS->surface[0].acco_coeff );
 

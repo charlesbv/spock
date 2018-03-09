@@ -2096,6 +2096,37 @@ int initialize_constellation(CONSTELLATION_T *CONSTELLATION, OPTIONS_T       *OP
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].normal[nnn]         = OPTIONS->surface[sss].normal[nnn];           // normal vector in the SC reference system
 	  }
 	}
+  if (OPTIONS->opengl == 1){
+  
+    CONSTELLATION->area_attitude_opengl_phi0 = OPTIONS->area_attitude_opengl_phi0;
+  CONSTELLATION->area_attitude_opengl_theta0 = OPTIONS->area_attitude_opengl_theta0;
+  CONSTELLATION->area_attitude_opengl_dtheta = OPTIONS->area_attitude_opengl_dtheta;
+  CONSTELLATION->area_attitude_opengl_dphi = OPTIONS->area_attitude_opengl_dphi;
+
+  int nb_phi, nb_theta;
+  nb_theta = (int)((180 - CONSTELLATION->area_attitude_opengl_theta0) / CONSTELLATION->area_attitude_opengl_dtheta ) + 1;
+  nb_phi = (int)((360 - CONSTELLATION->area_attitude_opengl_phi0) / CONSTELLATION->area_attitude_opengl_dphi ) + 1;
+
+  CONSTELLATION->area_attitude_opengl = malloc(nb_theta * sizeof(double *));
+  if ( CONSTELLATION->area_attitude_opengl == NULL){
+    printf("***! Could not allow memory to CONSTELLATION->area_attitude_opengl. The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+
+  int itheta, iphi;
+
+  for (itheta = 0; itheta < nb_theta; itheta++){
+    CONSTELLATION->area_attitude_opengl[itheta] = malloc(nb_phi * sizeof(double));
+  if ( CONSTELLATION->area_attitude_opengl[itheta] == NULL){
+    printf("***! Could not allow memory to CONSTELLATION->area_attitude_opengl[itheta]. The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+    for (iphi = 0; iphi < nb_phi; iphi++){
+
+      CONSTELLATION->area_attitude_opengl[itheta][iphi] = OPTIONS->area_attitude_opengl[itheta][iphi]  / (1e10);;  // OPTIONS->area_attitude_opengl is in cm^2. Convert it here to km^2
+    }
+  }
+
+  }
+
 	if (iDebugLevel >= 1){
 	  if (iProc == 0) printf("-- (initialize_constellation) Done initializing the geometry.\n");
 	}

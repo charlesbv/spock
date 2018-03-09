@@ -2118,7 +2118,7 @@ int load_options( OPTIONS_T *OPTIONS,
 	// Linear interpolate F10.7 and Ap
 	//      calculate_f107_average(filename_f107_to_calculate_f107_average, "omniweb");
 	OPTIONS->use_ap_hist = 0;
-
+	
 	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107_to_calculate_f107_average, filename_ap, "omniweb", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch,OPTIONS->et_oldest_tle_epoch, OPTIONS->final_epoch,OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method
 
 	getline(&line, &len, fp);
@@ -3480,7 +3480,7 @@ previous_index( &OPTIONS->aaa_mod, OPTIONS->et_mod_f107_ap, OPTIONS->et_interpo[
       if ((dir = opendir (OPTIONS->gitm_directory)) != NULL) {
 
 	while ((ent = readdir (dir)) != NULL) {
-	  //  print_test();
+
 	  // find the extension of each file. We only care about the file if it is a .bin file
 	  strcpy(extension_gitm_file, "");
 	  next = &(ent->d_name)[0];
@@ -3953,12 +3953,12 @@ previous_index( &OPTIONS->aaa_mod, OPTIONS->et_mod_f107_ap, OPTIONS->et_interpo[
     //  printf("CCC\nCCC\nCCC\n");
     mode_t process_mask = umask(0);
     mkdir(OPTIONS->dir_output, S_IRWXU | S_IRWXG | S_IRWXO);
-    //    print_test();
+
     umask(process_mask);
   }
   //  MPI_Finalize();exit(0);
   //  OUTPUT_RUN_NAME
-  //  print_test();print_test(); printf("<%s>\n",OPTIONS->dir_output);MPI_Finalize();exit(0);
+
   strcpy(OPTIONS->dir_output_run_name_temp, dir_output_run_name_temp);
   strcpy(OPTIONS->dir_output_run_name, OPTIONS->dir_output);
   //  strcat(OPTIONS->dir_output_run_name,"/");
@@ -4350,7 +4350,7 @@ int found_new_surface;
 	if (OPTIONS->new_cd == 1){
 	sscanf( line, "%lf", &OPTIONS->surface[surface_counter].acco_coeff ); 	
 	}
-	//	print_test();
+
 	else{
 	sscanf( line, "%lf", &OPTIONS->surface[surface_counter].Cd ); 	
 	}
@@ -4896,6 +4896,7 @@ int load_attitude( OPTIONS_T *OPTIONS,
   /* if the attitude representation is in angle (pitch/roll) then convert the representation into the cartesian representation */
   else{ 
 
+
     strcpy(temp_copy, OPTIONS->attitude_profile);
     //newstructure
 /*     strcpy(text_location, OPTIONS->dir_input_attitude); */
@@ -5336,9 +5337,8 @@ int lin_interpolate(double *f107_after_interpo,
    
       }
 
-      //      print_test();
       //      free(line);
-      //      print_test();
+
       fclose(fp);
 
       /* Linear interpolate Ap (if NRLMSIS00e uses daily Ap) */
@@ -5437,7 +5437,7 @@ int lin_interpolate(double *f107_after_interpo,
     f107A_before_interpo = malloc( nb_elements_in_file_f107* sizeof(double)) ; // used to be the following but really we want an upper boud so it's ok to allocate more memory than needed malloc( (index_to_stop_in_before_interpo - save_first_index_in_f107_before_interpo +1 ) * sizeof(double) );
     x_f107A_before_interpo = malloc( nb_elements_in_file_f107* sizeof(double)) ; //malloc( (index_to_stop_in_before_interpo - save_first_index_in_f107_before_interpo +1) * sizeof(double) );
 				     //    printf("%d %d %d\n",(index_to_stop_in_before_interpo - save_first_index_in_f107_before_interpo +1 ), index_to_stop_in_before_interpo, save_first_index_in_f107_before_interpo);
-				     //            print_test();
+
     /////////////////////// CALCULATE f107A_before_interpo /////////////////////////////
     /* Initialize sum_81_days as the sum of all F10.7 values from the initial epoch - 40.5 days to the initial epoch + 40.5 days */
     //    char current_time[256];
@@ -6326,7 +6326,7 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 	  }
 	}
       }
-      /* print_test(); */
+
       /* et2utc_c(x_f107_before_interpo[index_nb_f107-1], "ISOC", 3, 255, time_x_f107_before_interpo); */
       /* printf("out %s %f (%d-%d)\n", time_x_f107_before_interpo, f107_before_interpo[index_nb_f107-1], index_nb_f107, nb_elements_in_file_f107); */
       /* exit(0); */
@@ -6348,7 +6348,7 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
       /* printf("%f %d\n",f107_before_interpo[index_nb_f107],index_nb_f107); */
 
       if ((x_f107_before_interpo[index_nb_f107] >= et_final_epoch_midnight + 24*3600) || (index_nb_f107 ==  nb_elements_in_file_f107 + 4 - 1)){
-	//	    print_test();
+
 	break;
       }
 
@@ -6530,6 +6530,7 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 
       }
       else {
+	//	print_test();
 
 	y_min = f107_before_interpo[x_min_index];
 
@@ -6540,6 +6541,7 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 	b[i-1] = y_max - a[i-1]*x_max;
 	//          printf("%f %d | %f\n", f107_before_interpo[x_min_index], x_min_index, f107_before_interpo[x_min_index+1]);
 	f107_after_interpo[i] = a[i-1]*x_after_interpo[i] + b[i-1];
+	
 	//  	  printf("%f %d %f %f\n", f107_after_interpo[i], i,a[i-1],  b[i-1]);
       }
       /* 		etprint(x_after_interpo[i] ,"a");  */
@@ -8546,7 +8548,7 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
 			     int iProc,
 			     int *file_is_quaternion,
 			     int use_kalman){
-  
+
   /* Declarations */
   char read_time[10]; char len_fake_text[10];    char read_all_line[100];
       double **quaternion_before_interpo=NULL;
@@ -8678,7 +8680,7 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
     i = i + 1;
     x_after_interpo[i] = et_oldest_tle_epoch + dt*i / 2.0;  // "/ 2.0" because of the Runge Kunta orfer 4 method
     //        etprint(x_after_interpo[i], "tle");
-	
+
   } // leave this loop when x_after_interpo gets newer than constellation epoch (et_initial)
   int j = 0;
   //   printf("Nd %d\n",nb_time_steps_simu);exit(0);
@@ -8689,6 +8691,7 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
 	j = j+1;
   }
   }
+
 
   /* for (i = 0; i < nb_time_steps_simu; i++){ */
   /*   x_after_interpo[i] = et_initial + dt*i / 2.0;  // "/ 2.0" because of the Runge Kunta orfer 4 method */
@@ -8820,9 +8823,39 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
       
 
       str2et_c(text, &x_before_interpo[line_num]);  
-      //      etprint(x_before_interpo[line_num], "");
-      // printf("%f %f %f %f\n",quaternion_before_interpo[line_num][0], quaternion_before_interpo[line_num][1], quaternion_before_interpo[line_num][2], quaternion_before_interpo[line_num][3]);
+      
+      //           etprint(x_before_interpo[line_num], "");
+/*       printf("%f %f %f %f\n",quaternion_before_interpo[line_num][0], quaternion_before_interpo[line_num][1], quaternion_before_interpo[line_num][2], quaternion_before_interpo[line_num][3]); */
+/*       printf("%d %d\n", line_num, nb_elements_in_file); */
     }
+
+
+      //      exit(0);
+
+
+  /* Calculates the x array on which the interpolation is done */
+
+/*   //char times[256]; */
+  if (use_kalman != 1){
+    i = 0;
+  x_after_interpo[i] = et_oldest_tle_epoch;  // "/ 2.0" because of the Runge Kunta orfer 4 method
+  while (x_after_interpo[i] < et_initial){
+    i = i + 1;
+    x_after_interpo[i] = et_oldest_tle_epoch + dt*i / 2.0;  // "/ 2.0" because of the Runge Kunta orfer 4 method
+    //        etprint(x_after_interpo[i], "tle");
+
+  } // leave this loop when x_after_interpo gets newer than constellation epoch (et_initial)
+  int j = 0;
+  //   printf("Nd %d\n",nb_time_steps_simu);exit(0);
+  while (i<nb_time_steps_simu){
+       x_after_interpo[i] = et_initial + dt*j / 2.0;  // "/ 2.0" because of the Runge Kunta orfer 4 method
+       //          etprint(x_after_interpo[i], "const");
+	i = i +1;
+	j = j+1;
+  }
+  }
+
+
 
 /*   i = 0; */
 /*   x_after_interpo[i] = et_oldest_tle_epoch;  // "/ 2.0" because of the Runge Kunta orfer 4 method */
@@ -8903,10 +8936,10 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
       quaternion_after_interpo[i][3] = quaternion_before_interpo[nb_elements_in_file-1][3];
     }
 
-    //    et2utc_c(x_after_interpo[i], "C" ,3 ,255 , times);  
-    //    fprintf(fp_temp, "%s %f %f %f %d %d %d\n", times,  quaternion_after_interpo[i], roll_after_interpo[i], yaw_after_interpo[i], quaternion_order_after_interpo[i], roll_order_after_interpo[i], yaw_order_after_interpo[i]);
-  }
 
+       //       fprintf(fp_temp, "%s %f %f %f %d %d %d\n", times,  quaternion_after_interpo[i], roll_after_interpo[i], yaw_after_interpo[i], quaternion_order_after_interpo[i], roll_order_after_interpo[i], yaw_order_after_interpo[i]);
+  }
+  //  exit(0);
   if( fabs( x_after_interpo[0] - x_before_interpo[0] ) > 0.01 ){ // if the first time in the driver file is different (by more than 0.01s here) from the first time of propagation then the first interpolated value of the driver is equal to the second one. 
     quaternion_after_interpo[0][0] = quaternion_after_interpo[1][0];
     quaternion_after_interpo[0][1] = quaternion_after_interpo[1][1];
@@ -10106,14 +10139,15 @@ int compute_time_interpo(OPTIONS_T *OPTIONS){
     OPTIONS->et_interpo[2*j+1] = (et_interpo_temp[j+1]+et_interpo_temp[j])/2.; 
     }
   }
-
-/*   for (j = 0; j < OPTIONS->nb_time_steps-1; j ++){ */
+  OPTIONS->et_interpo[2*OPTIONS->nb_time_steps-1] = et_interpo_temp[OPTIONS->nb_time_steps-1];
+/*   for (j = 0; j < OPTIONS->nb_time_steps; j ++){ */
 /*     etprint(et_interpo_temp[j], ""); */
 /*   } */
-/*   for (j = 0; j < OPTIONS->nb_time_steps*2-1; j ++){ */
+/*   for (j = 0; j < OPTIONS->nb_time_steps*2; j ++){ */
 /*     etprint(OPTIONS->et_interpo[j], ""); */
 /*   } */
+  
   fclose(fp_meas);
-  //     MPI_Finalize(); exit(0);
+  //       MPI_Finalize(); exit(0);
   return 0;
 }

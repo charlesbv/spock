@@ -293,6 +293,11 @@ typedef struct {
   double **ensemble_array_per_iproc_ap_at_given_time;
   double **ensemble_array_per_iproc_ap_at_given_time_sorted;
   double **sum_sigma_for_f107_average;
+  double **area_attitude_opengl; // cross section area computed by opengl as a function of theta and phi 
+  double area_attitude_opengl_phi0;
+  double area_attitude_opengl_theta0;
+  double area_attitude_opengl_dtheta;
+  double area_attitude_opengl_dphi;
 } CONSTELLATION_T;
 
 

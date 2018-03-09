@@ -7,10 +7,11 @@
 #define N_STEPS 100
 
 typedef struct {
+  int opengl; // 1 if openGL was run to compute the cross section area as a function of theta and phi. 0 otherwise. if 0 then the drag, solar pressure and solar power will be copmuted using the geometry specificed in the geometry file (5th line of secion #SPACECRAFT). theta and phi identify the direction of the relative velocity vector (for drag) or sun direction (for solar power and solar radiation pressure)
   double et_final_epoch;
   double et_initial_epoch;
   int swpc_final_epoch_more_recent_than_45_days_from_current_day; // if the user chose swpc for the f107 and ap, and that the final epoch is beyong +45 days in the future (limit of swpc predictions) then values of ap and f107 beyong +45 days are set to constant, equal to the mean of the predicted values by SWPC (over the 45 days)
-  char oldest_tle_epoch[256];
+  char oldest_tle_epoch[300];
   double et_oldest_tle_epoch;
   int file_is_quaternion;
   double **quaternion;
@@ -78,8 +79,8 @@ typedef struct {
   int             coe_to_ensemble[N_SATS][6];
   char            filename_output[N_SATS][1000];
   char            filename_surface[1000];
-  char            initial_epoch[256];     // Epoch
-  char            final_epoch[256];     // Epoch
+  char            initial_epoch[300];     // Epoch
+  char            final_epoch[300];     // Epoch
   char            name_sat[N_SATS][1000]; // name of the satellite in the ORBIT configuration (matrix X * 7 in input.d)
   int             n_satellites;   // Number of satellites
   int             nb_satellites_not_including_gps;

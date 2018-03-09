@@ -1749,6 +1749,9 @@ int initialize_constellation(CONSTELLATION_T *CONSTELLATION, OPTIONS_T       *OP
 
 
 		}
+		 CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_attitude_interpolated_first = (int)( CONSTELLATION->spacecraft[ii][eee].et - OPTIONS->et_oldest_tle_epoch ) / OPTIONS->dt *2.;
+		  CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_driver_interpolated_first = (int)( CONSTELLATION->spacecraft[ii][eee].et - OPTIONS->et_oldest_tle_epoch ) / OPTIONS->dt * 2.;
+
 	  CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_attitude_interpolated = (int)( CONSTELLATION->spacecraft[ii][eee].et - OPTIONS->et_oldest_tle_epoch ) / OPTIONS->dt *2.;
 	  CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_driver_interpolated = (int)( CONSTELLATION->spacecraft[ii][eee].et - OPTIONS->et_oldest_tle_epoch ) / OPTIONS->dt * 2.;
 
