@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+
+#   http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 # This script runs 365 days of CYGNSS/GPS/specular points. For each day, the latest GPS TLE is calculated. The CYGNSS positions are initialized in state (ECEF position/velocity) as the last position of the previous day (so day n at midnight is initialized looking at the file of day n-1 at the last time step, which corresponds to day n midnight). 
 # The only 2 things you need to do before running this script are:
 # - check that the rm statement in this code deletes the correct folder and not anything else... (the correct folder to delete is the folder of the propagation of the previous day)

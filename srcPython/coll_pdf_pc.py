@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+
+#   http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 # this script genreates a PDF of Pc values. THe probability of a Pc to occur is defined by the probability of the set (f107, Ap) to occur. This is claculated in the script new_uncertainty_f107_ap_bis.py
 # so first run new_uncertainty_f107_ap_bis.py to get hist_f107 and hist_ap for iforecast = 2 (we only look at hte distrbutions of f107 an ap prediction errors at day + 2
 # report them in hist_f107 and hist_ap in this script (could have amde a function but we don't run new_uncertainty_f107_ap_bis many times, just once, since hist_f107 and hist_ap don't change (always computed over the same period: jan 1 2016 to nov 20 2016)

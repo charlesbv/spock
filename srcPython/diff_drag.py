@@ -1,3 +1,19 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+
+#   http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 # this script computes the time to decrease the SMA of of a sc by x km (for isntance x = 10) for different initial altitudes, F10.7, and cross section area (actually difference mass). It first runs the simu with SpOCK then post-process. Note that ic reated a SpOCK execeutbale spock_cyg that stops the propagation when the sma has dropped by 20 km (since the sma varies within an orbit (by a few km) and we want only the sma average to drop by 10 km i had to take a margin)
 # ASSUMPTIONS
 # - see section 'PARAMETERES TO SET BEFORE RUNNING THIS SCRIPT'
