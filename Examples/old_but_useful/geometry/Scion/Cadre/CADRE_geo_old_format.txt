@@ -1,0 +1,90 @@
+#BEGINNINGOFHEADER
+Define the properties of each surface on the spacecraft: Cd, area (cm^2), solar cell area (cm^2), the normal to the surface, the specular and diffusive reflectivities.
+The normal to the surface is expressed in the SC reference system in the EXACT format (x; y; z). 
+For CYGNSS: 
+- e_x points perpendicular to the ram-wake solar panels (oriented wake to ram)
+- e_z points perpendicular to the top solar panels (oriented away from the Earth in a Nadir-point configuration)
+- e_y is such that the basis (e_x; e_y; e_z) is orthogonal oriented in the right-hand direction (so in a Nadir-point configuration, if you are behind the satellite and look forward, e_y points to the left of the satellite)
+#ENDOFHEADER
+# NB_ENSEMBLES
+0
+
+# Ram Facing Surface
+(1.0; 0; 0.0)                     // normal
+100.0                              // area (cm^2)
+000.0                              // solar cell area (cm^2)
+4, 0.1                                 // Cd
+0.20				    // specular reflectivity
+0.10				    // diffusive reflectivity
+
+# Side 1
+(0.0; 0.0; 1.0)                     // normal
+300.0                              // area (cm^2)
+106.4                              // solar cell area (cm^2)
+4, 0.1                                 // Cd
+0.20				    // specular reflectivity
+0.10				    // diffusive reflectivity
+
+# Side 2
+(0.0; 0; -1.0)                     // normal
+300.0                              // area (cm^2)
+106.4                              // solar cell area (cm^2)
+4, 0.1                                 // Cd
+0.20		      	            // specular reflectivity
+0.10				    // diffusive reflectivity
+
+# Side 3
+(0.0; 1.0; 0.0)                    
+300.0
+106.4                          
+4, 0.1                                
+0.20				    
+0.10				    
+
+# Side 4
+(0.0; -1.0; 0.0)                    
+300.0
+106.4                          
+4, 0.1                                
+0.20				    
+0.10				    
+
+# Wake Facing Side
+(-1.0; 0.0; 0.0)                    
+100.0
+000.0                                
+4, 0.1                                
+0.20				    
+0.10				    
+
+# All Deployables Side top
+(0.9397; 0.0; 0.3420)
+252
+638.4
+4, 0.1
+0.20
+0.10
+
+# All Deployables Side bottom
+(0.9397; 0.0; -0.3420)
+252
+638.4
+4, 0.1
+0.20
+0.10
+
+# All Deployables Side right
+(0.9397; -0.3420; 0.0)
+252
+638.4
+4, 0.1
+0.20
+0.10
+
+# All Deployables Side left
+(0.9397; 0.3420; 0.0)
+252
+638.4
+4, 0.1
+0.20
+0.10

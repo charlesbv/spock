@@ -1,0 +1,28 @@
+#TIME
+2017-01-01T12:00:00
+2017-01-02T12:00:00
+5
+
+#SPACECRAFT
+2  
+0
+3
+-1
+cubesat_1u.txt
+
+#ORBIT
+oe
+500 35 0 70 12 0
+450 85 45 20 0 0.01
+
+#FORCES
+4
+drag solar_pressure sun_gravity moon_gravity
+static
+100
+100
+15
+
+#OUTPUT
+my_first_run
+30

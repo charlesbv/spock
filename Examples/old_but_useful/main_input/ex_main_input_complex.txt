@@ -1,0 +1,52 @@
+#TIME
+2017-01-01T12:00:00
+2017-01-02T12:00:00
+5
+
+#SPACECRAFT
+2  
+0
+3
+-1
+cubesat_1u_ensemble_cd.txt
+
+#ORBIT
+tle
+ex_tle1.txt
+ex_tle2.txt
+
+#FORCES
+4
+drag solar_pressure sun_gravity moon_gravity
+dynamic
+swpc
+100
+15
+
+#OUTPUT
+example_first_complex_run
+60
+
+##ENSEMBLES_COE
+0      
+10.0 2.0 0.0 6.0 0 0.0
+
+#ATTITUDE
+nadir
+
+##ENSEMBLES_ATTITUDE
+0
+###ENSEMBLES_ANGULAR_VELOCITY
+300                               
+(0.0033; 0.0033; 0.0033)          
+###ENSEMBLES_ANGULAR_VELOCITY_DEPLOYMENT
+(0; 0; 0)                         
+(0; 0; 0)                         
+(1.6; 1.6; 1.6)                   
+###ENSEMBLES_INITIAL_ATTITUDE
+(0; 0; 0) 
+(2.0; 0; 0.0)                         
+(0; 0; 2.0)                         
+
+#OUTPUT_ENSEMBLES
+oe

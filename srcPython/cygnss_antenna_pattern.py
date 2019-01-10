@@ -1,0 +1,148 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+
+#   http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# This script plots the antenna patten. It reads in the antenna gain filesx
+# ASSUMPTIONS:
+# - see # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+# - the files are ASCII files. rows are theta, columns are phi
+# - all antenna files mus thave the same format (over theta and phi)
+
+import numpy as np
+import matplotlib.gridspec as gridspec
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+
+
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+filename_gain_list = ['/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/src/ant_1_port_ddmi_v1.agm', '/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/src/ant_1_starboard_ddmi_v1.agm'] # list of antenna gain files
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+
+nb_file = len(filename_gain_list)
+for ifile in range(nb_file):
+    #ifile = 0
+    filename_gain = filename_gain_list[ifile]
+    file_gain = open(filename_gain, "r")
+    read_file_gain = file_gain.readlines()
+    if ifile == 0:
+        nb_theta = len(read_file_gain)
+        nb_phi = len(read_file_gain[0].split(','))
+        theta_max = 90. 
+        dtheta = (int)( theta_max/nb_theta )
+        theta_arr = np.arange(0, theta_max, dtheta)
+        phi_max = 180. 
+        dphi = (int)( phi_max * 2/nb_phi ) 
+        phi_arr = np.arange(-180, phi_max, dphi)
+        gain = np.zeros([nb_file, nb_theta, nb_phi])
+    for itheta in range(nb_theta):
+        for iphi in range(nb_phi):
+            gain[ifile, itheta, iphi] = np.float( read_file_gain[itheta].split(',')[iphi] )
+
+
+
+max_gain = 15#np.max(gain)
+#raise Exception
+# # Out[31]: (31.268536, 42.866177, [44, 0])
+# theta = 31.268536
+# phi = 42.866177
+# itheta = np.where((theta_arr > theta))[0][0] - 1
+# iphi = np.where((phi_arr > phi))[0][0] - 1
+
+# PLOT
+## Parameters for the figure
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 20 
+ratio_fig_size = 4./3
+color_arr = ['b', 'r','cornflowerblue','g', 'm', 'gold', 'cyan', 'fuchsia', 'lawngreen', 'darkgray', 'green', 'chocolate']
+
+
+# Contour of delta Pc for uncertainty VS median f107 vs different altitudes
+fig_title = ''
+y_label = 'Theta '  + u'(\N{DEGREE SIGN})'
+x_label = 'Phi '  + u'(\N{DEGREE SIGN})'
+
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+fig.suptitle(fig_title, y = 0.99,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+nb_col = 2
+nb_row = (int)(np.ceil(nb_file / np.float(nb_col)))
+gs = gridspec.GridSpec(nb_row, nb_col)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+
+for ifile in range(nb_file):
+    irow = ifile / nb_col
+    icol = np.mod(ifile, nb_col)
+    print irow, icol
+    ax = fig.add_subplot(gs[irow, icol])
+
+    ax.set_title(filename_gain_list[ifile].split('/')[-1], weight = 'bold', fontsize  = fontsize_plot)
+    if icol == 0:
+        ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+    if irow == (nb_row - 1):
+        ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+    [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+    ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+
+    origin = 'lower'
+
+    x = phi_arr
+    y = theta_arr
+    X, Y = np.meshgrid(x, y)
+    Z = gain[ifile, :, :]
+
+
+    nr, nc = Z.shape
+
+    Z = np.ma.array(Z)
+
+    # We are using automatic selection of contour levels;
+    # this is usually not such a good idea, because they don't
+    # occur on nice boundaries, but we do it here for purposes
+    # of illustration.
+    levels = np.arange(0, max_gain + 1, 1.)
+    CS1 = ax.contourf(X, Y, Z, levels,
+                      #[-1, -0.1, 0, 0.1],
+                      #alpha=0.5,
+                      cmap = plt.cm.get_cmap("rainbow"),
+                      origin=origin,
+                     extend='both')
+
+    CS2 = ax.contour(X, Y, Z, levels,
+                      colors=('k',),
+                      linewidths=(1,),
+                      origin=origin)
+
+    CS1.cmap.set_under('white')
+    CS1.cmap.set_over('white')
+
+cbar = plt.colorbar(CS1, ax = ax)#, title = '$(\mathrm{P_{c, max} - P_{c, min}})/\mathrm{P_{c, nom}}$')
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')
+
+fig_save_name = 'contour_antenna_gain.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+
+theta = 5.000000
+phi = 240.000000
+where_theta = np.where(theta_arr == theta)[0]
+where_phi = np.where(phi_arr == phi)[0]
+print gain[:, where_theta, where_phi]
