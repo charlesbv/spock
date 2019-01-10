@@ -1,7 +1,0 @@
-
-gcc -c -o src/mpi_fake/mpi.o src/mpi_fake/mpi.c -> create src/mpi_fake/mpi.o object file
-ar r src/mpi_fake/libmpi.a src/mpi_fake/mpi.o -> do some library stuff to tell gcc to use mpi.h from src/mpi_fake
-ranlib src/mpi_fake/libmpi.a -> do some library stuff to tell gcc to use mpi.h from src/mpi_fake
-gcc -c -o src/find_specular_points.o src/find_specular_points.c -> create src/find_specular_points.o object file
-gcc -o find_specular_points src/find_specular_points.o -L./src/mpi_fake -lmpi -lm -> create executable find_specular_points from object src/find_specular_points.o using the mpi.h from src/mpi_fake (through the library 'mpi' (see 'lmpi') that is in src/mpi_fake (see '-L./src/mpi_fake')) (-lm is something different: it's to tell gcc to use the math library 'm')
-
