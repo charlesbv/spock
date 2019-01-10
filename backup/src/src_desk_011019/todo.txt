@@ -1,0 +1,26 @@
+check diagonalisation of covariance matrix process is correct
+debug for cases without any tca found
+try case 1 alfano start 1 min before tca -> need to change code so it stops at start of array when going backward in time spanning tca
+check that eci at tca after propagation from epoch is same as one provided by alfano
+try with cases from chao
+
+
+
+
+ideas:
+- look at distirbutino at tca and see if std on x y z is the same as from the covariacne matrix at tca (conerted in eci frame)
+- try taking the std directly from the covariance matrix instead of daig elements/converted back to eci
+
+
+findings:
+- using the method i use to compute min distance between ensembles to callculated min distance for unpertubrd orbits give the same result at alfano (exact same tc and dca)
+- also, i find the same number of collisions (lokking only at steps) as post processing with python
+-> these two points prove that the way to calculate min distance and ocllision is correct. 
+
+- the number of collision at steps if 0.65. This means there are too many collisions (even only looking at steps)
+-> this point suggests that the distributions of the sc are not ok
+
+- most of the time (99% of the time), when 2 sc are closer than the min distance of collision, they are also at STEPS (in other words not really useful to use interpolation)
+
+- eci x and y vary like a sine as funciton of time, so if we are at a max (of x for instance) then the sc will have the x vary less fast so the std at that time will be smaller then if we are at the ax of the slope of x, where x varies very fast (and where therefore the std will tbe bigger) 
+-> it sucks to have the covariance matrices in ECI!
