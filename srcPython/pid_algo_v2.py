@@ -28,8 +28,10 @@ kplist = [1.] # list of proportional gains for PID
 kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
-inter_start_algo = 1.0
-prefix_name = 'rhonosine_grav50'#'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'#'grav50_solarzenith'#'solarzenith'#localtime70percent'
+inter_start_algo = 2.0
+prefix_name = 'main'
+#'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
+#'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
 if rho_more == 'equator':
     rho_phase = 0
@@ -58,7 +60,7 @@ elif ispleiades == 1:
     nb_proc = 0    
 
 else:
-    sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+    sys.path.append("/Users/cbv/work/spock/srcPython")
     path_mpirun = 'mpirun'
     spice_path = '/Users/cbv/cspice/data'
     nb_proc = 4
@@ -86,12 +88,15 @@ from collections import *
 
 
 # Read r/v of observations
-obs_rv_filename = 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'#'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'#'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt' # 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
-obs_att_filename = 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt' #HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'#'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt' # 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt''
+obs_rv_filename = 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
+obs_att_filename = 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt''
 
-
-# obs_rv_filename = 'HD_data/high_drag_data_20180521/spock_FM5_20180521_eng_pvt_query-15601_15d.txt'#spock_FM5_20180521_eng_pvt_query-15601_4d.txt'#spock_FM5_20180521_eng_pvt_query-15601.txt'
-# obs_att_filename = 'HD_data/high_drag_data_20180521/spock_FM5_20180521_eng_adcs_query-15600_15d.txt'#spock_FM5_20180521_eng_adcs_query-15600_4d.txt'#spock_FM5_20180521_eng_adcs_query-15600.txt'
 
 # #Convert ECEF file to ECI file
 # if ((isbig == 1) | (ispleiades == 1)):
@@ -147,7 +152,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval =  62 # 64 # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #!!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 10# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -164,7 +169,7 @@ index_obs_interval_start = 0 # !!!!!!!!!!! to change
 ## SpOCK main input file:
 dt  = 1.#1. #!!!!!!!!should be 1 s
 dt_output = 60 # !!!!!!!!!used to be 1
-gravity_order = 50#50 # !!!!!!!!!! should be 20
+gravity_order = 20#50 # !!!!!!!!!! should be 20
 
 date_start = date_obs_start#datetime.strptime("2017-12-18T06:00:00", "%Y-%m-%dT%H:%M:%S")#date_obs_start
 date_end = date_start + timedelta(seconds = interval_sec)
@@ -337,7 +342,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
                 'swpc',
                 # for OUTPUT section
-                        "out",
+                        "out/out",
                 dt_output, 
                 # for ATTITUDE section
                 obs_att_filename,

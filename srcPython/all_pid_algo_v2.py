@@ -1,13 +1,14 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
+pickle_root_list = ['main_mid']
 #pickle_root_list = ['dec17_pole', 'dec17_mid', 'dec17_highamp_pole', 'dec17_equator']
-pickle_root_list = ['rhonosine_grav50_mid', 'rho0_grav50_solarzenith_mid','egm08_mid','grav80_mid', 'localtime70percent_mid']
+#pickle_root_list = ['rhonosine_grav50_mid', 'rho0_grav50_solarzenith_mid','egm08_mid','grav80_mid', 'localtime70percent_mid']
 ['rhonosine_grav50_mid', 'rho0_grav50_solarzenith_mid']#['egm08_mid']#['grav80_mid']#['rho0_grav50_solarzenith_mid']     #['dt0_1s_solarzenith_mid']#['grav50_solarzenith_mid']
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'amplitude' # raw, amplitude
+toplot = 'raw' # raw, amplitude
 color_arr = ['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -26,7 +27,7 @@ elif ispleiades == 1:
     nb_proc = 0    
 
 else:
-    sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+    sys.path.append("/Users/cbv/work/spock/srcPython")
     path_mpirun = 'mpirun'
     spice_path = '/Users/cbv/cspice/data'
     nb_proc = 4
