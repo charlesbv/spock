@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-#import ipdb
+import ipdb
 import glob
 import numpy as np
 from datetime import datetime, timedelta
@@ -131,6 +131,7 @@ def read_input_file(filename):
         path_run_dir = './'
     if path_run_dir[0] == '~':
             path_run_dir=  os.path.expanduser('~') + path_run_dir[1:]
+
     common_name = line_out.split('/')[-1]
     if common_name != "now":
         if common_name != "out":
@@ -149,7 +150,6 @@ def read_input_file(filename):
             output_file_path_list.append( path_run_dir + common_name + '/' + common_name + str(i+1) + "/")
             output_file_name_list.append(common_name + str(i+1) + ".txt")
             collision_filename =  path_run_dir  + common_name + "_collision.txt"
-
 
 
 
@@ -321,8 +321,12 @@ def read_input_file(filename):
         #     if (i > 0):
         #         geometry_filename = geometry_filename + "/" + filename.split('/')[i]
         #geometry_filename = geometry_filename + '/geometry/' + geometry_filename_temp
-        geometry_filename = geometry_filename_temp
-        geometry_file = open(run_dir + geometry_filename)
+        if (('/' in geometry_filename_temp) == False):
+            geometry_filename_final = run_dir + geometry_filename_temp
+        else:
+            geometry_filename_final = geometry_filename_temp
+
+        geometry_file = open(geometry_filename_final)
         read_geometry_file = geometry_file.readlines()
         n_header_geo = 0
         while (read_geometry_file[n_header_geo].split()[0] != '#ENDOFHEADER'):
