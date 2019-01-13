@@ -56,7 +56,7 @@
  /////////////////////////////////////////////////////////////////////////////////////////
 
  int load_options( OPTIONS_T *OPTIONS,
-		   char      filename[1000], int iProc, int nProcs,  int iDebugLevel, char filename_input_no_path[256]) {
+		   char      filename[1000], int iProc, int nProcs,  int iDebugLevel, char filename_input_raw[256]) {
 
    //newstructure
    char text_spice[256];
@@ -491,7 +491,18 @@
 
 
 //  fp = fopen(filename, "r"); //newstructure
-  fp = fopen(filename_input_no_path, "r"); //newstructure  
+       char filename_input_no_path[1000]; // filename_input_raw is the name of the input file as indicated by the argument of the SpOCK call
+       // filename_input_no_path is filename_input_raw without the path to the file 
+       strcpy(filename_input_no_path, "");    
+       if (strrchr(&filename_input_raw[0], '/')== NULL){ // not '/' character
+	 // in the name indicated at 1st line of section #OUTPUT
+	 strcpy(filename_input_no_path, filename_input_raw);
+       }
+       else{ // '/' character in the name indicated at 1st line of section #OUTPUT
+	 strncat(filename_input_no_path,strrchr(&filename_input_raw[0], '/')+1, (int)(strrchr(&filename_input_raw[0], '/') + strlen(filename_input_raw) ) -1);
+       }
+
+       fp = fopen(filename_input_raw, "r"); //newstructure  
 
   if (fp == NULL){
     printf("***! The main input file was not found. The program will stop. !***\n");

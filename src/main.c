@@ -48,7 +48,7 @@ int main(int argc, char * argv[]) {
     GROUND_STATION_T GROUND_STATION;
     //    STORM_T         STORM;
     char             filename_input[256];
-    char filename_input_no_path[256];
+    char filename_input_raw[300];
     int ierr;
     CONSTELLATION_T *CONSTELLATION = malloc(sizeof(CONSTELLATION_T));
 
@@ -73,11 +73,8 @@ int main(int argc, char * argv[]) {
 //    printf("enwofjoiewjfoiewjfew\neowifheiowjfewewj\nfeowfjhweoinfeiw\n");
     strcpy( filename_input, "./input/main_input/");
     strcat(filename_input, argv[1]);
-    strcpy(filename_input_no_path, "");
-    strcat(filename_input_no_path, argv[1]);
-
-
-
+    strcpy(filename_input_raw, "");
+    strcat(filename_input_raw, argv[1]);
     // Debug Level
     int iDebugLevel = -1;
     if (argc > 2){
@@ -89,7 +86,7 @@ int main(int argc, char * argv[]) {
     }
     //    OPTIONS.new_cd = 1; // set it to 1 to iinitalize the drag coeff with the accomoation coefficient in the geometry file (and not the drag coefficient). Does not work if running ensembles on Cd
 
-    load_options( &OPTIONS, filename_input, iProc, nProcs, iDebugLevel, filename_input_no_path);
+    load_options( &OPTIONS, filename_input, iProc, nProcs, iDebugLevel, filename_input_raw);
 
     /*      print_options(&OPTIONS); */
 /*     int pp; */

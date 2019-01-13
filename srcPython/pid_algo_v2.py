@@ -19,7 +19,7 @@ plot_var = 'ecc' # dist, ecc, argper
 rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the ighhes tlatitude of the orbit)
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
-
+dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
 no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
@@ -28,8 +28,8 @@ kplist = [1.] # list of proportional gains for PID
 kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
-inter_start_algo = 2.0
-prefix_name = 'main'
+inter_start_algo = 1.0
+prefix_name = 'grav50'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -88,11 +88,14 @@ from collections import *
 
 
 # Read r/v of observations
-obs_rv_filename = 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+if dir_simu[-1] != '/':
+    dir_simu = dir_simu + '/'
+
+obs_rv_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
-obs_att_filename = 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+obs_att_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
 #HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
 #'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt''
@@ -169,7 +172,7 @@ index_obs_interval_start = 0 # !!!!!!!!!!! to change
 ## SpOCK main input file:
 dt  = 1.#1. #!!!!!!!!should be 1 s
 dt_output = 60 # !!!!!!!!!used to be 1
-gravity_order = 20#50 # !!!!!!!!!! should be 20
+gravity_order = 50#50 # !!!!!!!!!! should be 20
 
 date_start = date_obs_start#datetime.strptime("2017-12-18T06:00:00", "%Y-%m-%dT%H:%M:%S")#date_obs_start
 date_end = date_start + timedelta(seconds = interval_sec)
@@ -321,7 +324,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # if rho_control[iinter] <= -1:
         #     rho_control[iinter] = -0.99
 
-        main_input_filename = prefix_name + '_' + rho_more + '_interval' + format(interval, ".1f").replace(".","_") + "_iinter" + str(iinter)  + '_irho' + str(irho) + '.txt'
+        main_input_filename = dir_simu + prefix_name + '_' + rho_more + '_interval' + format(interval, ".1f").replace(".","_") + "_iinter" + str(iinter)  + '_irho' + str(irho) + '.txt'
         if no_prop != 1:
 
             spock_main_input( # need to be in spokc/srcPython to run this script   
@@ -342,7 +345,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
                 'swpc',
                 # for OUTPUT section
-                        "out/out",
+                        dir_simu + "out",
                 dt_output, 
                 # for ATTITUDE section
                 obs_att_filename,
