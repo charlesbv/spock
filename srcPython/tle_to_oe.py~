@@ -1,0 +1,6 @@
+# This script reads a TLE file (with 1 or more TLE(s)) and compute the keplerian
+# orbital elements
+# Important note: although this method can give an idea of the values of the
+# keplerian elements, it's not neither accurate nor theoretically correct
+# The correct approach would be to conver the TLEs to ECI r/v, then convert the
+# ECI r/v to osculating elements.

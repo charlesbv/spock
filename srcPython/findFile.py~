@@ -1,0 +1,13 @@
+# This script finds the netcd ffile corresponidng to a FM for a given date
+def findFile(date_netcdf, cygfm):
+    yy = datetime.strftime(date_netcdf, "%Y") 
+    doy = datetime.strftime(date_netcdf, "%j").zfill(3)
+    path_netcdf_file = netcdf_dir + yy + '/' + doy + '/'
+    list_file = [filename for filename in os.listdir(path_netcdf_file) if \
+     filename.startswith('cyg0' + str(cygfm))]
+    if len(list_file) == 0:
+        print '***! No netcdf file for FM0' + str(cygfm) + ' on ' +\
+                 str(date_netcdf) + " !***"
+        return ''
+    return path_netcdf_file + list_file[0]
+    

@@ -1,0 +1,143 @@
+# Converts ECI r v to osculating elements
+int cart2kep( ORBITAL_ELEMENTS_T   *OE,
+              double                r[3],
+              double                v[3],
+              double                time,
+              double                u)
+
+{
+  // Declarations
+  double rrss;
+  double vrss;
+  double unit_r[3];
+  double rdotv;
+  double h[3];
+  double mag_h;
+  double K[3] = {0.0};
+  double node[3];
+  double mag_node;
+  double unit_node[3];
+  double specific_energy;
+  double tempv1[3];
+  double tempv2[3];
+  double coeff;
+  double e_vector[3];
+  double unit_e[3];
+  double e_vector_dot_r;
+  double n;
+    
+  // Begin algorithm
+  v_mag( &rrss, r);
+  v_mag( &vrss, v);
+  v_norm( unit_r, r);
+  v_dot(&rdotv, r, v);
+
+  //
+  //  Solve for angular momentum (r x v)
+  //
+  v_cross(h,r,v);
+  v_mag( &mag_h, h);
+
+  //
+  // Solve for node vector
+  //
+  K[2] = 1.0;
+  v_cross(node, K,h);
+  v_mag(&mag_node, node);
+  v_norm( unit_node, node);
+
+  //
+  //  Solve for semi-major axis, sma
+  //
+  OE->sma = 1.0 / ( (2.0/rrss) - ( (vrss*vrss)/u ) );
+    
+  //
+  //  Solve for ecentricity, e and the e vector
+  //
+  specific_energy = -1.0*(u/(2.0*OE->sma));
+  v_scale(tempv1, v, rdotv);
+    
+  coeff = vrss*vrss - (u/rrss);
+    
+  v_scale(tempv2, r, coeff);
+  v_sub( e_vector , tempv2, tempv1);
+    
+  coeff = 1.0/u;
+  v_scale(e_vector, e_vector, (coeff));
+
+  v_mag( &OE->eccentricity, e_vector );
+  v_norm( unit_e, e_vector);
+
+  //  Solve for inclination, i
+  OE->inclination = acos(h[2]/mag_h);
+
+  //  Solve for longitude of ascending node
+  if (mag_node == 0.0) {
+    
+    OE->long_an = 0.0;
+    
+  } else if (node[1] >= 0){
+    
+    // TODO: Check this
+    OE->long_an = acos(node[0]/mag_node);  // was checked by CBV (Vallado3 eq (2.82))
+        
+  }
+
+  else if (node[1] < 0){
+    OE->long_an = 2*M_PI - acos(node[0]/mag_node);
+  }
+
+  //
+  //  Solve for argument of periapse
+  //
+  if (mag_node != 0.0) {
+    v_dot(&coeff, unit_node, unit_e);
+    OE->w = acos( coeff );
+    if (e_vector[2] < 0.0) {
+      OE->w = (2.0*M_PI - OE->w);
+    }/*  else { */
+    /*   OE->w = 0; */
+    /* } */
+  }
+
+  //  Solve for true anomaly
+  v_dot(&e_vector_dot_r, e_vector,r);
+  if (OE->eccentricity != 0) {
+    OE->f = acos(e_vector_dot_r/(OE->eccentricity*rrss));
+    if (rdotv < 0) {
+      OE->f = (2*M_PI) - fabs(OE->f);
+      //OE->f = OE->f + M_PI;
+    }
+  } else {
+    OE->f = 0;
+  }
+  //
+  //  Solve for time of periapsis
+  //
+  OE->E = 2*atan(sqrt((1-OE->eccentricity)/(1+OE->eccentricity))*tan(OE->f/2));
+  if (OE->E < 0) {
+    OE->E = OE->E + (2*M_PI);
+  }
+
+  n = sqrt(u/(OE->sma*OE->sma*OE->sma)); // mean motion - Vallado3 eq (2.76) (CBV)
+  OE->tp = -1 * ((OE->E/n) - ((OE->eccentricity*sin(OE->E))/n) - time);
+
+  // Right ascension
+  OE->ra =  atan2(r[1], r[0]);
+  if ( OE->ra < 0){
+    OE->ra = 2*M_PI + OE->ra ;
+  }
+
+
+  // orbital period
+  OE->period = pow( OE->sma, 3.0);
+  OE->period = OE->period / u;
+  OE->period = 2.0 * M_PI * sqrt( OE->period );
+
+  // AN to sc
+  OE->an_to_sc = fmod(OE->w + OE->f, 2*M_PI); // angle ascending node to s/c
+
+  return 0;
+    
+} /* ---------- end of function cart2kep ----------*/
+

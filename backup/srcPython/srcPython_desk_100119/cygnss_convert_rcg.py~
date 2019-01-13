@@ -1,0 +1,6 @@
+# This script converts the CYGNSS RCG to/from the 0-15 scale from/to the 0/220 scale, based on the main.cpp script (function writeDdmiFile) that Tim Butler sent me by email on 09/21/2018)
+
+
+def cygnss_convert_rcg(gain_in, scale):
+
+    return gain_out
