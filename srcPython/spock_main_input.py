@@ -107,7 +107,7 @@ def spock_main_input(
     elif density_mode == 'omniweb': # by default if dynamic is chosen then F10.7 and Ap are downloaded from swpc
         print >> main_input_file, "#FORCES\n" + str(gravity_order) + "\n" + forces + "\ndynamic\nomniweb\n100\n15\n"
     elif density_mode == 'static':
-        print >> main_input_file, "#FORCES\n" + str(gravity_order) + "\n" + forces + "\nstatic\n100\n100\n15\n"
+        print >> main_input_file, "#FORCES\n" + str(gravity_order) + "\n" + forces + "\nstatic\n70\n70\n5\n"
     elif ( ( type(density_mode) == list ) & ( density_mode[0] == 'static' ) ):
         print >> main_input_file, "#FORCES\n" + str(gravity_order) + "\n" + forces + "\nstatic\n" + density_mode[1] + "\n" + density_mode[2] + "\n" + density_mode[3] + "\n"  # 1 is f107, 2 is f107A, 3 is ap. I kept the option 'static' (right above) because it's from an old version that many scripts were using so I didn't to change all these scripts
     elif ( ( type(density_mode) == list ) & ( density_mode[0] == 'swpc_mod' ) ): 

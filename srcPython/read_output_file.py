@@ -326,8 +326,8 @@ def read_output_file(filename, list_variable):
         if (calculate_argument_perigee == 1):
             argument_perigee[i] = np.float(read_file_to_read[i+nb_lines_header].split()[16])
         if (calculate_phase_angle == 1):
-            #            phase_angle[i] = np.float(np.mod(true_anomaly[i] + argument_perigee[i], 360))
-            phase_angle[i] = np.float(read_file_to_read[i+nb_lines_header].split()[38])
+            phase_angle[i] = np.float(np.mod(true_anomaly[i] + argument_perigee[i], 360))
+            #phase_angle[i] = np.float(read_file_to_read[i+nb_lines_header].split()[38])
         if (calculate_phase_rate == 1):
             if i >= 1:
                 phase_rate[i] = ( ( true_anomaly[i] + argument_perigee[i] ) - ( true_anomaly[i-1] + argument_perigee[i-1] ) ) / ( nb_seconds_since_start[i] - nb_seconds_since_start[i-1] )
