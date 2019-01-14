@@ -25,6 +25,7 @@
 #include <gsl/gsl_randist.h>
 #include "f2c.h"
 #include <gsl/gsl_statistics.h>
+#include "gsl/gsl_sf_legendre.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3061,6 +3062,8 @@ int sign(double x){
   if (x < 0) return -1;
   return 0;
 }
+
+
 
 /*  LocalWords:  min
  */

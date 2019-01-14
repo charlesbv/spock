@@ -1926,9 +1926,17 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
     exit(0);
   }
   getline(&line, &len, fp);
-  sscanf(line,"%lf", &OPTIONS->degree);
+  RemoveSpaces(line);  strtok(line, "\n");  strtok(line, "\r");
+  char gravity_map_str[100];
+  strcpy(gravity_map_str, "");
+  OPTIONS->gravity_map = 0;
+  sscanf(line,"%lf %s", &OPTIONS->degree, gravity_map_str);
+  if (strcmp(gravity_map_str, "map") == 0){
+      OPTIONS->gravity_map = 1;
+    }
   OPTIONS->order = OPTIONS->degree; 
 
+  
   getline(&line,&len,fp);
   if(strstr(line, "drag") != NULL) {
     OPTIONS->include_drag = 1;

@@ -1408,7 +1408,7 @@ int compute_dxdt(   double          drdt[3],
   // dvdt
 
   // Gravity
-  compute_gravity( dvdt, r_i2cg_INRTL, et[0], &PARAMS->EARTH.GRAVITY, INTEGRATOR->degree, PARAMS->EARTH.earth_fixed_frame, PARAMS->EARTH.flattening, PARAMS->EARTH.radius, SC);
+  compute_gravity( dvdt, r_i2cg_INRTL, et[0], &PARAMS->EARTH.GRAVITY, INTEGRATOR->degree, PARAMS->EARTH.earth_fixed_frame, PARAMS->EARTH.flattening, PARAMS->EARTH.radius, SC, OPTIONS->gravity_map, CONSTELLATION);
 
   //  Moon Perturbations
   if (INTEGRATOR->include_moon == 1){
@@ -1657,7 +1657,9 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
                         int         degree,
 			char earth_fixed_frame[100],
 			double earth_flattening, double earth_radius,
-			SPACECRAFT_T *SC)
+			SPACECRAFT_T *SC,
+			int gravity_map,
+			CONSTELLATION_T *CONSTELLATION)
 			//                        int         order)
 {
 
@@ -1723,6 +1725,8 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
   //   Compute Partial of potential function wrt range, lat, long
   //  printf("degree = %d\n", degree);
 
+
+  if (gravity_map != 1){ // if the user doesn't want to use the 3d gravity map option
   for (l = 2; l <= degree; l++) {
 
     for ( m = 0; m <= l; m++) { // !!!!!!!!!!!!! replace 0 with l
@@ -1752,12 +1756,28 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
     }
   }
 
+
   //  exit(0);
 
   dUdr    = -dUdr     * Gravity->mu / rmag2;
   dUdlat  = dUdlat    * Gravity->mu / rmag;
   dUdlong = dUdlong   * Gravity->mu / rmag;
-    
+
+  } // end of if the user doesn't want to use the 3d gravity map option
+  else{ // if the user wants to use the 3d gravity map option
+    int iradius, ilat, ilon;
+    // determine the bin for the radius
+    iradius = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
+    // determine the bin for the lat
+    ilat = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
+    // determine the bin for the lon
+    ilon = (int)(( long_gc*180/M_PI ) / Gravity->dlon_map);
+    printf("%d %d %d\n", iradius, ilat, ilon);
+    //dUdr = CONSTELLATION->gravity_map[iradius][ilat][ilon][0];
+      /* dUdlat = //CONSTELLATION->gravity_map[iradius][ilat][ilon][1]; */
+      /* dUdlong = //CONSTELLATION->gravity_map[iradius][ilat][ilon][2]; */
+  }
+  
   //  // Compute the Earth fixed accels
   term                = (1/rmag) * dUdr - (r_ecef2cg_ECEF[2] / (rmag*rmag * r_xy)) * dUdlat;
   term2               = (1/(r_xy * r_xy)) * dUdlong;
@@ -3710,7 +3730,16 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.mu    = 398600.4418; // km^3/s^2
   PARAMS->EARTH.GRAVITY.j2    = 1.081874e-3;
   strcpy(PARAMS->EARTH.earth_fixed_frame, earth_fixed_frame);
- 
+
+  PARAMS->EARTH.GRAVITY.dlat_map = 50.;
+  PARAMS->EARTH.GRAVITY.dlon_map = 50.;
+  PARAMS->EARTH.GRAVITY.dradius_map = PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY. min_lat_map = -90.;
+  PARAMS->EARTH.GRAVITY.max_lat_map = 90.;
+  PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 40000.;
+  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 200.;
+
+  
   PARAMS->MOON.flattening     = 0.0012;//https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
   PARAMS->MOON.radius         = 1737.0;//https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
   PARAMS->MOON.GRAVITY.mu     = 4.902801076000e+003; // (value from STK) 
@@ -4688,3 +4717,141 @@ int calculate_cd_opengl(double *cd,
       return 1;
       return(f * factorial(f - 1));
 	}
+
+// Create a 3d map of the gravitational potential derivatives dUdr, dUdlat, and dUdlong. These are then used in compute_gravity to compute the acceleration due to the Earth gravity
+int gravity_map(CONSTELLATION_T *CONSTELLATION, GRAVITY_T  Gravity, int degree,  int iProc){
+  double dlat = Gravity.dlat_map;// size of latitude bins for the map (in degrees)
+  double dlon = Gravity.dlon_map;// size of longitude bins for the map (in degrees)
+  double dradius = Gravity.dradius_map;// size of radius bins for the map (in km);
+
+  int ii, iradius, ilon, ilat;
+  double radius, lon,lat;
+  double min_lat = Gravity.min_lat_map;// min latitude of all sc
+  double max_lat = Gravity.max_lat_map;// max latitude of all sc
+  double max_radius = Gravity.max_radius_map; // max radius of all sc (km)
+  double min_radius = Gravity.min_radius_map; // min radius of all sc (km)
+  // ex: if dlon = 1 deg then draf = 100 km.
+
+  double dlonrad = dlon * M_PI/ 180;
+  double dlatrad = dlat * M_PI/ 180;
+  double min_latrad = min_lat * M_PI/ 180;
+  double max_latrad = max_lat * M_PI/ 180;
+ 
+  double slat;
+  double radius2;
+  double radius3;
+  double rad_over_r;
+  double Plm;
+  double Plm_plus1;
+  double term;
+  double term2;
+  double coeff;
+  int l;
+  int m;
+
+
+ 
+  double dUdr     = 0.0;
+  double dUdlat   = 0.0;
+  double dUdlong  = 0.0;
+
+  
+  int nlon = (int)( 360/dlon) + 1;// nb lon bins
+  int nlat = (int)( (max_lat- min_lat)/dlat)*2 + 1;// nb lat bins
+  int nradius = (int)( (max_radius - min_radius)/dradius) + 1;
+
+  printf("3D Gravity map: dradius: %.1f km, dlat: %.1f deg, dlon: %.1f deg\n\n", dradius, dlat, dlon);
+  CONSTELLATION->gravity_map = malloc(nradius  * sizeof(double ***) );
+  if ( CONSTELLATION->gravity_map == NULL){
+    printf("***! Could not allow memory to CONSTELLATION->gravity_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  for (iradius = 0; iradius < nradius; iradius++){ // go over all radii
+      if (iProc == 0){ // print progress
+                printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
+      }
+    radius = min_radius + iradius * dradius;
+    CONSTELLATION->gravity_map[iradius] = malloc(nlat  * sizeof(double **) );
+    if ( CONSTELLATION->gravity_map[iradius] == NULL){
+      printf("***! Could not allow memory to CONSTELLATION->gravity_map[iradius]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+    }
+		
+    for (ilat = 0; ilat < nlat; ilat++){ // go over all latitudes
+      lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+      
+      CONSTELLATION->gravity_map[iradius][ilat] = malloc(nlon  * sizeof(double*) );
+      
+      if ( CONSTELLATION->gravity_map[iradius][ilat] == NULL){ 
+	printf("***! Could not allow memory to CONSTELLATION->gravity_map[iradius][ilat]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+      }
+      for (ilon = 0; ilon < nlon; ilon++){ // go over all longitude
+	lon = 0 + ilon * dlonrad;
+	CONSTELLATION->gravity_map[iradius][ilat][ilon] = malloc(3  * sizeof(double) );
+	if ( CONSTELLATION->gravity_map[iradius][ilat][ilon] == NULL){ 
+	  printf("***! Could not allow memory to CONSTELLATION->gravity_map[iradius][ilat][ilon]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+	}
+
+
+	// Declarations
+
+	dUdr     = 0.0;
+	dUdlat   = 0.0;
+	dUdlong  = 0.0;
+    
+	// Some intermediate
+	rad_over_r  = Gravity.radius / radius;
+	slat     = sin( lat );
+
+	radius2       = pow( radius, 2);
+	radius3       = pow( radius, 3);
+
+	//   Compute Partial of potential function wrt range, lat, long
+	for (l = 2; l <= degree; l++) {
+
+	  for ( m = 0; m <= l; m++) { // !!!!!!!!!!!!! replace 0 with l
+
+	    Plm         = pow(-1,m) * gsl_sf_legendre_Plm( l, m, slat ); // in ~/gsl-1.16/specfunc/legendre_poly.c // pow(-1,m) has been added to agree with Vallado's theory (the C library uses a pow(-1,m) that the theory does not))
+
+	    if ((m+1) > l) {
+            
+	      Plm_plus1 = 0.0;
+            
+	    } else {
+                
+	      Plm_plus1   = pow(-1,m+1) * gsl_sf_legendre_Plm( l, (m+1), slat ); // !!!!!!!!!!  pow(-1,m+1) has been added to agree with Vallado's theory (the C library uses a pow(-1,m+1) that the theory does not))
+            
+	    }
+
+
+	    coeff       = pow(rad_over_r, l);
+	    //      printf("%d %d %e %e\n", l,m,Gravity.Clm[l][m], Gravity.Slm[l][m]);
+	    term        = (Gravity.Clm[l][m] * cos( m*lon ) + Gravity.Slm[l][m] * sin( m*lon ));
+	    term2       = (-Gravity.Clm[l][m] * sin( m*lon ) + Gravity.Slm[l][m] * cos( m*lon )); // Modif by CBV 07-19-2015 from Vallado3 p. 548
+            
+	    dUdr    += coeff * (l + 1.0) * Plm * term;
+	    dUdlat  += coeff * ( Plm_plus1  - m * tan( lat) * Plm ) * term;
+	    dUdlong += coeff * m * Plm * term2;
+            
+	  }
+	}
+
+
+	dUdr    = -dUdr     * Gravity.mu / radius2;
+	dUdlat  = dUdlat    * Gravity.mu / radius;
+	dUdlong = dUdlong   * Gravity.mu / radius;
+	
+	CONSTELLATION->gravity_map[iradius][ilat][ilon][0] = dUdr; // dUdr
+	CONSTELLATION->gravity_map[iradius][ilat][ilon][1] = dUdlat; // dUdlat
+	CONSTELLATION->gravity_map[iradius][ilat][ilon][2] = dUdlong; // dUdlong
+
+      } // go over all longitudes
+	
+    } // go over all latitudes	
+  } // go over all radii
+
+}
+
+

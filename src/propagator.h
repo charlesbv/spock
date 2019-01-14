@@ -49,7 +49,13 @@ typedef struct {
   double Clm[MAX_DEGREE+1][MAX_ORDER+1];
   double Slm[MAX_DEGREE+1][MAX_ORDER+1];
   double radius;
-
+  double dlat_map; // size of latitude bins for the map (in degrees) 
+  double dlon_map; // size of longitude bins for the map (in degrees)
+  double dradius_map; // size of radius bins for the map (in km);
+  double  min_lat_map; // min latitude for the map
+  double max_lat_map;
+  double max_radius_map; // max radius for the map
+  double min_radius_map;
 }  GRAVITY_T;
 
 typedef struct {
@@ -335,7 +341,7 @@ typedef struct {
   double area_attitude_opengl_dphi;
   double **area_solar_panel_attitude_opengl;
 
-
+  double ****gravity_map;
 
 } CONSTELLATION_T;
 
@@ -422,7 +428,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
                         double      et,
                         GRAVITY_T   *Gravity,
                         int         degree,
-			char earth_fixed_frame[100],  double earth_flattening, double earth_radius, SPACECRAFT_T *SC);
+			char earth_fixed_frame[100],  double earth_flattening, double earth_radius, SPACECRAFT_T *SC, int gravity_map, CONSTELLATION_T *CONSTELLATION);
 			//          int         order);
 
 	

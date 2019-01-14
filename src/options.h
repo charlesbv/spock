@@ -7,6 +7,7 @@
 #define N_STEPS 100
 
 typedef struct {
+  int gravity_map; // 1 if the user has indicated "map" after the order of the gravity model (1st line of section #FORCES) -> will use a 3D map of the gravitational potential to calcualte the acceleration due to the Earth gravity. 0 otherwise.
   double bc_vcm_std[2]; // if computing the probability of collision and the input file has the fomat of a VCM, this is the standard deviation of Bcfrom the covariance matrix in the VCM (element 28). size of 2 because two objects that collide
   double srp_vcm_std[2]; // if computing the probability of collision and the input file has the fomat of a VCM, this is the standard deviation of the solar radiation pressure coeff from the covariance matrix in the VCM (element 45). size of 2 because two objects that collide
   int which_sc_oldest_tle_epoch;// if tle or VCM (collision) to inialize the orbits, this is the satellite with the odlest epoch. only used to print the progress (in %) of the simulation.
@@ -418,3 +419,6 @@ int exitf();
 int read_vcm(char filename[1000], OPTIONS_T *OPTIONS, int isc);
 
 int read_cdm(char filename[1000], OPTIONS_T *OPTIONS);
+
+int gravity_map(CONSTELLATION_T *CONSTELLATION, GRAVITY_T  Gravity, int degree,  int iProc);
+
