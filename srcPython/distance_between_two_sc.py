@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+sys.path.append("/Users/cbv/work/spock/srcPython")
 from cadre_read_last_tle import *
 from get_prop_dir import *
 import matplotlib.gridspec as gridspec
@@ -31,7 +31,7 @@ show_plots = 1
 path_folder_results = './'#path_folder_results = '/raid3/Armada/Charles/python/' #get_prop_dir(2) + 'output/python_propagator/'
 
 ## If the second spacecraft was propagated from the same main input file in SpOCK as the first spacecraft
-same_spock_input_file = 1
+same_spock_input_file = 0
 
 ############ ALGORITHM ############
 # Read input file sat1
@@ -90,7 +90,7 @@ nb_steps = nb_steps_sat1
 ## Set up plot parameters 
 height_fig = 9.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 20 
-hour_time_step_xticks = 24. # time step of ticks when plotting a function as a function of time
+hour_time_step_xticks = 3. # time step of ticks when plotting a function as a function of time
 step_plot = dt / 3600. # step in hours to plot
 
 ## Make plots

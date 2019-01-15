@@ -1781,12 +1781,15 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       long_gc_corr = 2*M_PI + long_gc;
     }
     ilon = (int)(( long_gc_corr*180/M_PI ) / Gravity->dlon_map);
-    printf("%f %d, %f %d, %f %d\n", rmag,iradius, lat_gc*180/M_PI, ilat,long_gc_corr*180/M_PI,ilon);
+        printf("%f %d, %f %d, %f %d\n", rmag,iradius, lat_gc*180/M_PI, ilat,long_gc_corr*180/M_PI,ilon);
        dUdr = Gravity->gravity_map[iradius][ilat][ilon][0];
       dUdlat = Gravity->gravity_map[iradius][ilat][ilon][1];
       dUdlong = Gravity->gravity_map[iradius][ilat][ilon][2];
       //      exitf();
   }
+
+  //  printf("%f %f %f -> %e %e %e\n", rmag, lat_gc*180/M_PI, long_gc*180/M_PI, dUdr, dUdlat, dUdlong);
+  //  exitf();
   
   //  // Compute the Earth fixed accels
   term                = (1/rmag) * dUdr - (r_ecef2cg_ECEF[2] / (rmag*rmag * r_xy)) * dUdlat;
@@ -1801,7 +1804,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
   pxform_c(earth_fixed_frame, "J2000", et, T_ECEF_to_J2000);
   m_x_v( a_i2cg_INRTL, T_ECEF_to_J2000, a_ecef2cg_ECEF);
   v_copy(SC->a_i2cg_INRTL_gravity, a_i2cg_INRTL);
-    v_print(a_ecef2cg_ECEF, "a_ecef2cg_ECEF"); 
+  //    v_print(a_ecef2cg_ECEF, "a_ecef2cg_ECEF"); 
 
 
   /* // J2 only  */
@@ -3741,13 +3744,13 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.j2    = 1.081874e-3;
   strcpy(PARAMS->EARTH.earth_fixed_frame, earth_fixed_frame);
 
-  PARAMS->EARTH.GRAVITY.dlat_map = 10.;
-  PARAMS->EARTH.GRAVITY.dlon_map = 10.;
+  PARAMS->EARTH.GRAVITY.dlat_map = 0.1;
+  PARAMS->EARTH.GRAVITY.dlon_map = 0.1;
   PARAMS->EARTH.GRAVITY.dradius_map = PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY. min_lat_map = -90.;
   PARAMS->EARTH.GRAVITY.max_lat_map = 90.;
-  PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 40000.;
-  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 200.;
+  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 400;//200.;
+  PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 1000;//40000.;
 
 
 
@@ -4789,7 +4792,7 @@ int gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
   int nlat = (int)( (max_lat- min_lat)/dlat)*2 + 1;// nb lat bins
   int nradius = (int)( (max_radius - min_radius)/dradius) + 1;
 
-  printf("3D Gravity map: dradius: %.1f km, dlat: %.1f deg, dlon: %.1f deg\n\n", dradius, dlat, dlon);
+    printf("3D Gravity map: dradius: %.1f km (%.1f to %.1f km), dlat: %.1f deg, dlon: %.1f deg\n\n", dradius, min_radius-Gravity->radius, max_radius-Gravity->radius, dlat, dlon);
   Gravity->gravity_map = malloc(nradius  * sizeof(double ***) );
   if ( Gravity->gravity_map == NULL){
     printf("***! Could not allow memory to Gravity->gravity_map. \
@@ -4797,7 +4800,7 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
   }
   for (iradius = 0; iradius < nradius; iradius++){ // go over all radii
       if (iProc == 0){ // print progress
-                printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
+		              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
       }
     radius = min_radius + iradius * dradius;
     Gravity->gravity_map[iradius] = malloc(nlat  * sizeof(double **) );
@@ -4808,6 +4811,9 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 		
     for (ilat = 0; ilat < nlat; ilat++){ // go over all latitudes
       lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+      /* if (iProc == 0){ // print progress */
+      /* 	printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  ilat*100.  / ( nlat-1 ) ); */
+      /* } */
       
       Gravity->gravity_map[iradius][ilat] = malloc(nlon  * sizeof(double*) );
       
@@ -4817,6 +4823,7 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
       }
       for (ilon = 0; ilon < nlon; ilon++){ // go over all longitude
 	lon = 0 + ilon * dlonrad;
+	//	printf("%f (%d), %f (%d), %f (%d)\n", radius, iradius, lat*180/M_PI, ilat, lon*180/M_PI, ilon);
 	Gravity->gravity_map[iradius][ilat][ilon] = malloc(3  * sizeof(double) );
 	if ( Gravity->gravity_map[iradius][ilat][ilon] == NULL){ 
 	  printf("***! Could not allow memory to Gravity->gravity_map[iradius][ilat][ilon]. \
@@ -4856,7 +4863,7 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 
 
 	    coeff       = pow(rad_over_r, l);
-	    //      printf("%d %d %e %e\n", l,m,Gravity->Clm[l][m], Gravity->Slm[l][m]);
+
 	    term        = (Gravity->Clm[l][m] * cos( m*lon ) + Gravity->Slm[l][m] * sin( m*lon ));
 	    term2       = (-Gravity->Clm[l][m] * sin( m*lon ) + Gravity->Slm[l][m] * cos( m*lon )); // Modif by CBV 07-19-2015 from Vallado3 p. 548
             

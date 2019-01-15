@@ -36,7 +36,7 @@ LDFLAGS=-L$(GSL_DIR)/lib
 %.o: %.c $(DEPS)
 	$(CC)  -c -o $@ $<  $(CFLAGS) $(LIBS) $(LDFLAGS)
 
-all: spock_grav
+all: spock_grav 
 
 spock_grav: $(OBJ)
 	$(CC) -o ${PATH_EXECUTABLE}/$@ $^ $(CFLAGS) $(LIBS) $(LDFLAGS) 
