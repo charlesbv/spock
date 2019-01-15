@@ -1,7 +1,7 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['grav50_mid']#['dt02_mid']#['onlyDrag_mid']
+pickle_root_list = ['noSolarPressure_mid']#['grav50_mid']#['dt02_mid']#['onlyDrag_mid']
 #pickle_root_list = ['dec17_pole', 'dec17_mid', 'dec17_highamp_pole', 'dec17_equator']
 #pickle_root_list = ['rhonosine_grav50_mid', 'rho0_grav50_solarzenith_mid','egm08_mid','grav80_mid', 'localtime70percent_mid']
 #['rhonosine_grav50_mid', 'rho0_grav50_solarzenith_mid']#['egm08_mid']#['grav80_mid']#['rho0_grav50_solarzenith_mid']     #['dt0_1s_solarzenith_mid']#['grav50_solarzenith_mid']
