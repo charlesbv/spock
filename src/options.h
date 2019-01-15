@@ -420,5 +420,5 @@ int read_vcm(char filename[1000], OPTIONS_T *OPTIONS, int isc);
 
 int read_cdm(char filename[1000], OPTIONS_T *OPTIONS);
 
-int gravity_map(CONSTELLATION_T *CONSTELLATION, GRAVITY_T  Gravity, int degree,  int iProc);
+
 

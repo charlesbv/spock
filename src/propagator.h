@@ -56,6 +56,7 @@ typedef struct {
   double max_lat_map;
   double max_radius_map; // max radius for the map
   double min_radius_map;
+    double ****gravity_map;
 }  GRAVITY_T;
 
 typedef struct {
@@ -341,7 +342,6 @@ typedef struct {
   double area_attitude_opengl_dphi;
   double **area_solar_panel_attitude_opengl;
 
-  double ****gravity_map;
 
 } CONSTELLATION_T;
 
@@ -434,7 +434,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 	
 //newstructure 		
 //int load_params( PARAMS_T *PARAMS, char main_directory_location[256], int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc);
-int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256]);
+int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use);
 //newstructure 
 
 int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
@@ -496,3 +496,4 @@ int calculate_cd_opengl(double *cd,
 			);
 
 double factorial(unsigned long f);
+int gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);

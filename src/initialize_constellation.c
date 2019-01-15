@@ -2536,7 +2536,6 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
   }
   // end of if the only case where the attitute needs to be set is the only case where it has not been set initially in initialize_constellation, which is if there is no ensemble at all run on the attitude
 
-
       compute_dxdt( v_dummy, CONSTELLATION->spacecraft[ii][eee].a_i2cg_INRTL, &CONSTELLATION->spacecraft[ii][eee].et, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, PARAMS, &CONSTELLATION->spacecraft[ii][eee].INTEGRATOR, et_initial_epoch, OPTIONS->et_oldest_tle_epoch, &test_density, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_attitude_interpolated, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.index_in_driver_interpolated, CONSTELLATION, OPTIONS, iProc, iDebugLevel, &CONSTELLATION->spacecraft[ii][eee]);
 
       double T_inrtl_2_lvlh[3][3];

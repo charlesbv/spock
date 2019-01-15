@@ -118,7 +118,8 @@ int main(int argc, char * argv[]) {
 
     //newstructure
     //load_params( &PARAMS, main_directory_location, iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc );
-    load_params( &PARAMS,  iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc, OPTIONS.path_to_spice );
+    int degree = (int)(OPTIONS.degree);
+    load_params( &PARAMS,  iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc, OPTIONS.path_to_spice, degree, OPTIONS.gravity_map );
     //newstructure
 
 /*     // !!!!!!!!!!!!!!REMOVE BLOCK BELOW */
@@ -367,17 +368,18 @@ int main(int argc, char * argv[]) {
 
 
     initialize_constellation( CONSTELLATION, &OPTIONS, &PARAMS, &GROUND_STATION, iDebugLevel, iProc, nProcs);
+
     //    exitf();
     //    printf("\nSSSSSSSSSSSS %d\n",OPTIONS.nb_time_steps);
 
 
     //  Create a 3d map of the gravitational potential derivatives dUdr, dUdlat, and dUdlong. These are then used in compute_gravity to compute the acceleration due to the Earth gravity
-      int degree = (int)(OPTIONS.degree);
-    if (OPTIONS.gravity_map == 1){
-      gravity_map(CONSTELLATION, PARAMS.EARTH.GRAVITY, degree, iProc);
-      printf("Done building the 3D gravity map.\n");
-    }
-          exitf();
+
+    /* if (OPTIONS.gravity_map == 1){ */
+    /*   gravity_map(CONSTELLATION, PARAMS.EARTH.GRAVITY, degree, iProc); */
+    /*   printf("Done building the 3D gravity map.\n"); */
+    /* } */
+
      if ( OPTIONS.use_kalman == 1 ){  // if 0 then it uses the classical propagation like in the previous veresions. If set to 1 then it uses Kalman Filter, which means observations are needed as inputs
      // Kalman filter
      MEAS_T MEAS;
