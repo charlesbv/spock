@@ -266,7 +266,10 @@ def read_input_file(filename):
         for i in range(len(read_file_gps_tle)):
             if read_file_gps_tle[i].split()[0] == '1':
                 if len(read_file_gps_tle[i-1].split()) > 1:
-                    gps_name.append( read_file_gps_tle[i-1].split()[1] )
+                    if len(read_file_gps_tle[i-1].split('PRN')) > 1: #'PRN' is written on the line
+                        gps_name.append( read_file_gps_tle[i-1].split('PRN')[1][:3].replace(" ", "") )
+                    else: # if no prn then take the second argument of the line (no particular reason for that)
+                        gps_name.append( read_file_gps_tle[i-1].split()[1] )
                 else:
                     gps_name.append( read_file_gps_tle[i-1].split()[0] )
                 nb_gps = nb_gps + 1

@@ -23,6 +23,7 @@
 # where main_input_filename is the name of the main input file that were used to run SpOCK. 
 # You can also plot the results by setting plot_results to 1, and path_folder_plot to the path where to put the plots (one plot per satellite). The name of the plot is the same as the name of the output folder of the satellite ('pdf' format)
 import sys
+sys.path.append("/Users/cbv/work/spock/srcPython")
 from datetime import datetime, timedelta
 import numpy as np
 from read_input_file import *
