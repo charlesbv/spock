@@ -30,7 +30,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-filename_gain_list = ['/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/src/ant_1_port_ddmi_v1.agm', '/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/src/ant_1_starboard_ddmi_v1.agm'] # list of antenna gain files
+filename_gain_list = ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm', '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'] # list of antenna gain files
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 nb_file = len(filename_gain_list)
