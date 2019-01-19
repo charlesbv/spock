@@ -21,6 +21,7 @@
 # - 'speed'
 # - 'altitude'
 # - 'latitude'
+# - 'longitude'
 # - 'eccentricity'
 # - 'sma'
 # - 'sma_average' orbit average sma
@@ -38,6 +39,7 @@
 # - 'position'
 # - 'velocity'
 # - 'acceleration_lvlh_drag_mag'
+# - 'acceleration'
 # - 'phase_angle'
 # - 'solar_zenith'
 # To run it:
@@ -49,7 +51,7 @@
 # - see block 'PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT' below
 
 import sys
-sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+sys.path.append("/Users/cbv/work/spock/srcPython")
 import pickle
 from orbit_average import *
 import matplotlib.colors as colors
@@ -85,7 +87,7 @@ from find_in_read_input_order_variables import *
 # - sc 7 is FM07
 # - sc 8 is FM03
 # (this is because if CYGNSS is run with a TLE from space-track.org, this is the order in the TLE file (it is 41884, 41885, 41886, ..., 41891)) 
-cygnss = 1
+cygnss = 0
 
 ## Save or not the plots
 save_plots = 1
@@ -131,7 +133,7 @@ else:
     plot_or_save_arg = len(sys.argv) - 2
 
 
-list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'local_time', 'raan', 'beta', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'tot_area_drag', 'position','velocity','acceleration_lvlh_drag_mag', 'phase_angle', 'solar_zenith'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
+list_elements_can_be_plot_or_save = ['radius', 'speed', 'altitude', 'latitude', 'longitude', 'eccentricity', 'sma', 'sma_average', 'radius_perigee', 'radius_apogee', 'argument_perigee', 'local_time', 'raan', 'beta', 'given_output', 'power', 'density', 'density_average', 'temperature', 'cd', 'tot_area_drag', 'position','velocity','acceleration_lvlh_drag_mag', 'phase_angle', 'solar_zenith', 'acceleration'] # !!!!! first date of given output is not necesarrily the same as for the other variables  
 
 
 not_in_list = 1
@@ -167,7 +169,7 @@ for irun in range(nb_run):
 
     dt = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
     nb_steps = var_in[find_in_read_input_order_variables(var_in_order, 'nb_steps')]; 
-    nb_sc = 4#!!!!!!var_in[find_in_read_input_order_variables(var_in_order, 'nb_sc')]; 
+    nb_sc = var_in[find_in_read_input_order_variables(var_in_order, 'nb_sc')]; 
 
     # Convert SC # to CYGNSS name if cygnss is set to 1
     if cygnss == 1:
@@ -209,7 +211,7 @@ for irun in range(nb_run):
             if ('sma' in var_to_read ) == False:
                 var_to_read.append('sma')
     isc_count = -1
-    for isc in range(3,nb_sc):#!!!!!!range(nb_sc):
+    for isc in range(nb_sc):
         isc_count = isc_count + 1
         isc_irun = isc_irun + 1
         var_out, var_out_order = read_output_file( output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
@@ -275,6 +277,11 @@ for irun in range(nb_run):
                 acceleration_lvlh_drag_mag = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
             acceleration_lvlh_drag_mag[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'acceleration_lvlh_drag_mag')]
 
+        if 'acceleration' in var_to_read:
+            if isc_count == 0:
+                acceleration = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
+            acceleration[isc, :nb_steps_new] = np.linalg.norm( var_out[find_in_read_input_order_variables(var_out_order, 'acceleration')], axis = 1)
+
         if 'phase_angle' in var_to_read:
             if isc_count == 0:
                 phase_angle = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
@@ -284,6 +291,11 @@ for irun in range(nb_run):
             if isc_count == 0:
                 latitude = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
             latitude[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'latitude')]
+        if 'longitude' in var_to_read:
+            if isc_count == 0:
+                longitude = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
+            longitude[isc, :nb_steps_new] = var_out[find_in_read_input_order_variables(var_out_order, 'longitude')]
+
         if 'eccentricity' in var_to_read:
             if isc_count == 0:
                 eccentricity = np.zeros([nb_sc, nb_steps_new]) # all output files of one simulation have the same number of steps
@@ -624,7 +636,63 @@ for irun in range(nb_run):
                         fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
                         fig_acceleration_lvlh_drag_mag.savefig(fig_save_name, facecolor=fig_acceleration_lvlh_drag_mag.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
+            # Acceleration
+            if 'acceleration' in var_to_read:        
+                if ( isc_count == 0 ) & (irun == 0) :
+                    # Plot
+                    fig_title = 'Acceleration as a function of time'
+                    y_label = 'Acceleration (m/s$^2$)'
+                    x_label = 'Longitude ' + u'(\N{DEGREE SIGN})' #'Real time'
+                    fig_acceleration = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
+                    fig_acceleration.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    gs = gridspec.GridSpec(1, 1)
+                    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+                    ax_acceleration = fig_acceleration.add_subplot(gs[0, 0])
+
+                    ax_acceleration.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_acceleration.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+                    [i.set_linewidth(2) for i in ax_acceleration.spines.itervalues()] # change the width of the frame of the figure
+                    ax_acceleration.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+                colorVal = scalarMap.to_rgba(isc_irun)
+                y_axis = acceleration[isc,:nb_steps_new] * 1000. # km/s2 to m/s2
+                x_axis_temp = longitude[isc,:nb_steps_new]
+                ax_acceleration.scatter(x_axis_temp, y_axis, s = 2, color = colorVal, label = label_arr[isc]) # !!!!!! soule be x_axis
+                #ax_acceleration.plot(x_axis_temp, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc]) # !!!!!! soule be x_axis
+
+                if isc == nb_sc - 1:
+                    # x axis label is in real time
+                    # ## all output files of one simulation have the same number of steps, and start at the same date
+                    # nb_ticks_xlabel = 8
+                    # dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+                    # xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
+                    # date_list_str = []
+                    # date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+                    # for i in range(len(xticks)):
+                    #     if dt_xlabel >= 3*24*3600:
+                    #         date_list_str.append( str(date_list[i])[5:10] )
+                    #     else:
+                    #         date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+                    # ax_acceleration.xaxis.set_ticks(xticks)
+                    # ax_acceleration.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+                    # ax_acceleration.margins(0,0); ax_acceleration.set_xlim([min(xticks), max(xticks)])
+            #        ax_acceleration.set_xlim([ax_acceleration.get_xlim()[0], most_recent_tle_among_all_sc])
+
+                    legend = ax_acceleration.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    legend.get_title().set_fontsize(str(fontsize_plot))
+
+                    if save_plots == 1:
+                        fig_save_name = 'acceleration'
+                        fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+                        fig_acceleration.savefig(fig_save_name, facecolor=fig_acceleration.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+
+                        
             # Latitude
             if 'latitude' in var_to_read:        
                 if ( isc_count == 0 ) & (irun == 0) :
@@ -677,6 +745,59 @@ for irun in range(nb_run):
                         fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
                         fig_latitude.savefig(fig_save_name, facecolor=fig_latitude.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
+            # # Longitude
+            # if 'longitude' in var_to_read:        
+            #     if ( isc_count == 0 ) & (irun == 0) :
+            #         # Plot
+            #         fig_title = 'Longitude as a function of time'
+            #         y_label = 'Longitude ' + u'(\N{DEGREE SIGN})'
+            #         x_label = 'Real time'
+            #         fig_longitude = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+            #         fig_longitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+            #         plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+            #         gs = gridspec.GridSpec(1, 1)
+            #         gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+            #         ax_longitude = fig_longitude.add_subplot(gs[0, 0])
+
+            #         ax_longitude.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+            #         ax_longitude.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+            #         [i.set_linewidth(2) for i in ax_longitude.spines.itervalues()] # change the width of the frame of the figure
+            #         ax_longitude.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+            #         plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+            #     colorVal = scalarMap.to_rgba(isc_irun)
+            #     y_axis = longitude[isc,:nb_steps_new]
+            #     ax_longitude.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc])
+
+            #     if isc == nb_sc - 1:
+            #         # x axis label is in real time
+            #         ## all output files of one simulation have the same number of steps, and start at the same date
+            #         nb_ticks_xlabel = 8
+            #         dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+            #         xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel)
+            #         date_list_str = []
+            #         date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+            #         for i in range(len(xticks)):
+            #             if dt_xlabel >= 3*24*3600:
+            #                 date_list_str.append( str(date_list[i])[5:10] )
+            #             else:
+            #                 date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+            #         ax_longitude.xaxis.set_ticks(xticks)
+            #         ax_longitude.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+            #         ax_longitude.margins(0,0); ax_longitude.set_xlim([min(xticks), max(xticks)])
+            # #        ax_longitude.set_xlim([ax_longitude.get_xlim()[0], most_recent_tle_among_all_sc])
+
+            #         legend = ax_longitude.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+            #         legend.get_title().set_fontsize(str(fontsize_plot))
+
+            #         if save_plots == 1:
+            #             fig_save_name = 'longitude'
+            #             fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+            #             fig_longitude.savefig(fig_save_name, facecolor=fig_longitude.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+                        
 
             # Phase_Angle
             if 'phase_angle' in var_to_read:        
@@ -1728,9 +1849,16 @@ for irun in range(nb_run):
                 if 'acceleration_lvlh_drag_mag' in var_to_read:
                     pickle.dump( acceleration_lvlh_drag_mag, open( root_save_fig_name + 'acceleration_lvlh_drag_mag' + ".pickle", "w" ) )
 
+                # Acceleration
+                if 'acceleration' in var_to_read:
+                    pickle.dump( acceleration, open( root_save_fig_name + 'acceleration' + ".pickle", "w" ) )
+
                 # Latitude
                 if 'latitude' in var_to_read:
                     pickle.dump( latitude, open( root_save_fig_name + 'latitude' + ".pickle", "w" ) )
+                # Longitude
+                if 'longitude' in var_to_read:
+                    pickle.dump( longitude, open( root_save_fig_name + 'longitude' + ".pickle", "w" ) )
 
                 # Phase_Angle
                 if 'phase_angle' in var_to_read:
