@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 1.0
-prefix_name = 'sp13'
+prefix_name = 'sp16'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -155,7 +155,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 36#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 62#36# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -337,7 +337,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                         1,
                 '0',
                 29,
-                dir_simu + "cygnss_geometry_2016_acco09_sp13.txt", #cygnss_geometry_2016_acco09.txt", 
+                dir_simu + "cygnss_geometry_2016_acco09_sp16.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section

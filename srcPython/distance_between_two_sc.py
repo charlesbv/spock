@@ -25,7 +25,7 @@ plt.isinteractive()
 save_results = 1
 
 ## Show or not the plots
-show_plots = 1
+show_plots = 0
 
 ## path of the folder where you want to store the results (pickle, image, video)
 path_folder_results = './'#path_folder_results = '/raid3/Armada/Charles/python/' #get_prop_dir(2) + 'output/python_propagator/'
@@ -90,7 +90,7 @@ nb_steps = nb_steps_sat1
 ## Set up plot parameters 
 height_fig = 9.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 20 
-hour_time_step_xticks = 3. # time step of ticks when plotting a function as a function of time
+hour_time_step_xticks = 0.2 # time step of ticks when plotting a function as a function of time
 step_plot = dt / 3600. # step in hours to plot
 
 ## Make plots
@@ -103,9 +103,9 @@ x_axis = np.arange(0, nb_steps, step_plot_in_index)
 #x_axis = np.arange(0, 2*24*360)# !!!!!!!!!!! remove
 ### Distance between spacecraft 1 and 2
 fig_title = ''#'Distance between spacecraft 1 and 2'
-y_label = 'Distance (km)'
-x_label = 'Real time'
-y_axis = dist_between_sat1_and_sat2 
+y_label = 'Distance (m)'
+x_label = 'Time (hours)'
+y_axis = dist_between_sat1_and_sat2 * 1000.
 factor_on_y = 1
 ### Plot with these parameters
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
@@ -131,9 +131,9 @@ date_list = [date_start + timedelta(hours=x) for x in np.arange(0, nb_hours_simu
 for i in range(len(xticks)):
     if hour_time_step_xticks < 12:
         if i == 0:
-            date_list_str.append("h+" + str(int(xticks[i] * step_plot)))
+            date_list_str.append("h+" + str(xticks[i] * step_plot))
         else:
-            date_list_str.append("+" + str(int(xticks[i] * step_plot)))
+            date_list_str.append("+" + str(xticks[i] * step_plot))
     else:
         date_list_str.append( str(date_list[i])[5:10] + "\n(day + " + str(int(xticks[i] * step_plot / 24.)) + ")")
 ax.xaxis.set_ticks(xticks)
@@ -145,7 +145,7 @@ if save_results == 1:
     fig_save_name = fig_save_name + 'distance_between_sat1_and_sat2.pdf'
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
     #os.system("rsync -av " + fig_save_name +" srbwks2014-0008.engin.umich.edu:./" + name_mission)
-
+    
 if show_plots == 1:
     plt.show(); plt.show()
 

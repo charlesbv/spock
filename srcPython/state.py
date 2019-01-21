@@ -682,7 +682,7 @@ for irun in range(nb_run):
                     # ax_acceleration.margins(0,0); ax_acceleration.set_xlim([min(xticks), max(xticks)])
             #        ax_acceleration.set_xlim([ax_acceleration.get_xlim()[0], most_recent_tle_among_all_sc])
 
-                    legend = ax_acceleration.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    legend = ax_acceleration.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="", fontsize = fontsize_plot)
                     legend.get_title().set_fontsize(str(fontsize_plot))
 
                     if save_plots == 1:

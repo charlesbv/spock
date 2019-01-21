@@ -78,7 +78,7 @@
 
 	     SpiceDouble epoch_sat; // epoch of TLE of the sat
 	     char sat_tle_file_temp[256];
-	     FILE *sat_tle_file;
+	     FILE *sat_tle_file = NULL;
 	     ORBITAL_ELEMENTS_T OE_temp;
 
 	     /* Set up the geophysical quantities.  At last check these were the values used by Space Command and SGP4 */
@@ -1517,11 +1517,18 @@
 	    if ( OPTIONS->one_file_with_tle_of_all_sc == 0) { // one tle per file
 	      strcat(sat_tle_file_temp,OPTIONS->tle_initialisation[ii]);
 	      sat_tle_file = fopen(sat_tle_file_temp,"r");
+	      if (sat_tle_file == NULL){
+		printf("!***!\nThe TLE file:\n%s\ncould not be found. The program will stop.\n!***!\n", sat_tle_file_temp); MPI_Finalize(); exit(0);
+	      }
 	    }
 	    else{ // all tles in one file
 	      strcat(sat_tle_file_temp,OPTIONS->tle_initialisation[0]);
 
 	      sat_tle_file = fopen(sat_tle_file_temp,"r");
+	      if (sat_tle_file == NULL){
+		printf("!***!\nThe TLE file:\n%s\ncould not be found. The program will stop.\n!***!\n", sat_tle_file_temp); MPI_Finalize(); exit(0);
+	      }
+		      
 	      for (bbb = 0; bbb < ii; bbb++){ // skip the TLEs of the sc before the current sc
 		getline( &line_temp, &len, sat_tle_file ); 
 		getline( &line_temp, &len, sat_tle_file );
@@ -4448,7 +4455,7 @@ int load_surface( OPTIONS_T *OPTIONS,
 	double cd_or_acco;
 int found_new_surface;
   double temp_normal[3];
-  FILE *fp;
+  FILE *fp = NULL;
   int found_eoh = 0;
   char string_nb_word[256];
   ssize_t read;
@@ -4464,7 +4471,9 @@ int found_new_surface;
   strtok(filename, "\n");
   strtok(filename, "\r");
   fp = fopen(filename, "r");
-
+  if (fp == NULL){
+    printf("!***!\nThe geometry file:\n%s\ncould not be found. The program will stop.\n!***!\n", filename); MPI_Finalize(); exit(0);
+  }
   // Find the number of ensembles on Cd in section #NB_ENSEMBLES_CD. If there is no such section, that's ok (the number of ensembles is set to 0)
   int found_ensemble_cd = 0;
   while ( found_ensemble_cd == 0 && !feof(fp) ){
@@ -8690,7 +8699,7 @@ int lin_interpolate_ap_hist(double **y_after_interpo,
 
   fp = fopen(filename, "r");
   if (fp == NULL){
-    printf("***! (load_options) (lin_interpolate_ap_hist) (lin_interpolate_ap_hist) The file %s could not be open. The program will stop. ***!\n", filename); MPI_Finalize(); exit(0);
+    printf("***! (load_options) (lin_interpolate_ap_hist) (lin_interpolate_ap_hist) The file %s could not be found. The program will stop. ***!\n", filename); MPI_Finalize(); exit(0);
   }
 
   if ( ( strcmp(src_file, "omniweb") == 0 ) || ( strcmp(src_file, "dynamic_manual") == 0 ) ){    
@@ -9619,7 +9628,7 @@ int read_gps_tle(char gps_tle_filename[1000],
 		 char gps_name[N_SATS][1000]){
 
   /* Declarations */
-  FILE *gps_tle_file;
+  FILE *gps_tle_file = NULL;
   int i,j;//, count_nb_of__;
   char *line = NULL;
   char text[256];
@@ -9629,6 +9638,9 @@ int read_gps_tle(char gps_tle_filename[1000],
 
   /* Algorithm */
   gps_tle_file = fopen(gps_tle_filename, "r");
+  if (gps_tle_file == NULL){
+    printf("!***!\nThe GPS TLE file:\n%s\ncould not be found. The program will stop.\n!***!\n", gps_tle_filename); MPI_Finalize(); exit(0);
+  }
   // Reads the entire file one time to calcualte the number of GPS
   while ( (read = getline(&line, &len, gps_tle_file)) != -1 ){
 
