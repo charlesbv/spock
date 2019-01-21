@@ -20,7 +20,7 @@ rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the i
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
+no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho = 0.1 # the rho control will vary by this amount to find the optimum rho over an interval
@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 1.0
-prefix_name = 'grav50'
+prefix_name = 'sp13'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -337,7 +337,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                         1,
                 '0',
                 29,
-                dir_simu + "cygnss_geometry_2016_acco09.txt", #"cygnss_geometry_2016_smaller_solar_radiation_coeff.txt", #"cygnss_geometry_2016.txt",#"cygnss_geometry_2016_acco09.txt",
+                dir_simu + "cygnss_geometry_2016_acco09_sp13.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section
