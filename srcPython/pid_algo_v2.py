@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 1.0
-prefix_name = 'sp16'
+prefix_name = 'sp15'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -337,7 +337,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                         1,
                 '0',
                 29,
-                dir_simu + "cygnss_geometry_2016_acco09_sp16.txt", #cygnss_geometry_2016_acco09.txt", 
+                dir_simu + "cygnss_geometry_2016_acco09_sp15.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section

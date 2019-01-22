@@ -56,7 +56,8 @@ typedef struct {
   double max_lat_map;
   double max_radius_map; // max radius for the map
   double min_radius_map;
-    double ****gravity_map;
+  double ****gravity_map;
+  FILE *file_gravity_map;
 }  GRAVITY_T;
 
 typedef struct {
