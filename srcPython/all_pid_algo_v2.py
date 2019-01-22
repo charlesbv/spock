@@ -2,7 +2,7 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ["sp16_mid"] #[ "grav50_mid", "sp11_mid", "sp13_mid", "sp16_mid", "sp20_mid"]
+pickle_root_list = ["grav50_mid", "sp11_mid", "sp12_mid", "sp13_mid", "sp14_mid", "sp15_mid", "sp16_mid", "sp20_mid"]
 #["sp07_mid", "sp09_mid",]
 #['solpres05_mid']#['dt02_mid']#['noSolarPressure_mid']#['grav50_mid']#['dt02_mid']#['onlyDrag_mid']
 #pickle_root_list = ['dec17_pole', 'dec17_mid', 'dec17_highamp_pole', 'dec17_equator']
@@ -11,8 +11,8 @@ pickle_root_list = ["sp16_mid"] #[ "grav50_mid", "sp11_mid", "sp13_mid", "sp16_m
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'raw' # raw, amplitude
-color_arr = ['blue', 'red', 'green', 'black', 'magenta']
+toplot = 'amplitude' # raw, amplitude
+color_arr = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
 import sys
@@ -112,6 +112,13 @@ for ipickle in range(nb_pickle):
 #     elif 'mid' in pickle_root_list[ipickle]:
 #         label = '210 deg local time'
     label = pickle_root_list[ipickle]                                                                                                                                           
+    if pickle_root_list[ipickle] == 'grav50_mid':
+        label = 'Cr = 1.0'
+    else:
+        label_temp = pickle_root_list[ipickle].replace('_mid', '')
+        label_temp = label_temp.replace('sp', '')
+        label = 'Cd = ' + label_temp[0] + '.' + label_temp[1]        
+
 
     if ipickle == 0:
         nb_interval_previous = nb_interval
@@ -125,6 +132,7 @@ for ipickle in range(nb_pickle):
     #     ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr + distance_lvlh_pid_average_mid_concantenate_arr )* 1000., linewidth = 2, color = 'red')
     #     ax.scatter(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr + distance_lvlh_pid_average_mid_concantenate_arr )* 1000., s= 500, marker = '.', color = 'red')
     elif toplot == 'amplitude':
+        
         ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr )* 1000., linewidth = 2, color = color_arr[ipickle], label = label)
 
     if ipickle == 0:
@@ -404,18 +412,21 @@ for ipickle in range(nb_pickle):
                      index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
                  ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr]= pickle.load(open(pickle_root + ".pickle")) 
     
-    label_temp = pickle_root_list[ipickle].replace("localtime_", "")
-    if 'equator' in pickle_root_list[ipickle]:
-        label = 'zenith'#'midnight'#'perigee'
-    elif 'pole' in pickle_root_list[ipickle]:
-        label = 'nadir' #'noon' 
-    elif 'highamp_pole' in pickle_root_list[ipickle]:
-        label = 'highamp_apogee'
-    elif 'mid' in pickle_root_list[ipickle]:
-        label = '210 deg local time' 
+    # label_temp = pickle_root_list[ipickle].replace("localtime_", "")
+    # if 'equator' in pickle_root_list[ipickle]:
+    #     label = 'zenith'#'midnight'#'perigee'
+    # elif 'pole' in pickle_root_list[ipickle]:
+    #     label = 'nadir' #'noon' 
+    # elif 'highamp_pole' in pickle_root_list[ipickle]:
+    #     label = 'highamp_apogee'
+    # elif 'mid' in pickle_root_list[ipickle]:
+    #     label = '210 deg local time' 
 
-
-
+    if pickle_root_list[ipickle] == 'grav50_mid':
+        label = 'Cr = 1.0'
+    else:
+        label_temp = pickle_root_list[ipickle].replace('_mid', '')
+        label = 'Cd = ' + label_temp[0] + '.' + label_temp[1]        
 
     if ipickle == 0:
         nb_interval_previous = nb_interval
