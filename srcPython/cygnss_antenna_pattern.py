@@ -31,10 +31,14 @@ from struct import *
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-#filename_gain_list = ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm', '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'] # list of antenna gain files
-filename_gain_list = [
-                      '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_fine.bin',
-                      '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
+
+filename_gain_list = ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1_test.bin']
+#filename_gain_list = ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
+
+
+# [
+#                       '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_fine.bin',
+#                       '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 nb_file = len(filename_gain_list)
@@ -156,7 +160,19 @@ for ifile in range(nb_file):
     x = phi_arr[ifile]
     y = theta_arr[ifile]
     X, Y = np.meshgrid(x, y)
-    Z = gain[ifile]
+    if el_start_deg < el_stop_deg: # file from low to high elevation
+        # top of graph is first row of Z,
+        # which should be highest elevation (since y axis is
+        # low (bottom) to high (top) elevation) but since
+        # el_start_deg < el_stop_deg then first row of gain[ifile]
+        # is low elevation so invert it so that first row of Z is
+        # highest elevation
+        Z = np.zeros([numEl, numAz])
+        for iel in range(numEl):
+            Z[iel, :] =  gain[ifile][numEl-1-iel, :]
+    else: # first row of gain[ifile] is highest elevation
+        Z = gain[ifile]
+        
 
 
     nr, nc = Z.shape
@@ -182,8 +198,8 @@ for ifile in range(nb_file):
 
     # CS1.cmap.set_under('white')
     # CS1.cmap.set_over('white')
-    CS1 = ax.imshow(Z, extent=[np.min(X),np.max(X),np.min(Y), np.max(Y)], cmap = 'jet', aspect = 'auto',
-                    vmin = 0, vmax = max_gain)
+    CS1 = ax.imshow(Z, extent=[np.min(x), np.max(x), np.min(y), np.max(y)], cmap = 'jet', aspect = 'auto',
+                    vmin = 0, vmax = max_gain, origin='upper')
     cbar = plt.colorbar(CS1, ax = ax)
     cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')
     filename_gain = filename_gain_list[ifile]
