@@ -35,7 +35,7 @@ import sys
 if islin == 1:
     sys.path.append("/home/cbv/Code/spock/srcPython")
 else:
-    sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+    sys.path.append("/Users/cbv/work/spock/srcPython")
 
 from os import listdir
 from read_input_file import *
@@ -62,15 +62,15 @@ import os.path
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 1 #1 # which CYGNSS to look at
+cygfm = 8 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-08-19T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
+date_start_val_start = '2018-10-30T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
+spock_input_filename = 'twoAntennas.txt'#'merged.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
-    dir_run_spock = '/home/cbv/cygnss/valsift_temp'#'/Users/cbv/cygnss/sift_temp' # '.' # no slash
-    dir_run_spock_out = '/home/cbv/cygnss/valsift_temp/spock_out' #'spock' # name of output folder, no slash
+    dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
-    dir_run_spock = '/Users/cbv/cygnss/valsift_temp'#'/Users/cbv/cygnss/sift_temp' # '.' # no slash
-    dir_run_spock_out = '/Users/cbv/cygnss/valsift_temp/spock_out' #'spock' # name of output folder, no slash
+    dir_run_spock = '/Users/cbv/cygnss/valsift_temp'# no slash
+
 
 
 pitch_max = 2. # filter out when pitch is greater than this value (in magnitude)
@@ -120,20 +120,23 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
     # date_start_val = "2017-08-20T00:00:00" # date to start the validation
     # date_stop_val = "2017-08-26T23:59:59" # date to stop the validation
     # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-    spock_input_filename = dir_run_spock  + "/spock_spec_start_" + date_start_val.replace(":", "_") + "_end_" + date_stop_val.replace(":", "_") + ".txt" # spock_spec_start_2017-08-20T00_00_00_end_2017-08-20T06_00_00.txt
+    
+    # !!!!!!! this line was not commented before 01/24/2019: spock_input_filename = dir_run_spock  + "/spock_spec_start_" + date_start_val.replace(":", "_") + "_end_" + date_stop_val.replace(":", "_") + ".txt" 
     if load_pickle != 1:
         # Run SpOCK from the date_start_val to date_stop_val
-        if idate < -1: # !!!!!!!! remove this if condition (keep what's below the 'if ' line)
-            os.chdir(dir_run_spock )
-            #if idate != 5: #!!!!!!!!!!!!!!!!!!!! REMOVE THIS IF condition (leave the os.system right below though)
-            print "spock_cygnss_spec_parallel.py " + date_start_val + " " + date_stop_val + " spec"
-            os.system("spock_cygnss_spec_parallel.py " + date_start_val + " " + date_stop_val + " spec")
-            if islin == 1:
-                os.chdir("/home/cbv/Code/cygnss/validate_sift")
-            else:
-                os.chdir("/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/validate_sift")
+        #!!!!!!!!!!! this block was not commented before 01/24/2019
+        # if idate < -1: # !!!!!!!! remove this if condition (keep what's below the 'if ' line)
+        #     os.chdir(dir_run_spock )
+        #     #if idate != 5: #!!!!!!!!!!!!!!!!!!!! REMOVE THIS IF condition (leave the os.system right below though)
+        #     print "spock_cygnss_spec_parallel.py " + date_start_val + " " + date_stop_val + " spec"
+        #     os.system("spock_cygnss_spec_parallel.py " + date_start_val + " " + date_stop_val + " spec")
+        #     if islin == 1:
+        #         os.chdir("/home/cbv/Code/cygnss/validate_sift")
+        #     else:
+        #         os.chdir("/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/validate_sift")
+        # print "Done running SpOCK"
+        #!!!!!!!!!!! end of this block was not commented before 01/24/2019
 
-        print "Done running SpOCK"
         # Read specular positio computed by SpOCK
         var_in, var_in_order = read_input_file(spock_input_filename)
         dt_spock_output = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
@@ -142,7 +145,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
         gps_name_list_spock = var_in[find_in_read_input_order_variables(var_in_order, 'gps_name')];
         cygfm_to_spock_nb = [4,3,8,2,1,6,7,5] # ['41884', '41885', '41886', '41887', '41888', '41889', '41890', '41891']
         isc =  cygfm_to_spock_nb[cygfm-1] - 1
-        spec_spock_filename = dir_run_spock + "/" + output_file_path_list[isc] + "specular_" + output_file_name_list[isc]
+        spec_spock_filename = output_file_path_list[isc] + "specular_" + output_file_name_list[isc] # !!!!! before 01/24/2019: dir_run_spock + "/" + output_file_path_list[isc] + "specular_" + output_file_name_list[isc]
         #spec_spock_filename = spec_spock_filename.replace(".txt", "_6SPs.txt")  
         print "Reading SpOCK specular files..."
 #         print "cp -p " + spec_spock_filename + " " + spec_spock_filename.replace(".txt", "_6SPs.txt")
@@ -157,7 +160,8 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
         ###############
         ##########
         # Rad the ECEF files. Although the satllite position is output in the specular file, the velcoity is not. When I write that, I've already run SpOCK (I'm commenting the spock_cygnss_spec_parallel.py line above). I don't want ot re run SpOCK to get the print the velcoity in the spec files so I read it from the ECEF file.
-        var_out, var_out_order = read_output_file(dir_run_spock + "/" + output_file_path_list[isc] + output_file_name_list[isc], ["position_ecef","velocity_ecef","position_tle","velocity_tle"] )
+        var_out, var_out_order = read_output_file(output_file_path_list[isc] + output_file_name_list[isc], ["position_ecef","velocity_ecef","position_tle","velocity_tle"] )
+        # !!!!!!!! before 01/24/2019: read_output_file(dir_run_spock + "/" + output_file_path_list[isc] + output_file_name_list[isc], ["position_ecef","velocity_ecef","position_tle","velocity_tle"] )
         r_cyg_spock_ecef_file = var_out[find_in_read_input_order_variables(var_out_order, 'position_ecef')]
         v_cyg_spock_ecef_file = var_out[find_in_read_input_order_variables(var_out_order, 'velocity_ecef')]
         r_cyg_spock_eci_tle = var_out[find_in_read_input_order_variables(var_out_order, 'position_tle')]
@@ -189,9 +193,9 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
         else:
             yy = ''
         if islin == 1:
-            path_netcdf = "/home/cbv/cygnss/netcdf/"
+            path_netcdf = "/home/cbv/cygnss/netcdfPodaac/"
         else:
-            path_netcdf = "/Users/cbv/cygnss/netcdf/"
+            path_netcdf = "/Users/cbv/cygnss/netcdfPodaac/"
         for iday in range(nb_day):
 
             if (os.path.isdir(path_netcdf + yy  + str(doy_array[iday]).zfill(3)) == False):

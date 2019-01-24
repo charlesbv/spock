@@ -1,0 +1,23 @@
+--2019-01-24 10:48:39--  https://www.celestrak.com/NORAD/elements/gps-ops.txt
+Resolving www.celestrak.com (www.celestrak.com)... 75.151.179.89
+Connecting to www.celestrak.com (www.celestrak.com)|75.151.179.89|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 5208 (5.1K) [text/plain]
+Saving to: ‘gps-ops.txt’
+
+     0K .....                                                 100%  146M=0s
+
+2019-01-24 10:48:39 (146 MB/s) - ‘gps-ops.txt’ saved [5208/5208]
+
+--2019-01-24 10:48:40--  https://www.space-track.org/basicspacedata/query/class/tle/NORAD_CAT_ID/22877,22877,24876,25933,26360,26407,26605,27663,27704,28129,28190,28361,28474,28874,29486,29601,32260,32384,32711,35752,36585,37753,38833,39166,39533,39741,40105,40294,40534,40730,41019,41328/EPOCH/2018-10-21--2018-10-31/predicates/OBJECT_NAME,TLE_LINE1,TLE_LINE2/format/3le/orderby/NORAD_CAT_ID/
+Resolving www.space-track.org (www.space-track.org)... 207.178.144.234
+Connecting to www.space-track.org (www.space-track.org)|207.178.144.234|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 90833 (89K) [text/plain]
+Saving to: ‘gps_2018-10-31_temp.txt’
+
+     0K .......... .......... .......... .......... .......... 56% 88.6K 0s
+    50K .......... .......... .......... ........             100%  161K=0.8s
+
+2019-01-24 10:48:41 (110 KB/s) - ‘gps_2018-10-31_temp.txt’ saved [90833/90833]
+

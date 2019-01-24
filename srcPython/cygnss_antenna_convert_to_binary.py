@@ -11,7 +11,8 @@
 # the script accordingly
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-filename_gain_in = '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'
+filename_gain_in = '/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1.agm'
+#'/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm'
 el_start_deg = 0; az_start_deg = -180
 el_stop_deg = 90; az_stop_deg = 180
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT

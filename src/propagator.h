@@ -58,6 +58,7 @@ typedef struct {
   double min_radius_map;
   double ****gravity_map;
   FILE *file_gravity_map;
+    char filename_gravity_map[200];
 }  GRAVITY_T;
 
 typedef struct {
@@ -497,4 +498,5 @@ int calculate_cd_opengl(double *cd,
 			);
 
 double factorial(unsigned long f);
-int gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
+int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
+int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);

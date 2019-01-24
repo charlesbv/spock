@@ -1,0 +1,7 @@
+# This script reads in the port and starboard antenna patterns and merge them into one single antenna pattern.
+# INPUTS:
+- starboard_antenna_filename: name of the starboard antenna patter file
+- port_antenna_filename: name of the port antenna patter file
+# ASSUMPTION:
+# - the pattern files have the .agm extension
+# - the pattern files must be 18 rows (elev) by 24 col (azim), ie same format as the onboard antenna pattern files
