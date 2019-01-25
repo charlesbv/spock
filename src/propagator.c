@@ -4965,7 +4965,7 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
   }
   for (iradius = 0; iradius < nradius; iradius++){ // go over all radii
       if (iProc == 0){ // print progress
-	//		              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
+			              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
       }
     radius = min_radius + iradius * dradius;
     Gravity->gravity_map[iradius] = malloc(nlat  * sizeof(double **) );
@@ -4994,10 +4994,13 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 	  printf("***! Could not allow memory to Gravity->gravity_map[iradius][ilat][ilon]. \
 The program will stop. !***\n"); MPI_Finalize(); exit(0);
 	}
-	    fread(&lon_sat,sizeof(lon_sat),1,file_specular_position_in);
-	Gravity->gravity_map[iradius][ilat][ilon][0] = dUdr; // dUdr
-	Gravity->gravity_map[iradius][ilat][ilon][1] = dUdlat; // dUdlat
-	Gravity->gravity_map[iradius][ilat][ilon][2] = dUdlong; // dUdlong
+	fread(&Gravity->gravity_map[iradius][ilat][ilon][0],
+	      sizeof(Gravity->gravity_map[iradius][ilat][ilon][0]),1,file_gravity_map);
+	fread(&Gravity->gravity_map[iradius][ilat][ilon][1],
+	      sizeof(Gravity->gravity_map[iradius][ilat][ilon][1]),1,file_gravity_map);
+	fread(&Gravity->gravity_map[iradius][ilat][ilon][2],
+	      sizeof(Gravity->gravity_map[iradius][ilat][ilon][2]),1,file_gravity_map);
+
       } // go over all longitudes
 
     } // go over all latitudes
