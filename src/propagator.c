@@ -1664,8 +1664,13 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 {
 
   // Declarations
-      int iradius, ilat, ilon;
+
+  int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2;
         double long_gc_corr;
+    double xradius, xlat, xlon;
+        int ii;
+    double y_radius1_lat1_lon1, y_radius1_lat1_lon2, y_radius1_lat2_lon1, y_radius1_lat2_lon2, y_radius1;
+        double y_radius2_lat1_lon1, y_radius2_lat1_lon2, y_radius2_lat2_lon1, y_radius2_lat2_lon2, y_radius2;
 
   double r_ecef2cg_ECEF[3];
   double a_ecef2cg_ECEF[3];
@@ -1769,9 +1774,38 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
   } // end of if the user doesn't want to use the 3d gravity map option
   else{ // if the user wants to use the 3d gravity map option
     // determine the bin for the radius
-    iradius = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
+
+    if (rmag < Gravity->min_radius_map){ // this happens if Gravity->min_radius_map was not set correctly, ie too large compared to the min radius of the satellite
+      iradius1 = 0;
+      iradius2 = 0;
+    }
+    else if (rmag >= Gravity->max_radius_map){// this happens only if the Gravity->max_radius_map was not set correctly, ie too small compared to the max radius of the satellite
+      iradius1 = Gravity->nradius_map - 1;
+      iradius2 = iradius1;
+            
+    }
+    else{
+      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
+      iradius2 = iradius1 + 1; // we know that if we're in this block then iradius1 < Gravity->nradius_map - 1
+      // so we're safe doing: iradius2 = iradius1 + 1
+      xradius = (rmag - Gravity->radius_map[iradius1]) / Gravity->dradius_map;
+    }
+
     // determine the bin for the lat
-    ilat = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
+    if (lat_gc*180/M_PI < Gravity->min_lat_map){ // this happens if Gravity->min_lat_map was not set correctly, ie too large compared to the min latitude of the satellite
+      ilat1 = 0;
+      ilat2 = 0;
+    }
+    else if (lat_gc*180/M_PI >= Gravity->max_lat_map){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
+      ilat1 = Gravity->nlat_map - 1;
+      ilat2 = ilat1;
+    }
+    else{
+      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
+      ilat2 = ilat1 + 1; // we know that if we're in this block then ilat1 < Gravity->nlat_map - 1
+      // so we're safe doing: ilat2 = ilat1 + 1
+      xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
+    }
     // determine the bin for the lon
 
     if (long_gc >= 0){ // long_gc_corr varies from 0 to 2*M_PI
@@ -1780,15 +1814,47 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
     else{
       long_gc_corr = 2*M_PI + long_gc;
     }
-    ilon = (int)(( long_gc_corr*180/M_PI ) / Gravity->dlon_map);
-    dUdr = Gravity->gravity_map[iradius][ilat][ilon][0];
-    dUdlat = Gravity->gravity_map[iradius][ilat][ilon][1];
-    dUdlong = Gravity->gravity_map[iradius][ilat][ilon][2];
+
+    ilon1 = (int)(( long_gc_corr*180/M_PI ) / Gravity->dlon_map);
+    // the longitude array of the 3d map varies frm 0 (1st bin) to 360 (last bin)
+    // so it's impossible that ilon1 == nlon - 1 (since long_gc_corr can't be
+    // exactly equal to 360). So we're safe to do: ilon2 = ilon1+1
+    ilon2 = ilon1+1;
+    xlon = (long_gc_corr*180/M_PI - Gravity->lon_map[ilat1]) / Gravity->dlon_map;
+
+    // interpolate dUdr, dUdlat, and dUdlong
+    for (ii = 0; ii < 3; ii+1){
+    y_radius1_lat1_lon1 = Gravity->gravity_map[iradius1][ilat1][ilon1][ii];
+    y_radius1_lat1_lon2 = Gravity->gravity_map[iradius1][ilat1][ilon2][ii];
+    y_radius1_lat2_lon1 = Gravity->gravity_map[iradius1][ilat2][ilon1][ii];
+    y_radius1_lat2_lon2 = Gravity->gravity_map[iradius1][ilat2][ilon2][ii];
+    y_radius1 = ((xlon*y_radius1_lat1_lon2 + (1-xlon)*y_radius1_lat1_lon1))*(1-xlat) +
+      ((xlon*y_radius1_lat2_lon2 + (1-xlon)*y_radius1_lat2_lon1))*xlat;
+    y_radius2_lat1_lon1 = Gravity->gravity_map[iradius2][ilat1][ilon1][ii];
+    y_radius2_lat1_lon2 = Gravity->gravity_map[iradius2][ilat1][ilon2][ii];
+    y_radius2_lat2_lon1 = Gravity->gravity_map[iradius2][ilat2][ilon1][ii];
+    y_radius2_lat2_lon2 = Gravity->gravity_map[iradius2][ilat2][ilon2][ii];
+    y_radius2 = ((xlon*y_radius2_lat1_lon2 + (1-xlon)*y_radius2_lat1_lon1))*(1-xlat) +
+      ((xlon*y_radius2_lat2_lon2 + (1-xlon)*y_radius2_lat2_lon1))*xlat;
+    if (ii == 0){
+      dUdr = y_radius2*xradius + y_radius1*(1-xradius);
+    //    dUdr = Gravity->gravity_map[iradius][ilat][ilon][0];
+    }
+    else if (ii == 1){
+      dUdlat = y_radius2*xradius + y_radius1*(1-xradius);
+      //dUdlat = Gravity->gravity_map[iradius][ilat][ilon][1];
+    }
+    else{
+            dUdlong = y_radius2*xradius + y_radius1*(1-xradius);
+	    //      dUdlong = Gravity->gravity_map[iradius][ilat][ilon][2];
+    }
+
+    }
       //      printf("%f %d, %f %d, %f %d\n", rmag,iradius, lat_gc*180/M_PI, ilat,long_gc_corr*180/M_PI,ilon);
       //      exitf();
   }
 
-  printf("%f (%f %d) %f (%d) %f (%d) -> %e %e %e\n", rmag, rmag - Gravity->radius, iradius, lat_gc*180/M_PI, ilat, long_gc*180/M_PI, ilon, dUdr, dUdlat, dUdlong);
+  printf("%f (%f %d) %f (%d) %f (%d) -> %e %e %e\n", rmag, rmag - Gravity->radius, iradius1, lat_gc*180/M_PI, ilat1, long_gc*180/M_PI, ilon1, dUdr, dUdlat, dUdlong);
 
   
   //  // Compute the Earth fixed accels
@@ -3744,9 +3810,9 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.j2    = 1.081874e-3;
   strcpy(PARAMS->EARTH.earth_fixed_frame, earth_fixed_frame);
 
-  PARAMS->EARTH.GRAVITY.dlat_map = 0.1;
-  PARAMS->EARTH.GRAVITY.dlon_map = 0.1;
-  PARAMS->EARTH.GRAVITY.dradius_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY.dlat_map = 3.27;
+  PARAMS->EARTH.GRAVITY.dlon_map = 100;
+  PARAMS->EARTH.GRAVITY.dradius_map = 12.37;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY. min_lat_map = -90;//-0.11;
   PARAMS->EARTH.GRAVITY.max_lat_map = 90;//0.11;
   PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 480;//200.;
@@ -3803,7 +3869,45 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
   if (gravity_map_use == 1){
 
-    //build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+
+  char text[200];
+  strcpy(text, "");
+  strcpy(PARAMS->EARTH.GRAVITY.filename_gravity_map, "grav");
+  sprintf(text, "%d", degree);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "_alt");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.min_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "-");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.max_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "-");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dradius_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "_lat");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.min_lat_map);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "-");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.max_lat_map);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "-");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dlat_map);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, "_lon");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dlon_map);
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, text);
+  //strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, ".txt");  // txt
+  strcat(PARAMS->EARTH.GRAVITY.filename_gravity_map, ".bin");
+  //printf("<%s>\n", PARAMS->EARTH.GRAVITY.filename_gravity_map);
+
+
+  
+  PARAMS->EARTH.GRAVITY.nlon_map = (int)( 360./PARAMS->EARTH.GRAVITY.dlon_map) + 1;// nb lon bins
+  PARAMS->EARTH.GRAVITY.nlat_map = (int)( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map) + 1;// nb lat bins
+  PARAMS->EARTH.GRAVITY.nradius_map = (int)( (PARAMS->EARTH.GRAVITY.max_radius_map - PARAMS->EARTH.GRAVITY.min_radius_map)/PARAMS->EARTH.GRAVITY.dradius_map) + 1;
+
+    
+  //    build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
        read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
   }
 
@@ -4751,7 +4855,7 @@ int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
 
   double dlat = Gravity->dlat_map;// size of latitude bins for the map (in degrees)
   double dlon = Gravity->dlon_map;// size of longitude bins for the map (in degrees)
-  double dradius = Gravity->dradius_map;// size of radius bins for the map (in km);
+  double dradius;// size of radius bins for the map (in km);
 
   int  iradius, ilon, ilat;
   double radius, lon,lat;
@@ -4762,8 +4866,8 @@ int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
   double min_radius = Gravity->min_radius_map; // min radius of all sc (km)
   // ex: if dlon = 1 deg then draf = 100 km.
 
-  double dlonrad = dlon * M_PI/ 180;
-  double dlatrad = dlat * M_PI/ 180;
+  double dlonrad;
+  double dlatrad;
   double min_latrad = min_lat * M_PI/ 180;
   double max_latrad = max_lat * M_PI/ 180;
  
@@ -4786,64 +4890,64 @@ int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
   double dUdlong  = 0.0;
 
   
-  int nlon = (int)( 360/dlon) + 1;// nb lon bins
-  int nlat = (int)( (max_lat- min_lat)/dlat) + 1;// nb lat bins
-  int nradius = (int)( (max_radius - min_radius)/dradius) + 1;
+  int nlon = Gravity->nlon_map;// nb lon bins
+  int nlat = Gravity->nlat_map;// nb lat bins
+  int nradius = Gravity->nradius_map;
 
-  printf("3D Gravity map: dradius: %.1f km (%.1f to %.1f km, %d), dlat: %.1f deg (%d), dlon: %.1f deg (%d)\n\n", dradius, min_radius-Gravity->radius, max_radius-Gravity->radius, nradius, dlat, nlat, dlon, nlon);
+  printf("3D Gravity map: dradius: %.1f km (%.1f to %.1f km, %d), dlat: %.1f deg (%d), dlon: %.1f deg (%d)\n\n",  Gravity->dradius_map, min_radius-Gravity->radius, max_radius-Gravity->radius, nradius, dlat, nlat, dlon, nlon);
   
   Gravity->file_gravity_map = NULL;
-  //  Gravity->file_gravity_map = fopen("")
-
-  char text[200];
-  strcpy(text, "");
-  strcpy(Gravity->filename_gravity_map, "grav");
-  sprintf(text, "%d", degree);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "_alt");
-  sprintf(text, "%.1f", min_radius-Gravity->radius);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", max_radius-Gravity->radius);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", dradius );
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "_lat");
-  sprintf(text, "%.1f", min_lat);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", max_lat);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", dlat);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "_lon");
-  sprintf(text, "%.1f", dlon);
-  strcat(Gravity->filename_gravity_map, text);
-  //strcat(Gravity->filename_gravity_map, ".txt");  // txt
-  strcat(Gravity->filename_gravity_map, ".bin");
-  // Gravity->file_gravity_map = fopen(Gravity->filename_gravity_map, "w+"); // txt 
   Gravity->file_gravity_map = fopen(Gravity->filename_gravity_map, "wb");
 
   for (iradius = 0; iradius < nradius; iradius++){ // go over all radii
+      	if (iradius == nradius - 1){
+	  dradius = max_radius - (min_radius + (nradius - 2)*Gravity->dradius_map);//not used 
+	  radius = max_radius;
+	}
+	else{
+	  dradius =  Gravity->dradius_map;
+	  radius = min_radius + iradius * dradius;
+	}
+
+    
       if (iProc == 0){ // print progress
-	//		              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
+				              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
       }
-    radius = min_radius + iradius * dradius;
+
+
 
 		
     for (ilat = 0; ilat < nlat; ilat++){ // go over all latitudes
-      lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+      	if (ilat == nlat - 1){
+	  dlatrad = max_latrad - (min_latrad + (nlat - 2)*dlatrad);//not used 
+	  lat = max_latrad;
+	}
+	else{
+	  dlatrad = Gravity->dlat_map * M_PI/ 180;
+	  lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+	}
+
+
+
+      
       if (iProc == 0){ // print progress
-	      	printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  ilat*100.  / ( nlat-1 ) );
+	//	      	printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  ilat*100.  / ( nlat-1 ) );
       }
       
 
       for (ilon = 0; ilon < nlon; ilon++){ // go over all longitude
+	if (ilon == nlon - 1){
+	  dlonrad = 2*M_PI - (nlon - 2)*dlonrad;//not used 
+	  lon = 2*M_PI;
+	}
+	else{
+	  dlonrad = Gravity->dlon_map * M_PI/ 180;
 	lon = 0 + ilon * dlonrad;
+	}
+
 	//	printf("%f (%d), %f (%d), %f (%d)\n", radius, iradius, lat*180/M_PI, ilat, lon*180/M_PI, ilon);
 
+	
 	// Declarations
 
 	dUdr     = 0.0;
@@ -4926,8 +5030,8 @@ int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
   double min_radius = Gravity->min_radius_map; // min radius of all sc (km)
   // ex: if dlon = 1 deg then draf = 100 km.
 
-  double dlonrad = dlon * M_PI/ 180;
-  double dlatrad = dlat * M_PI/ 180;
+  double dlonrad;
+  double dlatrad;
   double min_latrad = min_lat * M_PI/ 180;
   double max_latrad = max_lat * M_PI/ 180;
  
@@ -4949,57 +5053,55 @@ int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
   double dUdlat   = 0.0;
   double dUdlong  = 0.0;
 
-  
-  int nlon = (int)( 360/dlon) + 1;// nb lon bins
-  int nlat = (int)( (max_lat- min_lat)/dlat) + 1;// nb lat bins
-  int nradius = (int)( (max_radius - min_radius)/dradius) + 1;
 
   FILE *file_gravity_map = NULL;
 
-  char text[200];
-  strcpy(text, "");
-  strcpy(Gravity->filename_gravity_map, "grav");
-  sprintf(text, "%d", degree);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "_alt");
-  sprintf(text, "%.1f", min_radius-Gravity->radius);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", max_radius-Gravity->radius);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", dradius );
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "_lat");
-  sprintf(text, "%.1f", min_lat);
-  strcat(Gravity->filename_gravity_map, text);
-  strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", max_lat);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "-");
-  sprintf(text, "%.1f", dlat);
-  strcat(Gravity->filename_gravity_map, text);
-    strcat(Gravity->filename_gravity_map, "_lon");
-  sprintf(text, "%.1f", dlon);
-  strcat(Gravity->filename_gravity_map, text);
-  //strcat(Gravity->filename_gravity_map, ".txt");  // txt
-  strcat(Gravity->filename_gravity_map, ".bin");
+  int nlon = Gravity->nlon_map;// nb lon bins
+  int nlat = Gravity->nlat_map;// nb lat bins
+  int nradius = Gravity->nradius_map;
 
   
   file_gravity_map = fopen(Gravity->filename_gravity_map, "r");
-  
-  printf("3D Gravity map: dradius: %.1f km (%.1f to %.1f km, %d), dlat: %.1f deg (%d), dlon: %.1f deg (%d)\n\n", dradius, min_radius-Gravity->radius, max_radius-Gravity->radius, nradius, dlat, nlat, dlon, nlon);
+
+  printf("3D Gravity map: dradius: %.1f km (%.1f to %.1f km, %d), dlat: %.1f deg (%d), dlon: %.1f deg (%d)\n\n",  Gravity->dradius_map, min_radius-Gravity->radius, max_radius-Gravity->radius, nradius, dlat, nlat, dlon, nlon);  
 
   Gravity->gravity_map = malloc(nradius  * sizeof(double ***) );
+  Gravity->radius_map = malloc(nradius  * sizeof(double) );
+    Gravity->lat_map = malloc(nlat  * sizeof(double) );
+      Gravity->lon_map = malloc(nlon  * sizeof(double) );
+     
   if ( Gravity->gravity_map == NULL){
     printf("***! Could not allow memory to Gravity->gravity_map. \
 The program will stop. !***\n"); MPI_Finalize(); exit(0);
   }
+  if ( Gravity->radius_map == NULL){
+    printf("***! Could not allow memory to Gravity->radius_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->lat_map == NULL){
+    printf("***! Could not allow memory to Gravity->lat_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->lon_map == NULL){
+    printf("***! Could not allow memory to Gravity->lon_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+
+  
   for (iradius = 0; iradius < nradius; iradius++){ // go over all radii
       if (iProc == 0){ // print progress
-				              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
+	//				              printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  iradius*100.  / ( nradius-1 ) );
       }
-    radius = min_radius + iradius * dradius;
+      	if (iradius == nradius - 1){
+	  dradius = max_radius - (min_radius + (nradius - 2)*Gravity->dradius_map);//not used 
+	  radius = max_radius;
+	}
+	else{
+	  dradius =  Gravity->dradius_map;
+	  radius = min_radius + iradius * dradius;
+	}
+
+	Gravity->radius_map[iradius] = radius;
     Gravity->gravity_map[iradius] = malloc(nlat  * sizeof(double **) );
     if ( Gravity->gravity_map[iradius] == NULL){
       printf("***! Could not allow memory to Gravity->gravity_map[iradius]. \
@@ -5007,7 +5109,15 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
     }
 		
     for (ilat = 0; ilat < nlat; ilat++){ // go over all latitudes
-      lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+      	if (ilat == nlat - 1){
+	  dlatrad = max_latrad - (min_latrad + (nlat - 2)*dlatrad);//not used 
+	  lat = max_latrad;
+	}
+	else{
+	  dlatrad = Gravity->dlat_map * M_PI/ 180;
+	  lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
+	}
+	Gravity->lat_map[ilat] = lat;
       if (iProc == 0){ // print progress
 	//      	printf("\033[A\33[2K\rBuilding the 3D gravity map... %.0f%%\n",  ilat*100.  / ( nlat-1 ) );
       }
@@ -5019,8 +5129,17 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 The program will stop. !***\n"); MPI_Finalize(); exit(0);
       }
       for (ilon = 0; ilon < nlon; ilon++){ // go over all longitude
+	if (ilon == nlon - 1){
+	  dlonrad = 2*M_PI - (nlon - 2)*dlonrad;//not used 
+	  lon = 2*M_PI;
+	}
+	else{
+	  dlonrad = Gravity->dlon_map * M_PI/ 180;
 	lon = 0 + ilon * dlonrad;
-	//	printf("%f (%d), %f (%d), %f (%d)\n", radius, iradius, lat*180/M_PI, ilat, lon*180/M_PI, ilon);
+	}
+	Gravity->lon_map[ilon] = lon;
+	
+	printf("%f (%d), %f (%d), %f (%d)\n", radius, iradius, lat*180/M_PI, ilat, lon*180/M_PI, ilon);
 	Gravity->gravity_map[iradius][ilat][ilon] = malloc(3  * sizeof(double) );
 	if ( Gravity->gravity_map[iradius][ilat][ilon] == NULL){ 
 	  printf("***! Could not allow memory to Gravity->gravity_map[iradius][ilat][ilon]. \
