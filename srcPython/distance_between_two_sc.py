@@ -90,7 +90,7 @@ nb_steps = nb_steps_sat1
 ## Set up plot parameters 
 height_fig = 9.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 20 
-hour_time_step_xticks = 0.2 # time step of ticks when plotting a function as a function of time
+hour_time_step_xticks = 3. # time step of ticks when plotting a function as a function of time
 step_plot = dt / 3600. # step in hours to plot
 
 ## Make plots

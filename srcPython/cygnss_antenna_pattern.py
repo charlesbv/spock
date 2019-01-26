@@ -32,7 +32,8 @@ from struct import *
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
-filename_gain_list = ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
+filename_gain_list = ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']  
+# ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
 #['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
 #filename_gain_list = ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
 
