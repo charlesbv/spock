@@ -15,23 +15,73 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# This script plots the antenna patten. It reads in the antenna gain filesx
-# ASSUMPTIONS:
-# - see # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-# - the files are ASCII files or binary. rows are theta, columns are phi
-# - if the file is binary, it must be the same format as for tds-bop.exe
-# - if the file is not binary: if the resolution res_map is set to "fine" then
-# it must be in the same format as the files created by Scott Gleason (and
-# subequently by Darren McKague). If res_map is set to "coarsse", then it
-# must be in the same format as the on-board algorithm. Only difference between
-# the corase and fine formats: 2 first lines of the fine format do not exist in
-# coarse format
-# - if the file is binary, the elevtions can go in asceading or decreasing order,
-# but if the file is not binar:
-#   - if res_map is 'coarse', the elevations are assumed to be in ascending order
-#   - if res_map is 'fine', the elevations are assumed to be in descending order
-# (0 to 90 deg)
+# This script plots the antenna patten. It reads in the antenna gain files
 
+# INPUTS:
+# - filename_gain_list: name (including path) of the antenna gain pattern file
+# - res_map: resolution of the map (set to 'coarse' or 'fine')
+# ASSUMPTIONS:
+# - the files are ASCII files (e.g., .txt, .agm) or binary
+# - if the file is binary, it must be the same format as for tds-bop.exe:
+#   - format of header:
+#     - 2 first elements (1-2) are uint32 but we don't know what they are
+#     - elements 3-4 are uint32: numAz and numEl
+#     - elements 5-6 are double: az_start_deg and el_start_deg
+#     - elements 7-8 are double: az_inc_deg and el_inc_deg
+#   - the subsequent elemnts (9 to end) are the gain values
+#   - if the resolution res_map is set to "coarse" then, for an unknow
+#   reason, we need to force a minus sign on the el_inc_deg
+# - if the file is not binary:
+#   - if the resolution res_map is set to "fine" then
+#   it must be in the same format as the files created by Scott Gleason (and
+#   subequently by Darren McKague). FileFormatNotes.txt describes the format in
+#   details:
+#     - elev 90 to 0, step 0.1 deg (901 values) (decreasing order)
+#     - azim 0 to 360, step 0.1 deg (3601 values) (ascending order, 0 to 180 is
+#       starboard, 180 to 360 is port)
+#     - first 2 lines of files are header, then line 3 to end are gain values
+#   - if res_map is set to "coarse", then it must be in the same format as the
+#    on-board algorithm maps:
+#     - elev 0 to 85 deg, step 5 deg (18 values) (ascending order)
+#     - azim -180 to 165, step 15 deg (24 values) (ascending order, -180 to 0 is
+#       port, 0 to 180 is starboard)
+#     - no header line, directly start with the gain values
+#   - be careful:
+#     - in the coarse case, the first azim elements are for the port side (-180
+#       to 0), while in the fine case, the first azim elements are for the
+#       starboard side (0 to 180)
+#     - in the coarse case, rows are elevations and columns are azimuths, while
+#       in the fine case, rows are azimuths and columns are elevations
+#     - the fine maps have one extra value in elev and azim
+
+
+
+
+
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+res_map = 'fine' # coarse or fine. To set only if the file is ont binary
+
+filename_gain_list = ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt',
+'/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
+
+
+# Coarse .agm
+# ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm',
+# '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'] 
+
+# Fine .txt
+# ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt',
+# '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
+
+# Coarse .bin
+# ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']   
+# ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
+#['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
+
+# Coarse .bin TDS
+# ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
+
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 import numpy as np
 import matplotlib.gridspec as gridspec
@@ -40,25 +90,19 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from struct import *
 import sys
+import ipdb
 
 
-# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-
-filename_gain_list = ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
-# ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt']   
-# ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
-# ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']  
-# ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
-#['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
-# ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
-
-res_map = 'coarse' # coarse or fine. To set only if the file is ont binary
-# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+if ((res_map != 'coarse') & (res_map != 'fine')):
+    sys.exit("!***!\n res_map must be set to 'coarse' or 'fine'\
+            \n!***!")
+                    
+print 'Map resolution: ' + res_map
 
 nb_file = len(filename_gain_list)
 gain = []
-phi_arr = []
-theta_arr = []
+az_deg = []
+el_deg = []
 el_start_deg = []
 el_stop_deg = []
 for ifile in range(nb_file):
@@ -76,78 +120,78 @@ for ifile in range(nb_file):
         az_inc_deg = unpack('d', file_gain.read(8))[0]
         el_inc_deg = unpack('d', file_gain.read(8))[0]
         #!!!! for some reason, a negative sign is needed for this file
-        if 'tds_antennaMap1_coarse.bin' in filename_gain: 
+        if res_map == 'coarse':
             el_inc_deg = -el_inc_deg
         az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
-        az_deg = np.arange(az_start_deg, az_stop_deg+az_inc_deg, az_inc_deg)
+        az_deg_file = np.linspace(az_start_deg, az_stop_deg, numAz)
         el_stop_deg_file = el_start_deg_file + el_inc_deg * (numEl-1)
-        el_deg = np.arange(el_start_deg_file, el_stop_deg_file+el_inc_deg, el_inc_deg)
-        phi_arr_file = az_deg
-        theta_arr_file = el_deg
+        el_deg_file = np.linspace(el_start_deg_file, el_stop_deg_file, numEl)
         Z = np.zeros([numEl,numAz])
         for iaz in range(numAz):
             for iel in range(numEl):
                 Z[iel, iaz] = unpack('d', file_gain.read(8))[0]
         file_gain.close
         gain_file = Z
-        phi_arr.append(phi_arr_file)
-        theta_arr.append(theta_arr_file)
-        el_start_deg.append(el_start_deg_file)
-        el_stop_deg.append(el_stop_deg_file)
 
     else: # if antenna gain file is not binary
         if res_map == 'fine':
             nheader = 2
             file_gain = open(filename_gain, "r")
             read_file_gain = file_gain.readlines()
-            nb_phi = len(read_file_gain) - nheader
-            nb_theta = len(read_file_gain[0+nheader].split(','))
-            theta_max = 90. # absolute value 
-            dtheta =  theta_max/nb_theta
-            # the theta in the fine format are descengin order: 90 (1st column)
-            # to 0 (last column)
-            theta_arr_file = np.arange(90,-dtheta, -dtheta) 
-            phi_min = 0. 
-            phi_max = 360. 
-            dphi =  phi_max * 2/nb_phi 
-            phi_arr_file = np.arange(phi_min, phi_max, dphi)
-            gain_file = np.zeros([nb_theta, nb_phi])
-            for iphi in range(nb_phi):
-                print iphi, nb_phi-1
-                for itheta in range(nb_theta):
+            numAz = len(read_file_gain) - nheader
+            numEl = len(read_file_gain[0+nheader].split(','))
+            # Elevation
+            el_start_deg_file = 90. 
+            el_inc_deg = -0.1 # FileFormatNotes.txt: step is 0.1 deg
+            el_stop_deg_file = el_start_deg_file + el_inc_deg * (numEl-1)
+            # in FileFormatNotes.txt, elev goes in decreasing order
+            el_deg_file = np.linspace(el_start_deg_file, el_stop_deg_file, numEl)
+            # Azimuth
+            az_start_deg = 0. 
+            az_inc_deg =  0.1 # FileFormatNotes.txt: step is 0.1 deg
+            az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+            az_deg_file = np.linspace(az_start_deg, az_stop_deg, numAz)
+            # Gain
+            gain_file = np.zeros([numEl, numAz])
+            for iphi in range(numAz):
+                print iphi, numAz-1
+                for itheta in range(numEl):
                     gain_file[itheta, iphi] = np.float( read_file_gain[iphi+
                     nheader].split(',')[itheta] )
-            phi_arr.append(phi_arr_file)
-            theta_arr.append(theta_arr_file)
             
         elif res_map == 'coarse':
             nheader = 0
             file_gain = open(filename_gain, "r")
             read_file_gain = file_gain.readlines()
-            nb_theta = len(read_file_gain) - nheader
-            nb_phi = len(read_file_gain[0+nheader].split(','))
-            theta_max = 90. 
-            dtheta =  theta_max/nb_theta 
-            theta_arr_file = np.arange(0, theta_max, dtheta)
-            phi_min = -180. 
-            phi_max = 180. 
-            dphi =  phi_max * 2/nb_phi 
-            phi_arr_file = np.arange(phi_min, phi_max, dphi)
-            gain_file = np.zeros([nb_theta, nb_phi])
-            for itheta in range(nb_theta):
-                print itheta, nb_theta-1
-                for iphi in range(nb_phi):
+            numEl = len(read_file_gain) - nheader
+            numAz = len(read_file_gain[0+nheader].split(','))
+            # Elevation
+            el_start_deg_file = 0. 
+            el_inc_deg = 5. # FileFormatNotes.txt: step is 0.1 deg
+            el_stop_deg_file = el_start_deg_file + el_inc_deg * (numEl-1)
+            # in FileFormatNotes.txt, elev goes in decreasing order
+            el_deg_file = np.linspace(el_start_deg_file, el_stop_deg_file, numEl)
+            # Azimuth
+            az_start_deg = -180. 
+            az_inc_deg =  15. # FileFormatNotes.txt: step is 0.1 deg
+            az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+            az_deg_file = np.linspace(az_start_deg, az_stop_deg, numAz)
+            # Gain
+            gain_file = np.zeros([numEl, numAz])
+
+            for itheta in range(numEl):
+                print itheta, numEl-1
+                for iphi in range(numAz):
                     gain_file[itheta, iphi] = np.float( read_file_gain[itheta+
                     nheader].split(',')[iphi] )
-            phi_arr.append(phi_arr_file)
-            theta_arr.append(theta_arr_file)
-
-        else:
-            sys.exit("!***!\n res_map must be set to 'coarse' or 'fine'\
-            \n!***!")
-                    
 
     gain.append(gain_file)
+    az_deg.append(az_deg_file)
+    el_deg.append(el_deg_file)
+    el_start_deg.append(el_start_deg_file)
+    el_stop_deg.append(el_stop_deg_file)
+
+    
 max_gain = 15#np.max(gain)
 
 # PLOT
@@ -184,33 +228,33 @@ for ifile in range(nb_file):
 
     origin = 'lower'
 
-    x = phi_arr[ifile]
-    y = theta_arr[ifile]
+    x = az_deg[ifile]
+    y = el_deg[ifile]
     X, Y = np.meshgrid(x, y)
     extension = filename_gain.split('.')[-1]
-    if extension == 'bin':
-        if el_start_deg[ifile] < el_stop_deg[ifile]: # file from low to high elevation
-            # top of graph is first row of Z,
-            # which should be highest elevation (since y axis is
-            # low (bottom) to high (top) elevation) but since
-            # el_start_deg < el_stop_deg then first row of gain[ifile]
-            # is low elevation so invert it so that first row of Z is
-            # highest elevation
-            Z = np.zeros([numEl, numAz])
-            for iel in range(numEl):
-                Z[iel, :] =  gain[ifile][numEl-1-iel, :]
-        else: # first row of gain[ifile] is highest elevation
-            Z = gain[ifile]
-    else:
-        if res_map  == 'coarse': 
-            numEl = gain[ifile].shape[0]
-            numAz = gain[ifile].shape[1]
-            Z = np.zeros([numEl, numAz])
-            for iel in range(numEl):
-                Z[iel, :] =  gain[ifile][numEl-1-iel, :]
+    #    if extension == 'bin':
+    if el_start_deg[ifile] < el_stop_deg[ifile]: # file from low to high elevation
+        # top of graph is first row of Z,
+        # which should be highest elevation (since y axis is
+        # low (bottom) to high (top) elevation) but since
+        # el_start_deg < el_stop_deg then first row of gain[ifile]
+        # is low elevation so invert it so that first row of Z is
+        # highest elevation
+        Z = np.zeros([numEl, numAz])
+        for iel in range(numEl):
+            Z[iel, :] =  gain[ifile][numEl-1-iel, :]
+    else: # first row of gain[ifile] is highest elevation
+        Z = gain[ifile]
+    # else:
+    #     if res_map  == 'coarse': 
+    #         numEl = gain[ifile].shape[0]
+    #         numAz = gain[ifile].shape[1]
+    #         Z = np.zeros([numEl, numAz])
+    #         for iel in range(numEl):
+    #             Z[iel, :] =  gain[ifile][numEl-1-iel, :]
 
-        else:
-            Z = gain[ifile]
+    #     else:
+    #         Z = gain[ifile]
     nr, nc = Z.shape
 
     Z = np.ma.array(Z)
@@ -241,11 +285,4 @@ for ifile in range(nb_file):
     filename_gain = filename_gain_list[ifile]
     fig_save_name = filename_gain.replace(extension, 'pdf')
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
-
-
-
-theta = 5.000000
-phi = 240.000000
-where_theta = np.where(theta_arr == theta)[0]
-where_phi = np.where(phi_arr == phi)[0]
 
