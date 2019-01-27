@@ -29,7 +29,7 @@
 #     - elements 5-6 are double: az_start_deg and el_start_deg
 #     - elements 7-8 are double: az_inc_deg and el_inc_deg
 #   - the subsequent elemnts (9 to end) are the gain values
-#   - if the resolution res_map is set to "coarse" then, for an unknow
+#   - if the resolution res_map is set to "coarse", then, for an unknown
 #   reason, we need to force a minus sign on the el_inc_deg
 # - if the file is not binary:
 #   - if the resolution res_map is set to "fine" then
@@ -54,32 +54,39 @@
 #       in the fine case, rows are azimuths and columns are elevations
 #     - the fine maps have one extra value in elev and azim
 
-
-
-
-
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 res_map = 'fine' # coarse or fine. To set only if the file is ont binary
+filename_gain_list = ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6_test.bin',
+'/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6_test.bin',
+'/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6_test.bin']
 
-filename_gain_list = ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt',
-'/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
 
 
 # Coarse .agm
-# ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm',
-# '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'] 
+# ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm',
+# '/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm',
+# '/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1.agm'] 
+
+# Coarse .bin
+# ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1_test.bin',
+# '/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin',
+# '/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
 
 # Fine .txt
 # ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt',
-# '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
+# '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt',
+# '/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6.txt']
 
-# Coarse .bin
-# ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']   
-# ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
-#['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
+# Fine .bin
+# ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6_test.bin',
+# '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6_test.bin',
+# '/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6_test.bin']
 
 # Coarse .bin TDS
 # ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
+
+# Fine .bin TDS
+# ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_fine.bin'] 
 
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
