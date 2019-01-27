@@ -44,14 +44,15 @@ import sys
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
-filename_gain_list = ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt']   
+filename_gain_list = ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
+# ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_starboard_v6.txt']   
 # ['/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt']
 # ['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']  
 # ['/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test.bin']
 #['/Users/cbv/cspice/data/ant_1_port_ddmi_v1_test.bin']
 # ['/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/bruce/tds-bop V1.2.3/tds_antennaMap1_coarse.bin']
 
-res_map = 'fine' # coarse or fine. To set only if the file is ont binary
+res_map = 'coarse' # coarse or fine. To set only if the file is ont binary
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 nb_file = len(filename_gain_list)
@@ -148,33 +149,6 @@ for ifile in range(nb_file):
 
     gain.append(gain_file)
 max_gain = 15#np.max(gain)
-# BEFORE JAN 22 2019
-# for ifile in range(nb_file):
-#     #ifile = 0
-#     filename_gain = filename_gain_list[ifile]
-#     file_gain = open(filename_gain, "r")
-#     read_file_gain = file_gain.readlines()
-#     if ifile == 0:
-#         nb_theta = len(read_file_gain)
-#         nb_phi = len(read_file_gain[0].split(','))
-#         theta_max = 90. 
-#         dtheta = (int)( theta_max/nb_theta )
-#         theta_arr = np.arange(0, theta_max, dtheta)
-#         phi_max = 180. 
-#         dphi = (int)( phi_max * 2/nb_phi ) 
-#         phi_arr = np.arange(-180, phi_max, dphi)
-#         gain = np.zeros([nb_file, nb_theta, nb_phi])
-#     for itheta in range(nb_theta):
-#         for iphi in range(nb_phi):
-#             gain[ifile, itheta, iphi] = np.float( read_file_gain[itheta].split(',')[iphi] )
-# max_gain = 15#np.max(gain)
-# end of  BEFORE JAN 22 2019
-#raise Exception
-# # Out[31]: (31.268536, 42.866177, [44, 0])
-# theta = 31.268536
-# phi = 42.866177
-# itheta = np.where((theta_arr > theta))[0][0] - 1
-# iphi = np.where((phi_arr > phi))[0][0] - 1
 
 # PLOT
 ## Parameters for the figure

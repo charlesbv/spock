@@ -6,13 +6,22 @@
 # - the merged antenna gain pattern is created as follow:
   # - for each elev/azim bin, the gain is the max gain between the gain of the starboard antenna and the gain of the port antenna for this bin
 # ASSUMPTION:
-# - the pattern files have the .agm extension and must be the same format as the onboard antenna patter files:
-   # - 18 rows (elev) by 24 col (azim), ie same format as the onboard antenna pattern files
-   # - elev from 0 to 90 (every 5 deg), azim from -180 to 180 (every 15 deg)
+# if map_res is set to 'coarse':
+#   - the pattern files must be the same format as the onboard antenna pattern files:
+#     - 18 rows (elev) by 24 col (azim)
+#     - elev from 0 to 90 (every 5 deg), azim from -180 to 180 (every 15 deg)
+# if map_res is set to 'fine':
+#   - the pattern files must be the same format as the files created by
+# Scott Gleason (and subequently Darren McKague).
+#     - 2 header lines
+#     - azim are rows (0 to 360), elev are column (90 to 0), comma separated
+
+
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 starboard_antenna_filename = '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'
 port_antenna_filename = '/Users/cbv/cspice/data/ant_1_port_ddmi_v1.agm'
+res_map = 'fine' # coarse or fine
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 import numpy as np
@@ -20,44 +29,65 @@ import numpy as np
 # Read starboard antenna gain
 starboard_antenna_file = open(starboard_antenna_filename)
 read_starboard = starboard_antenna_file.readlines()
-nb_theta = len(read_starboard)
-nb_phi = len(read_starboard[0].split(','))
-theta_max = 90. 
-dtheta = (int)( theta_max/nb_theta )
-if dtheta != 5.:
-    sys.exit('d_elev for starboard antenna should be 5 deg.')
-theta_arr = np.arange(0, theta_max, dtheta)
-phi_max = 180. 
-dphi = (int)( phi_max * 2/nb_phi )
-if dphi != 15.:
-    sys.exit('d_azim for starboard antenna should be 15 deg.')
-phi_arr = np.arange(-180, phi_max, dphi)
-starboard_gain = np.zeros([nb_theta, nb_phi])
-for itheta in range(nb_theta):
-    for iphi in range(nb_phi):
-        starboard_gain[itheta, iphi] = np.float( read_starboard[itheta].split(',')[iphi] )
+if res_map == 'coarse':
+    nb_theta = len(read_starboard)
+    nb_phi = len(read_starboard[0].split(','))
+    theta_max = 90. 
+    dtheta = (int)( theta_max/nb_theta )
+    if dtheta != 5.:
+        sys.exit('d_elev for starboard antenna should be 5 deg.')
+    theta_arr = np.arange(0, theta_max, dtheta)
+    phi_max = 180. 
+    dphi = (int)( phi_max * 2/nb_phi )
+    if dphi != 15.:
+        sys.exit('d_azim for starboard antenna should be 15 deg.')
+    phi_arr = np.arange(-180, phi_max, dphi)
+    starboard_gain = np.zeros([nb_theta, nb_phi])
+    for itheta in range(nb_theta):
+        for iphi in range(nb_phi):
+            starboard_gain[itheta, iphi] = np.float( read_starboard[itheta].split(',')[iphi] )
+else:
+    nb_header = 2
+    nb_phi = len(read_starboard-nb_header)
+    nb_theta = len(read_starboard[nb_header].split(','))
+    theta_max = 90. 
+    dtheta =  theta_max/nb_theta 
+    if dtheta != .1:
+        sys.exit('d_elev for starboard antenna should be 0.1 deg for the fine map.')
+    theta_arr = np.arange(theta_max, -dtheta, -dtheta)
+    phi_max = 360.
+    dphi =  phi_max /nb_phi 
+    if dphi != .1:
+        sys.exit('d_azim for starboard antenna should be 0.1 deg for the fine map.')
+    phi_arr = np.arange(0, phi_max+dphi, dphi)
+    starboard_gain = np.zeros([nb_theta, nb_phi])
+    for itheta in range(nb_theta):
+        for iphi in range(nb_phi):
+            starboard_gain[itheta, iphi] = np.float( read_starboard[itheta].split(',')[iphi] )    
 starboard_antenna_file.close()
 
 # Read starboard antenna gain
+
 port_antenna_file = open(port_antenna_filename)
 read_port = port_antenna_file.readlines()
-nb_theta = len(read_port)
-nb_phi = len(read_port[0].split(','))
-theta_max = 90. 
-dtheta = (int)( theta_max/nb_theta )
-if dtheta != 5.:
-    sys.exit('d_elev for port antenna should be 5 deg.')
-theta_arr = np.arange(0, theta_max, dtheta)
-phi_max = 180. 
-dphi = (int)( phi_max * 2/nb_phi )
-if dphi != 15.:
-    sys.exit('d_azim for port antenna should be 15 deg.')
-phi_arr = np.arange(-180, phi_max, dphi)
-port_gain = np.zeros([nb_theta, nb_phi])
-for itheta in range(nb_theta):
-    for iphi in range(nb_phi):
-        port_gain[itheta, iphi] = np.float( read_port[itheta].split(',')[iphi] )
-port_antenna_file.close()
+if res_map == 'coarse':
+    nb_theta = len(read_port)
+    nb_phi = len(read_port[0].split(','))
+    theta_max = 90. 
+    dtheta = (int)( theta_max/nb_theta )
+    if dtheta != 5.:
+        sys.exit('d_elev for port antenna should be 5 deg for the coarse map.')
+    theta_arr = np.arange(0, theta_max, dtheta)
+    phi_max = 180. 
+    dphi = (int)( phi_max * 2/nb_phi )
+    if dphi != 15.:
+        sys.exit('d_azim for port antenna should be 15 deg for the coarse map.')
+    phi_arr = np.arange(-180, phi_max, dphi)
+    port_gain = np.zeros([nb_theta, nb_phi])
+    for itheta in range(nb_theta):
+        for iphi in range(nb_phi):
+            port_gain[itheta, iphi] = np.float( read_port[itheta].split(',')[iphi] )
+    port_antenna_file.close()
 
 # Calculate the merged gain
 merged_gain =  np.zeros([nb_theta, nb_phi])
