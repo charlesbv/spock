@@ -3,21 +3,20 @@
 # INPUTS:
 # - filename_gain_in (filename of antenna gain file to convert to binary file)
 # - res_map: resolution of the map (set to 'coarse' or 'fine')
-# - el_start_deg (elevation start), az_start_deg (azimuth start) of input map
-# - numEl (nb of elevation bins), numAz (nb of azimuth bins) of input map
-# - el_inc_deg (elevation step), az_inc_deg (azimuth step) of input map
 # ASSUMPTIONS:
 # - for the a description of the format of the input file, read the header of
 # the script cygnss_antenna_pattern.py
 # - the coarse on-board antennas (.agm) vary in elevation from 0 to 90 (step +5)
 #  and in azimuth from -180 to 180 (step +15, -180 to 0 is port, 0 to 180 is
-# starboard). However, it looks like tds-bop exepects the coarse antennas (.bin)
+# starboard). However, it looks like tds-bop expects the coarse antennas (.bin)
 # to vary in elevation from 90 to 0 (step -5) and in azimuth from 0 to 360
-# (step +15, 0 to 180 is starboard, 180 to 360 is port). Therefore, if the files
-# to convert are coarse files (i.e., res_map is 'coarse') then this script will
-# set el_start_deg to 90, az_start_deg to 0, and el_inc_deg to -5 (actually
-# el_inc_deg is set to +5, see next point)
-
+# (step +15, 0 to 180 is starboard, 180 to 360 is port). Therefore, for coarse
+# files (i.e., res_map is 'coarse'), this script sets el_start_deg to 90,
+# az_start_deg to 0, and el_inc_deg to -5 (actually el_inc_deg is kept at +5,
+# see next point)
+# - if the resolution res_map is set to "coarse", then, for an unknown
+# reason, we need to set el_inc_deg to its opposite value. !!!!!! todo: we
+# actually need to check that this statement is true
 
 # old assumptions (not valid anymore):
 # - when writing this function, I assumed that the format of the output file
@@ -33,8 +32,8 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-res_map = 'fine' # 'coarse' or 'fine'
-filename_gain_in = '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt'
+res_map = 'coarse' # 'coarse' or 'fine'
+filename_gain_in = '/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1.agm' 
 
 # Coarse file names
 # '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'
@@ -46,15 +45,7 @@ filename_gain_in = '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt'
 # '/Users/cbv/work/spockOut/beacon/ant_data/ant_1_port_v6.txt'
 # '/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6.txt'
 
-# Coarse map parameters
-el_start_deg = 0; az_start_deg = -180
-numEl = 18; numAz = 24
-el_inc_deg = 5.; az_inc_deg = 15.
 
-# Fine map parameters
-el_start_deg = 90; az_start_deg = 0
-numEl = 901; numAz = 3601
-el_inc_deg = -0.1; az_inc_deg = 0.1
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 import numpy as np
@@ -66,6 +57,16 @@ if ((res_map != 'coarse') & (res_map != 'fine')):
             \n!***!")
                     
 print 'Map resolution: ' + res_map
+
+if res_map == 'coarse': # Coarse map parameters
+    el_start_deg = 0; az_start_deg = -180
+    numEl = 18; numAz = 24
+    el_inc_deg = 5.; az_inc_deg = 15.
+else: # Fine map parameters
+    el_start_deg = 90; az_start_deg = 0
+    numEl = 901; numAz = 3601
+    el_inc_deg = -0.1; az_inc_deg = 0.1
+
 
 
 file_gain_in = open(filename_gain_in)
@@ -87,15 +88,30 @@ float_array.tofile(file_gain_out)
 # reason, we need to set el_inc_deg to its opposite value. !!!!!! todo: we
 # actually need to check that this statement is true
 if res_map == 'coarse':
-    el_inc_deg = -el_inc_deg
+    el_start_deg = 90. # although el_start_deg is 0 in .agm, el_start_deg
+    # needs to be 90 in binary
+    az_start_deg = 0 # although az_start_deg is -180 in .agm, az_start_deg
+    # needs to be 0 in binary
 float_array = array('d', [az_start_deg, el_start_deg, az_inc_deg, el_inc_deg])
 
 float_array.tofile(file_gain_out)
-if res_map == 'coarse': # rows are elevations, columns are azimuths
+if res_map == 'coarse': # in .agm coarse files, rows are elevations, columns are
+    # azimuth
+    gain_az_not_corrected = np.zeros([numEl, numAz])
     for iel in range(numEl):
         for iaz in range(numAz):
-            gain[iel, iaz] = read_f[iel].split(',')[iaz]
-else: # rows are azimuths, columns are elevations
+            # numEl-1-iel because elev in .agm goes from 0 to 90 but
+            # in binary it elev needs to go from 90 to 0
+            gain_az_not_corrected[numEl-1-iel, iaz] =read_f[iel].split(',')[iaz]
+    # transformation: in .agm azim goes from -180 to 180 (-180 to 0 is port,
+    # 180 to 0 is starboard) but in binary azim needs to go from 0 to 360
+    # (0 to 180 is starboard, 180 to 360 is port)
+    if numAz != 24:
+        sys.exit('The number of azimuth bins should be 24 for the coarse file.')
+    gain[:, 0:numAz/2] = gain_az_not_corrected[:, numAz/2:]
+    gain[:, numAz/2:] = gain_az_not_corrected[:, 0:numAz/2]
+    
+else: # in .txt fine files, rows are azimuths, columns are elevations
     nheader = 2
     for iaz in range(numAz):
         print iaz, numAz-1
