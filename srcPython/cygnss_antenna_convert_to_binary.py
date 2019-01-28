@@ -32,8 +32,8 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-res_map = 'coarse' # 'coarse' or 'fine'
-filename_gain_in = '/Users/cbv/cspice/data/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1.agm' 
+res_map = 'fine' # 'coarse' or 'fine'
+filename_gain_in = '/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6.txt'
 
 # Coarse file names
 # '/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm'
@@ -76,7 +76,7 @@ el_inc_deg = np.float(el_inc_deg); az_inc_deg = np.float(az_inc_deg)
 numEl = (int)(numEl); numAz = (int)(numAz)
 
 gain = np.zeros([numEl, numAz])
-filename_gain_out = filename_gain_in.split('.')[0] + '_test.bin'
+filename_gain_out = filename_gain_in.split('.')[0] + '_test_elevOpposite.bin'
 file_gain_out = open(filename_gain_out, "wb")
 # x1 x2 numAz numEl ('i')
 x1 = 0; x2 = 0 # not used in cygnss_antenna_pattern.py
@@ -119,7 +119,7 @@ else: # in .txt fine files, rows are azimuths, columns are elevations
             gain[iel, iaz] = read_f[iaz+nheader].split(',')[iel]
     
 for iaz in range(numAz):
-    for iel in range(numEl):
+    for iel in range(numEl-1,-1,-1):#!!!!!! should be for iel in range(numEl):
         float_array = array('d', [gain[iel, iaz]])
         float_array.tofile(file_gain_out)
 

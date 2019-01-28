@@ -17,7 +17,7 @@ import read_input_file; reload(read_input_file); from read_input_file import *
 from find_in_read_input_order_variables import *
 from datetime import datetime, timedelta
 
-input_filename = 'spock.txt'
+input_filename = 'merged.txt'
 cygfm = 3
 
 # Read SpOCK main input file
