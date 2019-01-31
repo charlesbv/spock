@@ -55,8 +55,8 @@
 #     - the fine maps have one extra value in elev and azim
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-res_map = 'fine' # coarse or fine. To set only if the file is ont binary
-filename_gain_list = ['gaussian_fine.bin']
+res_map = 'coarse' # coarse or fine. To set only if the file is ont binary
+filename_gain_list = ['gaussian_coarse.bin']
 
 # Coarse .agm
 # ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm',
@@ -281,7 +281,9 @@ for ifile in range(nb_file):
 
     # CS1.cmap.set_under('white')
     # CS1.cmap.set_over('white')
-    CS1 = ax.imshow(Z, extent=[np.min(x), np.max(x), np.min(y), np.max(y)], cmap = 'jet', aspect = 'auto',
+
+    #    CS1 = ax.imshow(Z, extent=[np.min(x), np.max(x), np.min(y), np.max(y)], cmap = 'jet', aspect = 'auto',
+    CS1 = ax.imshow(Z, extent=[0, 360, 0, 90], cmap = 'jet', aspect = 'auto',
                     vmin = 0, vmax = max_gain, origin='upper')
     cbar = plt.colorbar(CS1, ax = ax)
     cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')

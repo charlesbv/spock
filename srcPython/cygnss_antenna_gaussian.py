@@ -6,7 +6,7 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-res_map = 'fine' #resolution of the map (set to 'coarse' or 'fine')
+res_map = 'coarse' #resolution of the map (set to 'coarse' or 'fine')
 fwhm_half = 30. # in degrees. Full Width at Half Maximum / 2 
 max_gain = 15
 # fwhm represents the elevation at which the
@@ -83,10 +83,7 @@ if res_map == 'coarse': # in .agm coarse files, rows are elevations, columns are
 
     gain_az_not_corrected = np.zeros([numEl, numAz])
     for iel in range(numEl):
-        # numEl-1-iel because elev in .agm goes from 0 to 90 but
-        # in binary it elev needs to go from 90 to 0
-        
-        gain_az_not_corrected[numEl-1-iel, :] = gaussian(el_deg[iel], sigma,
+        gain_az_not_corrected[iel, :] = gaussian(el_deg[iel], sigma,
                                                          max_gain)
     # transformation: in .agm azim goes from -180 to 180 (-180 to 0 is port,
     # 180 to 0 is starboard) but in binary azim needs to go from 0 to 360
