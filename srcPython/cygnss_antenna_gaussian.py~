@@ -1,0 +1,5 @@
+# This script creates gaussian nadir pattern with no azimuth dependence
+# and a set half power beam width (e.g. 30 deg). It creates the fine
+# and coarse antennas, both in binary format following the format of
+# tds-bop (see the header of the script cygnss_antenna_pattern.py for
+# a complete description of the format

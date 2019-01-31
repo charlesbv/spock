@@ -56,7 +56,7 @@
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 res_map = 'fine' # coarse or fine. To set only if the file is ont binary
-filename_gain_list = ['/Users/cbv/work/spockOut/beacon/ant_data/merged_ant_1_starboard_v6_with_ant_1_port_v6_test_elevOpposite.bin']
+filename_gain_list = ['gaussian_fine.bin']
 
 # Coarse .agm
 # ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm',
