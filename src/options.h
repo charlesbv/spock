@@ -130,6 +130,7 @@ typedef struct {
   char            tle_initialisation[1000][N_SATS];
   int             include_drag;   // include drag
   int             include_solar_pressure; // include solar pressure
+    int             include_earth_pressure; // include earth pressure
   int             include_sun;    // include Sun perturbations
   int             include_moon;   // include Moon perturbations
   double          cd_modification[N_SATS]; // hack to allow us to change the drag coefficient on certain satellites

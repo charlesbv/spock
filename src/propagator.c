@@ -2442,323 +2442,73 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
 
 
 
-/* ///////////////////////////////////////////////////////////////////////////////////////// */
-/* // */
-/* //  Name:           compute_earth_pressure */
-/* //  Purpose:        Computes earth pressure acceleration */
-/* //  Assumptions:    / */
-/* //  References      / */
-/* // */
-/* //  Change Log: */
-/* //      |   Developer   |       Date    |   SCR     |   Notes */
-/* //      | --------------|---------------|-----------|--------------------------------------------------------- */
-/* //      | C. Bussy-Virat| 01/26/2019    |   ---     | Initial implementation */
-/* // */
-/* ///////////////////////////////////////////////////////////////////////////////////////// */
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Name:           compute_earth_pressure
+//  Purpose:        Computes earth pressure acceleration
+//  Assumptions:    spherical Earth
+//  References      /
+//
+//  Change Log:
+//      |   Developer   |       Date    |   SCR     |   Notes
+//      | --------------|---------------|-----------|---------------------------------------------------------
+//      | C. Bussy-Virat| 01/26/2019    |   ---     | Initial implementation
+//
+/////////////////////////////////////////////////////////////////////////////////////////
 
-/* int compute_earth_pressure(double          a_earth_pressure_INRTL[3], */
-/* 			   double          r_i2cg_INRTL[3], */
-/* 			   double          v_i2cg_INRTL[3], */
-/* 			   double          et, */
-/* 			   PARAMS_T        *PARAMS, */
-/* 			   INTEGRATOR_T    *INTEGRATOR, */
-/* 			   CONSTELLATION_T *CONSTELLATION, */
-/* 			   double          et_initial_epoch, */
-/* 			   double          et_sc_initial, */
-/* 			   int             index_in_attitude_interpolated) */
+int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
+			   double          r_i2cg_INRTL[3],
+			   double          v_i2cg_INRTL[3],
+			   double          et,
+			   PARAMS_T        *PARAMS,
+			   INTEGRATOR_T    *INTEGRATOR,
+			   CONSTELLATION_T *CONSTELLATION,
+			   double          et_initial_epoch,
+			   double          et_sc_initial,
+			   int             index_in_attitude_interpolated)
 		
-/* { */
-
-
-/*   // Declarations */
-/* 	  double k = 1; // in STK 'fraction of the solar disk visible at satellite location', set to 1 here */
-/* 	  double solar_luminosity = 3.823e26; // in Watts */
-
-/*     double dist_sat_to_sun; */
-/*     //  double solar_flux = 1358.0; // solar flux is in W/m^2 (SI), which is in kg/s^3. So the fact that we express distances in km and not in m does not change the value of the solar_flux here. */
-/*   double a_solar_pressure_in_body[3]; // solar pressure acceleration in the SC reference system */
-/*   double x[6]; */
-/*   double lt; */
-/*   double r_cg2sun_J2000[3]; */
-/*   double r_cg2sun_J2000_normalized[3]; */
-/*   double r_cg2sun_LVLH_normalized[3]; */
-/*   double r_cg2sun_SC_normalized[3]; */
-/*   double r_earth2sun_J2000[3]; */
-/*   double T_inrtl_2_lvlh[3][3]; */
-/*   double T_lvlh_2_inrtl[3][3]; */
-/*   double T_sc_to_lvlh[3][3]; */
-/*   double T_lvlh_to_sc[3][3]; */
-/*   double cos_phi; // phi is the angle between the satellite-Sun direction and the normal to the surface */
-/*   double light_speed = 299792.458; // spped of light in km/s */
-/*   double a_solar_pressure_in_LVLH[3]; */
-/*   //  double term1, term2; */
-/*   int sss; */
-/*   char shadow[256]; */
-/*   //  int index_in_attitude_interpolated; */
-/*   double v_angle[3]; */
-/*   int order_rotation[3]; */
-
-/*   shadow_light( shadow, r_i2cg_INRTL, et, PARAMS); */
-
-/*   if (INTEGRATOR->coll_vcm != 1){ */
-/*   if (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_angular_velocity") == 0){ */
-/*     v_angle[0] = INTEGRATOR->attitude.pitch_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.pitch_ini_ensemble; */
-/*     v_angle[1] = INTEGRATOR->attitude.roll_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.roll_ini_ensemble; */
-/*     v_angle[2] = INTEGRATOR->attitude.yaw_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.yaw_ini_ensemble; */
-/*     order_rotation[0] = 1; // !!!!!!!! we might want to change that in the future                                                                      */
-/*     order_rotation[1] = 2; */
-/*     order_rotation[2] = 3; */
-/*     INTEGRATOR->attitude.pitch_current = v_angle[0]; */
-/*     INTEGRATOR->attitude.roll_current = v_angle[1]; */
-/*     INTEGRATOR->attitude.yaw_current = v_angle[2]; */
-
-/*   } */
-
-/* 	  if (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_initial_attitude") == 0) { */
-/* 	      v_angle[0] =  INTEGRATOR->attitude.pitch_for_attitude_ensemble  +  INTEGRATOR->attitude.pitch_angular_velocity_constant * ( et - et_sc_initial ); */
-/* 	      v_angle[1] =  INTEGRATOR->attitude.roll_for_attitude_ensemble  +  INTEGRATOR->attitude.roll_angular_velocity_constant * ( et - et_sc_initial ); */
-/* 	      v_angle[2] =  INTEGRATOR->attitude.yaw_for_attitude_ensemble  +  INTEGRATOR->attitude.yaw_angular_velocity_constant * ( et - et_sc_initial ); */
-
-/* 	      order_rotation[0]  = 1; order_rotation[1]  = 2; order_rotation[2]  = 3; */
-	   
-/* 	      INTEGRATOR->attitude.pitch_current = v_angle[0]; */
-/* 	      INTEGRATOR->attitude.roll_current = v_angle[1]; */
-/* 	      INTEGRATOR->attitude.yaw_current = v_angle[2]; */
-/* 	          INTEGRATOR->attitude.order_pitch_current = order_rotation[0]; */
-/*     INTEGRATOR->attitude.order_roll_current = order_rotation[1]; */
-/*     INTEGRATOR->attitude.order_yaw_current = order_rotation[2]; */
-
-
-	      
-/* 	  } */
-
-
-/* 	  if ( (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_angular_velocity") != 0) && (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_initial_attitude") != 0) && (strcmp(INTEGRATOR->attitude.attitude_profile, "sun_pointed") != 0) ){ // otherwise (atittude is nadir, sun_pointed or manual (from an input file))     */
-/*     //    index_in_attitude_interpolated = floor( ( et - et_sc_initial ) / ( INTEGRATOR->dt / 2.0) ) ;  */
-/* 	    if (INTEGRATOR->file_is_quaternion == 0){ */
-/*     v_angle[0] = INTEGRATOR->attitude.pitch[index_in_attitude_interpolated]; */
-/*     v_angle[1] = INTEGRATOR->attitude.roll[index_in_attitude_interpolated]; */
-/*     v_angle[2] = INTEGRATOR->attitude.yaw[index_in_attitude_interpolated]; */
-/*     order_rotation[0] = INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated]; */
-/*     order_rotation[1] = INTEGRATOR->attitude.order_roll[index_in_attitude_interpolated]; */
-/*     order_rotation[2] = INTEGRATOR->attitude.order_yaw[index_in_attitude_interpolated]; */
-/*     INTEGRATOR->attitude.pitch_current = v_angle[0]; */
-/*     INTEGRATOR->attitude.roll_current = v_angle[1]; */
-/*     INTEGRATOR->attitude.yaw_current = v_angle[2]; */
-/*         INTEGRATOR->attitude.order_pitch_current = order_rotation[0]; */
-/*     INTEGRATOR->attitude.order_roll_current = order_rotation[1]; */
-/*     INTEGRATOR->attitude.order_yaw_current = order_rotation[2]; */
-
-
-/* 	    } */
-/* 	    else{ */
-/* 	      q_copy( INTEGRATOR->attitude.quaternion_current, INTEGRATOR->attitude.quaternion[index_in_attitude_interpolated]); */
-/* 	    } */
-/*   } */
-/*   } // end of no collision with VCM as colllision input file */
-
-/*     // !!! to comment beta angle  */
-/*     spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration. */
-
-/*     r_earth2sun_J2000[0] = x[0]; */
-/*     r_earth2sun_J2000[1] = x[1]; */
-/*     r_earth2sun_J2000[2] = x[2]; */
-
-/*     double r_earth2sun_J2000_norm[3]; */
-/*     v_norm(r_earth2sun_J2000_norm, r_earth2sun_J2000); */
-/*     double r_cross_v[3]; */
-/*     v_cross(r_cross_v,r_i2cg_INRTL,v_i2cg_INRTL); */
-/*     double r_cross_v_norm[3]; */
-/*     v_norm(r_cross_v_norm, r_cross_v); */
-/*     double r_cross_v_norm_dot_r_earth2sun_J2000_norm; */
-/*     v_dot(&r_cross_v_norm_dot_r_earth2sun_J2000_norm, r_cross_v_norm, r_earth2sun_J2000_norm); */
-/*     double angle_h_to_earth_sun; */
-/*     angle_h_to_earth_sun = acos(r_cross_v_norm_dot_r_earth2sun_J2000_norm); */
-    
-/*     INTEGRATOR->beta_angle = M_PI/2. - angle_h_to_earth_sun; */
-/*     //printf("beta: %f\n", INTEGRATOR->beta_angle*180./M_PI); */
-/*     // !!! end of to comment beta angle */
-
-/*   if ( strcmp(shadow, "light") == 0) { */
-
-
-/*     spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration. */
-
-/*     r_earth2sun_J2000[0] = x[0]; */
-/*     r_earth2sun_J2000[1] = x[1]; */
-/*     r_earth2sun_J2000[2] = x[2]; */
-
-
-     
-/*     v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL); */
-/*     v_mag( &dist_sat_to_sun, r_cg2sun_J2000 ); */
-/*     v_norm(r_cg2sun_J2000_normalized, r_cg2sun_J2000); */
-
-
-/*   if (INTEGRATOR->coll_vcm != 1){ */
-/*     /\* r_cg2sun_J2000_normalized inertial to LVLH *\/ */
-/*     compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL); */
-/*     m_x_v(r_cg2sun_LVLH_normalized, T_inrtl_2_lvlh, r_cg2sun_J2000_normalized); */
-
-/*     /\* r_cg2sun_J2000_normalized LVLH to body *\/ */
-/*     compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current); */
-/*     //  compute_T_sc_to_lvlh(T_sc_to_lvlh, INTEGRATOR->attitude.lvlh_alongtrack_in_body_cartesian, INTEGRATOR->attitude.lvlh_crosstrack_in_body_cartesian, &et, r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR);  */
-/*     m_trans(T_lvlh_to_sc, T_sc_to_lvlh); */
-/*     m_x_v(r_cg2sun_SC_normalized, T_lvlh_to_sc, r_cg2sun_LVLH_normalized );  */
-    
+{
 
 
 
+  // Determine the section of Earth visible from the satellite
+  // // M: point on the surface of Earth, visible from the satellite
+  // // M_max: point on the surface of the Earth at the limit of this section (ie, see the satellite at the horizon)
+  // // O: center of the Earth
+  // // S: satellite
+  // // P: projection of M on OS line 
+  // // beta: angle (OM, OS) (beta_max = angle  (OM_max, OS)
+  // // alpha: angle (SM, SO) (alpha_max = angle  (SM_max, SO)
+  // // r_proj: distance M to P
+  // // sm: distance S to M (sm_max = distance S to M_max)
+  // // sp: distance S to P
+  // // op: distance O to P
+  double radius_sc, beta, alpha, r_proj, sm, beta_max, alpha_max, sm_max, sp, op;
+  double delta;
+  v_mag( &radius_sc, r_i2cg_INRTL);
+  beta_max = acos(PARAMS->EARTH.radius/radius_sc); // every M with beta < beta_max is visible from the satellite
+  alpha_max = M_PI/2. - beta; 
+  sm_max = sqrt(radius_sc*radius_sc - PARAMS->EARTH.radius*PARAMS->EARTH.radius);
+  // Define the cordinate pf a point on the surface of the Earth visible from the satellite
+  // in the reference system with z axis equal to OS direction
+  // and M is defined in the x,y plane by its distance from the origin
+  double dbeta = 20. * M_PI / 180.;
+  double ddelta = 20. * M_PI / 180.;
+  delta = 0.
+  beta = 0.; // start with M at the sub-satellite point
+  while (beta <= beta_max){ // move M until beta reaches beta_max (see satellite at horizon)
+    op = PARAMS->EARTH.radius*cos(beta); // this is the z in the new ref system
+    while (delta <= 2*M_PI){
+  r_proj = sm * asin(alpha);
 
-
-
-/*   // openGL computation of cross-section area */
-/*   if (INTEGRATOR->opengl == 1){  */
-/*     // // compute the azimuth and elevation of the sun vector in body frame.  */
-/*     // // Actually the spherical coordinates are used.  */
-/*     // // theta is the angle between z_body and the sun vector (from 0 to -180 deg).  */
-/*     // // phi is the angle between x_body and the projection of the sun vector on the (x_body, y_body) plane (from 0 to 360 deg). */
-/*     double x_body[3], y_body[3], z_body[3]; */
-/*     x_body[0] = 1; x_body[1] = 0; x_body[2] = 0; */
-/*     y_body[0] = 0; y_body[1] = 1; y_body[2] = 0; */
-/*     z_body[0] = 0; z_body[1] = 0; z_body[2] = 1; */
-/*     double theta, phi; */
-/*     // // // theta */
-/*     theta = acos(r_cg2sun_SC_normalized[2]); // r_cg2sun_SC_normalized[2] is euqal to the projection of r_cg2sun_SC_normalized on z_body */
-/*     // // // phi */
-/*     phi = acos(r_cg2sun_SC_normalized[0]); */
-/*     if (r_cg2sun_SC_normalized[1] < 0){ */
-/*       phi = 2*M_PI - phi; */
-/*     } */
-
-
-/*     double theta_deg, phi_deg; */
-/*     theta_deg = theta * RAD2DEG; */
-/*     phi_deg = phi * RAD2DEG; */
-/*     // // get the cross-section area from the file generated by openGL */
-/*     // // // compute the indices itheta and iphi */
-/*     int itheta, iphi, iface; */
-/*     double A_ref = 0; */
-/*     itheta = (int)((theta_deg - CONSTELLATION->area_attitude_opengl_theta0) / CONSTELLATION->area_attitude_opengl_dtheta); */
-/*     iphi = (int)((phi_deg - CONSTELLATION->area_attitude_opengl_phi0) / CONSTELLATION->area_attitude_opengl_dphi); */
-
-/*     A_ref = CONSTELLATION->area_attitude_opengl_total[itheta][iphi]; */
-	
-	
-/* /\*       printf("pres %f %f\n", theta_deg, phi_deg); *\/ */
-/* /\*       printf("pres theta %.2f, phi %.2f\n", itheta*CONSTELLATION->area_attitude_opengl_dtheta + CONSTELLATION->area_attitude_opengl_theta0, iphi*CONSTELLATION->area_attitude_opengl_dphi + CONSTELLATION->area_attitude_opengl_phi0); *\/ */
-/* /\*       printf("pres A_ref %f\n" , A_ref*1e10); *\/ */
-/*       // we assume all surfaces have the same solar radiation coefficient so take the one of surface 0 */
-/* 	  // !!!!!!!!!!! THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES). Also (finally), if want to use Vallado, need to do some work to get the nomal of each face from the file OPTIONS->filename_area_attitude_opengl. Basically the same was you do for the drag coefficient, for wchih you need to know the normal of each triangle. I just didn't do it for the solar radiation pressure because wehn I'm writing these lines, i'm susing the equation from STK, wchih does not require to inkow the normal of each triangle (just the project area).  */
-
-/* 	  a_solar_pressure_in_body[0] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * A_ref / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[0]; */
-/* 	  a_solar_pressure_in_body[1] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * A_ref / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[1]; */
-/* 	  a_solar_pressure_in_body[2] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * A_ref / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[2]; */
-
-/* 	  // !!!!!!!!!!! end of THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES). Also (finally) need to do somw rok to get the nomal of each face from the file OPTIONS->filename_area_attitude_opengl. Basically the same wasy you do for the drag coefficient, for wchih you need to know the normal of each triangle. I just didn't do it for the solar radiation pressure because wehn I'm writing these lines, i'm susing the equation from STK, wchih does not require to inkow the normal of each triangle (just the project area).  */
-    
-/* 	    // !!!!!!!!!! THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES). Also (finally) need to do somw rok to get the nomal of each face from the file OPTIONS->filename_area_attitude_opengl. Basically the same wasy you do for the drag coefficient, for wchih you need to know the normal of each triangle. I just didn't do it for the solar radiation pressure because wehn I'm writing these lines, i'm susing the equation from STK, wchih does not require to inkow the normal of each triangle (just the project area). So basically, don't just uncmment this block if ou want to use Vallado's equations. */
-/* 	  /\* term1 = INTEGRATOR->surface[0].diffuse_reflectivity / 3.0 + INTEGRATOR->surface[0].specular_reflectivity * cos_phi; *\/ */
-/* 	  /\* term2 = 1 - INTEGRATOR->surface[0].specular_reflectivity; *\/ */
-
-/* /\* 	  a_solar_pressure_in_body[0] = - solar_flux * INTEGRATOR->surface[0].area * ( 2 * term1 * INTEGRATOR->surface[0].normal[0] + term2 * r_cg2sun_SC_normalized[0] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* /\* 	  a_solar_pressure_in_body[1] = - solar_flux * INTEGRATOR->surface[0].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[0].normal[1] + term2 * r_cg2sun_SC_normalized[1] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* /\* 	  a_solar_pressure_in_body[2] = - solar_flux * INTEGRATOR->surface[0].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[0].normal[2] + term2 * r_cg2sun_SC_normalized[2] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	    // !!!!!!!!!! END OF THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES).Also (finally) need to do somw rok to get the nomal of each face from the file OPTIONS->filename_area_attitude_opengl. Basically the same wasy you do for the drag coefficient, for wchih you need to know the normal of each triangle. I just didn't do it for the solar radiation pressure because wehn I'm writing these lines, i'm susing the equation from STK, wchih does not require to inkow the normal of each triangle (just the project area). So basically, don't just uncmment this block if ou want to use Vallado's equations. */
-
-
-/*   } // end of if (OPTIONS->opengl == 1) */
+ 
+  beta = beta + dbeta;
+  }
 
   
-/*   else{ */
+  return 0;
 
-
-
-/*     for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){ */
-/*       if (sss == 0){ */
-	
-/* 	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[0].normal); */
-/* 	if (cos_phi > 0){ */
-
-/* 	  // !!!!!!!!!!! THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	  a_solar_pressure_in_body[0] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * INTEGRATOR->surface[0].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[0]; */
-/* 	  a_solar_pressure_in_body[1] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * INTEGRATOR->surface[0].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[1]; */
-/* 	  a_solar_pressure_in_body[2] = - k * INTEGRATOR->surface[0].solar_radiation_coefficient * INTEGRATOR->surface[0].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[2]; */
-
-/* 	  // !!!!!!!!!!! END OF THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm).  UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-
-/* 	    // !!!!!!!!!! THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	  /\* term1 = INTEGRATOR->surface[0].diffuse_reflectivity / 3.0 + INTEGRATOR->surface[0].specular_reflectivity * cos_phi; *\/ */
-/* 	  /\* term2 = 1 - INTEGRATOR->surface[0].specular_reflectivity; *\/ */
-
-/* 	  /\* a_solar_pressure_in_body[0] = - solar_flux * INTEGRATOR->surface[0].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[0].normal[0] + term2 * r_cg2sun_SC_normalized[0] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	  /\* a_solar_pressure_in_body[1] = - solar_flux * INTEGRATOR->surface[0].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[0].normal[1] + term2 * r_cg2sun_SC_normalized[1] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	  /\* a_solar_pressure_in_body[2] = - solar_flux * INTEGRATOR->surface[0].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[0].normal[2] + term2 * r_cg2sun_SC_normalized[2] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	    // !!!!!!!!!! END OF THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	} */
-/* 	else { */
-/* 	  a_solar_pressure_in_body[0] = 0.0; */
-/* 	  a_solar_pressure_in_body[1] = 0.0; */
-/* 	  a_solar_pressure_in_body[2] = 0.0; */
-/* 	} */
-/*       } */
-/*       else{ */
-      
-/* 	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[sss].normal); */
-      
-/* 	if (cos_phi > 0){ */
-/* 	  // !!!!!!!!!!! THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	  a_solar_pressure_in_body[0] = a_solar_pressure_in_body[0]  - k * INTEGRATOR->surface[sss].solar_radiation_coefficient * INTEGRATOR->surface[sss].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[0]; */
-/* 	  a_solar_pressure_in_body[1] = a_solar_pressure_in_body[1] - k * INTEGRATOR->surface[sss].solar_radiation_coefficient * INTEGRATOR->surface[sss].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[1]; */
-/* 	  a_solar_pressure_in_body[2] = a_solar_pressure_in_body[2] - k * INTEGRATOR->surface[sss].solar_radiation_coefficient * INTEGRATOR->surface[sss].area * cos_phi / INTEGRATOR->mass * solar_luminosity / (4 * M_PI * light_speed * dist_sat_to_sun * dist_sat_to_sun * 1000000.) * r_cg2sun_SC_normalized[2]; */
-/* 	  // !!!!!!!!!!! END OF THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm).  UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-
-/* 	    // !!!!!!!!!! THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS.ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	  /\* term1 = INTEGRATOR->surface[sss].diffuse_reflectivity / 3.0 + INTEGRATOR->surface[sss].specular_reflectivity * cos_phi; *\/ */
-/* 	  /\* term2 = 1 - INTEGRATOR->surface[sss].specular_reflectivity; *\/ */
-
-/* 	  /\* a_solar_pressure_in_body[0] = a_solar_pressure_in_body[0] - solar_flux * INTEGRATOR->surface[sss].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[sss].normal[0] + term2 * r_cg2sun_SC_normalized[0] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	  /\* a_solar_pressure_in_body[1] = a_solar_pressure_in_body[1] - solar_flux * INTEGRATOR->surface[sss].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[sss].normal[1] + term2 * r_cg2sun_SC_normalized[1] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	  /\* a_solar_pressure_in_body[2] = a_solar_pressure_in_body[2] - solar_flux * INTEGRATOR->surface[sss].area * cos_phi * ( 2 * term1 * INTEGRATOR->surface[sss].normal[2] + term2 * r_cg2sun_SC_normalized[2] ) / (light_speed * INTEGRATOR->mass); *\/ */
-/* 	    // !!!!!!!!!! END OF THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES) */
-/* 	} */
-   
-/*       } */
-   
-/*     } */
-
-/*     m_x_v(a_solar_pressure_in_LVLH, T_sc_to_lvlh, a_solar_pressure_in_body); */
-/*     m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh); */
-/*     m_x_v(a_solar_pressure_INRTL, T_lvlh_2_inrtl, a_solar_pressure_in_LVLH);   */
-
-/*   } // end oif opengl != 1 */
-/*   } // end of no collision with VCM as colllision input file */
-
-/*   else{ */
-
-/*     double ps = solar_luminosity / (4 * M_PI * light_speed * 1000);// !!!!!!!!!!!!!! vlaue of ps? here i compute it using the other expresssion of the solar radiatino pressure but it might be something different in heujdu and ghrist, 2011 ( see ref below). light_speed coverted from km/s to m/s */
-
-/*     v_scale(a_solar_pressure_INRTL, r_cg2sun_J2000_normalized,   - ps *  INTEGRATOR->srp_vcm * 1000. * 1000.  / ( dist_sat_to_sun * dist_sat_to_sun * 1000 * 1000)); /// used equation (3) of "solar radiation pressure binning for the geosyncrhonous orbit" by M.D. Hejduk and R.W. Ghrist, 2011 (https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20110015238.pdf). srp_vcm converted from km2/kg to m2/kg  */
-
-/*     a_solar_pressure_INRTL[0] = a_solar_pressure_INRTL[0] / 1000.; // m/s2 to km/s2 */
-/*     a_solar_pressure_INRTL[1] = a_solar_pressure_INRTL[1] / 1000.; */
-/*     a_solar_pressure_INRTL[2] = a_solar_pressure_INRTL[2] / 1000.; */
-/*     //    printf("%d %d %e %e\n", INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb, INTEGRATOR->srp_vcm, dist_sat_to_sun); */
-/*   } */
-
-/*   //  v_norm_print(a_solar_pressure_INRTL, "a_solar_pressure_INRTL"); */
-/*   } */
-/*   else{ */
-/*     a_solar_pressure_INRTL[0] = 0.0; */
-/*     a_solar_pressure_INRTL[1] = 0.0; */
-/*     a_solar_pressure_INRTL[2] = 0.0; */
-
-/*   } */
-
-
-/*   return 0; */
-
-/* } */
+}
 
 
 

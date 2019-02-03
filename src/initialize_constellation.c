@@ -1236,12 +1236,12 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 - geodetic
 - filename, filenameecef, filenameout, filenamepower for main SC ONLY
 - name_sat
-- INTEGRATOR: dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar, sc_main_nb, sc_ensemble_nb
+- INTEGRATOR: dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar, sc_main_nb, sc_ensemble_nb
 	**************/
 	/*************************************************************************************/
 	/*************************************************************************************/
 	if (iDebugLevel >= 1){
-	  if (iProc == 0) printf("-- (initialize_constellation) Initializing r_ecef2cg_ECEF, v_ecef2cg_ECEF, geodetic, output file names, name_sat, dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
+	  if (iProc == 0) printf("-- (initialize_constellation) Initializing r_ecef2cg_ECEF, v_ecef2cg_ECEF, geodetic, output file names, name_sat, dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
 	}
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.sc_main_nb = ii;
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.sc_ensemble_nb = eee;
@@ -1542,7 +1542,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	}
 
 	if (iDebugLevel >= 2){
-	  if (iProc == 0) printf("--- (initialize_constellation) Initializing dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
+	  if (iProc == 0) printf("--- (initialize_constellation) Initializing dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
 	}
 
 	// Integrator
@@ -1557,6 +1557,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.order         = OPTIONS->order;        // Gravity order
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag  = OPTIONS->include_drag; // include drag (CBV)
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure  = OPTIONS->include_solar_pressure; // include drag (CBV)
+		CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure  = OPTIONS->include_earth_pressure; // include drag (CBV)
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_sun   = OPTIONS->include_sun;  // include Sun perturbations (CBV)
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_moon  = OPTIONS->include_moon; // include Moon perturbations (CBV)
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.density_mod = OPTIONS->density_mod; // // the desnity given by msis is multiplied by density_mod + density_amp * sin(2*pi*t/T + density_phase*T) where T is the orbital period  
@@ -1959,12 +1960,12 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
 	} // end of if the user wants to use drag
 	if (iDebugLevel >= 2){
-	  if (iProc == 0) printf("--- (initialize_constellation) Done initializing dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
+	  if (iProc == 0) printf("--- (initialize_constellation) Done initializing dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
 	}
 
 
 	if (iDebugLevel >= 1){
-	  if (iProc == 0) printf("-- (initialize_constellation) Done initializing r_ecef2cg_ECEF, geodetic, output file names, name_sat, dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
+	  if (iProc == 0) printf("-- (initialize_constellation) Done initializing r_ecef2cg_ECEF, geodetic, output file names, name_sat, dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar for all spacecraft.\n");
 	}
 
 	/*************************************************************************************/
@@ -1974,7 +1975,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 - geodetic
 - filename, filenameecef, filenameout, filenamepower for main SC ONLY
 - name_sat
-- INTEGRATOR: dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar, sc_main_nb, sc_ensemble_nb
+- INTEGRATOR: dt, nb_surfaces, mass, solar_cell_efficiency, degree, order, include_drag/solar_pressure/earth_pressure/moon/sun, Ap, Ap_hist, f107, f107A, density, initialize_geo_with_bstar, sc_main_nb, sc_ensemble_nb
 	**************/
 	/*************************************************************************************/
 	/*************************************************************************************/
@@ -2524,7 +2525,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
     if (OPTIONS->nb_ensembles_attitude <= 0){ // if we dont' run ensembles of any kind on the attitude
 
-      if ( ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure == 1) || ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
+      if ( ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure == 1) || ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure == 1)  || ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
 
 	if ( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.isGPS == 0){ // no attitude to set up for GPS because we dont compute the drag, solar rariatin pressu,re, power, and gorund station coverage (attitude is needed for coverage because we calculate azimuth and levation angles form the spaceecraft reference system)
 	  
@@ -2905,10 +2906,11 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.order         = OPTIONS->order;        // Gravity order
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_drag  = 0;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_solar_pressure  = 0; // do not care for now
+            CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_earth_pressure  = 0; // do not care for now
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_sun   = OPTIONS->include_sun;  // include Sun perturbations (CBV)
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_moon  = OPTIONS->include_moon; // include Moon perturbations (CBV)
       
-      CONSTELLATION->spacecraft[ii][0].INTEGRATOR.index_in_attitude_interpolated = 0; // do not care for now because the attitude is for the power, solar radiation pressure, or drag. For GPS satellite, we do not compute these (the main reason is that the TLE do not give the geometry). However, we need to set it to 0 (like a regular spacecraft) because to compute coverage, the variable index_in_attitude_interpolated is used
+      CONSTELLATION->spacecraft[ii][0].INTEGRATOR.index_in_attitude_interpolated = 0; // do not care for now because the attitude is for the power, solar radiation pressure, earth_pressure, or drag. For GPS satellite, we do not compute these (the main reason is that the TLE do not give the geometry). However, we need to set it to 0 (like a regular spacecraft) because to compute coverage, the variable index_in_attitude_interpolated is used
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.index_in_driver_interpolated = 0; // do not care for now because the attitude is for the power, solar radiation pressure, or drag. For GPS satellite, we do not compute these (the main reason is that the TLE do not give the geometry)
 
 	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.density_mod = OPTIONS->density_mod; // // the desnity given by msis is multiplied by density_mod + density_amp * sin(2*pi*t/T + density_phase*T) where T is the orbital period  

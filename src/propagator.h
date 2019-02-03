@@ -223,6 +223,7 @@ typedef struct {
   int include_moon;              // include moon perturbations
   int include_sun;               // include sun perturbations
   int include_solar_pressure;    // include solar pressure
+    int include_earth_pressure;    // include earth pressure
   char shadow[256];               // in umbra/penumbra or light of Earth
   char shadow_moon[256];               // in umbra/penumbra or light of Moon
   char format_density_driver[256]; // dynamic, static or density_file
@@ -455,6 +456,18 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
 			   double          et_initial_epoch,
 			       double          et_oldest_tle_epoch,
 			   int             index_in_attitude_interpolated);
+
+int compute_earth_pressure(double          a_solar_pressure_INRTL[3],
+			   double          r_i2cg_INRTL[3],
+			   double          v_i2cg_INRTL[3],
+			   double          et,
+			   PARAMS_T        *PARAMS,
+			   INTEGRATOR_T    *INTEGRATOR,
+			   CONSTELLATION_T *CONSTELLATION,
+			   double          et_initial_epoch,
+			       double          et_oldest_tle_epoch,
+			   int             index_in_attitude_interpolated);
+
 
 int shadow_light( char      shadow[256],
 		  double    r_i2cg_INRTL[3],

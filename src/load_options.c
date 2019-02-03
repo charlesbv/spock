@@ -764,8 +764,8 @@
 
   if ( strcmp(text_spice, "default") == 0 ){ // if 'default' chosen in section #SPICE. So that means that either the line below the path was empty or that the user put 'default' in this line
     strcpy(earth_binary_pck_path,OPTIONS->path_to_spice);
-    strcpy(earth_binary_pck_path_temp, "earth_000101_181125_180903.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
-    strcat(earth_binary_pck_path, "earth_000101_181125_180903.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
+    strcpy(earth_binary_pck_path_temp, "earth_000101_190424_190131.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
+    strcat(earth_binary_pck_path, "earth_000101_190424_190131.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
   }
   else { // if the user wants to use a particular earth_binary_pck file, then this file needs to be put in path_to_spice  (with the other spice files). IMPORTANT: the name of the file must have the format string1_string2_YYMMDD_string3.bpc where YYMMDD is the date of the last available information on the frame (so we don't know anything for the rotating frame any time after this date). Example: earth_000101_180418_180125.bpc (after 160830 we can't use ITRF93)
     strcpy(earth_binary_pck_path,OPTIONS->path_to_spice);
@@ -1957,6 +1957,14 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
   else{
     OPTIONS->include_solar_pressure = 0;
   }
+  if(strstr(line, "earth_pressure") != NULL) {
+    OPTIONS->include_earth_pressure = 1;
+  }
+  else{
+    OPTIONS->include_earth_pressure = 0;
+  }
+
+
   if(strstr(line, "sun_gravity") != NULL) {
     OPTIONS->include_sun = 1;
   }
@@ -1971,8 +1979,9 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
   }
   //  printf("%f %f %d %d %d %d\n", OPTIONS->order, OPTIONS->degree,OPTIONS->include_drag, OPTIONS->include_solar_pressure, OPTIONS->include_sun, OPTIONS->include_moon);exit(0);
   if ( (strcmp(OPTIONS->filename_surface, text_ball_coeff)  == 0) && (OPTIONS->include_solar_pressure == 1) ){
-    printf("***! The solar radiation pressure force can't be computed because you did not indicate a geometry file for the satellite(s) (see section '#SPACECRAFT'). !***\n");
+    printf("***! The earth and solar radiation pressure force can't be computed because you did not indicate a geometry file for the satellite(s) (see section '#SPACECRAFT'). !***\n");
     OPTIONS->include_solar_pressure = 0;
+    OPTIONS->include_earth_pressure = 0;
   }
 
   getline(&line,&len,fp);
@@ -4429,7 +4438,7 @@ if ((strcmp(filename_output_ensemble_temp[sss], "collision") == 0) || (strcmp(fi
 
   return 0;
   
-}
+ }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
