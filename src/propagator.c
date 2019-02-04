@@ -1399,7 +1399,7 @@ int compute_dxdt(   double          drdt[3],
   double r_earth2sun_J2000[3];
   double a_solar_pressure_INRTL[3];
   double adrag_i2cg_INRTL[3];
-
+  double a_earth_pressure_INRTL[3];
 
 
   /* // drdt */
@@ -1465,6 +1465,19 @@ int compute_dxdt(   double          drdt[3],
     compute_solar_pressure(a_solar_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
     v_add(dvdt, dvdt , a_solar_pressure_INRTL);
   }
+
+  /* Earth radiation pressure */
+  if (INTEGRATOR->include_earth_pressure == 1){
+    if (OPTIONS->opengl != 1){
+    compute_earth_pressure(a_earth_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
+    v_add(dvdt, dvdt , a_earth_pressure_INRTL);
+    }
+    else{
+      printf("!***!\nFor now, SpOCK can't compute the Earth radiation pressure with a 3D model. It will be ignored.\n!***!\n")
+    }
+  }
+
+  
   // Drag
 
   if (INTEGRATOR->include_drag == 1){
@@ -2476,34 +2489,196 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   // // M_max: point on the surface of the Earth at the limit of this section (ie, see the satellite at the horizon)
   // // O: center of the Earth
   // // S: satellite
-  // // P: projection of M on OS line 
+  // //H: sub-satellite point on the surface of the Earth
+  // // P: projection of M on OS line (P_max if M is M_max)
   // // beta: angle (OM, OS) (beta_max = angle  (OM_max, OS)
   // // alpha: angle (SM, SO) (alpha_max = angle  (SM_max, SO)
-  // // r_proj: distance M to P
+  // // mp: distance M to P
   // // sm: distance S to M (sm_max = distance S to M_max)
-  // // sp: distance S to P
-  // // op: distance O to P
-  double radius_sc, beta, alpha, r_proj, sm, beta_max, alpha_max, sm_max, sp, op;
-  double delta;
+  // // sp: distance S to P (sp_max = distance S to P_max)
+  // // sh: distance S to H
+  double T_sc_to_lvlh[3][3];
+        double earth_center_to_earth_elt_lvlh[3];
+      double r_i2cg_lvlh[3];
+      double earth_center_to_earth_elt_lvlh_norm[3];
+            double cos_zenith;
+            double a_earth_pressure_in_body[3];
+  double radius_sc, beta, alpha, mp, sm, beta_max, alpha_max, sm_max, sp, oh;
+  double delta, sh;
   v_mag( &radius_sc, r_i2cg_INRTL);
+  sh = radius_sc - PARAMS->EARTH.radius;
   beta_max = acos(PARAMS->EARTH.radius/radius_sc); // every M with beta < beta_max is visible from the satellite
-  alpha_max = M_PI/2. - beta; 
+  alpha_max = M_PI/2. - beta_max; 
   sm_max = sqrt(radius_sc*radius_sc - PARAMS->EARTH.radius*PARAMS->EARTH.radius);
-  // Define the cordinate pf a point on the surface of the Earth visible from the satellite
-  // in the reference system with z axis equal to OS direction
-  // and M is defined in the x,y plane by its distance from the origin
+
+  // define the coordinates of a point on the surface of the Earth visible from the satellite
+  // in the LVLH coordinate system (appropriate because the z axis is the direction OS)
+  // we use the idea that if P is a distance between sp_max and SH (ie beta is between
+    // beta_max and 0), and that MP is equal to PARAMS->EARTH.radius*sin(beta), then
+    // M is necessarily a point on the surface of the Earth (and in sight from the satellite)
+
   double dbeta = 20. * M_PI / 180.;
   double ddelta = 20. * M_PI / 180.;
-  delta = 0.
+  double r_earth_elt_lvlh[3];
+  double r_eci_norm[3];
+  delta = 0.; // start in the direction defined by the along-track direction (x_lvlh)
   beta = 0.; // start with M at the sub-satellite point
-  while (beta <= beta_max){ // move M until beta reaches beta_max (see satellite at horizon)
-    op = PARAMS->EARTH.radius*cos(beta); // this is the z in the new ref system
-    while (delta <= 2*M_PI){
-  r_proj = sm * asin(alpha);
+  int row;
+    double x[6];
+  double lt;
 
- 
-  beta = beta + dbeta;
+  double earth_elt_to_sun_lvlh[3];
+  double T_inrtl_2_lvlh[3][3];
+  double r_cg2sun_LVLH[3];
+    double r_cg2sun_J2000[3];
+    double r_earth2sun_J2000[3];
+          double earth_elt_to_sun_lvlh_norm[3];
+
+  double v_angle[3];
+  int order_rotation[3];
+
+  shadow_light( shadow, r_i2cg_INRTL, et, PARAMS);
+
+  if (INTEGRATOR->coll_vcm != 1){
+  if (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_angular_velocity") == 0){
+    v_angle[0] = INTEGRATOR->attitude.pitch_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.pitch_ini_ensemble;
+    v_angle[1] = INTEGRATOR->attitude.roll_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.roll_ini_ensemble;
+    v_angle[2] = INTEGRATOR->attitude.yaw_angular_velocity_ensemble * ( et - et_sc_initial ) + INTEGRATOR->attitude.yaw_ini_ensemble;
+    order_rotation[0] = 1; // !!!!!!!! we might want to change that in the future                                                                     
+    order_rotation[1] = 2;
+    order_rotation[2] = 3;
+    INTEGRATOR->attitude.pitch_current = v_angle[0];
+    INTEGRATOR->attitude.roll_current = v_angle[1];
+    INTEGRATOR->attitude.yaw_current = v_angle[2];
+
   }
+
+	  if (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_initial_attitude") == 0) {
+	      v_angle[0] =  INTEGRATOR->attitude.pitch_for_attitude_ensemble  +  INTEGRATOR->attitude.pitch_angular_velocity_constant * ( et - et_sc_initial );
+	      v_angle[1] =  INTEGRATOR->attitude.roll_for_attitude_ensemble  +  INTEGRATOR->attitude.roll_angular_velocity_constant * ( et - et_sc_initial );
+	      v_angle[2] =  INTEGRATOR->attitude.yaw_for_attitude_ensemble  +  INTEGRATOR->attitude.yaw_angular_velocity_constant * ( et - et_sc_initial );
+
+	      order_rotation[0]  = 1; order_rotation[1]  = 2; order_rotation[2]  = 3;
+	   
+	      INTEGRATOR->attitude.pitch_current = v_angle[0];
+	      INTEGRATOR->attitude.roll_current = v_angle[1];
+	      INTEGRATOR->attitude.yaw_current = v_angle[2];
+	          INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
+    INTEGRATOR->attitude.order_roll_current = order_rotation[1];
+    INTEGRATOR->attitude.order_yaw_current = order_rotation[2];
+
+
+	      
+	  }
+
+
+	  if ( (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_angular_velocity") != 0) && (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_initial_attitude") != 0) && (strcmp(INTEGRATOR->attitude.attitude_profile, "sun_pointed") != 0) ){ // otherwise (atittude is nadir, sun_pointed or manual (from an input file))    
+    //    index_in_attitude_interpolated = floor( ( et - et_sc_initial ) / ( INTEGRATOR->dt / 2.0) ) ; 
+	    if (INTEGRATOR->file_is_quaternion == 0){
+    v_angle[0] = INTEGRATOR->attitude.pitch[index_in_attitude_interpolated];
+    v_angle[1] = INTEGRATOR->attitude.roll[index_in_attitude_interpolated];
+    v_angle[2] = INTEGRATOR->attitude.yaw[index_in_attitude_interpolated];
+    order_rotation[0] = INTEGRATOR->attitude.order_pitch[index_in_attitude_interpolated];
+    order_rotation[1] = INTEGRATOR->attitude.order_roll[index_in_attitude_interpolated];
+    order_rotation[2] = INTEGRATOR->attitude.order_yaw[index_in_attitude_interpolated];
+    INTEGRATOR->attitude.pitch_current = v_angle[0];
+    INTEGRATOR->attitude.roll_current = v_angle[1];
+    INTEGRATOR->attitude.yaw_current = v_angle[2];
+        INTEGRATOR->attitude.order_pitch_current = order_rotation[0];
+    INTEGRATOR->attitude.order_roll_current = order_rotation[1];
+    INTEGRATOR->attitude.order_yaw_current = order_rotation[2];
+
+
+	    }
+	    else{
+	      q_copy( INTEGRATOR->attitude.quaternion_current, INTEGRATOR->attitude.quaternion[index_in_attitude_interpolated]);
+	    }
+  }
+  } // end of no collision with VCM as colllision input file
+
+
+	  
+    spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
+
+    r_earth2sun_J2000[0] = x[0];
+    r_earth2sun_J2000[1] = x[1];
+    r_earth2sun_J2000[2] = x[2];
+    v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL);
+      if (INTEGRATOR->coll_vcm != 1){
+  compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
+  m_x_v(r_cg2sun_LVLH, T_inrtl_2_lvlh, r_cg2sun_J2000);
+
+  /* r_cg2sun_J2000_normalized LVLH to body */
+    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+    //  compute_T_sc_to_lvlh(T_sc_to_lvlh, INTEGRATOR->attitude.lvlh_alongtrack_in_body_cartesian, INTEGRATOR->attitude.lvlh_crosstrack_in_body_cartesian, &et, r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR); 
+    m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
+
+  
+
+      r_i2cg_lvlh[0] = 0; r_i2cg_lvlh[1] = 0; r_i2cg_lvlh[2] = radius_sc;
+
+  while (beta <= beta_max){ // move M until beta reaches beta_max (see satellite at horizon)
+    sp = radius_sc - PARAMS->EARTH.radius*cos(beta); // distance along z_lvlh
+    mp = PARAMS->EARTH.radius*sin(beta);
+    r_earth_elt_lvlh[2] = -sp;// sp > 0 and z_lvlh is always < 0 because z axis in lvlh is from
+    // center of Earth to satellite
+    while (delta <= 2*M_PI){
+      r_earth_elt_lvlh[0] = mp * cos(delta);
+      r_earth_elt_lvlh[1] = mp * sin(delta);
+      // compute vector M to Sun in LVLH
+
+      
+      v_sub(earth_elt_to_sun_lvlh, r_cg2sun_J2000, r_earth_elt_lvlh);
+      v_norm(earth_elt_to_sun_lvlh_norm, earth_elt_to_sun_lvlh);
+      v_add(earth_center_to_earth_elt_lvlh, r_i2cg_lvlh, r_earth_elt_lvlh);
+      v_norm(earth_center_to_earth_elt_lvlh_norm, earth_center_to_earth_elt_lvlh);
+      v_dot(&cos_zenith, earth_center_to_earth_elt_lvlh_norm, earth_elt_to_sun_lvlh_norm);
+
+
+      // go over each surface of the sc 
+    for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
+      if (sss == 0){
+	
+	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[0].normal);
+	if (cos_phi > 0){
+
+	  a_earth_pressure_in_body[0] = 
+	  a_earth_pressure_in_body[1] = 
+	  a_earth_pressure_in_body[2] = 
+	}
+	else {
+	  a_earth_pressure_in_body[0] = 0.0;
+	  a_earth_pressure_in_body[1] = 0.0;
+	  a_earth_pressure_in_body[2] = 0.0;
+	}
+      }
+      else{
+      
+	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[sss].normal);
+      
+	if (cos_phi > 0){
+	  a_earth_pressure_in_body[0] = 
+	  a_earth_pressure_in_body[1] = 
+	  a_earth_pressure_in_body[2] = 
+	}
+   
+      }
+
+    }
+     
+     
+      
+      delta = delta + ddelta;
+    }
+      beta = beta + dbeta;
+
+      
+  }
+
+  
+      }  // end of no collision with VCM as colllision input file
+
+
 
   
   return 0;
