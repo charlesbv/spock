@@ -519,3 +519,5 @@ int calculate_cd_opengl(double *cd,
 double factorial(unsigned long f);
 int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
 int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
+double compute_earth_albedo();
+double compute_earth_emissivity();

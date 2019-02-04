@@ -1473,7 +1473,7 @@ int compute_dxdt(   double          drdt[3],
     v_add(dvdt, dvdt , a_earth_pressure_INRTL);
     }
     else{
-      printf("!***!\nFor now, SpOCK can't compute the Earth radiation pressure with a 3D model. It will be ignored.\n!***!\n")
+      printf("!***!\nFor now, SpOCK can't compute the Earth radiation pressure with a 3D model. It will be ignored.\n!***!\n");
     }
   }
 
@@ -2448,7 +2448,7 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
 
   }
 
-
+  //   v_norm_print(a_solar_pressure_INRTL, "a_solar_pressure_INRTL")  ;
   return 0;
 
 }
@@ -2483,7 +2483,10 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 {
 
 
+  // Declarations
+        double r_earth_elt_body[3];
 
+	double T_lvlh_2_inrtl[3][3];
   // Determine the section of Earth visible from the satellite
   // // M: point on the surface of Earth, visible from the satellite
   // // M_max: point on the surface of the Earth at the limit of this section (ie, see the satellite at the horizon)
@@ -2517,11 +2520,10 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     // beta_max and 0), and that MP is equal to PARAMS->EARTH.radius*sin(beta), then
     // M is necessarily a point on the surface of the Earth (and in sight from the satellite)
 
-  double dbeta = 20. * M_PI / 180.;
-  double ddelta = 20. * M_PI / 180.;
+  double dbeta = 3 * M_PI / 180.;
+  double ddelta = 40 * M_PI / 180.;
   double r_earth_elt_lvlh[3];
   double r_eci_norm[3];
-  delta = 0.; // start in the direction defined by the along-track direction (x_lvlh)
   beta = 0.; // start with M at the sub-satellite point
   int row;
     double x[6];
@@ -2536,8 +2538,12 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
   double v_angle[3];
   int order_rotation[3];
-
-  shadow_light( shadow, r_i2cg_INRTL, et, PARAMS);
+  double light_speed = 299792.458; // spped of light in km/s
+  double solar_luminosity = 3.823e26; // in Watts
+  double dist_sat_to_sun;
+  double T_lvlh_to_sc[3][3];
+  int sss;
+  double cos_phi;
 
   if (INTEGRATOR->coll_vcm != 1){
   if (strcmp(INTEGRATOR->attitude.attitude_profile, "ensemble_angular_velocity") == 0){
@@ -2604,6 +2610,11 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     r_earth2sun_J2000[1] = x[1];
     r_earth2sun_J2000[2] = x[2];
     v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL);
+    v_mag( &dist_sat_to_sun, r_cg2sun_J2000 );
+    double prad;
+    prad = solar_luminosity / (4 * M_PI * light_speed * 1000 * dist_sat_to_sun * dist_sat_to_sun * 1000000.); // in N/m2. should be about 4.5e-6 N./m2 (the flux prad*c should be about 1350 W/m2)
+
+    
       if (INTEGRATOR->coll_vcm != 1){
   compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
   m_x_v(r_cg2sun_LVLH, T_inrtl_2_lvlh, r_cg2sun_J2000);
@@ -2613,74 +2624,100 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     //  compute_T_sc_to_lvlh(T_sc_to_lvlh, INTEGRATOR->attitude.lvlh_alongtrack_in_body_cartesian, INTEGRATOR->attitude.lvlh_crosstrack_in_body_cartesian, &et, r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR); 
     m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
 
-  
+
 
       r_i2cg_lvlh[0] = 0; r_i2cg_lvlh[1] = 0; r_i2cg_lvlh[2] = radius_sc;
-
+      double area_earth_elt;
+      a_earth_pressure_in_body[0] = 0; a_earth_pressure_in_body[1] = 0; a_earth_pressure_in_body[2] = 0;
+      double delta_max;
+      //      printf("beta_max %f\n", beta_max*180/M_PI);
   while (beta <= beta_max){ // move M until beta reaches beta_max (see satellite at horizon)
     sp = radius_sc - PARAMS->EARTH.radius*cos(beta); // distance along z_lvlh
     mp = PARAMS->EARTH.radius*sin(beta);
+    sm = sqrt(sp*sp + mp*mp);
     r_earth_elt_lvlh[2] = -sp;// sp > 0 and z_lvlh is always < 0 because z axis in lvlh is from
     // center of Earth to satellite
-    while (delta <= 2*M_PI){
+
+    if (beta == 0){ // this corresponds to the disk right below the sc so it's not a crown so it's has to be treaty a bit differently from the other beta
+      area_earth_elt = 2*M_PI*PARAMS->EARTH.radius*PARAMS->EARTH.radius*(1 - cos(dbeta)); // some math: area of a portion of a sphere
+      delta_max = ddelta - ddelta/2.;// arbitrary, so that we only go once in the delta loop (since only Earth elt for beta  = 0 (whih is the disk right below the sc)
+    }
+    else{
+    area_earth_elt = PARAMS->EARTH.radius * dbeta * mp * ddelta;
+    delta_max = 2*M_PI;
+    }
+    delta = 0.; // start in the direction defined by the along-track direction (x_lvlh)
+    while (delta <= delta_max){
       r_earth_elt_lvlh[0] = mp * cos(delta);
       r_earth_elt_lvlh[1] = mp * sin(delta);
       // compute vector M to Sun in LVLH
 
       
-      v_sub(earth_elt_to_sun_lvlh, r_cg2sun_J2000, r_earth_elt_lvlh);
+      v_sub(earth_elt_to_sun_lvlh, r_cg2sun_LVLH, r_earth_elt_lvlh);
       v_norm(earth_elt_to_sun_lvlh_norm, earth_elt_to_sun_lvlh);
       v_add(earth_center_to_earth_elt_lvlh, r_i2cg_lvlh, r_earth_elt_lvlh);
       v_norm(earth_center_to_earth_elt_lvlh_norm, earth_center_to_earth_elt_lvlh);
       v_dot(&cos_zenith, earth_center_to_earth_elt_lvlh_norm, earth_elt_to_sun_lvlh_norm);
+      /* printf("delta %f, beta %f\n", beta*180/M_PI, delta*180/M_PI); */
+      /* v_print(earth_center_to_earth_elt_lvlh_norm, "earth_center_to_earth_elt_lvlh_norm"); */
+      /* v_print(earth_elt_to_sun_lvlh, "earth_elt_to_sun_lvlh"); */
+      /* v_print(r_cg2sun_LVLH,"r_cg2sun_LVLH"); */
+      /* printf("cos_zenith %f, zenith %f\n", cos_zenith, acos(cos_zenith) * 180/M_PI); */
 
-
-      // go over each surface of the sc 
+      m_x_v(r_earth_elt_body, T_lvlh_to_sc, r_earth_elt_lvlh);
+      double r_earth_elt_body_norm[3];
+      v_norm(r_earth_elt_body_norm, r_earth_elt_body);
+      // go over each surface of the sc
+      double cr, emiss, albedo;
+      emiss = compute_earth_emissivity();
+      albedo = compute_earth_albedo();
     for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
-      if (sss == 0){
-	
-	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[0].normal);
-	if (cos_phi > 0){
+      	cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
+	v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
 
-	  a_earth_pressure_in_body[0] = 
-	  a_earth_pressure_in_body[1] = 
-	  a_earth_pressure_in_body[2] = 
-	}
-	else {
-	  a_earth_pressure_in_body[0] = 0.0;
-	  a_earth_pressure_in_body[1] = 0.0;
-	  a_earth_pressure_in_body[2] = 0.0;
-	}
-      }
-      else{
-      
-	v_dot(&cos_phi, r_cg2sun_SC_normalized, INTEGRATOR->surface[sss].normal);
-      
-	if (cos_phi > 0){
-	  a_earth_pressure_in_body[0] = 
-	  a_earth_pressure_in_body[1] = 
-	  a_earth_pressure_in_body[2] = 
-	}
+	if (cos_phi > 0){ // the sc surface sees the Earth element
+     
+	  // IR pressure: even if Earth elt doesn't see the Sun
+	  a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	  a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	  a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	    // albedo: only if Earth elt sees the Sun
+	    if (cos_zenith > 0){
+
+	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	      a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	      a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	      //if (sss == 10){
+
+  //printf("%d, %e\n", sss, cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. *cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm));
+  //}
+
+	    } // end of if the Earth elt sees the Sun
+
+	} // end of if the sc surface sees the Earth elt 
    
-      }
+    } // end of all surfaces
 
-    }
-     
-     
-      
       delta = delta + ddelta;
-    }
+
+    } // end of go over all delta
+
       beta = beta + dbeta;
 
-      
-  }
 
-  
+
+  } // end of go over all beta
+  double a_earth_pressure_in_LVLH[3];
+      m_x_v(a_earth_pressure_in_LVLH, T_sc_to_lvlh, a_earth_pressure_in_body);
+    m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh);
+    m_x_v(a_earth_pressure_INRTL, T_lvlh_2_inrtl, a_earth_pressure_in_LVLH);  
+
       }  // end of no collision with VCM as colllision input file
 
 
 
-  
+      //     v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
+
   return 0;
 
 }
@@ -5419,4 +5456,19 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 
 
   return 0;
+}
+
+
+
+
+double compute_earth_albedo(){ // see http://ocw.upm.es/ingenieria-aeroespacial/modeling-the-space-environment/contenidos/material-declase/mse07_radiationpressure.pdf or Knocke, P.C. et al, “Earth Radiation Pressure Effects on Satellites.” Proceedings of the AIAA/AAS Astrodynamics Specialist Conference, Washington DC, 1988, pp. 577-586.
+  double albedo;
+  albedo = 0.34; // simplification (complete equation at the reference above)
+  return albedo;
+}
+
+double compute_earth_emissivity(){ // see http://ocw.upm.es/ingenieria-aeroespacial/modeling-the-space-environment/contenidos/material-declase/mse07_radiationpressure.pdf or Knocke, P.C. et al, “Earth Radiation Pressure Effects on Satellites.” Proceedings of the AIAA/AAS Astrodynamics Specialist Conference, Washington DC, 1988, pp. 577-586.
+  double emiss;
+  emiss = 0.68; // simplification (complete equation at the reference above)
+  return emiss;
 }
