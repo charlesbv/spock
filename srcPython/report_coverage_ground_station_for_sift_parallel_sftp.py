@@ -34,7 +34,7 @@ import ipdb
 
 
 # PARAMETERS TO SET
-plot_results = 1 # if you want to create a plot of the coverage
+plot_results = 0 # if you want to create a plot of the coverage
 path_folder_plot = '.' # if plot_results is set to 1, otherwise don't worry about it 
 # end of PARAMETERS TO SET
 
