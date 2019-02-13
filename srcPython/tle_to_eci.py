@@ -19,7 +19,7 @@ import numpy as np
 from sgp4.earth_gravity import wgs72old
 from sgp4.io import twoline2rv
 
-filename_tle = "fm5.txt"
+filename_tle = "/Users/cbv/cygnss_2017-03-20.txt"
 file_tle = open(filename_tle)
 read_file_tle = file_tle.readlines()
 line1 = read_file_tle[0].replace("\r", "").replace("\n","") 

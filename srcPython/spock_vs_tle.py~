@@ -1,0 +1,20 @@
+# This script compares the position predicted by SpOCK to the one reported in
+# the TLEs, between date_start and date_stop. It linear interpolates the
+# position of SpOCK between two time steps at the TLE epochs
+# No need to previously downlaod the TLEs, this script does it
+# Inputs:
+# - date_start: start date of the analysis (YYYY-mm-dd)
+# - date_stop: stop date of the analysis (YYYY-mm-dd)
+# ASSUMPTIONS:
+
+
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+date_start = '2018-04-26' 
+date_stop = '2018-04-29'
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+
+from datetime import datetime, timedelta
+
+
+date_start_date = datetime.strptime(date_start, "%Y-%m-%d")
+date_stop_date = datetime.strptime(date_stop, "%Y-%m-%d")
