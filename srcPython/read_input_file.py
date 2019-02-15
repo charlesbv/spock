@@ -463,10 +463,11 @@ def read_input_file(filename):
     order_variables.append("collision_filename | " + str(len(order_variables)))
     variables.append(compute_drag)
     order_variables.append("compute_drag | " + str(len(order_variables)))
-    variables.append(cdd)
-    order_variables.append("cdd | " + str(len(order_variables)))
-    variables.append(area)
-    order_variables.append("area | " + str(len(order_variables)))
+    if geometry_filename_temp != "ballistic_coefficient":
+        variables.append(cdd)
+        order_variables.append("cdd | " + str(len(order_variables)))
+        variables.append(area)
+        order_variables.append("area | " + str(len(order_variables)))
     variables.append(mass)
     order_variables.append("mass | " + str(len(order_variables)))
     
