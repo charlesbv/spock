@@ -11,6 +11,7 @@ sys.path.append("/Users/cbv/work/spock/srcPython")
 #sys.path.append("/home/cbv/Code/spock/srcPython")
 
 from utc2mst import *
+from utc2est import *
 import matplotlib
 matplotlib.use("Agg") # without this line, when running this script from a cronjob we get an error "Unable to access the X Display, is $DISPLAY set properly?"
 
@@ -29,11 +30,12 @@ from gs_radius import *
 #from cygnss_read_spock_spec import *
 import pyorbital.orbital
 
+
 def radius_for_tissot(dist_km):
     return np.rad2deg(dist_km/6378.) # this is calculating using the Haversine formula
 
 
-
+timezone = 'est' # est or mst
 input_filename = 'beacon_0201.txt'
 min_max_elev = 60. # all sc with a max elev wrt to gs that's lower than min_max_elev are excluded
 
@@ -134,9 +136,12 @@ for isc in range(nb_sc):
     for ict in range(nb_ct):
         start = datetime.strptime( read_gs_file[ict + nhead].split()[1] + 'T' + read_gs_file[ict + nhead].split()[2], "%Y-%m-%dT%H:%M:%S" )
         end = datetime.strptime( read_gs_file[ict + nhead].split()[4] + 'T' + read_gs_file[ict + nhead].split()[5], "%Y-%m-%dT%H:%M:%S" )
-
-        start_mst = datetime.strptime( utc2mst( read_gs_file[ict + nhead].split()[1] + 'T' + read_gs_file[ict + nhead].split()[2] ), "%Y-%m-%dT%H:%M:%S" )
-        end_mst = datetime.strptime(utc2mst( read_gs_file[ict + nhead].split()[4] + 'T' + read_gs_file[ict + nhead].split()[5] ), "%Y-%m-%dT%H:%M:%S" )
+        if timezone == 'mst':
+            start_mst = datetime.strptime( utc2mst( read_gs_file[ict + nhead].split()[1] + 'T' + read_gs_file[ict + nhead].split()[2] ), "%Y-%m-%dT%H:%M:%S" )
+            end_mst = datetime.strptime(utc2mst( read_gs_file[ict + nhead].split()[4] + 'T' + read_gs_file[ict + nhead].split()[5] ), "%Y-%m-%dT%H:%M:%S" )
+        elif timezone == 'est':
+            start_mst = datetime.strptime( utc2est( read_gs_file[ict + nhead].split()[1] + 'T' + read_gs_file[ict + nhead].split()[2] ), "%Y-%m-%dT%H:%M:%S" )
+            end_mst = datetime.strptime(utc2est( read_gs_file[ict + nhead].split()[4] + 'T' + read_gs_file[ict + nhead].split()[5] ), "%Y-%m-%dT%H:%M:%S" )
 
         duration = np.float(read_gs_file[ict + nhead].split()[9].replace("(","") )
         elev_max = np.float(read_gs_file[ict + nhead].split('max_elev ')[1].split()[0])
@@ -173,7 +178,7 @@ fontsize_plot = 20 # 9
 color_arr = ['k','b','r','g','m', 'y']
 
 iday = 0
-new_date_start = datetime.strptime('2019-03-18T00:00:00', "%Y-%m-%dT%H:%M:%S" ) # i did that so we can manually change the dtgart date of the animation
+new_date_start = datetime.strptime('2019-03-01T00:00:00', "%Y-%m-%dT%H:%M:%S" ) # i did that so we can manually change the dtgart date of the animation
 nb_day = (int)( np.ceil((date_stop - new_date_start).total_seconds() / 3600./24) )
 date_day_arr = np.array([new_date_start + timedelta(days=i) for i in np.arange(0, nb_day +1, 1)])# !!!!!! used to be np.array([date_start + timedelta(days=i) for i in np.arange(0, nb_day +1, 1)])
 
@@ -345,8 +350,13 @@ for istep in range(0,nb_steps_ani_sc):#!!!!!!!! was range(1,nb_steps_ani_sc):
 
     if first_time >= 0:
         utc_str = date_round_sec[istep*dt_index_sc][:19].replace("/", "-").replace(" ", "T")
-        mst_str = utc2mst(utc_str).replace("-", "/").replace("T", " ")
-        ax_title = utc_str + ' MST'#date_round_sec[istep*dt_index_sc][:19] + ' UTC'
+        if timezone == 'mst':
+            mst_str = utc2mst(utc_str).replace("-", "/").replace("T", " ")
+            ax_title = utc_str + ' MST'#date_round_sec[istep*dt_index_sc][:19] + ' UTC'
+        elif timezone == 'est':
+            mst_str = utc2est(utc_str).replace("-", "/").replace("T", " ")
+            ax_title = utc_str + ' EST'#date_round_sec[istep*dt_index_sc][:19] + ' UTC'
+
         print utc_str, ax_title
         ax1.set_title(ax_title, weight = 'normal', fontsize = fontsize_plot , y = 1.00) 
 
@@ -433,7 +443,7 @@ for istep in range(0,nb_steps_ani_sc):#!!!!!!!! was range(1,nb_steps_ani_sc):
 
         #raise Exception
 
-video_name = input_filename.replace(".txt", "") + "_" + date_start_str.replace("-", "_").replace(":", "_") +  "_to_" +  date_stop_str.replace("-", "_").replace(":", "_") + ".mp4"
+video_name = input_filename.replace(".txt", "") + "_" + date_start_str.replace("-", "_").replace(":", "_") +  "_to_" +  date_stop_str.replace("-", "_").replace(":", "_") + '_' + timezone + ".mp4"
 os.system('ffmpeg -start_number ' + str(istep_start_save) + ' -y -r 30 -i ani/%d_' +  str(nb_steps_ani_sc-1) + '.png -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ' + video_name)
 
 #os.system('scp ' + video_name + " desk:")
@@ -509,7 +519,10 @@ for i in range(len(xticks)):
 ax.xaxis.set_ticks(xticks) 
 ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot, rotation='vertical')
 
-ax.set_ylabel('Local time (MST)', weight = 'normal', fontsize  = fontsize_plot)
+if timezone == 'mst':
+    ax.set_ylabel('Local time (MST)', weight = 'normal', fontsize  = fontsize_plot)
+elif timezone == 'est':
+    ax.set_ylabel('Local time (EST)', weight = 'normal', fontsize  = fontsize_plot)
 ax.set_xlabel('Real time', weight = 'normal', fontsize  = fontsize_plot)
 
 if corrected ==1:
@@ -532,8 +545,8 @@ legend = ax.legend(loc='lower left', bbox_to_anchor=(0, 0), numpoints = 1,  titl
 ax.set_xlim([0,100])
 fig.set_size_inches(10, 20)
 if corrected == 1:
-    fig_save_name = 'overpass_corrected.pdf'
+    fig_save_name = 'overpass_corrected'  + '_' + timezone + '.pdf'
 else:
-    fig_save_name = 'overpass.pdf'
+    fig_save_name = 'overpass' + '_' + timezone + '.pdf'
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
