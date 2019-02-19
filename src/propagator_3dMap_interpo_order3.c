@@ -1714,9 +1714,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 
 	    double y_radius0_lat0_lon0; double y_radius0_lat0_lon1; double y_radius0_lat0_lon2; double y_radius0_lat3;
 
-	    double y_radius1_lat0_lon3, y_radius1_lat3_lon0;
-	    double y_radius0_lat0_lon3; double y_radius0_lat1_lon3; double y_radius0_lat2_lon3; double y_radius0_lat3_lon0; double y_radius0_lat3_lon1; double y_radius0_lat3_lon2; double y_radius0_lat3_lon3; double y_radius0_lat0; double y_radius0_lat1; double y_radius0_lat2;
-	    double y_radius2_lat0_lon3; double y_radius2_lat3_lon0; double y_radius3_lat0_lon0; double y_radius3_lat0_lon1; double y_radius3_lat0_lon2; double y_radius3_lat0_lon3; double y_radius3_lat1_lon0; double y_radius3_lat2_lon0; double y_radius3_lat3_lon0; double y_radius3_lat0;
+
 		    
 	    double r_ecef2cg_ECEF[3];
   double a_ecef2cg_ECEF[3];
@@ -1950,43 +1948,6 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
     /* printf("%d %d %d %d | %f\n",iradius1, iradius2, iradius3, Gravity->nradius_map, rmag); */
     /* printf("%d\n", order_interpo_map); */
     for (ii = 0; ii < 3; ii++){
-
-      // RADIUS0
-      y_radius0_lat0_lon0 = Gravity->gravity_map[iradius0][ilat0][ilon0][ii];
-      y_radius0_lat0_lon1 = Gravity->gravity_map[iradius0][ilat0][ilon1][ii];
-      y_radius0_lat0_lon2 = Gravity->gravity_map[iradius0][ilat0][ilon2][ii];
-      y_radius0_lat0_lon3 = Gravity->gravity_map[iradius0][ilat0][ilon3][ii];
-      y_radius0_lat1_lon0 = Gravity->gravity_map[iradius0][ilat1][ilon0][ii];
-      y_radius0_lat1_lon1 = Gravity->gravity_map[iradius0][ilat1][ilon1][ii];
-      y_radius0_lat1_lon2 = Gravity->gravity_map[iradius0][ilat1][ilon2][ii];
-      y_radius0_lat1_lon3 = Gravity->gravity_map[iradius0][ilat1][ilon3][ii];
-      y_radius0_lat2_lon0 = Gravity->gravity_map[iradius0][ilat2][ilon0][ii];
-      y_radius0_lat2_lon1 = Gravity->gravity_map[iradius0][ilat2][ilon1][ii];
-      y_radius0_lat2_lon2 = Gravity->gravity_map[iradius0][ilat2][ilon2][ii];
-      y_radius0_lat2_lon3 = Gravity->gravity_map[iradius0][ilat2][ilon3][ii];
-      y_radius0_lat3_lon0 = Gravity->gravity_map[iradius0][ilat3][ilon0][ii];
-      y_radius0_lat3_lon1 = Gravity->gravity_map[iradius0][ilat3][ilon1][ii];
-      y_radius0_lat3_lon2 = Gravity->gravity_map[iradius0][ilat3][ilon2][ii];
-      y_radius0_lat3_lon3 = Gravity->gravity_map[iradius0][ilat3][ilon3][ii];
-    //y_radius0_lat1 = xlon*y_radius0_lat1_lon2 + (1-xlon)*y_radius0_lat1_lon1;
-    //        y_radius0_lat2 = xlon*y_radius0_lat2_lon2 + (1-xlon)*y_radius0_lat2_lon1;
-    xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-
-    yinter[0] = y_radius0_lat0_lon0; yinter[1] = y_radius0_lat0_lon1; yinter[2] = y_radius0_lat0_lon2; yinter[3] = y_radius0_lat0_lon3;
-      polynomial_interpo(&y_radius0_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius0_lat1_lon0; yinter[1] = y_radius0_lat1_lon1; yinter[2] = y_radius0_lat1_lon2; yinter[3] = y_radius0_lat1_lon3;
-      polynomial_interpo(&y_radius0_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius0_lat2_lon0; yinter[1] = y_radius0_lat2_lon1; yinter[2] = y_radius0_lat2_lon2; yinter[3] = y_radius0_lat2_lon3;
-      polynomial_interpo(&y_radius0_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius0_lat3_lon0; yinter[1] = y_radius0_lat3_lon1; yinter[2] = y_radius0_lat3_lon2; yinter[3] = y_radius0_lat3_lon3;
-      polynomial_interpo(&y_radius0_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius0 = y_radius0_lat1*(1-xlat) + y_radius0_lat2*xlat; */
-	    /* printf("%e\n", y_radius0); */
-    xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-    yinter[0] = y_radius0_lat0; yinter[1] = y_radius0_lat1; yinter[2] = y_radius0_lat2; yinter[3] = y_radius0_lat3;
-      polynomial_interpo(&y_radius0, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      
-      // RADIUS1
       y_radius1_lat0_lon0 = Gravity->gravity_map[iradius1][ilat0][ilon0][ii];
       y_radius1_lat0_lon1 = Gravity->gravity_map[iradius1][ilat0][ilon1][ii];
       y_radius1_lat0_lon2 = Gravity->gravity_map[iradius1][ilat0][ilon2][ii];
@@ -2003,105 +1964,83 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       y_radius1_lat3_lon1 = Gravity->gravity_map[iradius1][ilat3][ilon1][ii];
       y_radius1_lat3_lon2 = Gravity->gravity_map[iradius1][ilat3][ilon2][ii];
       y_radius1_lat3_lon3 = Gravity->gravity_map[iradius1][ilat3][ilon3][ii];
+
+    
     //y_radius1_lat1 = xlon*y_radius1_lat1_lon2 + (1-xlon)*y_radius1_lat1_lon1;
     //        y_radius1_lat2 = xlon*y_radius1_lat2_lon2 + (1-xlon)*y_radius1_lat2_lon1;
-    xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-
-    yinter[0] = y_radius1_lat0_lon0; yinter[1] = y_radius1_lat0_lon1; yinter[2] = y_radius1_lat0_lon2; yinter[3] = y_radius1_lat0_lon3;
-      polynomial_interpo(&y_radius1_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius1_lat1_lon0; yinter[1] = y_radius1_lat1_lon1; yinter[2] = y_radius1_lat1_lon2; yinter[3] = y_radius1_lat1_lon3;
+    xinter[0] = Gravity->lon_map[ilon1]; xinter[1] = Gravity->lon_map[ilon2]; xinter[2] = Gravity->lon_map[ilon3];
+    yinter[0] = y_radius1_lat1_lon1; yinter[1] = y_radius1_lat1_lon2; yinter[2] = y_radius1_lat1_lon3;
       polynomial_interpo(&y_radius1_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius1_lat2_lon0; yinter[1] = y_radius1_lat2_lon1; yinter[2] = y_radius1_lat2_lon2; yinter[3] = y_radius1_lat2_lon3;
+    yinter[0] = y_radius1_lat2_lon1; yinter[1] = y_radius1_lat2_lon2; yinter[2] = y_radius1_lat2_lon3;
       polynomial_interpo(&y_radius1_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius1_lat3_lon0; yinter[1] = y_radius1_lat3_lon1; yinter[2] = y_radius1_lat3_lon2; yinter[3] = y_radius1_lat3_lon3;
-      polynomial_interpo(&y_radius1_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius1 = y_radius1_lat1*(1-xlat) + y_radius1_lat2*xlat; */
-	    /* printf("%e\n", y_radius1); */
-    xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-    yinter[0] = y_radius1_lat0; yinter[1] = y_radius1_lat1; yinter[2] = y_radius1_lat2; yinter[3] = y_radius1_lat3;
-      polynomial_interpo(&y_radius1, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      	  /* printf("%e\n", y_radius1); */
-	  /* 	  exitf(); */
-
-      // RADIUS2
-      y_radius2_lat0_lon0 = Gravity->gravity_map[iradius2][ilat0][ilon0][ii];
-      y_radius2_lat0_lon1 = Gravity->gravity_map[iradius2][ilat0][ilon1][ii];
-      y_radius2_lat0_lon2 = Gravity->gravity_map[iradius2][ilat0][ilon2][ii];
-      y_radius2_lat0_lon3 = Gravity->gravity_map[iradius2][ilat0][ilon3][ii];
-      y_radius2_lat1_lon0 = Gravity->gravity_map[iradius2][ilat1][ilon0][ii];
+    yinter[0] = y_radius1_lat3_lon1; yinter[1] = y_radius1_lat3_lon2; yinter[2] = y_radius1_lat3_lon3;
+      polynomial_interpo(&y_radius1_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
+      //          y_radius1 = y_radius1_lat1*(1-xlat) + y_radius1_lat2*xlat;
+	  //  printf("%e\n", y_radius1);
+    xinter[0] = Gravity->lat_map[ilat1]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] = Gravity->lat_map[ilat3];
+    yinter[0] = y_radius1_lat1; yinter[1] = y_radius1_lat2; yinter[2] = y_radius1_lat3;
+      polynomial_interpo(&y_radius1, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);    
+      //	  printf("%e\n", y_radius1);
+	  //	  exitf();
+      // RADIUS 2
       y_radius2_lat1_lon1 = Gravity->gravity_map[iradius2][ilat1][ilon1][ii];
-      y_radius2_lat1_lon2 = Gravity->gravity_map[iradius2][ilat1][ilon2][ii];
-      y_radius2_lat1_lon3 = Gravity->gravity_map[iradius2][ilat1][ilon3][ii];
-      y_radius2_lat2_lon0 = Gravity->gravity_map[iradius2][ilat2][ilon0][ii];
-      y_radius2_lat2_lon1 = Gravity->gravity_map[iradius2][ilat2][ilon1][ii];
-      y_radius2_lat2_lon2 = Gravity->gravity_map[iradius2][ilat2][ilon2][ii];
-      y_radius2_lat2_lon3 = Gravity->gravity_map[iradius2][ilat2][ilon3][ii];
-      y_radius2_lat3_lon0 = Gravity->gravity_map[iradius2][ilat3][ilon0][ii];
-      y_radius2_lat3_lon1 = Gravity->gravity_map[iradius2][ilat3][ilon1][ii];
-      y_radius2_lat3_lon2 = Gravity->gravity_map[iradius2][ilat3][ilon2][ii];
-      y_radius2_lat3_lon3 = Gravity->gravity_map[iradius2][ilat3][ilon3][ii];
+    y_radius2_lat1_lon2 = Gravity->gravity_map[iradius2][ilat1][ilon2][ii];
+    y_radius2_lat1_lon3 = Gravity->gravity_map[iradius2][ilat1][ilon3][ii];
+    y_radius2_lat2_lon1 = Gravity->gravity_map[iradius2][ilat2][ilon1][ii];
+    y_radius2_lat2_lon2 = Gravity->gravity_map[iradius2][ilat2][ilon2][ii];
+    y_radius2_lat2_lon3 = Gravity->gravity_map[iradius2][ilat2][ilon3][ii];
+    y_radius2_lat3_lon1 = Gravity->gravity_map[iradius2][ilat3][ilon1][ii];
+    y_radius2_lat3_lon2 = Gravity->gravity_map[iradius2][ilat3][ilon2][ii];
+    y_radius2_lat3_lon3 = Gravity->gravity_map[iradius2][ilat3][ilon3][ii];
+
     //y_radius2_lat1 = xlon*y_radius2_lat1_lon2 + (1-xlon)*y_radius2_lat1_lon1;
-    //        y_radius2_lat2 = xlon*y_radius2_lat2_lon2 + (1-xlon)*y_radius2_lat2_lon1;
-    xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-
-    yinter[0] = y_radius2_lat0_lon0; yinter[1] = y_radius2_lat0_lon1; yinter[2] = y_radius2_lat0_lon2; yinter[3] = y_radius2_lat0_lon3;
-      polynomial_interpo(&y_radius2_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius2_lat1_lon0; yinter[1] = y_radius2_lat1_lon1; yinter[2] = y_radius2_lat1_lon2; yinter[3] = y_radius2_lat1_lon3;
-      polynomial_interpo(&y_radius2_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius2_lat2_lon0; yinter[1] = y_radius2_lat2_lon1; yinter[2] = y_radius2_lat2_lon2; yinter[3] = y_radius2_lat2_lon3;
+    xinter[0] = Gravity->lon_map[ilon1]; xinter[1] = Gravity->lon_map[ilon2]; xinter[2] = Gravity->lon_map[ilon3];
+    yinter[0] = y_radius2_lat1_lon1; yinter[1] = y_radius2_lat1_lon2; yinter[2] = y_radius2_lat1_lon3;
+      polynomial_interpo(&y_radius2_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);    
+      //    y_radius2_lat2 = xlon*y_radius2_lat2_lon2 + (1-xlon)*y_radius2_lat2_lon1;
+      yinter[0] = y_radius2_lat2_lon1; yinter[1] = y_radius2_lat2_lon2; yinter[2] = y_radius2_lat2_lon3; 
       polynomial_interpo(&y_radius2_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius2_lat3_lon0; yinter[1] = y_radius2_lat3_lon1; yinter[2] = y_radius2_lat3_lon2; yinter[3] = y_radius2_lat3_lon3;
-      polynomial_interpo(&y_radius2_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius2 = y_radius2_lat1*(1-xlat) + y_radius2_lat2*xlat; */
-	    /* printf("%e\n", y_radius2); */
-    xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-    yinter[0] = y_radius2_lat0; yinter[1] = y_radius2_lat1; yinter[2] = y_radius2_lat2; yinter[3] = y_radius2_lat3;
-      polynomial_interpo(&y_radius2, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      	  /* printf("%e\n", y_radius2); */
-	  /* 	  exitf(); */
+      yinter[0] = y_radius2_lat3_lon1; yinter[1] = y_radius2_lat3_lon2; yinter[2] = y_radius2_lat3_lon3; 
+      polynomial_interpo(&y_radius2_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
 
-      // RADIUS3
-      y_radius3_lat0_lon0 = Gravity->gravity_map[iradius3][ilat0][ilon0][ii];
-      y_radius3_lat0_lon1 = Gravity->gravity_map[iradius3][ilat0][ilon1][ii];
-      y_radius3_lat0_lon2 = Gravity->gravity_map[iradius3][ilat0][ilon2][ii];
-      y_radius3_lat0_lon3 = Gravity->gravity_map[iradius3][ilat0][ilon3][ii];
-      y_radius3_lat1_lon0 = Gravity->gravity_map[iradius3][ilat1][ilon0][ii];
-      y_radius3_lat1_lon1 = Gravity->gravity_map[iradius3][ilat1][ilon1][ii];
-      y_radius3_lat1_lon2 = Gravity->gravity_map[iradius3][ilat1][ilon2][ii];
-      y_radius3_lat1_lon3 = Gravity->gravity_map[iradius3][ilat1][ilon3][ii];
-      y_radius3_lat2_lon0 = Gravity->gravity_map[iradius3][ilat2][ilon0][ii];
-      y_radius3_lat2_lon1 = Gravity->gravity_map[iradius3][ilat2][ilon1][ii];
-      y_radius3_lat2_lon2 = Gravity->gravity_map[iradius3][ilat2][ilon2][ii];
-      y_radius3_lat2_lon3 = Gravity->gravity_map[iradius3][ilat2][ilon3][ii];
-      y_radius3_lat3_lon0 = Gravity->gravity_map[iradius3][ilat3][ilon0][ii];
-      y_radius3_lat3_lon1 = Gravity->gravity_map[iradius3][ilat3][ilon1][ii];
-      y_radius3_lat3_lon2 = Gravity->gravity_map[iradius3][ilat3][ilon2][ii];
-      y_radius3_lat3_lon3 = Gravity->gravity_map[iradius3][ilat3][ilon3][ii];
+
+                y_radius2 = y_radius2_lat1*(1-xlat) + y_radius2_lat2*xlat;
+		//	printf("%e\n", y_radius2);
+          xinter[0] = Gravity->lat_map[ilat1]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] = Gravity->lat_map[ilat3];
+    yinter[0] = y_radius2_lat1; yinter[1] = y_radius2_lat2; yinter[2] = y_radius2_lat3;
+      polynomial_interpo(&y_radius2, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);
+      //		printf("%e\n", y_radius2);
+		//		exitf();
+      // RADIUS 3
+    y_radius3_lat1_lon1 = Gravity->gravity_map[iradius3][ilat1][ilon1][ii];
+    y_radius3_lat1_lon2 = Gravity->gravity_map[iradius3][ilat1][ilon2][ii];
+    y_radius3_lat1_lon3 = Gravity->gravity_map[iradius3][ilat1][ilon3][ii];
+    y_radius3_lat2_lon1 = Gravity->gravity_map[iradius3][ilat2][ilon1][ii];
+    y_radius3_lat2_lon2 = Gravity->gravity_map[iradius3][ilat2][ilon2][ii];
+    y_radius3_lat2_lon3 = Gravity->gravity_map[iradius3][ilat2][ilon3][ii];
+    y_radius3_lat3_lon1 = Gravity->gravity_map[iradius3][ilat3][ilon1][ii];
+    y_radius3_lat3_lon2 = Gravity->gravity_map[iradius3][ilat3][ilon2][ii];
+    y_radius3_lat3_lon3 = Gravity->gravity_map[iradius3][ilat3][ilon3][ii];
+
     //y_radius3_lat1 = xlon*y_radius3_lat1_lon2 + (1-xlon)*y_radius3_lat1_lon1;
-    //        y_radius3_lat2 = xlon*y_radius3_lat2_lon2 + (1-xlon)*y_radius3_lat2_lon1;
-    xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-
-    yinter[0] = y_radius3_lat0_lon0; yinter[1] = y_radius3_lat0_lon1; yinter[2] = y_radius3_lat0_lon2; yinter[3] = y_radius3_lat0_lon3;
-      polynomial_interpo(&y_radius3_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius3_lat1_lon0; yinter[1] = y_radius3_lat1_lon1; yinter[2] = y_radius3_lat1_lon2; yinter[3] = y_radius3_lat1_lon3;
-      polynomial_interpo(&y_radius3_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius3_lat2_lon0; yinter[1] = y_radius3_lat2_lon1; yinter[2] = y_radius3_lat2_lon2; yinter[3] = y_radius3_lat2_lon3;
+    xinter[0] = Gravity->lon_map[ilon1]; xinter[1] = Gravity->lon_map[ilon2]; xinter[2] = Gravity->lon_map[ilon3];
+    yinter[0] = y_radius3_lat1_lon1; yinter[1] = y_radius3_lat1_lon2; yinter[2] = y_radius3_lat1_lon3;
+      polynomial_interpo(&y_radius3_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);    
+      //    y_radius3_lat2 = xlon*y_radius3_lat2_lon2 + (1-xlon)*y_radius3_lat2_lon1;
+      yinter[0] = y_radius3_lat2_lon1; yinter[1] = y_radius3_lat2_lon2; yinter[2] = y_radius3_lat2_lon3; 
       polynomial_interpo(&y_radius3_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius3_lat3_lon0; yinter[1] = y_radius3_lat3_lon1; yinter[2] = y_radius3_lat3_lon2; yinter[3] = y_radius3_lat3_lon3;
-      polynomial_interpo(&y_radius3_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius3 = y_radius3_lat1*(1-xlat) + y_radius3_lat2*xlat; */
-	    /* printf("%e\n", y_radius3); */
-    xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-    yinter[0] = y_radius3_lat0; yinter[1] = y_radius3_lat1; yinter[2] = y_radius3_lat2; yinter[3] = y_radius3_lat3;
-      polynomial_interpo(&y_radius3, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      	  /* printf("%e\n", y_radius3); */
-	  /* 	  exitf(); */
+      yinter[0] = y_radius3_lat3_lon1; yinter[1] = y_radius3_lat3_lon2; yinter[2] = y_radius3_lat3_lon3; 
+      polynomial_interpo(&y_radius3_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
 
-      
-      
+
+      //          y_radius3 = y_radius3_lat1*(1-xlat) + y_radius3_lat2*xlat;
+          xinter[0] = Gravity->lat_map[ilat1]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] = Gravity->lat_map[ilat3];
+    yinter[0] = y_radius3_lat1; yinter[1] = y_radius3_lat2; yinter[2] = y_radius3_lat3;
+      polynomial_interpo(&y_radius3, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);
+
       // INTERPO OVER RADIUS
-          xinter[0] = Gravity->radius_map[iradius0];   xinter[1] = Gravity->radius_map[iradius1]; xinter[2] = Gravity->radius_map[iradius2]; xinter[3] = Gravity->radius_map[iradius3];
-	    yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2; yinter[3] = y_radius3;
+            xinter[0] = Gravity->radius_map[iradius1]; xinter[1] = Gravity->radius_map[iradius2]; xinter[2] = Gravity->radius_map[iradius3];
+	    yinter[0] = y_radius1; yinter[1] = y_radius2; yinter[2] = y_radius3;
     if (ii == 0){
       // dUdr = y_radius2*xradius + y_radius1*(1-xradius);
       polynomial_interpo(&dUdr, order_interpo_map, xinter, yinter, rmag);    
