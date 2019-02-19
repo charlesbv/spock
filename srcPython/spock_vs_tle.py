@@ -194,6 +194,8 @@ while istep < range(nstep-1):
         r_spock_interpo[iday] = r0 + slope*dtime
         error_spock[iday] = np.linalg.norm(r_spock_interpo[iday] - \
                                            r_tle[iday])
+
+        
         iday = iday + 1
         if iday == nday:
             break
