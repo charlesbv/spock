@@ -1680,17 +1680,18 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       double *xinter;
     double *yinter;
     int order_interpo_map = 3;
-    xinter = malloc(3 * sizeof(double));
-    yinter = malloc(3 * sizeof(double));
+    xinter = malloc(4 * sizeof(double));
+    yinter = malloc(4 * sizeof(double));
 
     double y_radius1_lat1, y_radius1_lat2, y_radius2_lat1, y_radius2_lat2;
-    int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2, ilon3, ilat3, iradius3;
+    int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2, ilon3, ilat3, iradius3, ilon0, ilat0, iradius0;
         double long_gc_corr;
 	   double xradius, xlat, xlon;
         int ii;
     double y_radius1_lat1_lon1, y_radius1_lat1_lon2, y_radius1_lat2_lon1, y_radius1_lat2_lon2, y_radius1;
         double y_radius2_lat1_lon1, y_radius2_lat1_lon2, y_radius2_lat2_lon1, y_radius2_lat2_lon2, y_radius2;
-    double y_radius1_lat1_lon3, y_radius1_lat2_lon3;
+
+	double y_radius1_lat1_lon3, y_radius1_lat2_lon3;
         double y_radius1_lat3_lon1, y_radius1_lat3_lon2, y_radius1_lat3_lon3;
 	    double y_radius2_lat1_lon3, y_radius2_lat2_lon3;
 
@@ -1701,7 +1702,20 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 
 	    double y_radius3_lat3_lon3; double y_radius3_lat3_lon1; double y_radius3_lat3_lon2; double y_radius3_lat3;
 	    	    double y_radius3_lat1; double y_radius3_lat2; 
-	    
+
+	double y_radius1_lat1_lon0, y_radius1_lat2_lon0;
+        double y_radius1_lat0_lon1, y_radius1_lat0_lon2, y_radius1_lat0_lon0;
+	    double y_radius2_lat1_lon0, y_radius2_lat2_lon0;
+
+        double y_radius0_lat1_lon1, y_radius0_lat1_lon2, y_radius0_lat2_lon1, y_radius0_lat2_lon2, y_radius0;
+	    double y_radius0_lat1_lon0, y_radius0_lat2_lon0;
+
+	    double y_radius1_lat0;  double y_radius2_lat0_lon0; double y_radius2_lat0_lon1; double y_radius2_lat0_lon2; double y_radius2_lat0;
+
+	    double y_radius0_lat0_lon0; double y_radius0_lat0_lon1; double y_radius0_lat0_lon2; double y_radius0_lat3;
+
+
+		    
 	    double r_ecef2cg_ECEF[3];
   double a_ecef2cg_ECEF[3];
   double T_J2000_to_ECEF[3][3];
@@ -1805,42 +1819,78 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
   else{ // if the user wants to use the 3d gravity map option
     // determine the bin for the radius
 
+
     if (rmag < Gravity->min_radius_map){ // this happens if Gravity->min_radius_map was not set correctly, ie too large compared to the min radius of the satellite
+      iradius0 = 0;
       iradius1 = 0;
       iradius2 = 0;
       iradius3 = 0;
       //      xradius = 0;
     }
-    else if (rmag >= Gravity->max_radius_map){// this happens only if the Gravity->max_radius_map was not set correctly, ie too small compared to the max radius of the satellite
+    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){
+      iradius0 = 0;
+      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map); // should be 0
+      iradius2 = iradius1 + 1;  // 1
+      iradius3 = iradius2 + 1; // 2
+
+    }
+    else if (rmag >= Gravity->max_radius_map + Gravity->dradius_map){
+      iradius1 = Gravity->nradius_map - 1;
+      iradius2 = iradius1;
+      iradius3 = iradius2;
+      iradius0 = iradius1;
+      //      xradius = 0;
+    }
+    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){// this happens only if the Gravity->max_radius_map was not set correctly, ie too small compared to the max radius of the satellite
+      iradius0 = Gravity->nradius_map - 2;
       iradius1 = Gravity->nradius_map - 1;
       iradius2 = iradius1;
       iradius3 = iradius2;
       //      xradius = 0;
     }
+    
     else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){
       iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
       iradius2 = iradius1 + 1; // we know that if we're in this block then iradius1 < Gravity->nradius_map - 1
       iradius3 = iradius2;
+      iradius0 = iradius1-1;
 	}
     else{
       iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
       iradius2 = iradius1 + 1; // we know that if we're in this block then iradius1 < Gravity->nradius_map - 1
       iradius3 = iradius2 + 1; // we know that if we're in this block then iradius2 < Gravity->nradius_map - 1
+      iradius0 = iradius1 - 1;
       // so we're safe doing: iradius2 = iradius1 + 1
       //      xradius = (rmag - Gravity->radius_map[iradius1]) / Gravity->dradius_map;
     }
 
     // determine the bin for the lat
     if (lat_gc*180/M_PI < Gravity->min_lat_map){ // this happens if Gravity->min_lat_map was not set correctly, ie too large compared to the min latitude of the satellite
+      ilat0 = 0;
       ilat1 = 0;
       ilat2 = 0;
       ilat3 = 0;
            xlat = 0;
     }
-    else if (lat_gc*180/M_PI >= Gravity->max_lat_map){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
+    else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){
+      ilat0 = 0;
+      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map); // should be 0
+      ilat2 = ilat1 + 1; // 1
+      ilat3 = ilat2 + 1; // 2
+
+    }
+    else if (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map){
       ilat1 = Gravity->nlat_map - 1;
       ilat2 = ilat1;
       ilat3 = ilat1;
+      ilat0 = ilat1;
+            xlat = 0;
+    }
+    else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
+      ilat1 = Gravity->nlat_map - 1;
+      ilat2 = ilat1;
+      ilat3 = ilat1;
+      ilat0 = ilat1-1;
             xlat = 0;
     }
 
@@ -1848,6 +1898,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
       ilat2 = ilat1 + 1; // we know that if we're in this block then ilat1 < Gravity->nlat_map - 1
       ilat3 = ilat2;
+      ilat0 = ilat1 - 1;
       xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
     }
 
@@ -1855,6 +1906,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
       ilat2 = ilat1 + 1; // we know that if we're in this block then ilat1 < Gravity->nlat_map - 1
       ilat3 = ilat2 + 1;  // we know that if we're in this block then ilat2 < Gravity->nlat_map - 1
+      ilat0 = ilat1 - 1;
       // so we're safe doing: ilat2 = ilat1 + 1
            xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
     }
@@ -1871,14 +1923,21 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
     // so it's impossible that ilon1 == nlon - 1 (since long_gc_corr can't be
     // exactly equal to 360). So we're safe to do: ilon2 = ilon1+1
         ilon2 = ilon1+1;
-    if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
+	if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){//in theory shold ilon3 should be 0 but then the delta lon is big (360) so would have to handle that too - complicated  enough for now
     ilon3 = ilon2;
     order_interpo_map = 2; // otherwise the denominator in the interpolation formula is 0
     }
     else{
     ilon3 = ilon2+1;
     }
-     
+    if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ //in theory shold ilon0 should be Gravity->nlon_map-1 but then the delta lon is big (360) so would have to handle that too - complicated  enough for now
+    ilon0 = 0;
+    }
+    else{
+    ilon0 = ilon1-1;
+    }
+
+    
     //    xlon = (long_gc_corr*180/M_PI - Gravity->lon_map[ilon1]) / Gravity->dlon_map;
     //    printf("%f %d %d %d %f %d %d %d %f %d %d %d\n", rmag - Gravity->radius, iradius1, iradius2, Gravity->nradius_map, lat_gc*180/M_PI, ilat1, ilat2, Gravity->nlat_map, long_gc_corr*180/M_PI, ilon1, ilon2, Gravity->nlon_map);
 

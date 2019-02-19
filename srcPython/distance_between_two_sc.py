@@ -33,6 +33,8 @@ path_folder_results = './'#path_folder_results = '/raid3/Armada/Charles/python/'
 ## If the second spacecraft was propagated from the same main input file in SpOCK as the first spacecraft
 same_spock_input_file = 0
 
+hour_time_step_xticks = 12. # time step of ticks when plotting a function as a function of time
+
 ############ ALGORITHM ############
 # Read input file sat1
 input_filename_sat1 =    sys.argv[1]
@@ -90,7 +92,6 @@ nb_steps = nb_steps_sat1
 ## Set up plot parameters 
 height_fig = 9.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 20 
-hour_time_step_xticks = 3. # time step of ticks when plotting a function as a function of time
 step_plot = dt / 3600. # step in hours to plot
 
 ## Make plots
@@ -135,7 +136,11 @@ for i in range(len(xticks)):
         else:
             date_list_str.append("+" + str(xticks[i] * step_plot))
     else:
-        date_list_str.append( str(date_list[i])[5:10] + "\n(day + " + str(int(xticks[i] * step_plot / 24.)) + ")")
+        #date_list_str.append( str(date_list[i])[5:10] + "\n(day + " + str(int(xticks[i] * step_plot / 24.)) + ")")
+        if i == 0:
+            date_list_str.append("d+" + str(xticks[i] * step_plot/24.))
+        else:        
+            date_list_str.append("+" + str(xticks[i] * step_plot/24.))
 ax.xaxis.set_ticks(xticks)
 ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 ax.margins(0,0)
