@@ -5738,7 +5738,9 @@ int polynomial_interpo(double *val, int n, double *x, double *y, double to_inter
 	    t=t*(x[i]-x[j]);
 	  }
       }
+
     *val=*val+((s/t)*y[i]);
+
   }
   return 0;
 
