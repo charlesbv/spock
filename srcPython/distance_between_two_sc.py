@@ -82,7 +82,7 @@ if nb_steps_sat2 != nb_steps_sat1:
 dist_between_sat1_and_sat2 = np.zeros([nb_steps_sat2])
 for i in range(nb_steps_sat2):
     dist_between_sat1_and_sat2[i] = np.linalg.norm( r_eci_sat2[i,:] - r_eci_sat1[i,:] )
-print min(dist_between_sat1_and_sat2)
+print dist_between_sat1_and_sat2[-1]
 
 # Plot
 dt = dt_sat1

@@ -1686,7 +1686,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
     double y_radius1_lat1, y_radius1_lat2, y_radius2_lat1, y_radius2_lat2;
     int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2, ilon3, ilat3, iradius3;
         double long_gc_corr;
-	//    double xradius, xlat, xlon;
+	   double xradius, xlat, xlon;
         int ii;
     double y_radius1_lat1_lon1, y_radius1_lat1_lon2, y_radius1_lat2_lon1, y_radius1_lat2_lon2, y_radius1;
         double y_radius2_lat1_lon1, y_radius2_lat1_lon2, y_radius2_lat2_lon1, y_radius2_lat2_lon2, y_radius2;
@@ -1817,7 +1817,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       iradius3 = iradius2;
       //      xradius = 0;
     }
-        else if (rmag >= Gravity->max_radius_map-Gravity->dradius_map){
+    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){
       iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
       iradius2 = iradius1 + 1; // we know that if we're in this block then iradius1 < Gravity->nradius_map - 1
       iradius3 = iradius2;
@@ -1835,20 +1835,20 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       ilat1 = 0;
       ilat2 = 0;
       ilat3 = 0;
-      //      xlat = 0;
+           xlat = 0;
     }
     else if (lat_gc*180/M_PI >= Gravity->max_lat_map){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
       ilat1 = Gravity->nlat_map - 1;
       ilat2 = ilat1;
       ilat3 = ilat1;
-      //      xlat = 0;
+            xlat = 0;
     }
 
-    else if (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map){
+    else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){
       ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
       ilat2 = ilat1 + 1; // we know that if we're in this block then ilat1 < Gravity->nlat_map - 1
       ilat3 = ilat2;
-      //xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
+      xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
     }
 
     else{
@@ -1856,7 +1856,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       ilat2 = ilat1 + 1; // we know that if we're in this block then ilat1 < Gravity->nlat_map - 1
       ilat3 = ilat2 + 1;  // we know that if we're in this block then ilat2 < Gravity->nlat_map - 1
       // so we're safe doing: ilat2 = ilat1 + 1
-      //      xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
+           xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
     }
     // determine the bin for the lon
     if (long_gc >= 0){ // long_gc_corr varies from 0 to 2*M_PI
@@ -1884,10 +1884,10 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 
     //    printf("%f %f, %f %f, %f %f\n", rmag - Gravity->radius, xradius, lat_gc*180/M_PI, xlat, long_gc_corr*180/M_PI, xlon);
     // interpolate dUdr, dUdlat, and dUdlong
-    printf("\n%d %d %d %d | %f\n",ilon1, ilon2, ilon3, Gravity->nlon_map, long_gc_corr*180/M_PI);
-    printf("%d %d %d %d | %f\n",ilat1, ilat2, ilat3, Gravity->nlat_map, lat_gc*180/M_PI);
-    printf("%d %d %d %d | %f\n",iradius1, iradius2, iradius3, Gravity->nradius_map, rmag);
-    printf("%d\n", order_interpo_map);
+    /* printf("\n%d %d %d %d | %f\n",ilon1, ilon2, ilon3, Gravity->nlon_map, long_gc_corr*180/M_PI); */
+    /* printf("%d %d %d %d | %f\n",ilat1, ilat2, ilat3, Gravity->nlat_map, lat_gc*180/M_PI); */
+    /* printf("%d %d %d %d | %f\n",iradius1, iradius2, iradius3, Gravity->nradius_map, rmag); */
+    /* printf("%d\n", order_interpo_map); */
     for (ii = 0; ii < 3; ii++){
     y_radius1_lat1_lon1 = Gravity->gravity_map[iradius1][ilat1][ilon1][ii];
     y_radius1_lat1_lon2 = Gravity->gravity_map[iradius1][ilat1][ilon2][ii];
@@ -1909,11 +1909,13 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       polynomial_interpo(&y_radius1_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
     yinter[0] = y_radius1_lat3_lon1; yinter[1] = y_radius1_lat3_lon2; yinter[2] = y_radius1_lat3_lon3;
       polynomial_interpo(&y_radius1_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      //    y_radius1 = y_radius1_lat1*(1-xlat) + y_radius1_lat2*xlat;
+      //          y_radius1 = y_radius1_lat1*(1-xlat) + y_radius1_lat2*xlat;
+	  //  printf("%e\n", y_radius1);
     xinter[0] = Gravity->lat_map[ilat1]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] = Gravity->lat_map[ilat3];
     yinter[0] = y_radius1_lat1; yinter[1] = y_radius1_lat2; yinter[2] = y_radius1_lat3;
       polynomial_interpo(&y_radius1, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);    
-
+      //	  printf("%e\n", y_radius1);
+	  //	  exitf();
       // RADIUS 2
       y_radius2_lat1_lon1 = Gravity->gravity_map[iradius2][ilat1][ilon1][ii];
     y_radius2_lat1_lon2 = Gravity->gravity_map[iradius2][ilat1][ilon2][ii];
@@ -1936,12 +1938,14 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       polynomial_interpo(&y_radius2_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
 
 
-      //          y_radius2 = y_radius2_lat1*(1-xlat) + y_radius2_lat2*xlat;
+                y_radius2 = y_radius2_lat1*(1-xlat) + y_radius2_lat2*xlat;
+		//	printf("%e\n", y_radius2);
           xinter[0] = Gravity->lat_map[ilat1]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] = Gravity->lat_map[ilat3];
     yinter[0] = y_radius2_lat1; yinter[1] = y_radius2_lat2; yinter[2] = y_radius2_lat3;
       polynomial_interpo(&y_radius2, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);
-
-      // RADIUS 2
+      //		printf("%e\n", y_radius2);
+		//		exitf();
+      // RADIUS 3
     y_radius3_lat1_lon1 = Gravity->gravity_map[iradius3][ilat1][ilon1][ii];
     y_radius3_lat1_lon2 = Gravity->gravity_map[iradius3][ilat1][ilon2][ii];
     y_radius3_lat1_lon3 = Gravity->gravity_map[iradius3][ilat1][ilon3][ii];
@@ -1970,7 +1974,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 
       // INTERPO OVER RADIUS
             xinter[0] = Gravity->radius_map[iradius1]; xinter[1] = Gravity->radius_map[iradius2]; xinter[2] = Gravity->radius_map[iradius3];
-	    yinter[0] = y_radius1; yinter[1] = y_radius2; yinter[1] = y_radius3;
+	    yinter[0] = y_radius1; yinter[1] = y_radius2; yinter[2] = y_radius3;
     if (ii == 0){
       // dUdr = y_radius2*xradius + y_radius1*(1-xradius);
       polynomial_interpo(&dUdr, order_interpo_map, xinter, yinter, rmag);    
@@ -5592,6 +5596,7 @@ double compute_earth_emissivity(){ // see http://ocw.upm.es/ingenieria-aeroespac
 }
 
 int polynomial_interpo(double *val, int n, double *x, double *y, double to_inter){
+  //  printf("%d\n", n);
   float s=1,t=1;
   int i,j;
   *val = 0;
