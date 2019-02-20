@@ -26,7 +26,7 @@ date_start = '2018-11-26'
 date_stop = '2018-11-30'
 download_tle = 0
 run_spock = (int)(sys.argv[1])
-prefix = 'grav4_noSolPres_'
+prefix = 'grav50_noSolPres_'
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 sys.path.append("/Users/cbv/work/spock/srcPython")
@@ -122,7 +122,7 @@ date_start_date = tle_epoch[0] + timedelta(seconds = 1)
 date_start = datetime.strftime(date_start_date, "%Y-%m-%dT%H:%M:%S")
 date_stop = date_stop_raw + 'T00:00:00'
 main_input_filename = prefix + 'spock_' + date_start_raw + '_to_' + date_stop_raw + '.txt'
-gravity = 4
+gravity = 50
 dt = 10.
 dt_output = dt
 if run_spock == 1:
@@ -207,6 +207,7 @@ while istep < range(nstep-1):
 
 # Do the same with the STK file
 stk_filename = '/Users/cbv/Downloads/sgp4nov.txt'
+#'sgp4nov.txt'
 #hpop_grav50_noSolPres.txt'
 #sgp4.txt'
 #hpop_grav4_noSolPres.txt'
@@ -251,8 +252,57 @@ while istep < range(nstep-1):
     istep = istep + 1
 
 
+# Do the same with the another STK file
+stkBis_filename = '/Users/cbv/Downloads/hpop_grav50_noSolPresNov.txt'
+#'sgp4nov.txt'
+#hpop_grav50_noSolPres.txt'
+#sgp4.txt'
+#hpop_grav4_noSolPres.txt'
+#hpop_grav4_none.txt'
+#CYGFM05_41884 J2000 Position Velocity.txt'
+stkBis_file = open(stkBis_filename)
+read_stkBis_file = stkBis_file.readlines()
+nheader = 7
+nsteps_stkBis = len(read_stkBis_file) - nheader
+r_stkBis = np.zeros([nsteps_stkBis, 3])
+date_stkBis = []
+for itime in range(nsteps_stkBis):
+    r_stkBis[itime, 0] = read_stkBis_file[itime + nheader].split()[4]
+    r_stkBis[itime, 1] = read_stkBis_file[itime + nheader].split()[5]
+    r_stkBis[itime, 2] = read_stkBis_file[itime + nheader].split()[6]
+    date_stkBis_raw = ' '.join(read_stkBis_file[itime + nheader].split()[:4])
+    date_stkBis.append(datetime.strptime(date_stkBis_raw,\
+                            '%d %b %Y %H:%M:%S.%f')) # 29 Apr 2018 00:00:00.000
+
+# Interpolate the STKBIS position at the TLE epochs
+r_stkBis_interpo = np.zeros([nday, 3])
+iday = 1 # since STKBIS was nitialized with the first tle the position of StkBis
+# at the inizializatino is the same aas the first TLE so ignore the first TLE
+istep = 0
+error_stkBis = np.zeros([nday])
+while istep < range(nstep-1):
+    if ( ( date_stkBis[istep] <= tle_epoch[iday] ) & \
+       ( date_stkBis[istep + 1] > tle_epoch[iday] ) ):
+        #print date_stkBis[istep], tle_epoch[iday], date_stkBis[istep + 1]
+        dtime = (tle_epoch[iday] - date_stkBis[istep]).total_seconds()
+        interval_time = (date_stkBis[istep+1] - date_stkBis[istep]).total_seconds()
+        r0 = r_stkBis[istep, :]
+        r1 = r_stkBis[istep+1, :]
+        interval_r = r1-r0
+        slope = interval_r/interval_time
+        r_stkBis_interpo[iday] = r0 + slope*dtime
+        error_stkBis[iday] = np.linalg.norm(r_stkBis_interpo[iday] - \
+                                           r_tle[iday])
+        iday = iday + 1
+        if iday == nday:
+            break
+    istep = istep + 1
+
+
+    
 print  'SpOCK', error_spock
 print  'STK', error_stk
+print  'STKBIS', error_stkBis
     
 
 # Distance SpOCK to STK -> ONLY IF THE TIME STAMPS ARE THE SAME
@@ -272,29 +322,33 @@ plt.rc('font', weight='bold') ## make the labels of the ticks in bold
 gs = gridspec.GridSpec(1, 1)
 gs.update(left = 0.11, right=0.94, top = 0.93,bottom = 0.12, hspace = 0.01)
 ax = fig.add_subplot(gs[0, 0])
-yaxis = np.linalg.norm(r_stk - r_spock, axis = 1)
+yaxis = np.linalg.norm(r_stk - r_stkBis, axis = 1)
+ax.plot(nb_seconds_since_start/3600., yaxis, linewidth = 2, color = 'r',
+        label = 'SGP4 VS HPOP')#
+yaxis = np.linalg.norm(r_stkBis - r_spock, axis = 1)
 ax.plot(nb_seconds_since_start/3600., yaxis, linewidth = 2, color = 'b',
-        label = 'SpOCK VS STK')#
-for iday in range(nday):
-    if iday == 0:
-        ax.scatter(nb_seconds_tle[iday]/3600.,
-                   error_spock[iday], s = 100, color = 'r', marker = 'o' ,
-                   label = 'SpOCK VS TLE')
-        ax.scatter(nb_seconds_tle[iday]/3600.,
-                   error_stk[iday], s = 100, color = 'green', marker = 'o' ,
-                   label = 'STK VS TLE')
+        label = 'SpOCK VS HPOP')#
 
-    else:
-        ax.scatter(nb_seconds_tle[iday]/3600.,
-                   error_spock[iday], s = 100, color = 'r', marker = 'o' )
-        ax.scatter(nb_seconds_tle[iday]/3600.,
-                   error_stk[iday], s = 100, color = 'green', marker = 'o')
+# for iday in range(nday):
+#     if iday == 0:
+#         ax.scatter(nb_seconds_tle[iday]/3600.,
+#                    error_spock[iday], s = 100, color = 'r', marker = 'o' ,
+#                    label = 'SpOCK VS TLE')
+#         ax.scatter(nb_seconds_tle[iday]/3600.,
+#                    error_stk[iday], s = 100, color = 'green', marker = 'o' ,
+#                    label = 'STK VS TLE')
+
+#     else:
+#         ax.scatter(nb_seconds_tle[iday]/3600.,
+#                    error_spock[iday], s = 100, color = 'r', marker = 'o' )
+#         ax.scatter(nb_seconds_tle[iday]/3600.,
+#                    error_stk[iday], s = 100, color = 'green', marker = 'o')
 
         
 ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
 ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
 ax.set_title(prefix, weight = 'bold', fontsize  = fontsize_plot)
-ax.set_ylim([min(yaxis), max(yaxis)])
+#ax.set_ylim([min(yaxis), max(yaxis)])
 ax.margins(0,0)
 [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
 ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
