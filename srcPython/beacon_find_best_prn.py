@@ -5,8 +5,8 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-prefix_pass = 'pass_9'
-csv_dir = 'outputCygnssMar'
+prefix_pass = 'pass_5'
+csv_dir = 'outputCygnssOct/FM08'
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')
@@ -44,3 +44,7 @@ for ifile in range(nfile):
     elev_tx_from_rx.append( 90. - np.arccos(rx_dot_rx_to_tx_lvlh) / deg2rad )
     max_elev_tx_from_rx[ifile] = np.max(elev_tx_from_rx[-1])
 
+print filename_list
+print max_elev_tx_from_rx
+imax = np.where(max_elev_tx_from_rx == np.max(elev_tx_from_rx))[0][0]
+print filename_list[imax]
