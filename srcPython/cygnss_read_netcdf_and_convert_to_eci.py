@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# This script is a copy of cygnss_read_netcdf.py on 2019/02/22. The only difference is that it also returns the ECI r/v of the CYGNSS (from the ECEF of the netcdf file)
 # This script reads a given netcdf file filename and return information on the satellite and SPs
 # inputs: 
 # - filename: name of netcdf file to read
@@ -33,7 +34,7 @@ import numpy as np
 import os
 import sys
 sys.path.append("/Users/cbv/work/spock/srcPython")
-
+from ecef2eci import *
 from os import listdir
 from read_input_file import *
 from read_output_file import *
@@ -49,12 +50,11 @@ from matplotlib.colors import LogNorm
 from matplotlib import pyplot as plt
 #from ecef2eci import *
 #from eci_to_lvlh import *
-from ecef_to_lvlh import *
 import pickle
 from cygnss_name_to_norad_id import *
 import os.path
 
-def cygnss_read_netcdf(filename):
+def cygnss_read_netcdf_and_convert_to_eci(filename):
     #filename = '/Users/cbv/cygnss/netcdf/2018/270/cyg02.ddmi.s20180927-000000-e20180927-235959.l1.power-brcs.a21.d21.nc'
 
     time_gain_0 = []
@@ -72,6 +72,9 @@ def cygnss_read_netcdf(filename):
     lat_cyg = []
     lon_cyg = []
 
+    r_eci_cyg = []
+    v_eci_cyg = []
+    
     pitch_cyg = []
     roll_cyg = []
     yaw_cyg = []
@@ -296,9 +299,19 @@ def cygnss_read_netcdf(filename):
                 vz_cyg.append(vz_cyg_temp.data[itime])
             else:
                 vz_cyg.append(vz_cyg_temp[itime])
-                
+            r_ecef = [x_cyg[-1]/1000., y_cyg[-1]/1000., z_cyg[-1]/1000.]
+            v_ecef = [vx_cyg[-1]/1000., vy_cyg[-1]/1000., vz_cyg[-1]/1000.]
+            if (len(x_cyg) == 1):
+                load_spice = 1
+            else:
+                load_spice = 0
+            r_eci_temp, v_eci_temp = ecef2eci(r_ecef, v_ecef, date_flight_str_rounded, load_spice)
+            r_eci_cyg.append(r_eci_temp*1000.)
+            v_eci_cyg.append(v_eci_temp*1000.)
             date_flight_rounded.append(date_flight_str_rounded)
             date_flight_rounded_date.append(date_flight_date_rounded)
 
     return date_flight_rounded, lon_cyg, lat_cyg, lon_spec, lat_spec, fom, gps,\
-        x_cyg, y_cyg, z_cyg, vx_cyg, vy_cyg, vz_cyg,date_flight_rounded_date
+        x_cyg, y_cyg, z_cyg, vx_cyg, vy_cyg, vz_cyg,date_flight_rounded_date,\
+        r_eci_cyg, v_eci_cyg
+

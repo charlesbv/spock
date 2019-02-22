@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# This script is a copy of cygnss_read_netcdf.py on 2019/02/22. The only difference is that it also returns the ECI r/v of the CYGNSS (from the ECEF of the netcdf file)
 # This script reads a given netcdf file filename and return information on the satellite and SPs
 # inputs: 
 # - filename: name of netcdf file to read
@@ -32,7 +33,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import os
 import sys
-sys.path.append("/Users/cbv/work/spock/srcPython")
+sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
 
 from os import listdir
 from read_input_file import *

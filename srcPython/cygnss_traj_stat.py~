@@ -1,0 +1,6 @@
+# This script was made to answer Scott's email on Dec 4, 2018.
+# The script:
+1- reads the position and velocity (ECEF r/v) of a given FM between date_start and date_stop
+2- converts ECEF r/v to ECI r/v
+3- converts ECI r/v to osculating orbital elements
+4- for each orbital element, compute distributions
