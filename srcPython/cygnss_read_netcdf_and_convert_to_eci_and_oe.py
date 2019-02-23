@@ -34,6 +34,7 @@ import numpy as np
 import os
 import sys
 sys.path.append("/Users/cbv/work/spock/srcPython")
+from cart2kep import *
 from ecef2eci import *
 from os import listdir
 from read_input_file import *
@@ -54,7 +55,8 @@ import pickle
 from cygnss_name_to_norad_id import *
 import os.path
 
-def cygnss_read_netcdf_and_convert_to_eci(filename):
+# load_spice_override: if 1 then ignored; if 0 then the spice kernels (to convert ecef to eci and orbital elements) won't be loaded, even though it's the first iteration of reading filename
+def cygnss_read_netcdf_and_convert_to_eci_and_oe(filename, load_spice_override):
     #filename = '/Users/cbv/cygnss/netcdf/2018/270/cyg02.ddmi.s20180927-000000-e20180927-235959.l1.power-brcs.a21.d21.nc'
 
     time_gain_0 = []
@@ -315,6 +317,8 @@ def cygnss_read_netcdf_and_convert_to_eci(filename):
                 load_spice = 1
             else:
                 load_spice = 0
+            if (load_spice_override == 0):
+                load_spice = 0
             r_eci_temp, v_eci_temp = ecef2eci(r_ecef, v_ecef, date_flight_str_rounded, load_spice)
             r_eci_cyg.append(r_eci_temp*1000.)
             v_eci_cyg.append(v_eci_temp*1000.)
@@ -330,5 +334,6 @@ def cygnss_read_netcdf_and_convert_to_eci(filename):
 
     return date_flight_rounded, lon_cyg, lat_cyg, lon_spec, lat_spec, fom, gps,\
         x_cyg, y_cyg, z_cyg, vx_cyg, vy_cyg, vz_cyg,date_flight_rounded_date,\
-        r_eci_cyg, v_eci_cyg
+        r_eci_cyg, v_eci_cyg, sma, eccentricity, inclination, long_an, w, \
+        f, period, phase_angle
 
