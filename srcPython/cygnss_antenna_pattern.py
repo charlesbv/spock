@@ -56,7 +56,8 @@
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 res_map = 'coarse' # coarse or fine. To set only if the file is ont binary
-filename_gain_list = ['gaussian_coarse.bin']
+filename_gain_list = ['merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test_elevOpposite.bin']
+
 
 # Coarse .agm
 # ['/Users/cbv/cspice/data/ant_1_starboard_ddmi_v1.agm',
@@ -102,6 +103,7 @@ if ((res_map != 'coarse') & (res_map != 'fine')):
                     
 print 'Map resolution: ' + res_map
 
+deg2rad = np.pi/180.
 nb_file = len(filename_gain_list)
 gain = []
 az_deg = []
@@ -212,6 +214,7 @@ x_label = 'Phi '  + u'(\N{DEGREE SIGN})'
 
 
 for ifile in range(nb_file):
+    # rectangular coordinates: x-axis azimuth, y-axis elevation
     fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
     fig.suptitle(fig_title, y = 0.99,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
     plt.rc('font', weight='bold') ## make the labels of the ticks in bold
@@ -248,46 +251,74 @@ for ifile in range(nb_file):
             Z[iel, :] =  gain[ifile][numEl-1-iel, :]
     else: # first row of gain[ifile] is highest elevation
         Z = gain[ifile]
-    # else:
-    #     if res_map  == 'coarse': 
-    #         numEl = gain[ifile].shape[0]
-    #         numAz = gain[ifile].shape[1]
-    #         Z = np.zeros([numEl, numAz])
-    #         for iel in range(numEl):
-    #             Z[iel, :] =  gain[ifile][numEl-1-iel, :]
-
-    #     else:
-    #         Z = gain[ifile]
     nr, nc = Z.shape
 
     Z = np.ma.array(Z)
 
-    # We are using automatic selection of contour levels;
-    # this is usually not such a good idea, because they don't
-    # occur on nice boundaries, but we do it here for purposes
-    # of illustration.
     levels = np.arange(0, max_gain + 1, 1.)
-    # CS1 = ax.contourf(X, Y, Z, levels,
-    #                   #[-1, -0.1, 0, 0.1],
-    #                   #alpha=0.5,
-    #                   cmap = plt.cm.get_cmap("jet"), # rainbow
-    #                   origin=origin,
-    #                  extend='both')
-
-    # CS2 = ax.contour(X, Y, Z, levels,
-    #                   colors=('k',),
-    #                   linewidths=(1,),
-    #                   origin=origin)
-
-    # CS1.cmap.set_under('white')
-    # CS1.cmap.set_over('white')
-
-    #    CS1 = ax.imshow(Z, extent=[np.min(x), np.max(x), np.min(y), np.max(y)], cmap = 'jet', aspect = 'auto',
     CS1 = ax.imshow(Z, extent=[0, 360, 0, 90], cmap = 'jet', aspect = 'auto',
                     vmin = 0, vmax = max_gain, origin='upper')
     cbar = plt.colorbar(CS1, ax = ax)
     cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')
     filename_gain = filename_gain_list[ifile]
-    fig_save_name = filename_gain.replace(extension, 'pdf')
+    fig_save_name = filename_gain.replace('.' + extension, '.pdf')
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+    
+    # polar coordiantes (azimuth elevation)
+    if res_map == 'coarse': # if fine, then takes forever
+        fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+        fig.suptitle(fig_title, y = 0.99,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+        plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+        gs = gridspec.GridSpec(1, 1)
+        gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+
+        ax = fig.add_subplot(gs[0, 0], projection = 'polar')
+
+        ax.set_title(filename_gain_list[ifile].split('/')[-1], weight = 'bold', fontsize  = fontsize_plot)
+        ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+        ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
+        [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+        plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+
+        origin = 'lower'
+
+        x = np.append(az_deg[ifile], 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+        y = 90 - np.append(el_deg[ifile], 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+        X, Y = np.meshgrid(x, y)
+        extension = filename_gain.split('.')[-1]
+        ax.set_theta_zero_location("N")
+        ax.set_theta_direction(-1)
+
+        #    if extension == 'bin':
+        if el_start_deg[ifile] < el_stop_deg[ifile]: # file from low to high elevation
+            # top of graph is first row of Z,
+            # which should be highest elevation (since y axis is
+            # low (bottom) to high (top) elevation) but since
+            # el_start_deg < el_stop_deg then first row of gain[ifile]
+            # is low elevation so invert it so that first row of Z is
+            # highest elevation
+            Z = np.zeros([numEl, numAz])
+            for iel in range(numEl):
+                Z[iel, :] =  gain[ifile][numEl-1-iel, :]
+        else: # first row of gain[ifile] is highest elevation
+            Z = gain[ifile]
+        nr, nc = Z.shape
+
+        Z = np.ma.array(Z)
+
+        levels = np.arange(0, max_gain + 1, 1.)
+        #CS1 = ax.imshow(Z, extent=[0, 360, 0, 90], cmap = 'jet', aspect = 'auto',
+        #                    vmin = 0, vmax = max_gain, origin='upper')
+        CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                            vmin = 0, vmax = max_gain, alpha = 0.3)                    
+        cbar = plt.colorbar(CS1, ax = ax)
+        cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')
+        filename_gain = filename_gain_list[ifile]
+        fig_save_name = filename_gain.replace('.' + extension, '_polar.pdf')
+        fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
 

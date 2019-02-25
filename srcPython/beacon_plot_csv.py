@@ -10,8 +10,9 @@ import matplotlib.gridspec as gridspec
 from matplotlib import pyplot as plt
 from ecef_to_lvlh import *
 from beacon_read_csv import *
+from struct import *
 deg2rad = np.pi/180
-filename = 'outputCygnssOct/FM01/pass_3_PRN_21.csv'
+filename = 'outputCygnssOct/FM08/pass_5_PRN_21.csv'
 
 date, prn, target_lat, target_lon, target_alt, target_ecef_x, target_ecef_y, target_ecef_z, target_rx_sat_look_angle_az, target_rx_sat_look_angle_el, target_rx_sat_range, sp_lat, sp_lon, sp_ecef_pos_x, sp_ecef_pos_y, sp_ecef_pos_z, sp_gain, rx_sub_sat_lat, rx_sub_sat_lon, rx_sat_ecef_pos_x, rx_sat_ecef_pos_y, rx_sat_ecef_pos_z, rx_sat_ecef_vel_x, rx_sat_ecef_vel_y, rx_sat_ecef_vel_z, tx_sat_ecef_pos_x, tx_sat_ecef_pos_y, tx_sat_ecef_pos_z, rx_power = beacon_read_csv(filename)
 
@@ -177,9 +178,66 @@ for itick in range(nelev_tick):
 ax.yaxis.set_ticklabels(elev_ticklabel)
 
 
+# ADD THE ANTENNA MAPS
+## read the antenna map
+filename_gain = 'CygnssAntenna/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test_elevOpposite.bin'
+extension = filename_gain.split('.')[-1]
+file_gain = open(filename_gain, "rb")
+x1 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+x2 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+numAz = unpack('i', file_gain.read(4))[0]
+numEl = unpack('i', file_gain.read(4))[0]
+az_start_deg = unpack('d', file_gain.read(8))[0]
+el_start_deg = unpack('d', file_gain.read(8))[0]
+az_inc_deg = unpack('d', file_gain.read(8))[0]
+el_inc_deg = unpack('d', file_gain.read(8))[0]
+#!!!! for some reason, a negative sign is needed for this file
+el_inc_deg = -el_inc_deg
+az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+az_deg = np.linspace(az_start_deg, az_stop_deg, numAz)
+el_stop_deg = el_start_deg + el_inc_deg * (numEl-1)
+el_deg = np.linspace(el_start_deg, el_stop_deg, numEl)
+gain = np.zeros([numEl,numAz])
+for iaz in range(numAz):
+    for iel in range(numEl):
+        gain[iel, iaz] = unpack('d', file_gain.read(8))[0]
+file_gain.close
+
+## ADD THE MAP TO THE POLAR COORD PLOT
+x = np.append(az_deg, 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+y = 90 - np.append(el_deg, 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+X, Y = np.meshgrid(x, y)
+extension = filename_gain.split('.')[-1]
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+
+#    if extension == 'bin':
+if el_start_deg < el_stop_deg: # file from low to high elevation
+    # top of graph is first row of Z,
+    # which should be highest elevation (since y axis is
+    # low (bottom) to high (top) elevation) but since
+    # el_start_deg < el_stop_deg then first row of gain
+    # is low elevation so invert it so that first row of Z is
+    # highest elevation
+    Z = np.zeros([numEl, numAz])
+    for iel in range(numEl):
+        Z[iel, :] =  gain[numEl-1-iel, :]
+else: # first row of gain is highest elevation
+    Z = gain
+nr, nc = Z.shape
+
+Z = np.ma.array(Z)
+max_gain = 15
+CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                    vmin = 0, vmax = max_gain, alpha = 0.3)                    
+cbar = plt.colorbar(CS1, ax = ax, pad = 0.075)
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'normal')
+
 fig_save_name = filename.replace('.csv', '_beacon_wrt_fm_body.pdf')
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
+
+sys.exit()
 
 # POSITION OF BEACON POLAR COORDINATE IN CYGNSS ORBIT (not body) REFCE FRAME
 width_fig = 15.
