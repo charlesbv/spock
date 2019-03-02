@@ -521,4 +521,4 @@ int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
 int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
 double compute_earth_albedo();
 double compute_earth_emissivity();
-int polynomial_interpo(double *val, int  n, double *x, double *y, double to_inter);
+int polynomial_interpo(int printVar, double *val, int  n, double *x, double *y, double to_inter);
