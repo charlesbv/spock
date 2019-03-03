@@ -33,7 +33,7 @@ path_folder_results = './'#path_folder_results = '/raid3/Armada/Charles/python/'
 ## If the second spacecraft was propagated from the same main input file in SpOCK as the first spacecraft
 same_spock_input_file = 0
 
-hour_time_step_xticks = 12. # time step of ticks when plotting a function as a function of time
+hour_time_step_xticks = 24./30#12. # time step of ticks when plotting a function as a function of time
 
 ############ ALGORITHM ############
 # Read input file sat1
@@ -105,7 +105,7 @@ x_axis = np.arange(0, nb_steps, step_plot_in_index)
 ### Distance between spacecraft 1 and 2
 fig_title = ''#'Distance between spacecraft 1 and 2'
 y_label = 'Distance (m)'
-x_label = 'Time (hours)'
+x_label = 'Time (days)'
 y_axis = dist_between_sat1_and_sat2 * 1000.
 factor_on_y = 1
 ### Plot with these parameters
