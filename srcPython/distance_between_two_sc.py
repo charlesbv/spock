@@ -105,7 +105,6 @@ x_axis = np.arange(0, nb_steps, step_plot_in_index)
 ### Distance between spacecraft 1 and 2
 fig_title = ''#'Distance between spacecraft 1 and 2'
 y_label = 'Distance (m)'
-x_label = 'Time (days)'
 y_axis = dist_between_sat1_and_sat2 * 1000.
 factor_on_y = 1
 ### Plot with these parameters
@@ -118,7 +117,7 @@ ax = fig.add_subplot(gs[0, 0])
 
 ax.plot(x_axis[:-1], y_axis[0:nb_steps:step_plot_in_index][:-1] * factor_on_y, linewidth = 2, color = 'k')#ax.plot(x_axis, y_axis[0:nb_steps:step_plot_in_index] * factor_on_y, linewidth = 2, color = 'k')
 ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+
 
 [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
 ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
@@ -131,18 +130,21 @@ nb_hours_simu = nb_steps * dt/ 3600.
 date_list = [date_start + timedelta(hours=x) for x in np.arange(0, nb_hours_simu+1, hour_time_step_xticks)]
 for i in range(len(xticks)):
     if hour_time_step_xticks < 12:
+        x_label = 'Time (hours)'
         if i == 0:
             date_list_str.append("h+" + str(xticks[i] * step_plot))
         else:
             date_list_str.append("+" + str(xticks[i] * step_plot))
     else:
         #date_list_str.append( str(date_list[i])[5:10] + "\n(day + " + str(int(xticks[i] * step_plot / 24.)) + ")")
+        x_label = 'Time (days)'
         if i == 0:
             date_list_str.append("d+" + str(xticks[i] * step_plot/24.))
         else:        
             date_list_str.append("+" + str(xticks[i] * step_plot/24.))
 ax.xaxis.set_ticks(xticks)
 ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
 ax.margins(0,0)
 
 if save_results == 1:

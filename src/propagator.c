@@ -1464,12 +1464,15 @@ int compute_dxdt(   double          drdt[3],
   if (INTEGRATOR->include_solar_pressure == 1){
     compute_solar_pressure(a_solar_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
     v_add(dvdt, dvdt , a_solar_pressure_INRTL);
+    //  v_norm_print(a_solar_pressure_INRTL, "\nSun");
   }
 
   /* Earth radiation pressure */
   if (INTEGRATOR->include_earth_pressure == 1){
     if (OPTIONS->opengl != 1){
     compute_earth_pressure(a_earth_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
+    //        v_norm_print(a_earth_pressure_INRTL, "Earth");
+
     v_add(dvdt, dvdt , a_earth_pressure_INRTL);
     }
     else{
@@ -2938,14 +2941,13 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   // beta_max and 0), and that MP is equal to PARAMS->EARTH.radius*sin(beta), then
   // M is necessarily a point on the surface of the Earth (and in sight from the satellite)
 
-  int nbeta =  10;// we want 3 slices, the first one being the cap
+      int nbeta =  5;// number of slices, the first one being the cap -> 5 is the min number to keep good accuracy                  
   int ibeta = 0;
-  int ndelta_at_beta_max = 50.;
+  int ndelta_at_beta_max = 10.; // 10 is the min number to keep good accuracy
   double ddelta_length_at_beta_max = 2*M_PI*PARAMS->EARTH.radius*sin(beta_max) / ndelta_at_beta_max;
-
   // find the "latitudinal" angular width of each Earth element that is not the "polar cap" and find the "latitudinal" angular width of the Earth element that is the polar cap
   // -> all elts that are not the polar cap have the same "latitudinal" angular width. Howver, the "longitudinal" angular width is calculated so that each elt has the same projected attenuated area (see further comments)
-  double dbeta_cap = 0.5 * M_PI / 180.;
+  double dbeta_cap = 0.5 * M_PI / 180.; ; // -> any number smaller than 0.5 deg is ok
   double dbeta_not_cap = (beta_max - dbeta_cap)/(nbeta - 1); // for example, if nbeta = 3,  we want 3 slices, the first one being the cap
   double ap, bp, cp; // the euqation to find dbeta_cap is quadratic. It comes from the fact that we want 
   /* ap = 4*M_PI*PARAMS->EARTH.radius; */
@@ -3107,7 +3109,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	    area_earth_elt = PARAMS->EARTH.radius * dbeta_not_cap * mp * ddelta;
 	    delta_max = 2*M_PI;
 	  }
-	  area_earth_elt = area_earth_elt*cos_kappa; // projection of the earth element area on the direction  "earth elt to satellite" 
+	  	  area_earth_elt = area_earth_elt*cos_kappa; // projection of the earth element area on the direction  "earth elt to satellite" 
 	  // the goal is to have area_earth_elt/(M_PI * sm * sm) constant from a beta to another
 	  if (idelta == 1){ // no need to do those calcaultions for more delta since it's not delta dependent. Still do it in the delta while loop though cause r_earth_elt_lvlh is needed here
 		            /* printf("%f %f %f\n", beta*180/M_PI, dbeta*180/M_PI, beta_max*180/M_PI); */
@@ -3160,7 +3162,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	delta = delta + ddelta;
 
       } // end of go over all delta
-      printf("ndelta %d\n", idelta);
+      //      printf("ndelta %d\n", idelta);
       if (ibeta == nbeta-1){ 
 	beta = 0;
       }
