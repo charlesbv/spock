@@ -33,7 +33,7 @@ path_folder_results = './'#path_folder_results = '/raid3/Armada/Charles/python/'
 ## If the second spacecraft was propagated from the same main input file in SpOCK as the first spacecraft
 same_spock_input_file = 0
 
-hour_time_step_xticks = 24./30#12. # time step of ticks when plotting a function as a function of time
+hour_time_step_xticks = 3.#12. # time step of ticks when plotting a function as a function of time
 
 ############ ALGORITHM ############
 # Read input file sat1
