@@ -2938,12 +2938,20 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   // beta_max and 0), and that MP is equal to PARAMS->EARTH.radius*sin(beta), then
   // M is necessarily a point on the surface of the Earth (and in sight from the satellite)
 
-  int nbeta =  3;// we want 3 slices, the first one being the cap
+  int nbeta =  10;// we want 3 slices, the first one being the cap
   int ibeta = 0;
-  double dbeta_cap = 0.1 * M_PI / 180.;
-  double dbeta_not_cap = (beta_max - dbeta_cap)/(nbeta - 1); // for example, if nbeta = 3,  we want 3 slices, the first one being the cap
-  int ndelta_at_beta_max = 12.;
+  int ndelta_at_beta_max = 50.;
   double ddelta_length_at_beta_max = 2*M_PI*PARAMS->EARTH.radius*sin(beta_max) / ndelta_at_beta_max;
+
+  // find the "latitudinal" angular width of each Earth element that is not the "polar cap" and find the "latitudinal" angular width of the Earth element that is the polar cap
+  // -> all elts that are not the polar cap have the same "latitudinal" angular width. Howver, the "longitudinal" angular width is calculated so that each elt has the same projected attenuated area (see further comments)
+  double dbeta_cap = 0.5 * M_PI / 180.;
+  double dbeta_not_cap = (beta_max - dbeta_cap)/(nbeta - 1); // for example, if nbeta = 3,  we want 3 slices, the first one being the cap
+  double ap, bp, cp; // the euqation to find dbeta_cap is quadratic. It comes from the fact that we want 
+  /* ap = 4*M_PI*PARAMS->EARTH.radius; */
+  /* bp = -(ddelta_length_at_beta_max + 4*beta_max*M_PI*PARAMS->EARTH.radius) */
+
+  
   double dbeta;
   double ddelta;// = 0.1 * M_PI / 180.;
   double r_earth_elt_lvlh[3];
@@ -3056,7 +3064,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     double delta_max = 1;  // don't care about the value now, it's going to be modified as soon as we enter the while loop on delta
     //                  printf("beta_max %f\n", beta_max*180/M_PI);
     double f_beta, f_beta_max;
-    printf("\n\n");
+    //    printf("\n\n");
     while (ibeta != nbeta){ // move M until beta reaches beta_max (see satellite at horizon)
       ibeta = ibeta + 1;
       sp = radius_sc - PARAMS->EARTH.radius*cos(beta); // distance along z_lvlh
@@ -3084,7 +3092,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	  v_norm(r_earth_elt_lvlh_norm, r_earth_elt_lvlh);
 	  v_scale(r_earth_elt_lvlh_norm_minus, r_earth_elt_lvlh_norm, -1);// vector MS
 	  v_dot(&cos_kappa, earth_center_to_earth_elt_lvlh_norm, r_earth_elt_lvlh_norm_minus );
-	  f_beta = cos_kappa;// / (M_PI * sm * sm);
+	  f_beta = cos_kappa / (M_PI * sm * sm);
 	  if (ibeta == 1){
 	    f_beta_max = f_beta;
 	  }
@@ -3102,8 +3110,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	  area_earth_elt = area_earth_elt*cos_kappa; // projection of the earth element area on the direction  "earth elt to satellite" 
 	  // the goal is to have area_earth_elt/(M_PI * sm * sm) constant from a beta to another
 	  if (idelta == 1){ // no need to do those calcaultions for more delta since it's not delta dependent. Still do it in the delta while loop though cause r_earth_elt_lvlh is needed here
-		            printf("%f %f %f\n", beta*180/M_PI, dbeta*180/M_PI, beta_max*180/M_PI);
-			    printf("C = %e | physical area %f | ddelta %f\n", area_earth_elt, area_earth_elt/cos_kappa, ddelta*180/M_PI); 
+		            /* printf("%f %f %f\n", beta*180/M_PI, dbeta*180/M_PI, beta_max*180/M_PI); */
+			    /* printf("C = %e | physical area %f | ddelta %f\n", area_earth_elt/(M_PI * sm * sm), area_earth_elt/cos_kappa, ddelta*180/M_PI);  */
 
 
 		}
