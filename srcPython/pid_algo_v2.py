@@ -20,7 +20,7 @@ rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the i
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
+no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho = 0.1 # the rho control will vary by this amount to find the optimum rho over an interval
@@ -155,7 +155,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 54#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 49#54#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
