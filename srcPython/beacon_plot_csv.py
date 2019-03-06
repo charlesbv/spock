@@ -11,8 +11,9 @@ from matplotlib import pyplot as plt
 from ecef_to_lvlh import *
 from beacon_read_csv import *
 from struct import *
+from tabulate import tabulate
 deg2rad = np.pi/180
-filename = 'outputCygnssOct/FM08/pass_5_PRN_21.csv'
+filename = 'outputCygnssOct/FM01/pass_3_PRN_21.csv'
 
 date, prn, target_lat, target_lon, target_alt, target_ecef_x, target_ecef_y, target_ecef_z, target_rx_sat_look_angle_az, target_rx_sat_look_angle_el, target_rx_sat_range, sp_lat, sp_lon, sp_ecef_pos_x, sp_ecef_pos_y, sp_ecef_pos_z, sp_gain, rx_sub_sat_lat, rx_sub_sat_lon, rx_sat_ecef_pos_x, rx_sat_ecef_pos_y, rx_sat_ecef_pos_z, rx_sat_ecef_vel_x, rx_sat_ecef_vel_y, rx_sat_ecef_vel_z, tx_sat_ecef_pos_x, tx_sat_ecef_pos_y, tx_sat_ecef_pos_z, rx_power = beacon_read_csv(filename)
 
@@ -108,7 +109,30 @@ ax.yaxis.set_ticklabels(elev_ticklabel)
     
 #fig.set_size_inches(10, 20)
 fig_save_name = filename.replace('.csv', '_fm_wrt_beacon.pdf')
-fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+# Table of elveatio vs time every 10 degrees of elvevation
+n = len(target_rx_sat_look_angle_el)
+i = 1
+kel = 10
+table_elev = []
+table_elev.append([format(np.abs(target_rx_sat_look_angle_el[0]), ".0f")+ u'\N{DEGREE SIGN}',  date[0][11:]])
+# eleve from 0 to max, veery 10 degrees
+for kel in np.arange(10, 91, 10):
+    try:
+        ii = np.where(target_rx_sat_look_angle_el >= kel)[0][0]
+        table_elev.append([format(target_rx_sat_look_angle_el[ii], ".0f")+ u'\N{DEGREE SIGN}',  date[ii][11:]])
+    except IndexError: # means thakel is greater than the max elev
+        imax = np.where(target_rx_sat_look_angle_el == np.max(target_rx_sat_look_angle_el))[0][0]
+        table_elev.append([format(target_rx_sat_look_angle_el[imax], ".0f")+ u'\N{DEGREE SIGN}',  date[imax][11:]])
+        break
+kel_max = kel-10
+for kel in np.arange(kel_max, 0, -10):
+    ii = np.where(target_rx_sat_look_angle_el[imax+1:] <= kel)[0][0]
+    table_elev.append([format(target_rx_sat_look_angle_el[imax+1+ii], ".0f")+ u'\N{DEGREE SIGN}',  date[imax+1+ii][11:]])
+table_elev.append([format(np.abs(target_rx_sat_look_angle_el[-1]), ".0f")+ u'\N{DEGREE SIGN}',  date[-1][11:]])
+print tabulate(table_elev, headers=['FM\nelev.', 'Time\n(UTC)'])
 # POSITION OF GPS POLAR COORDINATE IN CYGNSS ORBIT (not body) REFCE FRAME
 width_fig = 15.
 height_fig = width_fig * 3 /4
