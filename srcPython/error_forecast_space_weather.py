@@ -19,6 +19,7 @@
 
 import os
 from os import listdir
+from matplotlib.colors import LogNorm
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from os.path import isfile, join
@@ -27,9 +28,13 @@ import numpy as np
 from matplotlib  import pyplot as plt
 import sys
 import ipdb
-# format = 'swpc_f107' # swpc_f107, swpc_ap
-def read_obs(format, filename, date_start_str, date_stop_str):
-    print 'Format of the observation file: ' + format
+import matplotlib.gridspec as gridspec
+
+compute_dist = 0
+
+# format_data = 'swpc_f107' # swpc_f107, swpc_ap
+def read_obs(format_data, filename, date_start_str, date_stop_str):
+    print 'Format of the observation file: ' + format_data
     print 'Filename: ' + filename
     print 'Start date: ' + date_start_str
     print 'End date: ' + date_stop_str
@@ -56,12 +61,12 @@ def read_obs(format, filename, date_start_str, date_stop_str):
     obs_start = iobs
     date_obs = [] # !!!!!! if everything goes well then: date_obs = date_pred. Otherwise, there is a problem somewhere so debug!
     skip_lines = 0
-    if (format == 'swpc_f107'):
+    if (format_data == 'swpc_f107'):
         col_start = 12; col_stop = 15
-    elif (format == 'swpc_ap'):
+    elif (format_data == 'swpc_ap'):
         col_start = 59; col_stop = 62
     for iobs in range( obs_start, obs_start + nobs):
-        if ((format == 'swpc_f107') | (format == 'swpc_ap')):
+        if ((format_data == 'swpc_f107') | (format_data == 'swpc_ap')):
             if ( read_file_obs[skip_lines + n_hdr_obs + iobs].split()[0] != ":Product:" ):
                 date_obs_temp = read_file_obs[skip_lines + n_hdr_obs + iobs].split()[0] + read_file_obs[skip_lines + n_hdr_obs + iobs].split()[1] + read_file_obs[skip_lines + n_hdr_obs + iobs].split()[2]
                 date_obs.append( datetime.strptime( date_obs_temp, "%Y%m%d" ) )
@@ -74,12 +79,12 @@ def read_obs(format, filename, date_start_str, date_stop_str):
 
     return date_obs, obs
 
-# format: swpc_3d
-def read_pred(format, filename):
-    print 'Format of the prediction file: ' + format
+# format_data: swpc_3d
+def read_pred(format_data, filename):
+    print 'Format of the prediction file: ' + format_data
     print 'Filename: ' + filename
     bug = 0
-    if format == 'swpc_3d':
+    if format_data == 'swpc_3d':
         file_pred = open(filename)
         read_file_pred = file_pred.readlines()
         nday = 3
@@ -110,7 +115,7 @@ def read_pred(format, filename):
                 pred_ap[:] = np.zeros([nday])-999
         except IndexError:
             pred_ap = np.zeros([nday]) - 999
-    if format == 'swpc_27':
+    if format_data == 'swpc_27':
         nday = 27
         # F10.7
         pred_f107 = np.zeros([nday])
@@ -137,18 +142,20 @@ error_ap_all_day = []
 date_bug = []
 date_ok = []
 year_arr = np.zeros([nyear])
+std_f107 = np.zeros([nyear, nday_pred])
+std_ap = np.zeros([nyear, nday_pred])
 for year in range(year_start, year_stop + 1):
     iyear = iyear + 1
     # Observations
-    format = 'swpc_f107' # swpc_f107, swpc_ap
+    format_data = 'swpc_f107' # swpc_f107, swpc_ap
     filename = '/Users/cbv/work/spaceWeather/swpcObs/' + str(year) + '_DSD.txt'
     date_start_str = str(year) + '-01-01'
     date_stop_str = str(year) + '-12-31'
-    date_obs_f107, f107_obs = read_obs(format, filename, date_start_str, date_stop_str)
+    date_obs_f107, f107_obs = read_obs(format_data, filename, date_start_str, date_stop_str)
  
-    format = 'swpc_ap' # swpc_f107, swpc_ap
+    format_data = 'swpc_ap' # swpc_f107, swpc_ap
     filename = '/Users/cbv/work/spaceWeather/swpcObs/' + str(year) + '_DGD.txt'
-    date_obs_ap, ap_obs = read_obs(format, filename, date_start_str, date_stop_str)
+    date_obs_ap, ap_obs = read_obs(format_data, filename, date_start_str, date_stop_str)
 
     if year in leap_year:
         nday = 366
@@ -160,10 +167,10 @@ for year in range(year_start, year_stop + 1):
         print date_obs_f107[iday]
         date_now = str(datetime.strptime(str(year) + '-01-01', '%Y-%m-%d') + timedelta(days = iday))[:10].replace('-', '')
         # # Predictions
-        format = 'swpc_3d' # swpc_3d
+        format_data = 'swpc_3d' # swpc_3d
         filename = '/Users/cbv/work/spaceWeather/swpcPred/3day/' + str(year) + '_RSGA/' + date_now + 'RSGA.txt'
         try:
-            date_pred, f107_pred, ap_pred = read_pred(format, filename)
+            date_pred, f107_pred, ap_pred = read_pred(format_data, filename)
         except IOError:
             date_bug.append(date_now)
             continue
@@ -176,6 +183,209 @@ for year in range(year_start, year_stop + 1):
     error_f107[iyear, :] = np.mean(error_f107_temp, axis = 0)
     error_ap[iyear, :] = np.mean(error_ap_temp, axis = 0)
     year_arr[iyear] = year
+    for ihor in range(nday_pred):
+        std_f107[iyear, ihor] = np.std(error_f107_all_day[-1][:, ihor])
+        std_ap[iyear, ihor] = np.std(error_ap_all_day[-1][:, ihor])
 
 
-# Figures
+## Parameters for the figure
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 20 
+ratio_fig_size = 4./3
+width_fig = 25
+color_arr = ['blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen', 'black']
+        
+if compute_dist == 1:
+    f107_bin_range_in = np.array([-15.        , -10.71428571,  -6.42857143,  -2.14285714,
+                               2.14285714,   6.42857143,  10.71428571,  15.        ])
+    ap_bin_range_in = f107_bin_range_in
+
+
+    # Compute distributions of forecast errors in F10.7 and Ap
+
+    max_dist = 60
+    for year in range(year_start, year_stop + 1):
+        for hor in range(1, 4):
+            # year = 2013 # any year between year_start and year_stop
+            # hor = 1 # 1, 2, ..., nday_pred
+            iyear = np.where(year_arr == year)[0][0]
+            ihor = hor - 1
+
+            # Figures
+            ## Distirbution of forecast error of F10.7
+            yf107temp = error_f107_all_day[iyear][:, ihor]
+            yf107 = np.copy(yf107temp)
+            outlier_min = np.where(yf107 < np.min(f107_bin_range_in))[0]
+            yf107[outlier_min] = np.min(f107_bin_range_in) + 0.00001
+            outlier_max = np.where(yf107 > np.max(f107_bin_range_in))[0]
+            yf107[outlier_max] = np.max(f107_bin_range_in) - 0.00001
+            hist_f107_temp = np.histogram(yf107, range = [np.min(f107_bin_range_in),
+                        np.max(f107_bin_range_in)], bins = len(f107_bin_range_in)-1)
+            hist_f107 = hist_f107_temp[0]*100. / np.sum(hist_f107_temp[0]) 
+            f107_bin_range = hist_f107_temp[1] # !!!!!!!! f107_bin_range should be equal to f107_bin_range_in
+            f107_bin_center = (f107_bin_range[:-1] + np.roll(f107_bin_range, -1)[:-1])/2
+
+            fig_title = 'PDF of F10.7 forecast error at +' + str((int)(hor)) + ' day - ' + str((int)(year))
+            y_label = 'Probability (%)'
+            x_label = 'F10.7 forecast error'
+            fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+            plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+            gs = gridspec.GridSpec(1, 1)
+            gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+            ax = fig.add_subplot(gs[0, 0])
+
+            ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+            ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+            ax.set_title(fig_title, weight = 'normal', fontsize  = fontsize_plot)
+
+            [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+            ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+            plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+            bar_f107 = ax.bar(f107_bin_center, hist_f107, f107_bin_center[1] - f107_bin_center[0], 0 , linewidth = 2)
+            if np.max(hist_f107) > max_dist:
+                ax.text(f107_bin_range_in[len(f107_bin_range_in) / 2-1], max_dist, 'Max: ' + format(np.max(hist_f107),'.0f')+ '% -->', rotation = 90, fontsize = fontsize_plot, verticalalignment = 'top', horizontalalignment = 'right')
+            ax.margins(0,0)
+            ax.set_ylim([0, max_dist])
+            fig_save_name = 'fig/pdf/f107/pdf_f107_error_' + str((int)(hor)) + 'd_' + str((int)(year))
+            fig_save_name =  fig_save_name + '.pdf'
+            fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+            ## Distirbution of forecast error of Ap
+            yaptemp = error_ap_all_day[iyear][:, ihor]
+            yap = np.copy(yaptemp)
+            outlier_min = np.where(yap < np.min(ap_bin_range_in))[0]
+            yap[outlier_min] = np.min(ap_bin_range_in) + 0.00001
+            outlier_max = np.where(yap > np.max(ap_bin_range_in))[0]
+            yap[outlier_max] = np.max(ap_bin_range_in) - 0.00001
+            hist_ap_temp = np.histogram(yap, range = [np.min(ap_bin_range_in),
+                        np.max(ap_bin_range_in)], bins = len(ap_bin_range_in)-1)
+            hist_ap = hist_ap_temp[0]*100. / np.sum(hist_ap_temp[0]) 
+            ap_bin_range = hist_ap_temp[1] # !!!!!!!! ap_bin_range should be equal to ap_bin_range_in
+            ap_bin_center = (ap_bin_range[:-1] + np.roll(ap_bin_range, -1)[:-1])/2
+            # if np.max(hist_ap) > max_dist:
+            #     max_dist = np.max(hist_ap)
+
+            fig_title = 'PDF of Ap forecast error at +' + str((int)(hor)) + ' day - ' + str((int)(year))
+            y_label = 'Probability (%)'
+            x_label = 'Ap forecast error'
+            fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+            plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+            gs = gridspec.GridSpec(1, 1)
+            gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+            ax = fig.add_subplot(gs[0, 0])
+
+            ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+            ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+            ax.set_title(fig_title, weight = 'normal', fontsize  = fontsize_plot)
+
+            [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+            ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+            plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+
+
+            bar_ap = ax.bar(ap_bin_center, hist_ap, ap_bin_center[1] - ap_bin_center[0], 0 , linewidth = 2)
+            if np.max(hist_ap) > max_dist:
+                ax.text(ap_bin_range_in[len(ap_bin_range_in) / 2-1], max_dist, 'Max: ' + format(np.max(hist_ap),'.0f')+ '% -->', rotation = 90, fontsize = fontsize_plot, verticalalignment = 'top', horizontalalignment = 'right')
+
+            ax.margins(0,0)        
+            ax.set_ylim([0, max_dist])
+            fig_save_name = 'fig/pdf/ap/pdf_ap_error_' + str((int)(hor)) + 'd_' + str((int)(year))
+            fig_save_name =  fig_save_name + '.pdf'
+            fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+        
+# Standard deviation VS time
+# Get the std values from swpc (stops in 2013 but has pred horizons at +4, 5, 6, and 7 days)
+swpc_f107_error_filename = '/Users/cbv/work/spaceWeather/table_swpc_f107_error.txt'
+swpc_f107_error_file = open(swpc_f107_error_filename)
+read_swpc_f107 = swpc_f107_error_file.readlines()
+nhor_swpc = 7
+std_f107_swpc = np.zeros([len(read_swpc_f107), nhor_swpc])
+std_f107_swpc = np.zeros([len(read_swpc_f107), nhor_swpc])
+year_f107_swpc = np.zeros([len(read_swpc_f107)])
+for i in range(len(read_swpc_f107)):
+    year_f107_swpc[i] =  read_swpc_f107[i].split()[0]
+    for   ihor in   range(nhor_swpc):
+        std_f107_swpc[i, ihor] = read_swpc_f107[i].split()[1+ihor]
+swpc_ap_error_filename = '/Users/cbv/work/spaceWeather/table_swpc_ap_error.txt'
+swpc_ap_error_file = open(swpc_ap_error_filename)
+read_swpc_ap = swpc_ap_error_file.readlines()
+nhor_swpc = 7
+std_ap_swpc = np.zeros([len(read_swpc_ap), nhor_swpc])
+std_ap_swpc = np.zeros([len(read_swpc_ap), nhor_swpc])
+year_ap_swpc = np.zeros([len(read_swpc_ap)])
+for i in range(len(read_swpc_ap)):
+    year_ap_swpc[i] =  read_swpc_ap[i].split()[0]
+    for   ihor in   range(nhor_swpc):
+        std_ap_swpc[i, ihor] = read_swpc_ap[i].split()[1+ihor]
+
+fig_title = 'Standard deviation of F10.7 error VS time - ' + str((int)(year))
+y_label = 'Standard deviation'
+x_label = 'Time (years)'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(fig_title, weight = 'normal', fontsize  = fontsize_plot)
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+
+for ihor in range(nday_pred):
+    ax.plot(range(year_start, year_stop + 1), std_f107[:, ihor], linewidth = 2, color = color_arr[ihor], label ='+' + str((int)(ihor + 1)) + ' day')
+    ax.scatter(range(year_start, year_stop + 1), std_f107[:, ihor], linewidth = 2, color = color_arr[ihor])
+
+for ihor in range(nday_pred, nhor_swpc):
+    ax.plot(year_f107_swpc, std_f107_swpc[:, ihor], linewidth = 2, color = color_arr[ihor], label ='+' + str((int)(ihor + 1)) + ' day - SWPC')
+    ax.scatter(year_f107_swpc, std_f107_swpc[:, ihor], linewidth = 2, color = color_arr[ihor])
+
+legend = ax.legend(loc='upper left', bbox_to_anchor=(0, 1), numpoints = 1,  title="Pred. horizon", fontsize = fontsize_plot)
+legend.get_title().set_fontsize(str(fontsize_plot))
+ax.margins(0,0)
+ax.xaxis.set_ticks(range(year_start, year_stop + 1, 2))
+fig_save_name = 'fig/std_f107_error_vs_time'
+fig_save_name =  fig_save_name + '.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+    
+
+raise Exception
+        
+
+## F10.7 VS time
+fig_title = 'F10.7 forecast error VS time - ' + str((int)(year))
+y_label = 'F10.7 error'
+x_label = 'Time (days)'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(fig_title, weight = 'normal', fontsize  = fontsize_plot)
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+ 
+
+for ihor in range(nday_pred):
+    ax.plot(error_f107_all_day[iyear][:, ihor], linewidth = 2, color = color_arr[ihor], label ='+' + str((int)(ihor + 1)) + ' day')
+legend = ax.legend(loc='upper left', bbox_to_anchor=(0, 1), numpoints = 1,  title="Pred. horizon", fontsize = fontsize_plot)
+legend.get_title().set_fontsize(str(fontsize_plot))
+ax.margins(0,0)
+fig_save_name = 'fig/f107_error_vs_time_' + str((int)(year))
+fig_save_name =  fig_save_name + '.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
