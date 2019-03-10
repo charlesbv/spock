@@ -11,7 +11,7 @@ pickle_root_list = ["earth_sp13_mid", "gravMap_sp13_mid"]
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'amplitude' # raw, amplitude
+toplot = 'rho_control' # raw, amplitude, rho_control
 color_arr = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -93,7 +93,7 @@ for ipickle in range(nb_pickle):
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                      index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr]= pickle.load(open(pickle_root + ".pickle"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval]= pickle.load(open(pickle_root + ".pickle"))
 
 
 
@@ -135,6 +135,9 @@ for ipickle in range(nb_pickle):
         
         ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr )* 1000., linewidth = 2, color = color_arr[ipickle], label = label)
 
+    elif toplot == 'rho_control':
+        ax.plot(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
+        ax.scatter(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
     if ipickle == 0:
         pickle_root_concatenate = pickle_root_list[ipickle]
     else:
@@ -142,7 +145,7 @@ for ipickle in range(nb_pickle):
 ax.margins(0,0)
 
 # ax.plot([0, duration_simu], [0,0], linestyle = 'dashed', linewidth = 2, color = 'black')
-ax.set_xlim([0, 198.]); #ax.set_ylim([-20, 20]) 
+ax.set_xlim([0, 198.]); #ax.set_ylim([-20, 20])
 # ax.text(duration_simu/2., -200, 'SpOCK in front -> need rho_control < 0', horizontalalignment = 'center', verticalalignment = 'bottom', fontsize = fontsize_plot, weight = 'bold')
 # ax.text(duration_simu/2., 1200, 'SpOCK behind -> need rho_control > 0', horizontalalignment = 'center', verticalalignment = 'top', fontsize = fontsize_plot, weight = 'bold')
 ax.margins(0,0)
@@ -152,6 +155,10 @@ legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  t
 if toplot == 'amplitude':
     fig_save_name = 'fig/all_amplitude_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'Amplitude ocillations (m)'
+if toplot == 'rho_control':
+    fig_save_name = 'fig/all_rho_control_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    y_label = 'rho_control'
+    ax.set_ylim([-1, 1])   
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'Distance (m)'

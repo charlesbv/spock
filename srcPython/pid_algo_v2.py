@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 1.0
-prefix_name = 'earth_sp13'
+prefix_name = 'gravMap_sp13'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -155,7 +155,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 49#54#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 54#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -244,6 +244,7 @@ argper_spock_ok_pid_all_inter = []
 duration_simu = (nb_interval - inter_start_algo) * step_move_save + inter_start_algo * interval # first inter_start_algo are interval hour long, then rest of the intervals are step_move_save hour long
 index_period_spock_step_move = np.zeros([nb_interval]) # index in orbit average variables of the end of each interval
 index_step_move_save = []
+nb_seconds_interval = []
 for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     if iinter < inter_start_algo:
         step_move = interval # shoule be = interval
@@ -564,6 +565,10 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             error_change_sign = 1
             
             # start and end dates of next interval
+            if (len(nb_seconds_interval) == 0):
+                nb_seconds_interval.append(step_move_sec)
+            else:
+                nb_seconds_interval.append(nb_seconds_interval[-1] + step_move_sec)
             date_start = date_start + timedelta(seconds = step_move_sec)
             date_start_str = datetime.strftime(date_start, "%Y-%m-%dT%H:%M:%S")
             date_end_str = datetime.strftime(date_start + timedelta(seconds = interval_sec), "%Y-%m-%dT%H:%M:%S")
@@ -944,7 +949,7 @@ pickle.dump([duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                  index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr], open(pickle_root + ".pickle", "w"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval], open(pickle_root + ".pickle", "w"))
 
 
 raise Exception
