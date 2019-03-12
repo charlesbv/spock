@@ -354,7 +354,7 @@ for ihor in range(nday_pred, nhor_swpc):
 legend = ax.legend(loc='upper right', bbox_to_anchor=(1, 1), numpoints = 1,  title="Pred. horizon", fontsize = fontsize_plot)
 legend.get_title().set_fontsize(str(fontsize_plot))
 ax.margins(0,0)
-ax.set_ylim([0, np.max(std_f107_swpc)])
+ax.set_ylim([0, max([np.max(std_f107_swpc), np.max(std_f107)])])
 ax.xaxis.set_ticks(range(year_start, year_stop + 1, 2))
 fig_save_name = 'fig/std_f107_error_vs_time'
 fig_save_name =  fig_save_name + '.pdf'
@@ -390,6 +390,7 @@ for ihor in range(nday_pred, nhor_swpc):
 legend = ax.legend(loc='upper right', bbox_to_anchor=(1, 1), numpoints = 1,  title="Pred. horizon", fontsize = fontsize_plot)
 legend.get_title().set_fontsize(str(fontsize_plot))
 ax.margins(0,0)
+ax.set_ylim([0, max([np.max(std_ap_swpc), np.max(std_ap)])])
 ax.xaxis.set_ticks(range(year_start, year_stop + 1, 2))
 fig_save_name = 'fig/std_ap_error_vs_time'
 fig_save_name =  fig_save_name + '.pdf'
