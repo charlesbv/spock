@@ -1978,7 +1978,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
     OPTIONS->include_moon = 0;
   }
   //  printf("%f %f %d %d %d %d\n", OPTIONS->order, OPTIONS->degree,OPTIONS->include_drag, OPTIONS->include_solar_pressure, OPTIONS->include_sun, OPTIONS->include_moon);exit(0);
-  if ( (strcmp(OPTIONS->filename_surface, text_ball_coeff)  == 0) && (OPTIONS->include_solar_pressure == 1) ){
+  if ( (strcmp(OPTIONS->filename_surface, text_ball_coeff)  == 0) && ((OPTIONS->include_solar_pressure == 1) || (OPTIONS->include_earth_pressure == 1)) ){
     printf("***! The earth and solar radiation pressure force can't be computed because you did not indicate a geometry file for the satellite(s) (see section '#SPACECRAFT'). !***\n");
     OPTIONS->include_solar_pressure = 0;
     OPTIONS->include_earth_pressure = 0;

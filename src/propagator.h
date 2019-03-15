@@ -258,7 +258,7 @@ typedef struct {
     double bc_vcm; // if computing the probability of collision and the input file has the fomat of a VCM, this is the value of the ballistic coefficient reported in the VCM
   double srp_vcm; // if computing the probability of collision and the input file has the fomat of a VCM, this is the value of the solar radiation pressure coefficient reported in the VCM
   double et_vcm;// if computing the probability of collision and the input file has the format of a VCM, et_vcm is the epoch of the VCM
-
+  double              a_i2cg_INRTL_ir_earth[3];
 }   INTEGRATOR_T;
 
 typedef struct {

@@ -185,7 +185,7 @@ int generate_ephemerides(   CONSTELLATION_T  *CONSTELLATION,
   double starttime, endtime;
   double twrite = 0.0;
   double time_between_last_gps_epoch_and_constellation_epoch_starttime, new_dt_for_gps;
-  int save_include_drag, save_include_solar_pressure;
+  int save_include_drag, save_include_solar_pressure, save_include_earth_pressure;
   double save_solar_cell_efficiency;
   int choose_tle_to_initialise_orbit = 0;
   int ccc;
@@ -622,6 +622,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 
       save_include_drag = CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_drag;
       save_include_solar_pressure = CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_solar_pressure;
+            save_include_earth_pressure = CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_earth_pressure;
       save_solar_cell_efficiency = CONSTELLATION->spacecraft[ii][0].INTEGRATOR.solar_cell_efficiency;
 /*       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_drag  = 0; // do not include drag until the epoch becomes the epoch start time of the constellation (for now! (this is for interpolation of the thermospheric drivers reasons)) */
 /*       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_solar_pressure  = 0; // do not include solar_pressure until the epoch becomes the epoch start time of the constellation (for now! (this is for interpolation of the thermospheric drivers reasons)) */
@@ -634,6 +635,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	  for (eee = 1L + iProc * OPTIONS->nb_ensemble_min_per_proc; eee< 1 + iProc * OPTIONS->nb_ensemble_min_per_proc + OPTIONS->nb_ensemble_min_per_proc ; eee++){ // go through all ensembles
 	    save_include_drag = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag;
 	    save_include_solar_pressure = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure;
+	    	    save_include_earth_pressure = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure;
 	    save_solar_cell_efficiency = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency;
 
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = OPTIONS->dt;
@@ -706,6 +708,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = OPTIONS->dt;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_drag  = save_include_drag; // the drag is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_solar_pressure  = save_include_solar_pressure; // the solar_pressure is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
+            CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_earth_pressure  = save_include_earth_pressure; // the earth_pressure is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.solar_cell_efficiency  = save_solar_cell_efficiency; // the solar_power is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
       } // end of if this iProc runs main sc ii
       //      }
@@ -716,6 +719,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = OPTIONS->dt;
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag  = save_include_drag;
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure  = save_include_solar_pressure;
+	    	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure  = save_include_earth_pressure;
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency  = save_solar_cell_efficiency;
 	  }
 	}
