@@ -2903,6 +2903,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
+  	double cr, emiss, albedo;
   double r_earth_elt_body[3];
   double r_earth_elt_lvlh_norm[3], r_earth_elt_lvlh_norm_minus[3];
   double cos_kappa;
@@ -3065,6 +3066,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     double area_earth_elt;
     a_albedo_earth_pressure_in_body[0] = 0; a_albedo_earth_pressure_in_body[1] = 0; a_albedo_earth_pressure_in_body[2] = 0;
         a_ir_earth_pressure_in_body[0] = 0; a_ir_earth_pressure_in_body[1] = 0; a_ir_earth_pressure_in_body[2] = 0;
+	double a_earth_pressure_in_body[3];
+	        a_earth_pressure_in_body[0] = 0; a_earth_pressure_in_body[1] = 0; a_earth_pressure_in_body[2] = 0;
     double delta_max = 1;  // don't care about the value now, it's going to be modified as soon as we enter the while loop on delta
     //                  printf("beta_max %f\n", beta_max*180/M_PI);
     double f_beta, f_beta_max;
@@ -3133,38 +3136,30 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	double r_earth_elt_body_norm[3];
 	v_norm(r_earth_elt_body_norm, r_earth_elt_body);
 	// go over each surface of the sc
-	double cr, emiss, albedo;
+
 	emiss = compute_earth_emissivity();
 	albedo = compute_earth_albedo();
-	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
-	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
-	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
-
-	  if (cos_phi > 0){ // the sc surface sees the Earth element
 
 	    
-	      if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){ //!!!!!! only compute the IR at the irst time step -> assumes that the Earthdurface rea seen frmo the satellite is constat during the entire propgatrion and that the emmissivity (equivalent of albedo for IR) doesn't vary with latitude. The first condition means that the distance Earth to satellite doesn't vary much during the simulation, which means that the ecceentricity is close to 0 and that the orbit doens't decay too much...
-		print_test();   
+	    //	    	      if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){ //!!!!!! only compute the IR at the irst time step -> assumes that the Earthdurface rea seen frmo the satellite is constat during the entire propgatrion and that the emmissivity (equivalent of albedo for IR) doesn't vary with latitude. The first condition means that the distance Earth to satellite doesn't vary much during the simulation, which means that the ecceentricity is close to 0 and that the orbit doens't decay too much...
+	    //	print_test();   
 	    // IR pressure: even if Earth elt doesn't see the Sun
-	    a_ir_earth_pressure_in_body[0] = a_ir_earth_pressure_in_body[0] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	    a_ir_earth_pressure_in_body[1] = a_ir_earth_pressure_in_body[1] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	    a_ir_earth_pressure_in_body[2] = a_ir_earth_pressure_in_body[2] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	    a_ir_earth_pressure_in_body[0] = a_ir_earth_pressure_in_body[0] -  0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; //  area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	    a_ir_earth_pressure_in_body[1] = a_ir_earth_pressure_in_body[1] -  0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	    a_ir_earth_pressure_in_body[2] = a_ir_earth_pressure_in_body[2] - 0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
 	    //	    print_test();
-	      }
+	    //	      } // end of first iteration
 	    // albedo: only if Earth elt sees the Sun
 	    if (cos_zenith > 0){
 
-	      a_albedo_earth_pressure_in_body[0] = a_albedo_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	      a_albedo_earth_pressure_in_body[1] = a_albedo_earth_pressure_in_body[1] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	      a_albedo_earth_pressure_in_body[2] = a_albedo_earth_pressure_in_body[2] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	      a_albedo_earth_pressure_in_body[0] = a_albedo_earth_pressure_in_body[0] -  albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	      a_albedo_earth_pressure_in_body[1] = a_albedo_earth_pressure_in_body[1] - albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	      a_albedo_earth_pressure_in_body[2] = a_albedo_earth_pressure_in_body[2] -  albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
 	      //if (sss == 10){
 
 	      //printf("%d, %e\n", sss, cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. *cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm));
 	      //}
 
-	    } // end of if the Earth elt sees the Sun
-
-	  } // end of if the sc surface sees the Earth elt 
    
 	} // end of all surfaces
 
@@ -3181,6 +3176,21 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
     } // end of go over all beta
+    double a_earth_pressure_in_body_temp[3];
+    v_add(a_earth_pressure_in_body_temp, a_albedo_earth_pressure_in_body, a_ir_earth_pressure_in_body);
+    double a_ir_earth_pressure_in_body_norm_temp[3];
+    v_norm(a_ir_earth_pressure_in_body_norm_temp, a_earth_pressure_in_body);
+    double a_ir_earth_pressure_in_body_norm[3];
+    v_scale(a_ir_earth_pressure_in_body_norm, a_ir_earth_pressure_in_body_norm_temp, -1);
+	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
+	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
+	  v_dot(&cos_phi, a_ir_earth_pressure_in_body_norm, INTEGRATOR->surface[sss].normal);
+
+	  if (cos_phi > 0){ // the sc surface sees the Earth element
+	    v_scale(a_earth_pressure_in_body, a_earth_pressure_in_body_temp, cos_phi*cr*INTEGRATOR->surface[sss].area*1000000.); //surface[sss].area in km2 -> m2,
+	  } // end of if the sc surface sees the Earth elt 
+   
+	} // end of all surfaces
 
     double a_albedo_earth_pressure_in_LVLH[3], a_albedo_earth_pressure_INRTL[3], a_ir_earth_pressure_INRTL[3];
     m_x_v(a_albedo_earth_pressure_in_LVLH, T_sc_to_lvlh, a_albedo_earth_pressure_in_body);
@@ -3188,24 +3198,28 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     m_x_v(a_albedo_earth_pressure_INRTL, T_lvlh_2_inrtl, a_albedo_earth_pressure_in_LVLH);  
 
         double a_ir_earth_pressure_in_LVLH[3];
-	if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){
+	//		if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){
 	  m_x_v(a_ir_earth_pressure_in_LVLH, T_sc_to_lvlh, a_ir_earth_pressure_in_body);
 	  
 	  m_x_v(INTEGRATOR->a_i2cg_INRTL_ir_earth, T_lvlh_2_inrtl, a_ir_earth_pressure_in_LVLH);
-	}
-
+	  //	}
+	  //	v_norm_print(INTEGRATOR->a_i2cg_INRTL_ir_earth, "INTEGRATOR->a_i2cg_INRTL_ir_earth");
 	v_add(a_earth_pressure_INRTL, a_albedo_earth_pressure_INRTL, INTEGRATOR->a_i2cg_INRTL_ir_earth);
     
   }  // end of no collision with VCM as colllision input file
 
 
   double temp_norm;
-  double old_i = 5.8399019126e-11;
-  double old_f = 5.0263347875e-11;
+  double old_i = 5.8399019126e-11;//5.8399019126e-11;
+  double old_f =5.9101654710e-11;//5.0263048641e-11;//5.0263347875e-11;
   v_mag(&temp_norm, a_earth_pressure_INRTL);
   v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
-  printf("r = %.1f\n", ((temp_norm-old_f)/ old_f)*100);
+  printf("r = %.4f\n", ((temp_norm-old_f)/ old_f)*100);
   printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first);
+    if (INTEGRATOR->index_in_attitude_interpolated == 1){
+         exitf();
+  }
+
   //        exitf();
   return 0;
 

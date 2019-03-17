@@ -3194,8 +3194,10 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   v_mag(&temp_norm, a_earth_pressure_INRTL);
   v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
   /* printf("r = %.1f\n", ((temp_norm-5.8399019126e-11)/ 5.8399019126e-11)*100); */
-  /* printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first); */
-  //       exitf();
+  printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first);
+  if (INTEGRATOR->index_in_attitude_interpolated == 1){
+         exitf();
+  }
   return 0;
 
 }
