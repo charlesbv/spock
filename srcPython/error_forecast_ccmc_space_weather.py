@@ -101,7 +101,7 @@ def read_pred(format_data, filename):
         date_pred = np.array(date_pred)
         return date_pred, b_pred, v_pred, n_pred, t_pred
 
-filename_pred = 'ccmcPred/20160220_190100_2.0_ENLIL_time_line.dat'
+filename_pred = 'ccmcPred/20181111_095200_2.0_ENLIL_time_line.dat'#'ccmcPred/20160220_190100_2.0_ENLIL_time_line.dat'
 format_data = 'ccmc'
 date_pred, b_pred, v_pred, n_pred, t_pred = read_pred(format_data, filename_pred)
 date_start = str(date_pred[0])[:10].replace('-', '')
