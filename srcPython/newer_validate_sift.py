@@ -62,9 +62,9 @@ import os.path
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 8 #1 # which CYGNSS to look at
+cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-10-30T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
+date_start_val_start = '2018-09-24T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
 spock_input_filename = 'twoAntennas.txt'#'merged.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
