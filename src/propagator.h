@@ -59,6 +59,30 @@ typedef struct {
   int nlat_map;
   int nlon_map;
   int nradius_map;
+  
+    double dzenith_map; // size of zenith bins for the map (in km);
+    int nzenith_map;
+    double max_zenith_map; // max zenith for the map
+  double min_zenith_map;
+    double delev_elt_map; // size of elev_elt bins for the map (in km);
+    int nelev_elt_map;
+    double max_elev_elt_map; // max elev_elt for the map
+  double min_elev_elt_map;
+    double dazim_elt_map; // size of azim_elt bins for the map (in km);
+    int nazim_elt_map;
+    double max_azim_elt_map; // max azim_elt for the map
+  double min_azim_elt_map;
+
+    double delev_surf_map; // size of elev_surf bins for the map (in km);
+    int nelev_surf_map;
+    double max_elev_surf_map; // max elev_surf for the map
+  double min_elev_surf_map;
+    double dazim_surf_map; // size of azim_surf bins for the map (in km);
+    int nazim_surf_map;
+    double max_azim_surf_map; // max azim_surf for the map
+  double min_azim_surf_map;
+
+  
   double ****gravity_map;
   double *radius_map;
   double *lat_map;
@@ -443,7 +467,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 	
 //newstructure 		
 //int load_params( PARAMS_T *PARAMS, char main_directory_location[256], int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc);
-int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use);
+int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use, int earth_pressure);
 //newstructure 
 
 int compute_solar_pressure(double          a_solar_pressure_INRTL[3],

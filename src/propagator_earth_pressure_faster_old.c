@@ -1085,7 +1085,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
 
     if (OPTIONS->nb_ensembles_attitude <= 0){ // if we dont' run ensembles of any kind on the attitude
 
-      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
+      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_earth_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
 
 	if (SC->INTEGRATOR.isGPS == 0){ // no attitude to set up for GPS because we dont compute the drag, solar rariatin pressu,re, power, and gorund station coverage (attitude is needed for coverage because we calculate azimuth and levation angles form the spaceecraft reference system)
 	  
@@ -1115,7 +1115,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   v_scale(dv, dv, 0.5);
   v_add(vk, SC->v_i2cg_INRTL, dv);
 
-  if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 ) || (GROUND_STATION->nb_ground_stations > 0) ){
+  if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || (SC->INTEGRATOR.include_earth_pressure != 0 ) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 ) || (GROUND_STATION->nb_ground_stations > 0) ){
     //    if (SC->et >= et_initial_epoch){ //  that's because if the initializtion of the orbit was made with a TLE, we don't want index_in_attitude_interpolated to be incremented for times between the TLE epoch and the inital epoch 
       SC->INTEGRATOR.index_in_attitude_interpolated =  SC->INTEGRATOR.index_in_attitude_interpolated + 1;
     
@@ -1146,7 +1146,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   // the only case where the attitute needs to be set is the only case where it has not been set initially in initialize_constellation, which is if there is no ensemble at all run on the attitude
   if ( ( strcmp(OPTIONS->attitude_profile, "ensemble_angular_velocity") != 0 ) && ( strcmp(OPTIONS->attitude_profile, "ensemble_initial_attitude") != 0 ) ) { // if we do not run ensembles on the initial angular velocity
     if (OPTIONS->nb_ensembles_attitude <= 0){
-      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
+      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_earth_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
 	if (SC->INTEGRATOR.isGPS == 0){ // no attitude to set up for GPS because we dont compute the drag, solar rariatin pressu,re, power, and gorund station coverage (attitude is needed for coverage because we calculate azimuth and levation angles form the spaceecraft reference system)
 	  set_attitude(SC->INTEGRATOR.attitude, SC->INTEGRATOR.index_in_attitude_interpolated, OPTIONS, SC->INTEGRATOR.file_is_quaternion);
 	}
@@ -1187,7 +1187,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   v_copy( dv, k3v);
   v_add(vk, SC->v_i2cg_INRTL, dv);
 
-  if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 )  || (GROUND_STATION->nb_ground_stations > 0) ){
+  if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || (SC->INTEGRATOR.include_earth_pressure != 0) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 )  || (GROUND_STATION->nb_ground_stations > 0) ){
     //    if (SC->et >= et_initial_epoch){ //  that's because if the initializtion of the orbit was made with a TLE, we don't want index_in_attitude_interpolated to be incremented for times between the TLE epoch and the inital epoch 
       SC->INTEGRATOR.index_in_attitude_interpolated =  SC->INTEGRATOR.index_in_attitude_interpolated + 1;
       if ( SC->INTEGRATOR.include_drag != 0 ){
@@ -1213,7 +1213,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   // the only case where the attitute needs to be set is the only case where it has not been set initially in initialize_constellation, which is if there is no ensemble at all run on the attitude
   if ( ( strcmp(OPTIONS->attitude_profile, "ensemble_angular_velocity") != 0 ) && ( strcmp(OPTIONS->attitude_profile, "ensemble_initial_attitude") != 0 ) ) { // if we do not run ensembles on the initial angular velocity
     if (OPTIONS->nb_ensembles_attitude <= 0){
-      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
+      if ( (SC->INTEGRATOR.solar_cell_efficiency != -1) || (GROUND_STATION->nb_ground_stations > 0) || (SC->INTEGRATOR.include_solar_pressure == 1) || (SC->INTEGRATOR.include_earth_pressure == 1) || (SC->INTEGRATOR.include_drag == 1) ){ // these are the case where SpOCK uses the attitude
 	if (SC->INTEGRATOR.isGPS == 0){ // no attitude to set up for GPS because we dont compute the drag, solar rariatin pressu,re, power, and gorund station coverage (attitude is needed for coverage because we calculate azimuth and levation angles form the spaceecraft reference system)
 	  set_attitude(SC->INTEGRATOR.attitude, SC->INTEGRATOR.index_in_attitude_interpolated, OPTIONS, SC->INTEGRATOR.file_is_quaternion);
 	}
@@ -2903,6 +2903,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
+  	double cr, emiss, albedo;
   double r_earth_elt_body[3];
   double r_earth_elt_lvlh_norm[3], r_earth_elt_lvlh_norm_minus[3];
   double cos_kappa;
@@ -2926,7 +2927,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   double r_i2cg_lvlh[3];
   double earth_center_to_earth_elt_lvlh_norm[3];
   double cos_zenith;
-  double a_earth_pressure_in_body[3];
+  double a_albedo_earth_pressure_in_body[3];
+    double a_ir_earth_pressure_in_body[3];
   double radius_sc, beta, alpha, mp, sm, beta_max, alpha_max, sm_max, sp, oh;
   double delta, sh;
   v_mag( &radius_sc, r_i2cg_INRTL);
@@ -3062,7 +3064,10 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
     r_i2cg_lvlh[0] = 0; r_i2cg_lvlh[1] = 0; r_i2cg_lvlh[2] = radius_sc;
     double area_earth_elt;
-    a_earth_pressure_in_body[0] = 0; a_earth_pressure_in_body[1] = 0; a_earth_pressure_in_body[2] = 0;
+    a_albedo_earth_pressure_in_body[0] = 0; a_albedo_earth_pressure_in_body[1] = 0; a_albedo_earth_pressure_in_body[2] = 0;
+        a_ir_earth_pressure_in_body[0] = 0; a_ir_earth_pressure_in_body[1] = 0; a_ir_earth_pressure_in_body[2] = 0;
+	double a_earth_pressure_in_body[3];
+	        a_earth_pressure_in_body[0] = 0; a_earth_pressure_in_body[1] = 0; a_earth_pressure_in_body[2] = 0;
     double delta_max = 1;  // don't care about the value now, it's going to be modified as soon as we enter the while loop on delta
     //                  printf("beta_max %f\n", beta_max*180/M_PI);
     double f_beta, f_beta_max;
@@ -3131,38 +3136,30 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	double r_earth_elt_body_norm[3];
 	v_norm(r_earth_elt_body_norm, r_earth_elt_body);
 	// go over each surface of the sc
-	double cr, emiss, albedo;
+
 	emiss = compute_earth_emissivity();
 	albedo = compute_earth_albedo();
-	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
-	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
-	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
-
-	  if (cos_phi > 0){ // the sc surface sees the Earth element
 
 	    
-	    //  if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){ //!!!!!! only compute the IR at the irst time step -> assumes that the Earthdurface rea seen frmo the satellite is constat during the entire propgatrion and that the emmissivity (equivalent of albedo for IR) doesn't vary with latitude. The first condition means that the distance Earth to satellite doesn't vary much during the simulation, which means that the ecceentricity is close to 0 and that the orbit doens't decay too much...
-   
+	    //	    	      if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){ //!!!!!! only compute the IR at the irst time step -> assumes that the Earthdurface rea seen frmo the satellite is constat during the entire propgatrion and that the emmissivity (equivalent of albedo for IR) doesn't vary with latitude. The first condition means that the distance Earth to satellite doesn't vary much during the simulation, which means that the ecceentricity is close to 0 and that the orbit doens't decay too much...
+	    //	print_test();   
 	    // IR pressure: even if Earth elt doesn't see the Sun
-	    a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	    a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	    a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
-
-	    //  }
+	    a_ir_earth_pressure_in_body[0] = a_ir_earth_pressure_in_body[0] -  0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; //  area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	    a_ir_earth_pressure_in_body[1] = a_ir_earth_pressure_in_body[1] -  0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	    a_ir_earth_pressure_in_body[2] = a_ir_earth_pressure_in_body[2] - 0.25 * emiss * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	    //	    print_test();
+	    //	      } // end of first iteration
 	    // albedo: only if Earth elt sees the Sun
 	    if (cos_zenith > 0){
 
-	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	      a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	      a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
+	      a_albedo_earth_pressure_in_body[0] = a_albedo_earth_pressure_in_body[0] -  albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
+	      a_albedo_earth_pressure_in_body[1] = a_albedo_earth_pressure_in_body[1] - albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
+	      a_albedo_earth_pressure_in_body[2] = a_albedo_earth_pressure_in_body[2] -  albedo * cos_zenith * prad   / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
 	      //if (sss == 10){
 
 	      //printf("%d, %e\n", sss, cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. *cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm));
 	      //}
 
-	    } // end of if the Earth elt sees the Sun
-
-	  } // end of if the sc surface sees the Earth elt 
    
 	} // end of all surfaces
 
@@ -3179,25 +3176,51 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
     } // end of go over all beta
+    double a_earth_pressure_in_body_temp[3];
+    v_add(a_earth_pressure_in_body_temp, a_albedo_earth_pressure_in_body, a_ir_earth_pressure_in_body);
+    double a_ir_earth_pressure_in_body_norm_temp[3];
+    v_norm(a_ir_earth_pressure_in_body_norm_temp, a_earth_pressure_in_body);
+    double a_ir_earth_pressure_in_body_norm[3];
+    v_scale(a_ir_earth_pressure_in_body_norm, a_ir_earth_pressure_in_body_norm_temp, -1);
+	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
+	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
+	  v_dot(&cos_phi, a_ir_earth_pressure_in_body_norm, INTEGRATOR->surface[sss].normal);
 
-    double a_earth_pressure_in_LVLH[3];
-    m_x_v(a_earth_pressure_in_LVLH, T_sc_to_lvlh, a_earth_pressure_in_body);
+	  if (cos_phi > 0){ // the sc surface sees the Earth element
+	    v_scale(a_earth_pressure_in_body, a_earth_pressure_in_body_temp, cos_phi*cr*INTEGRATOR->surface[sss].area*1000000.); //surface[sss].area in km2 -> m2,
+	  } // end of if the sc surface sees the Earth elt 
+   
+	} // end of all surfaces
+
+    double a_albedo_earth_pressure_in_LVLH[3], a_albedo_earth_pressure_INRTL[3], a_ir_earth_pressure_INRTL[3];
+    m_x_v(a_albedo_earth_pressure_in_LVLH, T_sc_to_lvlh, a_albedo_earth_pressure_in_body);
     m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh);
-    m_x_v(a_earth_pressure_INRTL, T_lvlh_2_inrtl, a_earth_pressure_in_LVLH);  
+    m_x_v(a_albedo_earth_pressure_INRTL, T_lvlh_2_inrtl, a_albedo_earth_pressure_in_LVLH);  
 
+        double a_ir_earth_pressure_in_LVLH[3];
+	//		if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){
+	  m_x_v(a_ir_earth_pressure_in_LVLH, T_sc_to_lvlh, a_ir_earth_pressure_in_body);
+	  
+	  m_x_v(INTEGRATOR->a_i2cg_INRTL_ir_earth, T_lvlh_2_inrtl, a_ir_earth_pressure_in_LVLH);
+	  //	}
+	  //	v_norm_print(INTEGRATOR->a_i2cg_INRTL_ir_earth, "INTEGRATOR->a_i2cg_INRTL_ir_earth");
+	v_add(a_earth_pressure_INRTL, a_albedo_earth_pressure_INRTL, INTEGRATOR->a_i2cg_INRTL_ir_earth);
+    
   }  // end of no collision with VCM as colllision input file
 
 
   double temp_norm;
-  double old_i = 5.8399019126e-11;
-  double old_f = 5.0263347875e-11;
+  double old_i = 5.8399019126e-11;//5.8399019126e-11;
+  double old_f =5.9101654710e-11;//5.0263048641e-11;//5.0263347875e-11;
   v_mag(&temp_norm, a_earth_pressure_INRTL);
-  //  v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
-  /* printf("r = %.1f\n", ((temp_norm-5.8399019126e-11)/ 5.8399019126e-11)*100); */
-  //  printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first);
-  if (INTEGRATOR->index_in_attitude_interpolated == 1){
+  v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
+  printf("r = %.4f\n", ((temp_norm-old_f)/ old_f)*100);
+  printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first);
+    if (INTEGRATOR->index_in_attitude_interpolated == 1){
          exitf();
   }
+
+  //        exitf();
   return 0;
 
 }
@@ -4568,7 +4591,7 @@ spkez_c(10, et, "J2000", "NONE", 399, x_earth, &lt_earth); //   Return the state
 /////////////////////////////////////////////////////////////////////////////////////////
 //newstructure
 //int load_params( PARAMS_T *PARAMS, char main_directory_location[256], int iDebugLevel, char earth_fixed_frame[100],   double use_ap_hist, int iProc) {
-int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100],   double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use, int earth_pressure) {
+int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100],   double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use) {
 //newstructure
 
   int ii;
@@ -4586,35 +4609,6 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.max_lat_map = 40;//0.11;
   PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 480;//200.;
   PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 600;//501;//40000.;
-
-
-  // for the earth pressure map (the radius maping is the same as for the gravity map)
-  // // zenith
-  PARAMS->EARTH.GRAVITY.dzenith_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
-  PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
-  PARAMS->EARTH.GRAVITY.max_zenith_map = 90.;
-
-  // // azim and elevation of the Earth element (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_elt_map = 10.;
-  PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
-  PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
-  
-  PARAMS->EARTH.GRAVITY.delev_elt_map = 10.;
-  PARAMS->EARTH.GRAVITY.min_elev_elt_map = 0;
-  PARAMS->EARTH.GRAVITY.max_elev_elt_map = 90.;
-
-  // // azim and elevation of the surface normal vector (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_surf_map = 10.;
-  PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
-  PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
-  
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 10.;
-  PARAMS->EARTH.GRAVITY.min_elev_surf_map = 0;
-  PARAMS->EARTH.GRAVITY.max_elev_surf_map = 90.;
- 
-  
-  // end of for the earth pressure map 
-
   
   PARAMS->MOON.flattening     = 0.0012;//https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
   PARAMS->MOON.radius         = 1737.0;//https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
@@ -4664,15 +4658,10 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
 
 
-  if (earth_pressure == 1){
-    PARAMS->EARTH.GRAVITY.nzenith_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_zenith_map - PARAMS->EARTH.GRAVITY.min_zenith_map)/PARAMS->EARTH.GRAVITY.dzenith_map)) + 1;
-    
-    
-  }
 
   if (gravity_map_use == 1){
 
-    
+
   char text[200];
   strcpy(text, "");
   strcpy(PARAMS->EARTH.GRAVITY.filename_gravity_map, "grav");
@@ -4708,7 +4697,6 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.nlon_map = (int)(ceil( 360./PARAMS->EARTH.GRAVITY.dlon_map)) + 1;// nb lon bins
   PARAMS->EARTH.GRAVITY.nlat_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map)) + 1;// nb lat bins
   PARAMS->EARTH.GRAVITY.nradius_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_radius_map - PARAMS->EARTH.GRAVITY.min_radius_map)/PARAMS->EARTH.GRAVITY.dradius_map)) + 1;
-
 
       //       build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
      read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
@@ -5652,85 +5640,6 @@ int calculate_cd_opengl(double *cd,
 
 
 
-
-int build_earth_pressure_map(GRAVITY_T  *Gravity){
-
-
-    double max_radius = Gravity->max_radius_map; // max radius of all sc (km)
-    double min_radius = Gravity->min_radius_map; // min radius of all sc (km)
-    double dradius, radius;
-    int nradius = Gravity->nradius_map;
-    int iradius;
-
-    double max_zenith = Gravity->max_zenith_map; 
-    double min_zenith = Gravity->min_zenith_map; 
-    double dzenith, zenith;
-    int nzenith = Gravity->nzenith_map;
-    int izenith;
-
-    double max_elev_elt = Gravity->max_elev_elt_map; 
-    double min_elev_elt = Gravity->min_elev_elt_map; 
-    double delev_elt, elev_elt;
-    int nelev_elt = Gravity->nelev_elt_map;
-    int ielev_elt;
-
-    double max_azim_elt = Gravity->max_azim_elt_map; 
-    double min_azim_elt = Gravity->min_azim_elt_map; 
-    double dazim_elt, azim_elt;
-    int nazim_elt = Gravity->nazim_elt_map;
-    int iazim_elt;
-
-
-    
-  for (iradius = 0; iradius < nradius; iradius++){ // go over radii
-      	if (iradius == nradius - 1){
-	  dradius = max_radius - (min_radius + (nradius - 2)*Gravity->dradius_map);//not used 
-	  radius = max_radius;
-	}
-	else{
-	  dradius =  Gravity->dradius_map;
-	  radius = min_radius + iradius * dradius;
-	}
-	for (izenith = 0; izenith < nzenith; izenith++){ // go over zeniths
-	  if (izenith == nzenith - 1){
-	    dzenith = max_zenith - (min_zenith + (nzenith - 2)*Gravity->dzenith_map);//not used 
-	    zenith = max_zenith;
-	  }
-	  else{
-	    dzenith =  Gravity->dzenith_map;
-	    zenith = min_zenith + izenith * dzenith;
-	  }
-
-	for (ielev_elt = 0; ielev_elt < nelev_elt; ielev_elt++){ // go over all elevation of Earth element 
-	  if (ielev_elt == nelev_elt - 1){
-	    delev_elt = max_elev_elt - (min_elev_elt + (nelev_elt - 2)*Gravity->delev_elt_map);//not used 
-	    elev_elt = max_elev_elt;
-	  }
-	  else{
-	    delev_elt =  Gravity->delev_elt_map;
-	    elev_elt = min_elev_elt + ielev_elt * delev_elt             ;
-	  }
-
-	for (iazim_elt = 0; iazim_elt < nazim_elt; iazim_elt++){ // go over all azimuth of Earth element 
-	  if (iazim_elt == nazim_elt - 1){
-	    dazim_elt = max_azim_elt - (min_azim_elt + (nazim_elt - 2)*Gravity->dazim_elt_map);//not used 
-	    azim_elt = max_azim_elt;
-	  }
-	  else{
-	    dazim_elt =  Gravity->dazim_elt_map;
-	    azim_elt = min_azim_elt + iazim_elt * dazim_elt             ;
-	  }
-
-
-	} // go over all azimuth of Earth element
-	  
-	} // go over all elevation of Earth element
-	  
-	}// go over zeniths
-	
-  } // go over radii
-  return 0;
-}
 
 
 int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){

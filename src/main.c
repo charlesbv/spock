@@ -119,7 +119,7 @@ int main(int argc, char * argv[]) {
     //newstructure
     //load_params( &PARAMS, main_directory_location, iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc );
     int degree = (int)(OPTIONS.degree);
-    load_params( &PARAMS,  iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc, OPTIONS.path_to_spice, degree, OPTIONS.gravity_map );
+    load_params( &PARAMS,  iDebugLevel, OPTIONS.earth_fixed_frame, OPTIONS.use_ap_hist, iProc, OPTIONS.path_to_spice, degree, OPTIONS.gravity_map, OPTIONS.include_earth_pressure );
     //newstructure
 
 /*     // !!!!!!!!!!!!!!REMOVE BLOCK BELOW */

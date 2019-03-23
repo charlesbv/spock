@@ -5,7 +5,7 @@ ifdef COMPILER
 	./src/prop_math.o \
 	./src/kalman_9state_new_with_tau.o \
 	./src/mpi_fake/mpi.o \
-	./src/propagator.o ./src/load_options.o \
+	./src/propagator_earth_pressure_faster.o ./src/load_options.o \
 	./src/generate_ephemerides.o ./src/initialize_constellation.o 
 	MPI_H_DUMMY := $(shell ln -s mpi_fake/mpi.h ./src/mpi.h)
 
@@ -15,7 +15,7 @@ else
 	OBJ = ./src/main.o ./src/nrlmsise-00.o ./src/nrlmsise-00_data.o \
 	./src/prop_math.o \
 	./src/kalman_9state_new_with_tau.o \
-	./src/propagator.o ./src/load_options.o \
+	./src/propagator_earth_pressure_faster.o ./src/load_options.o \
 	./src/generate_ephemerides.o ./src/initialize_constellation.o 
 	MPI_H_REMOVE_DUMMY := $(shell rm -f ./src/mpi.h)
 endif
@@ -36,13 +36,13 @@ LDFLAGS=-L$(GSL_DIR)/lib
 %.o: %.c $(DEPS)
 	$(CC)  -c -o $@ $<  $(CFLAGS) $(LIBS) $(LDFLAGS)
 
-all: spock_grav_read_bin 
+all: spock_grav_read_bin_earth_map 
 
-spock_grav_read_bin: $(OBJ)
+spock_grav_read_bin_earth_map: $(OBJ)
 	$(CC) -o ${PATH_EXECUTABLE}/$@ $^ $(CFLAGS) $(LIBS) $(LDFLAGS) 
 
 clean:
-	find  ${PATH_EXECUTABLE} -type f -maxdepth 1 -name spock_grav_read_bin -delete #rm -f  ${PATH_EXECUTABLE}/spock_grav_read_bin_again # ignore the warning with maxdepth (it does work)
+	find  ${PATH_EXECUTABLE} -type f -maxdepth 1 -name spock_grav_read_bin_earth_map -delete #rm -f  ${PATH_EXECUTABLE}/spock_grav_read_bin_earth_map_again # ignore the warning with maxdepth (it does work)
 	rm -f ./src/*.o
 	rm -f ./src/mpi_fake/*.o
 
