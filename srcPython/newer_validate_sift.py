@@ -1,3 +1,4 @@
+
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -65,7 +66,7 @@ plt.ion()
 cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
 date_start_val_start = '2018-09-24T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
-spock_input_filename = 'twoAntennas.txt'#'merged.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+spock_input_filename = 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -73,13 +74,13 @@ else:
 
 
 
-pitch_max = 2. # filter out when pitch is greater than this value (in magnitude)
-roll_max = 30. # filter out when roll is greater than this value (in magnitude)
-yaw_max = 2. # filter out when yaw is greater than this value (in magnitude)
+pitch_max = 180. # filter out when pitch is greater than this value (in magnitude)
+roll_max = 180. # filter out when roll is greater than this value (in magnitude)
+yaw_max = 180. # filter out when yaw is greater than this value (in magnitude)
 load_pickle = 0 # set to 1 if results have been previously saved in a pickle so no computation is made here
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 date_start_val_start = datetime.strptime(date_start_val_start, "%Y-%m-%dT%H:%M:%S")
-date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])
+date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,4,1)])
 nb_date = len(date_start_val_array)
 
 
@@ -151,7 +152,6 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
 #         print "cp -p " + spec_spock_filename + " " + spec_spock_filename.replace(".txt", "_6SPs.txt")
 #         os.system("cp -p " + spec_spock_filename + " " + spec_spock_filename.replace(".txt", "_6SPs.txt"))
 #        date_spock, lon_spock, lat_spock, gain_spock, gps_spock, normpower_spock, x_cyg_spock, y_cyg_spock, z_cyg_spock, x_gps_spock, y_gps_spock, z_gps_spock,  x_spec_spock, y_spec_spock, z_spec_spock, nb_spec_spock,  el_spec_spock, az_spec_spock, el_gps_from_cyg_spock,  el_spec_not_int_spock, az_spec_not_int_spock = cygnss_read_spock_spec(spec_spock_filename)
-
         data_spec = cygnss_read_spock_spec_bin(spec_spock_filename.replace('.txt','.bin'), gps_name_list_spock, dt_spock_output, 1) 
         date_spock = data_spec[0]; lon_spock = data_spec[1]; lat_spock = data_spec[2]; gain_spock = data_spec[3]; gps_spock = data_spec[4]; normpower_spock = data_spec[5]; x_cyg_spock = data_spec[6]; y_cyg_spock = data_spec[7]; z_cyg_spock = data_spec[8]; x_gps_spock = data_spec[9]; y_gps_spock = data_spec[10]; z_gps_spock = data_spec[11];  x_spec_spock = data_spec[12]; y_spec_spock = data_spec[13]; z_spec_spock = data_spec[14]; nb_spec_spock = data_spec[15];  el_spec_spock = data_spec[16]; az_spec_spock = data_spec[17]; el_gps_from_cyg_spock = data_spec[18];  el_spec_not_int_spock = data_spec[19]; az_spec_not_int_spock = data_spec[20]
 
@@ -197,7 +197,6 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
         else:
             path_netcdf = "/Users/cbv/cygnss/netcdfPodaac/"
         for iday in range(nb_day):
-
             if (os.path.isdir(path_netcdf + yy  + str(doy_array[iday]).zfill(3)) == False):
                 os.system("mkdir " + path_netcdf + yy  + str(doy_array[iday]).zfill(3))
             if download_netcdf == 1:
@@ -401,7 +400,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
 
                 # only select times in netcdf that are also date of SpOCK output (SpOCK output as specified in main input  file, not output imes of spec (these are very second))
                     #print np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ), date_flight_date_rounded, date_flight_temp_date
-
+                #dt_spock_output = 1.; date_spock_not_interpolated = date_spock # !!!!!!!!!!!!!!!! remove line
                 date_flight_raw_every_second.append(date_flight_temp)
                 while ( np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ) != 0 ):
                     itime = itime + 1
@@ -420,6 +419,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                         date_flight_date_rounded = datetime.strptime(date_flight_temp.split('.')[0], "%Y-%m-%dT%H:%M:%S" )
                     else: #if time can't be rounded by less than 100 ms
                         time_remove = 1
+                    #print itime, date_flight_date_rounded
 
 
                         #print itime, time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6)), x_cyg_netcdf_temp[itime]/1000.
@@ -879,7 +879,6 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     fom_spock_already_seen_this_time[ifom_spock] = 1
                 if len(np.where(nb_ties_per_rcg_per_time[itime, :] >= 1)[0]): # at least one tie for this time
                     time_with_tie.append(itime)
-
                 if np.max(spec_spock_order_descending_got_matched[itime, :]) <= 3:
                     nb_time_4_highest_gain_got_matched[itime] = 1
 
@@ -3138,3 +3137,55 @@ fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox
 
 
 #itime_netcdf = 100; itime_spock = index_in_spock_date_netcdf_same_dt_output[itime_netcdf]; print date_spock[itime_spock]
+
+nb_date = len(time_diff_prn_all_date)
+time_first_gain_wrong_all_date = []
+time_second_gain_wrong_all_date = []
+time_first_and_second_gain_wrong_all_date = []
+num_percentage_first_gain_wrong = 0; den_percentage_first_gain_wrong = 0; num_percentage_second_gain_wrong = 0; den_percentage_second_gain_wrong = 0;
+num_percentage_first_and_second_gain_wrong = 0; den_percentage_first_and_second_gain_wrong = 0
+percentage_first_gain_wrong_all_date = np.zeros([nb_date]); percentage_second_gain_wrong_all_date = np.zeros([nb_date])
+percentage_first_and_second_gain_wrong_all_date = np.zeros([nb_date])
+for idate in range(nb_date):
+    time_first_gain_wrong = []
+    time_second_gain_wrong = []
+    time_first_and_second_gain_wrong = []
+    for itime in time_diff_prn_all_date[idate]:
+        gain_spock_now = fom_spock_all_date[idate][itime]
+        gain_sort_index = np.argsort(-gain_spock_now) # descending order
+        # top PRN gain
+        if ((gps_spock_all_date[idate][itime][gain_sort_index[0]] in gps_netcdf_all_date[idate][itime]) == False):
+            time_first_gain_wrong.append(itime)
+        if ((gps_spock_all_date[idate][itime][gain_sort_index[1]] in gps_netcdf_all_date[idate][itime]) == False):
+            time_second_gain_wrong.append(itime)
+        if (((gps_spock_all_date[idate][itime][gain_sort_index[0]] in gps_netcdf_all_date[idate][itime]) == False) & ((gps_spock_all_date[idate][itime][gain_sort_index[1]] in gps_netcdf_all_date[idate][itime]) == False)):
+            time_first_and_second_gain_wrong.append(itime)
+    time_first_gain_wrong_all_date.append(time_first_gain_wrong)
+    time_second_gain_wrong_all_date.append(time_second_gain_wrong)
+    time_first_and_second_gain_wrong_all_date.append(time_first_and_second_gain_wrong)
+    percentage_first_gain_wrong_all_date[idate] = len(time_first_gain_wrong_all_date[-1]) * 100. / len(gps_spock_all_date[idate])
+    percentage_second_gain_wrong_all_date[idate] = len(time_second_gain_wrong_all_date[-1]) * 100. / len(gps_spock_all_date[idate])
+    percentage_first_and_second_gain_wrong_all_date[idate] = len(time_first_and_second_gain_wrong_all_date[-1]) * 100. / len(gps_spock_all_date[idate])
+    
+    num_percentage_first_gain_wrong = num_percentage_first_gain_wrong + len(time_first_gain_wrong_all_date[-1])
+    den_percentage_first_gain_wrong = den_percentage_first_gain_wrong + len(gps_spock_all_date[idate])
+
+    num_percentage_second_gain_wrong = num_percentage_second_gain_wrong + len(time_second_gain_wrong_all_date[-1])
+    den_percentage_second_gain_wrong = den_percentage_second_gain_wrong + len(gps_spock_all_date[idate])
+
+    num_percentage_first_and_second_gain_wrong = num_percentage_first_and_second_gain_wrong + len(time_first_and_second_gain_wrong_all_date[-1])
+    den_percentage_first_and_second_gain_wrong = den_percentage_first_and_second_gain_wrong + len(gps_spock_all_date[idate])
+
+percentage_first_gain_wrong = num_percentage_first_gain_wrong * 100./den_percentage_first_gain_wrong
+percentage_second_gain_wrong = num_percentage_second_gain_wrong * 100./den_percentage_second_gain_wrong
+percentage_first_and_second_gain_wrong = num_percentage_first_and_second_gain_wrong * 100./den_percentage_first_and_second_gain_wrong
+    
+for idate in range(nb_date):
+    print 'day ' + str(idate + 1)
+    print '    - percentage of time the top PRN is incorrectly selected: ' + format(percentage_first_gain_wrong_all_date[idate], ".2f") 
+    print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + format(percentage_second_gain_wrong_all_date[idate], ".2f")
+    print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong_all_date[idate], ".2f") 
+print 'Over all days:'
+print '    - percentage of time the top PRN is incorrectly selected: ' + format(percentage_first_gain_wrong, ".2f") 
+print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + format(percentage_second_gain_wrong, ".2f")
+print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong, ".2f") 
