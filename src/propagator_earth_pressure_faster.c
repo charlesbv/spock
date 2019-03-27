@@ -2008,7 +2008,6 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       // latitude
       gravity_map_yinter_lat(yinter, &order_interpo_map, lat_gc, Gravity, y_radius3_lat0, y_radius3_lat1, y_radius3_lat2, y_radius3_lat3);
       polynomial_interpo(&y_radius3, order_interpo_map, xinter_lat, yinter, lat_gc*180/M_PI);  
-
       // Interpo over radius
       gravity_map_yinter_radius( yinter, &order_interpo_map,  rmag, Gravity,  y_radius0,  y_radius1,  y_radius2,  y_radius3);
 	// Interpolate dUdr, Dudlat, DUdlong
@@ -2646,7 +2645,126 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
-  int order_interpo_map = 4;
+          double a_earth_pressure_fac[3];
+	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;   
+  int ii;
+  		// radius0 zenith0
+  double y_radius0_zenith0_elev_surf0_azim_surf0, y_radius0_zenith0_elev_surf0_azim_surf1, y_radius0_zenith0_elev_surf0_azim_surf2, y_radius0_zenith0_elev_surf0_azim_surf3, y_radius0_zenith0_elev_surf0;
+    double y_radius0_zenith0_elev_surf1_azim_surf0, y_radius0_zenith0_elev_surf1_azim_surf1, y_radius0_zenith0_elev_surf1_azim_surf2, y_radius0_zenith0_elev_surf1_azim_surf3, y_radius0_zenith0_elev_surf1;
+        double y_radius0_zenith0_elev_surf2_azim_surf0, y_radius0_zenith0_elev_surf2_azim_surf1, y_radius0_zenith0_elev_surf2_azim_surf2, y_radius0_zenith0_elev_surf2_azim_surf3, y_radius0_zenith0_elev_surf2;
+	        double y_radius0_zenith0_elev_surf3_azim_surf0, y_radius0_zenith0_elev_surf3_azim_surf1, y_radius0_zenith0_elev_surf3_azim_surf2, y_radius0_zenith0_elev_surf3_azim_surf3, y_radius0_zenith0_elev_surf3;
+		double y_radius0_zenith0;
+				// radius0 zenith1
+  double y_radius0_zenith1_elev_surf0_azim_surf0, y_radius0_zenith1_elev_surf0_azim_surf1, y_radius0_zenith1_elev_surf0_azim_surf2, y_radius0_zenith1_elev_surf0_azim_surf3, y_radius0_zenith1_elev_surf0;
+    double y_radius0_zenith1_elev_surf1_azim_surf0, y_radius0_zenith1_elev_surf1_azim_surf1, y_radius0_zenith1_elev_surf1_azim_surf2, y_radius0_zenith1_elev_surf1_azim_surf3, y_radius0_zenith1_elev_surf1;
+        double y_radius0_zenith1_elev_surf2_azim_surf0, y_radius0_zenith1_elev_surf2_azim_surf1, y_radius0_zenith1_elev_surf2_azim_surf2, y_radius0_zenith1_elev_surf2_azim_surf3, y_radius0_zenith1_elev_surf2;
+	        double y_radius0_zenith1_elev_surf3_azim_surf0, y_radius0_zenith1_elev_surf3_azim_surf1, y_radius0_zenith1_elev_surf3_azim_surf2, y_radius0_zenith1_elev_surf3_azim_surf3, y_radius0_zenith1_elev_surf3;
+		double y_radius0_zenith1;
+		// radius0 zenith2
+  double y_radius0_zenith2_elev_surf0_azim_surf0, y_radius0_zenith2_elev_surf0_azim_surf1, y_radius0_zenith2_elev_surf0_azim_surf2, y_radius0_zenith2_elev_surf0_azim_surf3, y_radius0_zenith2_elev_surf0;
+    double y_radius0_zenith2_elev_surf1_azim_surf0, y_radius0_zenith2_elev_surf1_azim_surf1, y_radius0_zenith2_elev_surf1_azim_surf2, y_radius0_zenith2_elev_surf1_azim_surf3, y_radius0_zenith2_elev_surf1;
+        double y_radius0_zenith2_elev_surf2_azim_surf0, y_radius0_zenith2_elev_surf2_azim_surf1, y_radius0_zenith2_elev_surf2_azim_surf2, y_radius0_zenith2_elev_surf2_azim_surf3, y_radius0_zenith2_elev_surf2;
+	        double y_radius0_zenith2_elev_surf3_azim_surf0, y_radius0_zenith2_elev_surf3_azim_surf1, y_radius0_zenith2_elev_surf3_azim_surf2, y_radius0_zenith2_elev_surf3_azim_surf3, y_radius0_zenith2_elev_surf3;
+		double y_radius0_zenith2;
+		// radius0 zenith3
+  double y_radius0_zenith3_elev_surf0_azim_surf0, y_radius0_zenith3_elev_surf0_azim_surf1, y_radius0_zenith3_elev_surf0_azim_surf2, y_radius0_zenith3_elev_surf0_azim_surf3, y_radius0_zenith3_elev_surf0;
+    double y_radius0_zenith3_elev_surf1_azim_surf0, y_radius0_zenith3_elev_surf1_azim_surf1, y_radius0_zenith3_elev_surf1_azim_surf2, y_radius0_zenith3_elev_surf1_azim_surf3, y_radius0_zenith3_elev_surf1;
+        double y_radius0_zenith3_elev_surf2_azim_surf0, y_radius0_zenith3_elev_surf2_azim_surf1, y_radius0_zenith3_elev_surf2_azim_surf2, y_radius0_zenith3_elev_surf2_azim_surf3, y_radius0_zenith3_elev_surf2;
+	        double y_radius0_zenith3_elev_surf3_azim_surf0, y_radius0_zenith3_elev_surf3_azim_surf1, y_radius0_zenith3_elev_surf3_azim_surf2, y_radius0_zenith3_elev_surf3_azim_surf3, y_radius0_zenith3_elev_surf3;
+		double y_radius0_zenith3;
+		double y_radius0;
+
+  		// radius1 zenith0
+  double y_radius1_zenith0_elev_surf0_azim_surf0, y_radius1_zenith0_elev_surf0_azim_surf1, y_radius1_zenith0_elev_surf0_azim_surf2, y_radius1_zenith0_elev_surf0_azim_surf3, y_radius1_zenith0_elev_surf0;
+    double y_radius1_zenith0_elev_surf1_azim_surf0, y_radius1_zenith0_elev_surf1_azim_surf1, y_radius1_zenith0_elev_surf1_azim_surf2, y_radius1_zenith0_elev_surf1_azim_surf3, y_radius1_zenith0_elev_surf1;
+        double y_radius1_zenith0_elev_surf2_azim_surf0, y_radius1_zenith0_elev_surf2_azim_surf1, y_radius1_zenith0_elev_surf2_azim_surf2, y_radius1_zenith0_elev_surf2_azim_surf3, y_radius1_zenith0_elev_surf2;
+	        double y_radius1_zenith0_elev_surf3_azim_surf0, y_radius1_zenith0_elev_surf3_azim_surf1, y_radius1_zenith0_elev_surf3_azim_surf2, y_radius1_zenith0_elev_surf3_azim_surf3, y_radius1_zenith0_elev_surf3;
+		double y_radius1_zenith0;
+				// radius1 zenith1
+  double y_radius1_zenith1_elev_surf0_azim_surf0, y_radius1_zenith1_elev_surf0_azim_surf1, y_radius1_zenith1_elev_surf0_azim_surf2, y_radius1_zenith1_elev_surf0_azim_surf3, y_radius1_zenith1_elev_surf0;
+    double y_radius1_zenith1_elev_surf1_azim_surf0, y_radius1_zenith1_elev_surf1_azim_surf1, y_radius1_zenith1_elev_surf1_azim_surf2, y_radius1_zenith1_elev_surf1_azim_surf3, y_radius1_zenith1_elev_surf1;
+        double y_radius1_zenith1_elev_surf2_azim_surf0, y_radius1_zenith1_elev_surf2_azim_surf1, y_radius1_zenith1_elev_surf2_azim_surf2, y_radius1_zenith1_elev_surf2_azim_surf3, y_radius1_zenith1_elev_surf2;
+	        double y_radius1_zenith1_elev_surf3_azim_surf0, y_radius1_zenith1_elev_surf3_azim_surf1, y_radius1_zenith1_elev_surf3_azim_surf2, y_radius1_zenith1_elev_surf3_azim_surf3, y_radius1_zenith1_elev_surf3;
+		double y_radius1_zenith1;
+		// radius1 zenith2
+  double y_radius1_zenith2_elev_surf0_azim_surf0, y_radius1_zenith2_elev_surf0_azim_surf1, y_radius1_zenith2_elev_surf0_azim_surf2, y_radius1_zenith2_elev_surf0_azim_surf3, y_radius1_zenith2_elev_surf0;
+    double y_radius1_zenith2_elev_surf1_azim_surf0, y_radius1_zenith2_elev_surf1_azim_surf1, y_radius1_zenith2_elev_surf1_azim_surf2, y_radius1_zenith2_elev_surf1_azim_surf3, y_radius1_zenith2_elev_surf1;
+        double y_radius1_zenith2_elev_surf2_azim_surf0, y_radius1_zenith2_elev_surf2_azim_surf1, y_radius1_zenith2_elev_surf2_azim_surf2, y_radius1_zenith2_elev_surf2_azim_surf3, y_radius1_zenith2_elev_surf2;
+	        double y_radius1_zenith2_elev_surf3_azim_surf0, y_radius1_zenith2_elev_surf3_azim_surf1, y_radius1_zenith2_elev_surf3_azim_surf2, y_radius1_zenith2_elev_surf3_azim_surf3, y_radius1_zenith2_elev_surf3;
+		double y_radius1_zenith2;
+		// radius1 zenith3
+  double y_radius1_zenith3_elev_surf0_azim_surf0, y_radius1_zenith3_elev_surf0_azim_surf1, y_radius1_zenith3_elev_surf0_azim_surf2, y_radius1_zenith3_elev_surf0_azim_surf3, y_radius1_zenith3_elev_surf0;
+    double y_radius1_zenith3_elev_surf1_azim_surf0, y_radius1_zenith3_elev_surf1_azim_surf1, y_radius1_zenith3_elev_surf1_azim_surf2, y_radius1_zenith3_elev_surf1_azim_surf3, y_radius1_zenith3_elev_surf1;
+        double y_radius1_zenith3_elev_surf2_azim_surf0, y_radius1_zenith3_elev_surf2_azim_surf1, y_radius1_zenith3_elev_surf2_azim_surf2, y_radius1_zenith3_elev_surf2_azim_surf3, y_radius1_zenith3_elev_surf2;
+	        double y_radius1_zenith3_elev_surf3_azim_surf0, y_radius1_zenith3_elev_surf3_azim_surf1, y_radius1_zenith3_elev_surf3_azim_surf2, y_radius1_zenith3_elev_surf3_azim_surf3, y_radius1_zenith3_elev_surf3;
+		double y_radius1_zenith3;
+		double y_radius1 ;
+
+  		// radius2 zenith0
+  double y_radius2_zenith0_elev_surf0_azim_surf0, y_radius2_zenith0_elev_surf0_azim_surf1, y_radius2_zenith0_elev_surf0_azim_surf2, y_radius2_zenith0_elev_surf0_azim_surf3, y_radius2_zenith0_elev_surf0;
+    double y_radius2_zenith0_elev_surf1_azim_surf0, y_radius2_zenith0_elev_surf1_azim_surf1, y_radius2_zenith0_elev_surf1_azim_surf2, y_radius2_zenith0_elev_surf1_azim_surf3, y_radius2_zenith0_elev_surf1;
+        double y_radius2_zenith0_elev_surf2_azim_surf0, y_radius2_zenith0_elev_surf2_azim_surf1, y_radius2_zenith0_elev_surf2_azim_surf2, y_radius2_zenith0_elev_surf2_azim_surf3, y_radius2_zenith0_elev_surf2;
+	        double y_radius2_zenith0_elev_surf3_azim_surf0, y_radius2_zenith0_elev_surf3_azim_surf1, y_radius2_zenith0_elev_surf3_azim_surf2, y_radius2_zenith0_elev_surf3_azim_surf3, y_radius2_zenith0_elev_surf3;
+		double y_radius2_zenith0;
+				// radius2 zenith1
+  double y_radius2_zenith1_elev_surf0_azim_surf0, y_radius2_zenith1_elev_surf0_azim_surf1, y_radius2_zenith1_elev_surf0_azim_surf2, y_radius2_zenith1_elev_surf0_azim_surf3, y_radius2_zenith1_elev_surf0;
+    double y_radius2_zenith1_elev_surf1_azim_surf0, y_radius2_zenith1_elev_surf1_azim_surf1, y_radius2_zenith1_elev_surf1_azim_surf2, y_radius2_zenith1_elev_surf1_azim_surf3, y_radius2_zenith1_elev_surf1;
+        double y_radius2_zenith1_elev_surf2_azim_surf0, y_radius2_zenith1_elev_surf2_azim_surf1, y_radius2_zenith1_elev_surf2_azim_surf2, y_radius2_zenith1_elev_surf2_azim_surf3, y_radius2_zenith1_elev_surf2;
+	        double y_radius2_zenith1_elev_surf3_azim_surf0, y_radius2_zenith1_elev_surf3_azim_surf1, y_radius2_zenith1_elev_surf3_azim_surf2, y_radius2_zenith1_elev_surf3_azim_surf3, y_radius2_zenith1_elev_surf3;
+		double y_radius2_zenith1;
+		// radius2 zenith2
+  double y_radius2_zenith2_elev_surf0_azim_surf0, y_radius2_zenith2_elev_surf0_azim_surf1, y_radius2_zenith2_elev_surf0_azim_surf2, y_radius2_zenith2_elev_surf0_azim_surf3, y_radius2_zenith2_elev_surf0;
+    double y_radius2_zenith2_elev_surf1_azim_surf0, y_radius2_zenith2_elev_surf1_azim_surf1, y_radius2_zenith2_elev_surf1_azim_surf2, y_radius2_zenith2_elev_surf1_azim_surf3, y_radius2_zenith2_elev_surf1;
+        double y_radius2_zenith2_elev_surf2_azim_surf0, y_radius2_zenith2_elev_surf2_azim_surf1, y_radius2_zenith2_elev_surf2_azim_surf2, y_radius2_zenith2_elev_surf2_azim_surf3, y_radius2_zenith2_elev_surf2;
+	        double y_radius2_zenith2_elev_surf3_azim_surf0, y_radius2_zenith2_elev_surf3_azim_surf1, y_radius2_zenith2_elev_surf3_azim_surf2, y_radius2_zenith2_elev_surf3_azim_surf3, y_radius2_zenith2_elev_surf3;
+		double y_radius2_zenith2;
+		// radius2 zenith3
+  double y_radius2_zenith3_elev_surf0_azim_surf0, y_radius2_zenith3_elev_surf0_azim_surf1, y_radius2_zenith3_elev_surf0_azim_surf2, y_radius2_zenith3_elev_surf0_azim_surf3, y_radius2_zenith3_elev_surf0;
+    double y_radius2_zenith3_elev_surf1_azim_surf0, y_radius2_zenith3_elev_surf1_azim_surf1, y_radius2_zenith3_elev_surf1_azim_surf2, y_radius2_zenith3_elev_surf1_azim_surf3, y_radius2_zenith3_elev_surf1;
+        double y_radius2_zenith3_elev_surf2_azim_surf0, y_radius2_zenith3_elev_surf2_azim_surf1, y_radius2_zenith3_elev_surf2_azim_surf2, y_radius2_zenith3_elev_surf2_azim_surf3, y_radius2_zenith3_elev_surf2;
+	        double y_radius2_zenith3_elev_surf3_azim_surf0, y_radius2_zenith3_elev_surf3_azim_surf1, y_radius2_zenith3_elev_surf3_azim_surf2, y_radius2_zenith3_elev_surf3_azim_surf3, y_radius2_zenith3_elev_surf3;
+		double y_radius2_zenith3;
+		double y_radius2 ;
+
+		
+  		// radius3 zenith0
+  double y_radius3_zenith0_elev_surf0_azim_surf0, y_radius3_zenith0_elev_surf0_azim_surf1, y_radius3_zenith0_elev_surf0_azim_surf2, y_radius3_zenith0_elev_surf0_azim_surf3, y_radius3_zenith0_elev_surf0;
+    double y_radius3_zenith0_elev_surf1_azim_surf0, y_radius3_zenith0_elev_surf1_azim_surf1, y_radius3_zenith0_elev_surf1_azim_surf2, y_radius3_zenith0_elev_surf1_azim_surf3, y_radius3_zenith0_elev_surf1;
+        double y_radius3_zenith0_elev_surf2_azim_surf0, y_radius3_zenith0_elev_surf2_azim_surf1, y_radius3_zenith0_elev_surf2_azim_surf2, y_radius3_zenith0_elev_surf2_azim_surf3, y_radius3_zenith0_elev_surf2;
+	        double y_radius3_zenith0_elev_surf3_azim_surf0, y_radius3_zenith0_elev_surf3_azim_surf1, y_radius3_zenith0_elev_surf3_azim_surf2, y_radius3_zenith0_elev_surf3_azim_surf3, y_radius3_zenith0_elev_surf3;
+		double y_radius3_zenith0;
+				// radius3 zenith1
+  double y_radius3_zenith1_elev_surf0_azim_surf0, y_radius3_zenith1_elev_surf0_azim_surf1, y_radius3_zenith1_elev_surf0_azim_surf2, y_radius3_zenith1_elev_surf0_azim_surf3, y_radius3_zenith1_elev_surf0;
+    double y_radius3_zenith1_elev_surf1_azim_surf0, y_radius3_zenith1_elev_surf1_azim_surf1, y_radius3_zenith1_elev_surf1_azim_surf2, y_radius3_zenith1_elev_surf1_azim_surf3, y_radius3_zenith1_elev_surf1;
+        double y_radius3_zenith1_elev_surf2_azim_surf0, y_radius3_zenith1_elev_surf2_azim_surf1, y_radius3_zenith1_elev_surf2_azim_surf2, y_radius3_zenith1_elev_surf2_azim_surf3, y_radius3_zenith1_elev_surf2;
+	        double y_radius3_zenith1_elev_surf3_azim_surf0, y_radius3_zenith1_elev_surf3_azim_surf1, y_radius3_zenith1_elev_surf3_azim_surf2, y_radius3_zenith1_elev_surf3_azim_surf3, y_radius3_zenith1_elev_surf3;
+		double y_radius3_zenith1;
+		// radius3 zenith2
+  double y_radius3_zenith2_elev_surf0_azim_surf0, y_radius3_zenith2_elev_surf0_azim_surf1, y_radius3_zenith2_elev_surf0_azim_surf2, y_radius3_zenith2_elev_surf0_azim_surf3, y_radius3_zenith2_elev_surf0;
+    double y_radius3_zenith2_elev_surf1_azim_surf0, y_radius3_zenith2_elev_surf1_azim_surf1, y_radius3_zenith2_elev_surf1_azim_surf2, y_radius3_zenith2_elev_surf1_azim_surf3, y_radius3_zenith2_elev_surf1;
+        double y_radius3_zenith2_elev_surf2_azim_surf0, y_radius3_zenith2_elev_surf2_azim_surf1, y_radius3_zenith2_elev_surf2_azim_surf2, y_radius3_zenith2_elev_surf2_azim_surf3, y_radius3_zenith2_elev_surf2;
+	        double y_radius3_zenith2_elev_surf3_azim_surf0, y_radius3_zenith2_elev_surf3_azim_surf1, y_radius3_zenith2_elev_surf3_azim_surf2, y_radius3_zenith2_elev_surf3_azim_surf3, y_radius3_zenith2_elev_surf3;
+		double y_radius3_zenith2;
+		// radius3 zenith3
+  double y_radius3_zenith3_elev_surf0_azim_surf0, y_radius3_zenith3_elev_surf0_azim_surf1, y_radius3_zenith3_elev_surf0_azim_surf2, y_radius3_zenith3_elev_surf0_azim_surf3, y_radius3_zenith3_elev_surf0;
+    double y_radius3_zenith3_elev_surf1_azim_surf0, y_radius3_zenith3_elev_surf1_azim_surf1, y_radius3_zenith3_elev_surf1_azim_surf2, y_radius3_zenith3_elev_surf1_azim_surf3, y_radius3_zenith3_elev_surf1;
+        double y_radius3_zenith3_elev_surf2_azim_surf0, y_radius3_zenith3_elev_surf2_azim_surf1, y_radius3_zenith3_elev_surf2_azim_surf2, y_radius3_zenith3_elev_surf2_azim_surf3, y_radius3_zenith3_elev_surf2;
+	        double y_radius3_zenith3_elev_surf3_azim_surf0, y_radius3_zenith3_elev_surf3_azim_surf1, y_radius3_zenith3_elev_surf3_azim_surf2, y_radius3_zenith3_elev_surf3_azim_surf3, y_radius3_zenith3_elev_surf3;
+		double y_radius3_zenith3;
+		double y_radius3 ;
+
+
+		
+		double *xinter_radius, *xinter_zenith, *xinter_elev_surf, *xinter_azim_surf;
+    double *yinter;
+    int order_interpo_map = 4;
+    xinter_radius = malloc(4 * sizeof(double));
+    yinter = malloc(4 * sizeof(double));
+    xinter_zenith = malloc(4 * sizeof(double));
+    xinter_elev_surf = malloc(4 * sizeof(double));
+        xinter_azim_surf = malloc(4 * sizeof(double));
+
+  
   double cr;
   double r_earth_elt_body[3];
   double r_earth_elt_lvlh_norm[3], r_earth_elt_lvlh_norm_minus[3];
@@ -2766,71 +2884,743 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   double prad;
   prad = solar_luminosity / (4 * M_PI * light_speed * 1000 * dist_sat_to_sun * dist_sat_to_sun * 1000000.); // in N/m2. should be about 4.5e-6 N./m2 (the flux prad*c should be about 1350 W/m2)
   double zenith_sc, cos_zenith_sc, r_earth2sun_J2000_mag;
-    v_mag(&r_earth2sun_J2000_mag, r_earth2sun_J2000);
-    v_dot(&cos_zenith_sc, r_i2cg_INRTL, r_earth2sun_J2000);
-    cos_zenith_sc = cos_zenith_sc / ( radius_sc *  r_earth2sun_J2000_mag);
-    zenith_sc = acos(cos_zenith_sc); // doesn't matter if get +-zenith angle
+  v_mag(&r_earth2sun_J2000_mag, r_earth2sun_J2000);
+  v_dot(&cos_zenith_sc, r_i2cg_INRTL, r_earth2sun_J2000);
+  cos_zenith_sc = cos_zenith_sc / ( radius_sc *  r_earth2sun_J2000_mag);
+  zenith_sc = acos(cos_zenith_sc); // doesn't matter if get +-zenith angle
   if (INTEGRATOR->coll_vcm != 1){
-	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
-	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
-    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
-    double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
-    double T_lvlh_to_inrtl[3][3];
-    	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
+      compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+      double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
+      double T_lvlh_to_inrtl[3][3];
+      for (sss = 0; sss < 1; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
+	      cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
     	m_x_v(sc_normal_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[sss].normal);
 	compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
-    m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
-    m_x_v(sc_normal_eci, T_lvlh_to_inrtl, sc_normal_lvlh);
-    double T_inrtl_2_earth_pres_frame[3][3];
-    compute_T_inrtl_2_earth_pres_frame( T_inrtl_2_earth_pres_frame, r_i2cg_INRTL, et);
-    m_x_v(sc_normal_epf, T_inrtl_2_earth_pres_frame, sc_normal_eci);
-    double elev_surf, azim_surf;
-    elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180 
-    azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
+	m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
+	m_x_v(sc_normal_eci, T_lvlh_to_inrtl, sc_normal_lvlh);
+	double T_inrtl_2_earth_pres_frame[3][3];
+	compute_T_inrtl_2_earth_pres_frame( T_inrtl_2_earth_pres_frame, r_i2cg_INRTL, et);
+	m_x_v(sc_normal_epf, T_inrtl_2_earth_pres_frame, sc_normal_eci);
+	double elev_surf, azim_surf;
+	elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180 
+	azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
 
 
     
-    int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
-    int iradius0, iradius1, iradius2, iradius3;
+	int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
+	int iradius0, iradius1, iradius2, iradius3;
         int izenith0, izenith1, izenith2, izenith3;
-	        int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
+	int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
         int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
 	double azim_surf_corr;
-    // determine the bin for the radius
-    compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
-    iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
+	// determine the bin for the radius
+	compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
+	iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
 
-    // determine the bin for the zenith
+	// determine the bin for the zenith
 	compute_izenith_gravity_map(izenith_arr, &PARAMS->EARTH.GRAVITY, zenith_sc);
-      izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
+	izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
 
-      // determine the bin for the elevation of the normal of the surface
+	// determine the bin for the elevation of the normal of the surface
 	compute_ielev_surf_gravity_map(ielev_surf_arr, &PARAMS->EARTH.GRAVITY, elev_surf);
-      ielev_surf0 = ielev_surf_arr[0]; ielev_surf1 = ielev_surf_arr[1]; ielev_surf2 = ielev_surf_arr[2]; ielev_surf3 = ielev_surf_arr[3];
+	ielev_surf0 = ielev_surf_arr[0]; ielev_surf1 = ielev_surf_arr[1]; ielev_surf2 = ielev_surf_arr[2]; ielev_surf3 = ielev_surf_arr[3];
 
-    // determine the bin for the azimuth of the normal of the surface
-    if (azim_surf >= 0){ // azim_surf_corr varies from 0 to 2*M_PI
-      azim_surf_corr = azim_surf;
+	// determine the bin for the azimuth of the normal of the surface
+	if (azim_surf >= 0){ // azim_surf_corr varies from 0 to 2*M_PI
+	  azim_surf_corr = azim_surf;
+	}
+	else{
+	  azim_surf_corr = 2*M_PI + azim_surf;
+	}    
+	compute_iazim_surf_gravity_map(iazim_surf_arr, &PARAMS->EARTH.GRAVITY, azim_surf_corr);
+	iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
+
+	if (elev_surf*180/M_PI >= PARAMS->EARTH.GRAVITY.min_elev_surf_map){ // otherwise the surface doesn't see any part of the Earthzenith
+	  
+	  // Determine the x bins (radius, zenith, elev_surf, azim_surf) for the interpolations
+	  earth_pressure_map_xinter(xinter_radius, xinter_zenith, xinter_elev_surf, xinter_azim_surf, radius_sc, zenith_sc, elev_surf, azim_surf_corr, &PARAMS->EARTH.GRAVITY, iradius_arr, izenith_arr, ielev_surf_arr, iazim_surf_arr);
+
+
+    // Interpolate over longitude, latitude, and radius
+	  // !!!!-> GIANT BLOCKS FOR EACH RADIUS (RADIUS0, 1, 2,3). All radius block are identical to the block radius0 except that the chracters 'radius0' are replaced by 'radius1' in the block radius1, by 'radius2' in the block radius2, by 'radius3' in the block radius3. Of coures, we could make a funciton but the problem is that we loop over ii, which is the last dimension of PARAMS->EARTH.GRAVITY.earth_pressure_map, whcih makes the function not possible. if ii was the first dimension then we could have factorized in functions easily... This is super ugly but you can move the end of the giant block by looking for "END OF GIANT BLOCK" 
+    for (ii = 0; ii < 3; ii++){
+      // GIANT BLOCK (about 600 lines, see comment right above)
+      // RADIUS0
+      // // zenith0
+      // // // zenith0 elev_surf0
+      y_radius0_zenith0_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf0][iazim_surf0][ii];
+      y_radius0_zenith0_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf0][iazim_surf1][ii];
+      y_radius0_zenith0_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf0][iazim_surf2][ii];
+      y_radius0_zenith0_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith0_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0_elev_surf0_azim_surf0, y_radius0_zenith0_elev_surf0_azim_surf1, y_radius0_zenith0_elev_surf0_azim_surf2, y_radius0_zenith0_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith0_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf1
+      y_radius0_zenith0_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf1][iazim_surf0][ii];
+      y_radius0_zenith0_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf1][iazim_surf1][ii];
+      y_radius0_zenith0_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf1][iazim_surf2][ii];
+      y_radius0_zenith0_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith0_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0_elev_surf1_azim_surf0, y_radius0_zenith0_elev_surf1_azim_surf1, y_radius0_zenith0_elev_surf1_azim_surf2, y_radius0_zenith0_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith0_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf2
+      y_radius0_zenith0_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf2][iazim_surf0][ii];
+      y_radius0_zenith0_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf2][iazim_surf1][ii];
+      y_radius0_zenith0_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf2][iazim_surf2][ii];
+      y_radius0_zenith0_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith0_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0_elev_surf2_azim_surf0, y_radius0_zenith0_elev_surf2_azim_surf1, y_radius0_zenith0_elev_surf2_azim_surf2, y_radius0_zenith0_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith0_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf3
+      y_radius0_zenith0_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf3][iazim_surf0][ii];
+      y_radius0_zenith0_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf3][iazim_surf1][ii];
+      y_radius0_zenith0_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf3][iazim_surf2][ii];
+      y_radius0_zenith0_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith0][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith0_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0_elev_surf3_azim_surf0, y_radius0_zenith0_elev_surf3_azim_surf1, y_radius0_zenith0_elev_surf3_azim_surf2, y_radius0_zenith0_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith0_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith0 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0_elev_surf0, y_radius0_zenith0_elev_surf1, y_radius0_zenith0_elev_surf2, y_radius0_zenith0_elev_surf3);
+      polynomial_interpo(&y_radius0_zenith0, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith1
+      // // // zenith1 elev_surf0
+      y_radius0_zenith1_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf0][iazim_surf0][ii];
+      y_radius0_zenith1_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf0][iazim_surf1][ii];
+      y_radius0_zenith1_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf0][iazim_surf2][ii];
+      y_radius0_zenith1_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith1_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith1_elev_surf0_azim_surf0, y_radius0_zenith1_elev_surf0_azim_surf1, y_radius0_zenith1_elev_surf0_azim_surf2, y_radius0_zenith1_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith1_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf1
+      y_radius0_zenith1_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf1][iazim_surf0][ii];
+      y_radius0_zenith1_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf1][iazim_surf1][ii];
+      y_radius0_zenith1_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf1][iazim_surf2][ii];
+      y_radius0_zenith1_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith1_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith1_elev_surf1_azim_surf0, y_radius0_zenith1_elev_surf1_azim_surf1, y_radius0_zenith1_elev_surf1_azim_surf2, y_radius0_zenith1_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith1_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf2
+      y_radius0_zenith1_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf2][iazim_surf0][ii];
+      y_radius0_zenith1_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf2][iazim_surf1][ii];
+      y_radius0_zenith1_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf2][iazim_surf2][ii];
+      y_radius0_zenith1_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith1_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith1_elev_surf2_azim_surf0, y_radius0_zenith1_elev_surf2_azim_surf1, y_radius0_zenith1_elev_surf2_azim_surf2, y_radius0_zenith1_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith1_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf3
+      y_radius0_zenith1_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf3][iazim_surf0][ii];
+      y_radius0_zenith1_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf3][iazim_surf1][ii];
+      y_radius0_zenith1_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf3][iazim_surf2][ii];
+      y_radius0_zenith1_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith1][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith1_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith1_elev_surf3_azim_surf0, y_radius0_zenith1_elev_surf3_azim_surf1, y_radius0_zenith1_elev_surf3_azim_surf2, y_radius0_zenith1_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith1_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith1 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius0_zenith1_elev_surf0, y_radius0_zenith1_elev_surf1, y_radius0_zenith1_elev_surf2, y_radius0_zenith1_elev_surf3);
+      polynomial_interpo(&y_radius0_zenith1, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith2
+      // // // zenith2 elev_surf0
+      y_radius0_zenith2_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf0][iazim_surf0][ii];
+      y_radius0_zenith2_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf0][iazim_surf1][ii];
+      y_radius0_zenith2_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf0][iazim_surf2][ii];
+      y_radius0_zenith2_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith2_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith2_elev_surf0_azim_surf0, y_radius0_zenith2_elev_surf0_azim_surf1, y_radius0_zenith2_elev_surf0_azim_surf2, y_radius0_zenith2_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith2_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf1
+      y_radius0_zenith2_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf1][iazim_surf0][ii];
+      y_radius0_zenith2_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf1][iazim_surf1][ii];
+      y_radius0_zenith2_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf1][iazim_surf2][ii];
+      y_radius0_zenith2_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith2_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith2_elev_surf1_azim_surf0, y_radius0_zenith2_elev_surf1_azim_surf1, y_radius0_zenith2_elev_surf1_azim_surf2, y_radius0_zenith2_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith2_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf2
+      y_radius0_zenith2_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf2][iazim_surf0][ii];
+      y_radius0_zenith2_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf2][iazim_surf1][ii];
+      y_radius0_zenith2_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf2][iazim_surf2][ii];
+      y_radius0_zenith2_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith2_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith2_elev_surf2_azim_surf0, y_radius0_zenith2_elev_surf2_azim_surf1, y_radius0_zenith2_elev_surf2_azim_surf2, y_radius0_zenith2_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith2_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf3
+      y_radius0_zenith2_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf3][iazim_surf0][ii];
+      y_radius0_zenith2_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf3][iazim_surf1][ii];
+      y_radius0_zenith2_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf3][iazim_surf2][ii];
+      y_radius0_zenith2_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith2][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith2_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith2_elev_surf3_azim_surf0, y_radius0_zenith2_elev_surf3_azim_surf1, y_radius0_zenith2_elev_surf3_azim_surf2, y_radius0_zenith2_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith2_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith2 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius0_zenith2_elev_surf0, y_radius0_zenith2_elev_surf1, y_radius0_zenith2_elev_surf2, y_radius0_zenith2_elev_surf3);
+      polynomial_interpo(&y_radius0_zenith2, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith3
+      // // // zenith3 elev_surf0
+      y_radius0_zenith3_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf0][iazim_surf0][ii];
+      y_radius0_zenith3_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf0][iazim_surf1][ii];
+      y_radius0_zenith3_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf0][iazim_surf2][ii];
+      y_radius0_zenith3_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith3_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith3_elev_surf0_azim_surf0, y_radius0_zenith3_elev_surf0_azim_surf1, y_radius0_zenith3_elev_surf0_azim_surf2, y_radius0_zenith3_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith3_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf1
+      y_radius0_zenith3_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf1][iazim_surf0][ii];
+      y_radius0_zenith3_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf1][iazim_surf1][ii];
+      y_radius0_zenith3_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf1][iazim_surf2][ii];
+      y_radius0_zenith3_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith3_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith3_elev_surf1_azim_surf0, y_radius0_zenith3_elev_surf1_azim_surf1, y_radius0_zenith3_elev_surf1_azim_surf2, y_radius0_zenith3_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith3_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf2
+      y_radius0_zenith3_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf2][iazim_surf0][ii];
+      y_radius0_zenith3_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf2][iazim_surf1][ii];
+      y_radius0_zenith3_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf2][iazim_surf2][ii];
+      y_radius0_zenith3_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith3_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith3_elev_surf2_azim_surf0, y_radius0_zenith3_elev_surf2_azim_surf1, y_radius0_zenith3_elev_surf2_azim_surf2, y_radius0_zenith3_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith3_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf3
+      y_radius0_zenith3_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf3][iazim_surf0][ii];
+      y_radius0_zenith3_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf3][iazim_surf1][ii];
+      y_radius0_zenith3_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf3][iazim_surf2][ii];
+      y_radius0_zenith3_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius0][izenith3][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius0_zenith3_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius0_zenith3_elev_surf3_azim_surf0, y_radius0_zenith3_elev_surf3_azim_surf1, y_radius0_zenith3_elev_surf3_azim_surf2, y_radius0_zenith3_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius0_zenith3_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith3 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius0_zenith3_elev_surf0, y_radius0_zenith3_elev_surf1, y_radius0_zenith3_elev_surf2, y_radius0_zenith3_elev_surf3);
+      polynomial_interpo(&y_radius0_zenith3, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+      // // -> radius0 (interpo over zenith)
+      earth_pressure_map_yinter_zenith(yinter, &order_interpo_map, zenith_sc, &PARAMS->EARTH.GRAVITY, y_radius0_zenith0, y_radius0_zenith1, y_radius0_zenith2, y_radius0_zenith3);
+      polynomial_interpo(&y_radius0, order_interpo_map, xinter_zenith, yinter, zenith_sc*180/M_PI);
+
+
+
+      // RADIUS1
+      // // zenith0
+      // // // zenith0 elev_surf0
+      y_radius1_zenith0_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf0][iazim_surf0][ii];
+      y_radius1_zenith0_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf0][iazim_surf1][ii];
+      y_radius1_zenith0_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf0][iazim_surf2][ii];
+      y_radius1_zenith0_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith0_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0_elev_surf0_azim_surf0, y_radius1_zenith0_elev_surf0_azim_surf1, y_radius1_zenith0_elev_surf0_azim_surf2, y_radius1_zenith0_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith0_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf1
+      y_radius1_zenith0_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf1][iazim_surf0][ii];
+      y_radius1_zenith0_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf1][iazim_surf1][ii];
+      y_radius1_zenith0_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf1][iazim_surf2][ii];
+      y_radius1_zenith0_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith0_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0_elev_surf1_azim_surf0, y_radius1_zenith0_elev_surf1_azim_surf1, y_radius1_zenith0_elev_surf1_azim_surf2, y_radius1_zenith0_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith0_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf2
+      y_radius1_zenith0_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf2][iazim_surf0][ii];
+      y_radius1_zenith0_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf2][iazim_surf1][ii];
+      y_radius1_zenith0_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf2][iazim_surf2][ii];
+      y_radius1_zenith0_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith0_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0_elev_surf2_azim_surf0, y_radius1_zenith0_elev_surf2_azim_surf1, y_radius1_zenith0_elev_surf2_azim_surf2, y_radius1_zenith0_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith0_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf3
+      y_radius1_zenith0_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf3][iazim_surf0][ii];
+      y_radius1_zenith0_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf3][iazim_surf1][ii];
+      y_radius1_zenith0_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf3][iazim_surf2][ii];
+      y_radius1_zenith0_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith0][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith0_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0_elev_surf3_azim_surf0, y_radius1_zenith0_elev_surf3_azim_surf1, y_radius1_zenith0_elev_surf3_azim_surf2, y_radius1_zenith0_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith0_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith0 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0_elev_surf0, y_radius1_zenith0_elev_surf1, y_radius1_zenith0_elev_surf2, y_radius1_zenith0_elev_surf3);
+      polynomial_interpo(&y_radius1_zenith0, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith1
+      // // // zenith1 elev_surf0
+      y_radius1_zenith1_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf0][iazim_surf0][ii];
+      y_radius1_zenith1_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf0][iazim_surf1][ii];
+      y_radius1_zenith1_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf0][iazim_surf2][ii];
+      y_radius1_zenith1_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith1_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith1_elev_surf0_azim_surf0, y_radius1_zenith1_elev_surf0_azim_surf1, y_radius1_zenith1_elev_surf0_azim_surf2, y_radius1_zenith1_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith1_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf1
+      y_radius1_zenith1_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf1][iazim_surf0][ii];
+      y_radius1_zenith1_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf1][iazim_surf1][ii];
+      y_radius1_zenith1_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf1][iazim_surf2][ii];
+      y_radius1_zenith1_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith1_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith1_elev_surf1_azim_surf0, y_radius1_zenith1_elev_surf1_azim_surf1, y_radius1_zenith1_elev_surf1_azim_surf2, y_radius1_zenith1_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith1_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf2
+      y_radius1_zenith1_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf2][iazim_surf0][ii];
+      y_radius1_zenith1_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf2][iazim_surf1][ii];
+      y_radius1_zenith1_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf2][iazim_surf2][ii];
+      y_radius1_zenith1_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith1_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith1_elev_surf2_azim_surf0, y_radius1_zenith1_elev_surf2_azim_surf1, y_radius1_zenith1_elev_surf2_azim_surf2, y_radius1_zenith1_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith1_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf3
+      y_radius1_zenith1_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf3][iazim_surf0][ii];
+      y_radius1_zenith1_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf3][iazim_surf1][ii];
+      y_radius1_zenith1_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf3][iazim_surf2][ii];
+      y_radius1_zenith1_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith1][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith1_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith1_elev_surf3_azim_surf0, y_radius1_zenith1_elev_surf3_azim_surf1, y_radius1_zenith1_elev_surf3_azim_surf2, y_radius1_zenith1_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith1_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith1 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius1_zenith1_elev_surf0, y_radius1_zenith1_elev_surf1, y_radius1_zenith1_elev_surf2, y_radius1_zenith1_elev_surf3);
+      polynomial_interpo(&y_radius1_zenith1, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith2
+      // // // zenith2 elev_surf0
+      y_radius1_zenith2_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf0][iazim_surf0][ii];
+      y_radius1_zenith2_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf0][iazim_surf1][ii];
+      y_radius1_zenith2_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf0][iazim_surf2][ii];
+      y_radius1_zenith2_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith2_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith2_elev_surf0_azim_surf0, y_radius1_zenith2_elev_surf0_azim_surf1, y_radius1_zenith2_elev_surf0_azim_surf2, y_radius1_zenith2_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith2_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf1
+      y_radius1_zenith2_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf1][iazim_surf0][ii];
+      y_radius1_zenith2_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf1][iazim_surf1][ii];
+      y_radius1_zenith2_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf1][iazim_surf2][ii];
+      y_radius1_zenith2_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith2_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith2_elev_surf1_azim_surf0, y_radius1_zenith2_elev_surf1_azim_surf1, y_radius1_zenith2_elev_surf1_azim_surf2, y_radius1_zenith2_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith2_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf2
+      y_radius1_zenith2_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf2][iazim_surf0][ii];
+      y_radius1_zenith2_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf2][iazim_surf1][ii];
+      y_radius1_zenith2_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf2][iazim_surf2][ii];
+      y_radius1_zenith2_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith2_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith2_elev_surf2_azim_surf0, y_radius1_zenith2_elev_surf2_azim_surf1, y_radius1_zenith2_elev_surf2_azim_surf2, y_radius1_zenith2_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith2_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf3
+      y_radius1_zenith2_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf3][iazim_surf0][ii];
+      y_radius1_zenith2_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf3][iazim_surf1][ii];
+      y_radius1_zenith2_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf3][iazim_surf2][ii];
+      y_radius1_zenith2_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith2][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith2_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith2_elev_surf3_azim_surf0, y_radius1_zenith2_elev_surf3_azim_surf1, y_radius1_zenith2_elev_surf3_azim_surf2, y_radius1_zenith2_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith2_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith2 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius1_zenith2_elev_surf0, y_radius1_zenith2_elev_surf1, y_radius1_zenith2_elev_surf2, y_radius1_zenith2_elev_surf3);
+      polynomial_interpo(&y_radius1_zenith2, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith3
+      // // // zenith3 elev_surf0
+      y_radius1_zenith3_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf0][iazim_surf0][ii];
+      y_radius1_zenith3_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf0][iazim_surf1][ii];
+      y_radius1_zenith3_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf0][iazim_surf2][ii];
+      y_radius1_zenith3_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith3_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith3_elev_surf0_azim_surf0, y_radius1_zenith3_elev_surf0_azim_surf1, y_radius1_zenith3_elev_surf0_azim_surf2, y_radius1_zenith3_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith3_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf1
+      y_radius1_zenith3_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf1][iazim_surf0][ii];
+      y_radius1_zenith3_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf1][iazim_surf1][ii];
+      y_radius1_zenith3_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf1][iazim_surf2][ii];
+      y_radius1_zenith3_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith3_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith3_elev_surf1_azim_surf0, y_radius1_zenith3_elev_surf1_azim_surf1, y_radius1_zenith3_elev_surf1_azim_surf2, y_radius1_zenith3_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith3_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf2
+      y_radius1_zenith3_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf2][iazim_surf0][ii];
+      y_radius1_zenith3_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf2][iazim_surf1][ii];
+      y_radius1_zenith3_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf2][iazim_surf2][ii];
+      y_radius1_zenith3_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith3_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith3_elev_surf2_azim_surf0, y_radius1_zenith3_elev_surf2_azim_surf1, y_radius1_zenith3_elev_surf2_azim_surf2, y_radius1_zenith3_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith3_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf3
+      y_radius1_zenith3_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf3][iazim_surf0][ii];
+      y_radius1_zenith3_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf3][iazim_surf1][ii];
+      y_radius1_zenith3_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf3][iazim_surf2][ii];
+      y_radius1_zenith3_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius1][izenith3][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius1_zenith3_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius1_zenith3_elev_surf3_azim_surf0, y_radius1_zenith3_elev_surf3_azim_surf1, y_radius1_zenith3_elev_surf3_azim_surf2, y_radius1_zenith3_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius1_zenith3_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith3 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius1_zenith3_elev_surf0, y_radius1_zenith3_elev_surf1, y_radius1_zenith3_elev_surf2, y_radius1_zenith3_elev_surf3);
+      polynomial_interpo(&y_radius1_zenith3, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+      // // -> radius1 (interpo over zenith)
+      earth_pressure_map_yinter_zenith(yinter, &order_interpo_map, zenith_sc, &PARAMS->EARTH.GRAVITY, y_radius1_zenith0, y_radius1_zenith1, y_radius1_zenith2, y_radius1_zenith3);
+      polynomial_interpo(&y_radius1, order_interpo_map, xinter_zenith, yinter, zenith_sc*180/M_PI);
+
+      
+      // RADIUS2
+      // // zenith0
+      // // // zenith0 elev_surf0
+      y_radius2_zenith0_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf0][iazim_surf0][ii];
+      y_radius2_zenith0_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf0][iazim_surf1][ii];
+      y_radius2_zenith0_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf0][iazim_surf2][ii];
+      y_radius2_zenith0_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith0_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0_elev_surf0_azim_surf0, y_radius2_zenith0_elev_surf0_azim_surf1, y_radius2_zenith0_elev_surf0_azim_surf2, y_radius2_zenith0_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith0_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf1
+      y_radius2_zenith0_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf1][iazim_surf0][ii];
+      y_radius2_zenith0_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf1][iazim_surf1][ii];
+      y_radius2_zenith0_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf1][iazim_surf2][ii];
+      y_radius2_zenith0_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith0_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0_elev_surf1_azim_surf0, y_radius2_zenith0_elev_surf1_azim_surf1, y_radius2_zenith0_elev_surf1_azim_surf2, y_radius2_zenith0_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith0_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf2
+      y_radius2_zenith0_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf2][iazim_surf0][ii];
+      y_radius2_zenith0_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf2][iazim_surf1][ii];
+      y_radius2_zenith0_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf2][iazim_surf2][ii];
+      y_radius2_zenith0_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith0_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0_elev_surf2_azim_surf0, y_radius2_zenith0_elev_surf2_azim_surf1, y_radius2_zenith0_elev_surf2_azim_surf2, y_radius2_zenith0_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith0_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf3
+      y_radius2_zenith0_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf3][iazim_surf0][ii];
+      y_radius2_zenith0_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf3][iazim_surf1][ii];
+      y_radius2_zenith0_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf3][iazim_surf2][ii];
+      y_radius2_zenith0_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith0][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith0_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0_elev_surf3_azim_surf0, y_radius2_zenith0_elev_surf3_azim_surf1, y_radius2_zenith0_elev_surf3_azim_surf2, y_radius2_zenith0_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith0_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith0 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0_elev_surf0, y_radius2_zenith0_elev_surf1, y_radius2_zenith0_elev_surf2, y_radius2_zenith0_elev_surf3);
+      polynomial_interpo(&y_radius2_zenith0, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith1
+      // // // zenith1 elev_surf0
+      y_radius2_zenith1_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf0][iazim_surf0][ii];
+      y_radius2_zenith1_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf0][iazim_surf1][ii];
+      y_radius2_zenith1_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf0][iazim_surf2][ii];
+      y_radius2_zenith1_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith1_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith1_elev_surf0_azim_surf0, y_radius2_zenith1_elev_surf0_azim_surf1, y_radius2_zenith1_elev_surf0_azim_surf2, y_radius2_zenith1_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith1_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf1
+      y_radius2_zenith1_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf1][iazim_surf0][ii];
+      y_radius2_zenith1_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf1][iazim_surf1][ii];
+      y_radius2_zenith1_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf1][iazim_surf2][ii];
+      y_radius2_zenith1_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith1_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith1_elev_surf1_azim_surf0, y_radius2_zenith1_elev_surf1_azim_surf1, y_radius2_zenith1_elev_surf1_azim_surf2, y_radius2_zenith1_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith1_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf2
+      y_radius2_zenith1_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf2][iazim_surf0][ii];
+      y_radius2_zenith1_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf2][iazim_surf1][ii];
+      y_radius2_zenith1_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf2][iazim_surf2][ii];
+      y_radius2_zenith1_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith1_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith1_elev_surf2_azim_surf0, y_radius2_zenith1_elev_surf2_azim_surf1, y_radius2_zenith1_elev_surf2_azim_surf2, y_radius2_zenith1_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith1_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf3
+      y_radius2_zenith1_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf3][iazim_surf0][ii];
+      y_radius2_zenith1_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf3][iazim_surf1][ii];
+      y_radius2_zenith1_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf3][iazim_surf2][ii];
+      y_radius2_zenith1_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith1][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith1_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith1_elev_surf3_azim_surf0, y_radius2_zenith1_elev_surf3_azim_surf1, y_radius2_zenith1_elev_surf3_azim_surf2, y_radius2_zenith1_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith1_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith1 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius2_zenith1_elev_surf0, y_radius2_zenith1_elev_surf1, y_radius2_zenith1_elev_surf2, y_radius2_zenith1_elev_surf3);
+      polynomial_interpo(&y_radius2_zenith1, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith2
+      // // // zenith2 elev_surf0
+      y_radius2_zenith2_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf0][iazim_surf0][ii];
+      y_radius2_zenith2_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf0][iazim_surf1][ii];
+      y_radius2_zenith2_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf0][iazim_surf2][ii];
+      y_radius2_zenith2_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith2_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith2_elev_surf0_azim_surf0, y_radius2_zenith2_elev_surf0_azim_surf1, y_radius2_zenith2_elev_surf0_azim_surf2, y_radius2_zenith2_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith2_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf1
+      y_radius2_zenith2_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf1][iazim_surf0][ii];
+      y_radius2_zenith2_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf1][iazim_surf1][ii];
+      y_radius2_zenith2_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf1][iazim_surf2][ii];
+      y_radius2_zenith2_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith2_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith2_elev_surf1_azim_surf0, y_radius2_zenith2_elev_surf1_azim_surf1, y_radius2_zenith2_elev_surf1_azim_surf2, y_radius2_zenith2_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith2_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf2
+      y_radius2_zenith2_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf2][iazim_surf0][ii];
+      y_radius2_zenith2_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf2][iazim_surf1][ii];
+      y_radius2_zenith2_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf2][iazim_surf2][ii];
+      y_radius2_zenith2_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith2_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith2_elev_surf2_azim_surf0, y_radius2_zenith2_elev_surf2_azim_surf1, y_radius2_zenith2_elev_surf2_azim_surf2, y_radius2_zenith2_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith2_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf3
+      y_radius2_zenith2_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf3][iazim_surf0][ii];
+      y_radius2_zenith2_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf3][iazim_surf1][ii];
+      y_radius2_zenith2_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf3][iazim_surf2][ii];
+      y_radius2_zenith2_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith2][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith2_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith2_elev_surf3_azim_surf0, y_radius2_zenith2_elev_surf3_azim_surf1, y_radius2_zenith2_elev_surf3_azim_surf2, y_radius2_zenith2_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith2_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith2 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius2_zenith2_elev_surf0, y_radius2_zenith2_elev_surf1, y_radius2_zenith2_elev_surf2, y_radius2_zenith2_elev_surf3);
+      polynomial_interpo(&y_radius2_zenith2, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith3
+      // // // zenith3 elev_surf0
+      y_radius2_zenith3_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf0][iazim_surf0][ii];
+      y_radius2_zenith3_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf0][iazim_surf1][ii];
+      y_radius2_zenith3_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf0][iazim_surf2][ii];
+      y_radius2_zenith3_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith3_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith3_elev_surf0_azim_surf0, y_radius2_zenith3_elev_surf0_azim_surf1, y_radius2_zenith3_elev_surf0_azim_surf2, y_radius2_zenith3_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith3_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf1
+      y_radius2_zenith3_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf1][iazim_surf0][ii];
+      y_radius2_zenith3_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf1][iazim_surf1][ii];
+      y_radius2_zenith3_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf1][iazim_surf2][ii];
+      y_radius2_zenith3_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith3_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith3_elev_surf1_azim_surf0, y_radius2_zenith3_elev_surf1_azim_surf1, y_radius2_zenith3_elev_surf1_azim_surf2, y_radius2_zenith3_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith3_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf2
+      y_radius2_zenith3_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf2][iazim_surf0][ii];
+      y_radius2_zenith3_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf2][iazim_surf1][ii];
+      y_radius2_zenith3_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf2][iazim_surf2][ii];
+      y_radius2_zenith3_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith3_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith3_elev_surf2_azim_surf0, y_radius2_zenith3_elev_surf2_azim_surf1, y_radius2_zenith3_elev_surf2_azim_surf2, y_radius2_zenith3_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith3_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf3
+      y_radius2_zenith3_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf3][iazim_surf0][ii];
+      y_radius2_zenith3_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf3][iazim_surf1][ii];
+      y_radius2_zenith3_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf3][iazim_surf2][ii];
+      y_radius2_zenith3_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius2][izenith3][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius2_zenith3_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius2_zenith3_elev_surf3_azim_surf0, y_radius2_zenith3_elev_surf3_azim_surf1, y_radius2_zenith3_elev_surf3_azim_surf2, y_radius2_zenith3_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius2_zenith3_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith3 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius2_zenith3_elev_surf0, y_radius2_zenith3_elev_surf1, y_radius2_zenith3_elev_surf2, y_radius2_zenith3_elev_surf3);
+      polynomial_interpo(&y_radius2_zenith3, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+      // // -> radius2 (interpo over zenith)
+      earth_pressure_map_yinter_zenith(yinter, &order_interpo_map, zenith_sc, &PARAMS->EARTH.GRAVITY, y_radius2_zenith0, y_radius2_zenith1, y_radius2_zenith2, y_radius2_zenith3);
+      polynomial_interpo(&y_radius2, order_interpo_map, xinter_zenith, yinter, zenith_sc*180/M_PI);
+
+
+      
+      // RADIUS3
+      // // zenith0
+      // // // zenith0 elev_surf0
+      y_radius3_zenith0_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf0][iazim_surf0][ii];
+      y_radius3_zenith0_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf0][iazim_surf1][ii];
+      y_radius3_zenith0_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf0][iazim_surf2][ii];
+      y_radius3_zenith0_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith0_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0_elev_surf0_azim_surf0, y_radius3_zenith0_elev_surf0_azim_surf1, y_radius3_zenith0_elev_surf0_azim_surf2, y_radius3_zenith0_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith0_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf1
+      y_radius3_zenith0_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf1][iazim_surf0][ii];
+      y_radius3_zenith0_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf1][iazim_surf1][ii];
+      y_radius3_zenith0_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf1][iazim_surf2][ii];
+      y_radius3_zenith0_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith0_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0_elev_surf1_azim_surf0, y_radius3_zenith0_elev_surf1_azim_surf1, y_radius3_zenith0_elev_surf1_azim_surf2, y_radius3_zenith0_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith0_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf2
+      y_radius3_zenith0_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf2][iazim_surf0][ii];
+      y_radius3_zenith0_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf2][iazim_surf1][ii];
+      y_radius3_zenith0_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf2][iazim_surf2][ii];
+      y_radius3_zenith0_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith0_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0_elev_surf2_azim_surf0, y_radius3_zenith0_elev_surf2_azim_surf1, y_radius3_zenith0_elev_surf2_azim_surf2, y_radius3_zenith0_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith0_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith0 elev_surf3
+      y_radius3_zenith0_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf3][iazim_surf0][ii];
+      y_radius3_zenith0_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf3][iazim_surf1][ii];
+      y_radius3_zenith0_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf3][iazim_surf2][ii];
+      y_radius3_zenith0_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith0][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith0_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0_elev_surf3_azim_surf0, y_radius3_zenith0_elev_surf3_azim_surf1, y_radius3_zenith0_elev_surf3_azim_surf2, y_radius3_zenith0_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith0_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith0 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0_elev_surf0, y_radius3_zenith0_elev_surf1, y_radius3_zenith0_elev_surf2, y_radius3_zenith0_elev_surf3);
+      polynomial_interpo(&y_radius3_zenith0, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith1
+      // // // zenith1 elev_surf0
+      y_radius3_zenith1_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf0][iazim_surf0][ii];
+      y_radius3_zenith1_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf0][iazim_surf1][ii];
+      y_radius3_zenith1_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf0][iazim_surf2][ii];
+      y_radius3_zenith1_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith1_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith1_elev_surf0_azim_surf0, y_radius3_zenith1_elev_surf0_azim_surf1, y_radius3_zenith1_elev_surf0_azim_surf2, y_radius3_zenith1_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith1_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf1
+      y_radius3_zenith1_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf1][iazim_surf0][ii];
+      y_radius3_zenith1_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf1][iazim_surf1][ii];
+      y_radius3_zenith1_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf1][iazim_surf2][ii];
+      y_radius3_zenith1_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith1_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith1_elev_surf1_azim_surf0, y_radius3_zenith1_elev_surf1_azim_surf1, y_radius3_zenith1_elev_surf1_azim_surf2, y_radius3_zenith1_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith1_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf2
+      y_radius3_zenith1_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf2][iazim_surf0][ii];
+      y_radius3_zenith1_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf2][iazim_surf1][ii];
+      y_radius3_zenith1_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf2][iazim_surf2][ii];
+      y_radius3_zenith1_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith1_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith1_elev_surf2_azim_surf0, y_radius3_zenith1_elev_surf2_azim_surf1, y_radius3_zenith1_elev_surf2_azim_surf2, y_radius3_zenith1_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith1_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith1 elev_surf3
+      y_radius3_zenith1_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf3][iazim_surf0][ii];
+      y_radius3_zenith1_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf3][iazim_surf1][ii];
+      y_radius3_zenith1_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf3][iazim_surf2][ii];
+      y_radius3_zenith1_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith1][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith1_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith1_elev_surf3_azim_surf0, y_radius3_zenith1_elev_surf3_azim_surf1, y_radius3_zenith1_elev_surf3_azim_surf2, y_radius3_zenith1_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith1_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith1 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius3_zenith1_elev_surf0, y_radius3_zenith1_elev_surf1, y_radius3_zenith1_elev_surf2, y_radius3_zenith1_elev_surf3);
+      polynomial_interpo(&y_radius3_zenith1, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith2
+      // // // zenith2 elev_surf0
+      y_radius3_zenith2_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf0][iazim_surf0][ii];
+      y_radius3_zenith2_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf0][iazim_surf1][ii];
+      y_radius3_zenith2_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf0][iazim_surf2][ii];
+      y_radius3_zenith2_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith2_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith2_elev_surf0_azim_surf0, y_radius3_zenith2_elev_surf0_azim_surf1, y_radius3_zenith2_elev_surf0_azim_surf2, y_radius3_zenith2_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith2_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf1
+      y_radius3_zenith2_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf1][iazim_surf0][ii];
+      y_radius3_zenith2_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf1][iazim_surf1][ii];
+      y_radius3_zenith2_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf1][iazim_surf2][ii];
+      y_radius3_zenith2_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith2_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith2_elev_surf1_azim_surf0, y_radius3_zenith2_elev_surf1_azim_surf1, y_radius3_zenith2_elev_surf1_azim_surf2, y_radius3_zenith2_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith2_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf2
+      y_radius3_zenith2_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf2][iazim_surf0][ii];
+      y_radius3_zenith2_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf2][iazim_surf1][ii];
+      y_radius3_zenith2_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf2][iazim_surf2][ii];
+      y_radius3_zenith2_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith2_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith2_elev_surf2_azim_surf0, y_radius3_zenith2_elev_surf2_azim_surf1, y_radius3_zenith2_elev_surf2_azim_surf2, y_radius3_zenith2_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith2_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith2 elev_surf3
+      y_radius3_zenith2_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf3][iazim_surf0][ii];
+      y_radius3_zenith2_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf3][iazim_surf1][ii];
+      y_radius3_zenith2_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf3][iazim_surf2][ii];
+      y_radius3_zenith2_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith2][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith2_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith2_elev_surf3_azim_surf0, y_radius3_zenith2_elev_surf3_azim_surf1, y_radius3_zenith2_elev_surf3_azim_surf2, y_radius3_zenith2_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith2_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith2 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius3_zenith2_elev_surf0, y_radius3_zenith2_elev_surf1, y_radius3_zenith2_elev_surf2, y_radius3_zenith2_elev_surf3);
+      polynomial_interpo(&y_radius3_zenith2, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+            // // zenith3
+      // // // zenith3 elev_surf0
+      y_radius3_zenith3_elev_surf0_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf0][iazim_surf0][ii];
+      y_radius3_zenith3_elev_surf0_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf0][iazim_surf1][ii];
+      y_radius3_zenith3_elev_surf0_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf0][iazim_surf2][ii];
+      y_radius3_zenith3_elev_surf0_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf0][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith3_elev_surf0 (interpo over azim_surf)
+      order_interpo_map = 4;
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith3_elev_surf0_azim_surf0, y_radius3_zenith3_elev_surf0_azim_surf1, y_radius3_zenith3_elev_surf0_azim_surf2, y_radius3_zenith3_elev_surf0_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith3_elev_surf0, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf1
+      y_radius3_zenith3_elev_surf1_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf1][iazim_surf0][ii];
+      y_radius3_zenith3_elev_surf1_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf1][iazim_surf1][ii];
+      y_radius3_zenith3_elev_surf1_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf1][iazim_surf2][ii];
+      y_radius3_zenith3_elev_surf1_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf1][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith3_elev_surf1 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith3_elev_surf1_azim_surf0, y_radius3_zenith3_elev_surf1_azim_surf1, y_radius3_zenith3_elev_surf1_azim_surf2, y_radius3_zenith3_elev_surf1_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith3_elev_surf1, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf2
+      y_radius3_zenith3_elev_surf2_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf2][iazim_surf0][ii];
+      y_radius3_zenith3_elev_surf2_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf2][iazim_surf1][ii];
+      y_radius3_zenith3_elev_surf2_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf2][iazim_surf2][ii];
+      y_radius3_zenith3_elev_surf2_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf2][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith3_elev_surf2 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith3_elev_surf2_azim_surf0, y_radius3_zenith3_elev_surf2_azim_surf1, y_radius3_zenith3_elev_surf2_azim_surf2, y_radius3_zenith3_elev_surf2_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith3_elev_surf2, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // zenith3 elev_surf3
+      y_radius3_zenith3_elev_surf3_azim_surf0 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf3][iazim_surf0][ii];
+      y_radius3_zenith3_elev_surf3_azim_surf1 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf3][iazim_surf1][ii];
+      y_radius3_zenith3_elev_surf3_azim_surf2 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf3][iazim_surf2][ii];
+      y_radius3_zenith3_elev_surf3_azim_surf3 = PARAMS->EARTH.GRAVITY.earth_pressure_map[iradius3][izenith3][ielev_surf3][iazim_surf3][ii];
+      // // // // -> y_radius3_zenith3_elev_surf3 (interpo over azim_surf)
+      earth_pressure_map_yinter_azim_surf(yinter, &order_interpo_map, azim_surf_corr, &PARAMS->EARTH.GRAVITY, y_radius3_zenith3_elev_surf3_azim_surf0, y_radius3_zenith3_elev_surf3_azim_surf1, y_radius3_zenith3_elev_surf3_azim_surf2, y_radius3_zenith3_elev_surf3_azim_surf3);
+      polynomial_interpo(&y_radius3_zenith3_elev_surf3, order_interpo_map, xinter_azim_surf, yinter, azim_surf_corr*180/M_PI);
+      // // // ->  zenith3 (interpo over elev_surf)
+      earth_pressure_map_yinter_elev_surf(yinter, &order_interpo_map, elev_surf, &PARAMS->EARTH.GRAVITY, y_radius3_zenith3_elev_surf0, y_radius3_zenith3_elev_surf1, y_radius3_zenith3_elev_surf2, y_radius3_zenith3_elev_surf3);
+      polynomial_interpo(&y_radius3_zenith3, order_interpo_map, xinter_elev_surf, yinter, elev_surf*180/M_PI);
+
+      // // -> radius3 (interpo over zenith)
+      earth_pressure_map_yinter_zenith(yinter, &order_interpo_map, zenith_sc, &PARAMS->EARTH.GRAVITY, y_radius3_zenith0, y_radius3_zenith1, y_radius3_zenith2, y_radius3_zenith3);
+      polynomial_interpo(&y_radius3, order_interpo_map, xinter_zenith, yinter, zenith_sc*180/M_PI);
+
+      // END OF GIANT BLOCK      
+      // Interpo over radius. function gravity_map_yinter_radius is used because it has the same purpose here
+      gravity_map_yinter_radius( yinter, &order_interpo_map,  radius_sc, &PARAMS->EARTH.GRAVITY,  y_radius0,  y_radius1,  y_radius2,  y_radius3);
+	// Interpolate dUdr, Dudlat, DUdlong
+    if (ii == 0){
+      // dUdr = y_radius2*xradius + y_radius1*(1-xradius);
+
+
+      polynomial_interpo(&a_pressure_epf[0], order_interpo_map, xinter_radius, yinter, rmag);
+    }
+    else if (ii == 1){
+      //      dUdlat = y_radius2*xradius + y_radius1*(1-xradius);
+      polynomial_interpo(&dUdlat, order_interpo_map, xinter_radius, yinter, rmag);    
     }
     else{
-      azim_surf_corr = 2*M_PI + azim_surf;
-    }    
-    compute_iazim_surf_gravity_map(iazim_surf_arr, &PARAMS->EARTH.GRAVITY, azim_surf_corr, &order_interpo_map);
-    iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
+      //      dUdlong = y_radius2*xradius + y_radius1*(1-xradius);
 
-    
+      polynomial_interpo(&dUdlong, order_interpo_map, xinter_radius, yinter, rmag);    
+    }
 
-    //    Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]
 
-    //    printf("%d: elev %f, azim %f\n",sss,elev_surf*180/M_PI, azim_surf*180/M_PI);
-    //  v_print(sc_normal_epf, "sc_normal_epf");
+      
+    }
+	  
+	/* printf("\nradius %.0f %.0f %.2f %.0f %.0f\n", xinter_radius[0]-PARAMS->EARTH.GRAVITY.radius, xinter_radius[1]-PARAMS->EARTH.GRAVITY.radius, radius_sc-PARAMS->EARTH.GRAVITY.radius, xinter_radius[2]-PARAMS->EARTH.GRAVITY.radius, xinter_radius[3]-PARAMS->EARTH.GRAVITY.radius); */
+	/* printf("zenith %.0f %.0f %.2f %.0f %.0f\n", xinter_zenith[0], xinter_zenith[1], zenith_sc*180/M_PI, xinter_zenith[2], xinter_zenith[3]); */
+	/* printf("elev_surf %.0f %.0f %.2f %.0f %.0f\n", xinter_elev_surf[0], xinter_elev_surf[1], elev_surf*180/M_PI, xinter_elev_surf[2], xinter_elev_surf[3]); */
+	/* printf("azim_surf %.0f %.0f %.2f %.0f %.0f\n", xinter_azim_surf[0], xinter_azim_surf[1], azim_surf_corr*180/M_PI, xinter_azim_surf[2], xinter_azim_surf[3]); */
+
+
+		
 	}
+	//    Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]
+
+	//    printf("%d: elev %f, azim %f\n",sss,elev_surf*180/M_PI, azim_surf*180/M_PI);
+	//  v_print(sc_normal_epf, "sc_normal_epf");
+      }
 
   	
-	  //	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
+      //	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
 
-	  //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
-	}
+      //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
+    
   }  // end of no collision with VCM as colllision input file
 
   return 0;
@@ -4214,7 +5004,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.j2    = 1.081874e-3;
   strcpy(PARAMS->EARTH.earth_fixed_frame, earth_fixed_frame);
 
-  PARAMS->EARTH.GRAVITY.dlat_map = 1.;
+  PARAMS->EARTH.GRAVITY.dlat_map = 0.5;
   PARAMS->EARTH.GRAVITY.dlon_map = 1.;
   PARAMS->EARTH.GRAVITY.dradius_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY. min_lat_map = -40;//-0.11;
@@ -4230,7 +5020,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   // // zenith
   PARAMS->EARTH.GRAVITY.dzenith_map = 30.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
-  PARAMS->EARTH.GRAVITY.max_zenith_map = 90.;
+  PARAMS->EARTH.GRAVITY.max_zenith_map = 180.;
 
   // // azim and elevation of the Earth element (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
   PARAMS->EARTH.GRAVITY.dazim_elt_map = 10.;
@@ -4345,8 +5135,8 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-        build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
-	//read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+  //build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
 
@@ -4388,8 +5178,8 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   
 
 
-  //      build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
-     read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  //build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+	  read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
   }
 
 
@@ -5410,10 +6200,7 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	  dradius =  Gravity->dradius_map;
 	  radius = min_radius + iradius * dradius;
 	}
-	for (izenith = 0; izenith < nzenith; izenith++){ // go over zeniths
-
-
-	  
+	for (izenith = 0; izenith < nzenith; izenith++){ // go over zeniths	  
 	  if (izenith == nzenith - 1){
 	    dzenith = max_zenith - (min_zenith + (nzenith - 2)*Gravity->dzenith_map);//not used 
 	    zenith = max_zenith;
@@ -5552,7 +6339,6 @@ int read_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
   // - the x vector completes the orthogonal basis
   // Declarations
 
-  double a_earth_pressure_fac[3];
   double nvec[3];
   	  double cm[3], oc[3], om[3];
 	  double cos_nvec_cm, cm_mag;
@@ -5713,7 +6499,6 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 	  azim_surf = azim_surf * M_PI / 180.;
 	  // the "elevation" of the satellite normal vector is the angle between nvec and CO (direction satellite to center of the Earth, ie -z direction where z has been previously defined)
  
-	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;
 	  	fread(&Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][0],
 	      sizeof(Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][0]),1,file_earth_pressure_map);
 	fread(&Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][1],
@@ -6014,6 +6799,7 @@ The program will stop. !***\n"); MPI_Finalize(); exit(0);
 	  lat = min_latrad + ilat * dlatrad; // GEOCENTRIC latitude
 	}
 	Gravity->lat_map[ilat] = lat * 180/M_PI;
+	//	printf(, )
       if (iProc == 0){ // print progress
 		      	printf("\033[A\33[2K\r... %.0f%%\n",  ilat*100.  / ( nlat-1 ) );
       }
@@ -6278,7 +7064,7 @@ int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, do
     }
 
 
-    else if ( (elev_surf*180/M_PI >= Gravity->max_elev_surf_map-Gravity->delev_surf_map) && (elev_surf*180/M_PI < Gravity->max_elev_surf_map)){
+    else if ( (elev_surf*180/M_PI >= Gravity->max_elev_surf_map-Gravity->delev_surf_map) && (elev_surf*180/M_PI <= Gravity->max_elev_surf_map)){
       ielev_surf1 = (int)(( elev_surf*180/M_PI - Gravity->min_elev_surf_map ) / Gravity->delev_surf_map);
       ielev_surf2 = ielev_surf1 + 1;
       ielev_surf3 = ielev_surf2;
@@ -6333,13 +7119,11 @@ int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double long_gc
 
 
 
-int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr, int *order_interpo_map){
+int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr){
 
   int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
   iazim_surf1 = (int)(( azim_surf_corr*180/M_PI ) / Gravity->dazim_surf_map);
-  // the longitude array of the 3d map varies frm 0 (1st bin) to 360 (last bin)
-  // so it's impossible that iazim_surf1 == nlon - 1 (since azim_surf_corr can't be
-  // exactly equal to 360). So we're safe to do: iazim_surf2 = iazim_surf1+1
+
   iazim_surf2 = iazim_surf1+1;
   if (azim_surf_corr*180/M_PI >= 360 - Gravity->dazim_surf_map){
     iazim_surf3 = 1;//  iazim_surf2;
@@ -6348,8 +7132,8 @@ int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, do
   else{
     iazim_surf3 = iazim_surf2+1;
   }
-  if (azim_surf_corr*180/M_PI <= Gravity->dazim_surf_map){ //in theory shold iazim_surf0 should be Gravity->nlon_map-1 but then the delta lon is big (360) so would have to handle that too - complicated  enough for now
-    iazim_surf0 = Gravity->nlon_map-2; // example: iazim_surf1 = 0 and iazim_surf0 = 359 (Gravity->nlon_map-1 = 360 so neeed to have iazim_surf0 = Gravity->nlon_map-2, not iazim_surf0 = Gravity->nlon_map-1)
+  if (azim_surf_corr*180/M_PI <= Gravity->dazim_surf_map){ //in theory shold iazim_surf0 should be Gravity->nazim_surf_map-1 but then the delta azim_surf is big (360) so would have to handle that too - complicated  enough for now
+    iazim_surf0 = Gravity->nazim_surf_map-2; // example: iazim_surf1 = 0 and iazim_surf0 = 359 (Gravity->nazim_surf_map-1 = 360 so neeed to have iazim_surf0 = Gravity->nazim_surf_map-2, not iazim_surf0 = Gravity->nazim_surf_map-1)
   }
   else{
     iazim_surf0 = iazim_surf1-1;
@@ -6374,6 +7158,13 @@ int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_g
 
 }
 
+
+int earth_pressure_map_yinter_azim_surf(double *yinter, int *order_interpo_map, double azim_surf_corr, GRAVITY_T *Gravity, double y_azim_surf0, double y_azim_surf1, double y_azim_surf2, double y_azim_surf3){
+    yinter[0] = y_azim_surf0; yinter[1] = y_azim_surf1; yinter[2] = y_azim_surf2; yinter[3] = y_azim_surf3;
+    return 0;
+
+}
+
 int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3){
       if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
 	yinter[0] = y_lat0;
@@ -6393,6 +7184,43 @@ int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc
     }
       else{
 	yinter[0] = y_lat0; yinter[1] = y_lat1; yinter[2] = y_lat2; yinter[3] = y_lat3;
+    	*order_interpo_map = 4;
+      }
+
+return 0;
+}
+
+
+
+int earth_pressure_map_yinter_elev_surf(double *yinter, int *order_interpo_map, double elev_surf, GRAVITY_T *Gravity, double y_elev_surf0, double y_elev_surf1, double y_elev_surf2, double y_elev_surf3){
+      if ((elev_surf*180/M_PI < Gravity->min_elev_surf_map + Gravity->delev_surf_map) && (elev_surf*180/M_PI >= Gravity->min_elev_surf_map)){ // ielev_surf1 = ielev_surf0
+	yinter[0] = y_elev_surf0; yinter[1] = y_elev_surf2; yinter[2] = y_elev_surf3;
+	*order_interpo_map = 3;
+      }
+      else if ( (elev_surf*180/M_PI >= Gravity->max_elev_surf_map-Gravity->delev_surf_map) && (elev_surf*180/M_PI <= Gravity->max_elev_surf_map)){ // ielev_surf3 =ielev_surf2
+	yinter[0] = y_elev_surf0; yinter[1] = y_elev_surf1; yinter[2] = y_elev_surf2;
+	*order_interpo_map = 3;
+    }
+      else{
+	yinter[0] = y_elev_surf0; yinter[1] = y_elev_surf1; yinter[2] = y_elev_surf2; yinter[3] = y_elev_surf3;
+    	*order_interpo_map = 4;
+      }
+
+return 0;
+}
+
+
+int earth_pressure_map_yinter_zenith(double *yinter, int *order_interpo_map, double zenith, GRAVITY_T *Gravity, double y_zenith0, double y_zenith1, double y_zenith2, double y_zenith3){
+      if ((zenith*180/M_PI < Gravity->min_zenith_map + Gravity->dzenith_map) && (zenith*180/M_PI >= Gravity->min_zenith_map)){ // izenith1 = izenith0
+	yinter[0] = y_zenith0; yinter[1] = y_zenith2; yinter[2] = y_zenith3;
+	*order_interpo_map = 3;
+      }
+      else if ( (zenith*180/M_PI >= Gravity->max_zenith_map-Gravity->dzenith_map) && (zenith*180/M_PI < Gravity->max_zenith_map)){ // izenith3 =izenith2
+	yinter[0] = y_zenith0; yinter[1] = y_zenith1; yinter[2] = y_zenith2;
+	*order_interpo_map = 3;
+    }
+      else{
+	yinter[0] = y_zenith0; yinter[1] = y_zenith1; yinter[2] = y_zenith2; yinter[3] = y_zenith3;
     	*order_interpo_map = 4;
       }
 
@@ -6425,6 +7253,76 @@ int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rma
     else{
 	    yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2; yinter[3] = y_radius3;
 	    *order_interpo_map = 4;
+    }
+
+  return 0;
+}
+
+int earth_pressure_map_xinter(double *xinter_radius, double *xinter_zenith, double *xinter_elev_surf, double *xinter_azim_surf, double rmag, double zenith, double elev_surf, double azim_surf_corr, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr, int *ielev_surf_arr, int *iazim_surf_arr)
+	  {
+  
+  int iradius1, iradius2, iradius3, iradius0;
+  int izenith0, izenith1, izenith2, izenith3;
+  int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
+  int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
+  iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
+  izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
+  ielev_surf0 = ielev_surf_arr[0]; ielev_surf1 = ielev_surf_arr[1]; ielev_surf2 = ielev_surf_arr[2]; ielev_surf3 = ielev_surf_arr[3];
+  iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
+  
+    // xinter_azim_surf
+      if (azim_surf_corr*180/M_PI <= Gravity->dazim_surf_map){ 
+	xinter_azim_surf[0] = Gravity->azim_surf_map[Gravity->nazim_surf_map-2] - Gravity->azim_surf_map[Gravity->nazim_surf_map-1]; 
+	xinter_azim_surf[1] = Gravity->azim_surf_map[iazim_surf1]; xinter_azim_surf[2] = Gravity->azim_surf_map[iazim_surf2]; xinter_azim_surf[3] = Gravity->azim_surf_map[iazim_surf3];
+      }
+      else if (azim_surf_corr*180/M_PI >= 360 - Gravity->dazim_surf_map){
+	xinter_azim_surf[3] = Gravity->azim_surf_map[Gravity->nazim_surf_map-1] + (Gravity->azim_surf_map[1] - Gravity->azim_surf_map[0]);
+	xinter_azim_surf[0] = Gravity->azim_surf_map[iazim_surf0]; xinter_azim_surf[1] = Gravity->azim_surf_map[iazim_surf1]; xinter_azim_surf[2] = Gravity->azim_surf_map[iazim_surf2];
+      }
+      else{
+	xinter_azim_surf[0] = Gravity->azim_surf_map[iazim_surf0]; xinter_azim_surf[1] = Gravity->azim_surf_map[iazim_surf1]; xinter_azim_surf[2] = Gravity->azim_surf_map[iazim_surf2]; xinter_azim_surf[3] = Gravity->azim_surf_map[iazim_surf3];
+
+      }
+
+      // xinter_zenith
+      if ((zenith*180/M_PI < Gravity->min_zenith_map + Gravity->dzenith_map) && (zenith*180/M_PI >= Gravity->min_zenith_map)){ // izenith1 = izenith0
+	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith2]; xinter_zenith[2] =  Gravity->zenith_map[izenith3];
+      }
+      else if ( (zenith*180/M_PI >= Gravity->max_zenith_map-Gravity->dzenith_map) && (zenith*180/M_PI < Gravity->max_zenith_map)){ // izenith3 =izenith2
+	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith1]; xinter_zenith[2] = Gravity->zenith_map[izenith2];
+    }
+      else{
+	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith1]; xinter_zenith[2] = Gravity->zenith_map[izenith2]; xinter_zenith[3] = Gravity->zenith_map[izenith3];
+      }
+
+
+      // xinter_elev_surf
+      if ((elev_surf*180/M_PI < Gravity->min_elev_surf_map + Gravity->delev_surf_map) && (elev_surf*180/M_PI >= Gravity->min_elev_surf_map)){ // ielev_surf1 = ielev_surf0
+	xinter_elev_surf[0] = Gravity->elev_surf_map[ielev_surf0]; xinter_elev_surf[1] = Gravity->elev_surf_map[ielev_surf2]; xinter_elev_surf[2] =  Gravity->elev_surf_map[ielev_surf3];
+      }
+      else if ( (elev_surf*180/M_PI >= Gravity->max_elev_surf_map-Gravity->delev_surf_map) && (elev_surf*180/M_PI <= Gravity->max_elev_surf_map)){ // ielev_surf3 =ielev_surf2
+	xinter_elev_surf[0] = Gravity->elev_surf_map[ielev_surf0]; xinter_elev_surf[1] = Gravity->elev_surf_map[ielev_surf1]; xinter_elev_surf[2] = Gravity->elev_surf_map[ielev_surf2];
+    }
+      else{
+	xinter_elev_surf[0] = Gravity->elev_surf_map[ielev_surf0]; xinter_elev_surf[1] = Gravity->elev_surf_map[ielev_surf1]; xinter_elev_surf[2] = Gravity->elev_surf_map[ielev_surf2]; xinter_elev_surf[3] = Gravity->elev_surf_map[ielev_surf3];
+      }
+
+      
+      // xinter_radius
+      if ((rmag < Gravity->min_radius_map) || (rmag >= Gravity->max_radius_map + Gravity->dradius_map)){ // all iradius the same
+      xinter_radius[0] = Gravity->radius_map[iradius0];
+    }
+    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){ // iradius0 = iradius1
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius2]; xinter_radius[2] = Gravity->radius_map[iradius3];
+    }
+    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){ // iradius2 and 3 = iradius 1
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius1];
+    }
+    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){ // iradius3 = iradius2
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius1]; xinter_radius[2] = Gravity->radius_map[iradius2];
+    }
+    else{
+          xinter_radius[0] = Gravity->radius_map[iradius0];   xinter_radius[1] = Gravity->radius_map[iradius1]; xinter_radius[2] = Gravity->radius_map[iradius2]; xinter_radius[3] = Gravity->radius_map[iradius3];
     }
 
   return 0;

@@ -560,7 +560,7 @@ int polynomial_interpo(double *val, int  n, double *x, double *y, double to_inte
 int compute_iradius_gravity_map(int iradius_arr[4], GRAVITY_T *Gravity, double rmag);
 int compute_ilat_gravity_map(int ilat_arr[4], GRAVITY_T *Gravity, double lat_gc);
 int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double lon_gc_corr);
-int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr, int *order_interpo_map);
+int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr);
 int compute_izenith_gravity_map(int izenith_arr[4], GRAVITY_T *Gravity, double zenith);
 int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, double elev_surf);
 int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3);
@@ -570,3 +570,7 @@ int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_ra
 		       int *ilon_arr, int *ilat_arr, int *iradius_arr);
 int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_gc_corr, GRAVITY_T *Gravity, double y_lon0, double y_lon1, double y_lon2, double y_lon3);
 
+int earth_pressure_map_xinter(double *xinter_radius, double *xinter_zenith, double *xinter_elev_surf, double *xinter_azim_surf, double rmag, double zenith, double elev_surf, double azim_surf_corr, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr, int *ielev_surf_arr, int *iazim_surf_arr);
+int earth_pressure_map_yinter_azim_surf(double *yinter, int *order_interpo_map, double azim_surf_corr, GRAVITY_T *Gravity, double y_azim_surf0, double y_azim_surf1, double y_azim_surf2, double y_azim_surf3);
+int earth_pressure_map_yinter_elev_surf(double *yinter, int *order_interpo_map, double elev_surf, GRAVITY_T *Gravity, double y_elev_surf0, double y_elev_surf1, double y_elev_surf2, double y_elev_surf3);
+int earth_pressure_map_yinter_zenith(double *yinter, int *order_interpo_map, double zenith, GRAVITY_T *Gravity, double y_zenith0, double y_zenith1, double y_zenith2, double y_zenith3);
