@@ -84,11 +84,19 @@ typedef struct {
 
   
   double ****gravity_map;
+  double *****earth_pressure_map;
   double *radius_map;
   double *lat_map;
   double *lon_map;
+
+  double *zenith_map;
+  double *elev_surf_map;
+  double *azim_surf_map;
   FILE *file_gravity_map;
     char filename_gravity_map[200];
+  FILE *file_earth_pressure_map;
+    char filename_earth_pressure_map[200];
+
 }  GRAVITY_T;
 
 typedef struct {
@@ -543,6 +551,22 @@ int calculate_cd_opengl(double *cd,
 double factorial(unsigned long f);
 int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
 int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
+int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc);
+int read_earth_pressure_map(GRAVITY_T  *Gravity, int iProc);
+
 double compute_earth_albedo();
 double compute_earth_emissivity();
-int polynomial_interpo(int printVar, double *val, int  n, double *x, double *y, double to_inter);
+int polynomial_interpo(double *val, int  n, double *x, double *y, double to_inter);
+int compute_iradius_gravity_map(int iradius_arr[4], GRAVITY_T *Gravity, double rmag);
+int compute_ilat_gravity_map(int ilat_arr[4], GRAVITY_T *Gravity, double lat_gc);
+int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double lon_gc_corr);
+int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr, int *order_interpo_map);
+int compute_izenith_gravity_map(int izenith_arr[4], GRAVITY_T *Gravity, double zenith);
+int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, double elev_surf);
+int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3);
+int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double y_radius0, double y_radius1, double y_radius2, double y_radius3);
+
+int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity,
+		       int *ilon_arr, int *ilat_arr, int *iradius_arr);
+int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_gc_corr, GRAVITY_T *Gravity, double y_lon0, double y_lon1, double y_lon2, double y_lon3);
+

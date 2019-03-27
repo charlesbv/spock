@@ -1410,6 +1410,10 @@ int compute_dxdt(   double          drdt[3],
   // Gravity
   compute_gravity( dvdt, r_i2cg_INRTL, et[0], &PARAMS->EARTH.GRAVITY, INTEGRATOR->degree, PARAMS->EARTH.earth_fixed_frame, PARAMS->EARTH.flattening, PARAMS->EARTH.radius, SC, OPTIONS->gravity_map, CONSTELLATION);
 
+  /*   if (dvdt[0] != aa){ */
+  /*     print_test(); */
+  /*     exitf(); */
+  /*   } */
   //  Moon Perturbations
   if (INTEGRATOR->include_moon == 1){
 
@@ -1680,12 +1684,14 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 {
 
   // Declarations
-      double *xinter;
+  int iradius_arr[4], ilat_arr[4], ilon_arr[4];
+  double *xinter_radius, *xinter_lon, *xinter_lat;
     double *yinter;
     int order_interpo_map = 4;
-    xinter = malloc(4 * sizeof(double));
+    xinter_radius = malloc(4 * sizeof(double));
     yinter = malloc(4 * sizeof(double));
-
+    xinter_lon = malloc(4 * sizeof(double));
+    xinter_lat = malloc(4 * sizeof(double));
     double y_radius1_lat1, y_radius1_lat2, y_radius2_lat1, y_radius2_lat2;
     int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2, ilon3, ilat3, iradius3, ilon0, ilat0, iradius0;
         double long_gc_corr;
@@ -1824,144 +1830,30 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
   else{ // if the user wants to use the 3d gravity map option
     // determine the bin for the radius
 
-
-    if (rmag < Gravity->min_radius_map){ // this happens if Gravity->min_radius_map was not set correctly, ie too large compared to the min radius of the satellite
-      iradius0 = 0;
-      iradius1 = 0;
-      iradius2 = 0;
-      iradius3 = 0;
-      //      xradius = 0;
-    }
-    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){
-      iradius0 = 0;
-      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map); // should be 0
-      iradius2 = iradius1 + 1;  // 1
-      iradius3 = iradius2 + 1; // 2
-
-    }
-    else if (rmag >= Gravity->max_radius_map + Gravity->dradius_map){
-      iradius1 = Gravity->nradius_map - 1;
-      iradius2 = iradius1;
-      iradius3 = iradius2;
-      iradius0 = iradius1;
-      //      xradius = 0;
-    }
-    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){
-      iradius0 = Gravity->nradius_map - 2;
-      iradius1 = Gravity->nradius_map - 1;
-      iradius2 = iradius1;
-      iradius3 = iradius2;
-      //      xradius = 0;
-    }
-    
-    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){
-      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
-      iradius2 = iradius1 + 1; 
-      iradius3 = iradius2;
-      iradius0 = iradius1-1;
-	}
-    else{
-      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
-      iradius2 = iradius1 + 1; 
-      iradius3 = iradius2 + 1; 
-      iradius0 = iradius1 - 1;
-      // so we're safe doing: iradius2 = iradius1 + 1
-      //      xradius = (rmag - Gravity->radius_map[iradius1]) / Gravity->dradius_map;
-    }
+    // determine the bin for the radius
+    compute_iradius_gravity_map(iradius_arr, Gravity, rmag);
+    iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
 
     // determine the bin for the lat
-    if (lat_gc*180/M_PI < Gravity->min_lat_map){ // this happens if Gravity->min_lat_map was not set correctly, ie too large compared to the min latitude of the satellite
-      ilat0 = 0;
-      ilat1 = 0;
-      ilat2 = 0;
-      ilat3 = 0;
-           xlat = 0;
-    }
-    else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){
-      ilat0 = 0;
-      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map); // should be 0
-      ilat2 = ilat1 + 1; // 1
-      ilat3 = ilat2 + 1; // 2
+    compute_ilat_gravity_map(ilat_arr, Gravity, lat_gc);
+    ilat0 = ilat_arr[0]; ilat1 = ilat_arr[1]; ilat2 = ilat_arr[2]; ilat3 = ilat_arr[3];
 
-    }
-    else if (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map){
-      ilat1 = Gravity->nlat_map - 1;
-      ilat2 = ilat1;
-      ilat3 = ilat1;
-      ilat0 = ilat1;
-            xlat = 0;
-    }
-    else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
-      ilat1 = Gravity->nlat_map - 1;
-      ilat2 = ilat1;
-      ilat3 = ilat1;
-      ilat0 = ilat1-1;
-            xlat = 0;
-    }
-
-    else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){
-      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
-      ilat2 = ilat1 + 1;
-      ilat3 = ilat2;
-      ilat0 = ilat1 - 1;
-      xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
-    }
-
-    else{
-      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
-      ilat2 = ilat1 + 1; 
-      ilat3 = ilat2 + 1; 
-      ilat0 = ilat1 - 1;
-      // so we're safe doing: ilat2 = ilat1 + 1
-           xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
-    }
     // determine the bin for the lon
     if (long_gc >= 0){ // long_gc_corr varies from 0 to 2*M_PI
       long_gc_corr = long_gc;
     }
     else{
       long_gc_corr = 2*M_PI + long_gc;
-    }
+    }    
+    compute_ilon_gravity_map(ilon_arr, Gravity, long_gc_corr);
+    ilon0 = ilon_arr[0]; ilon1 = ilon_arr[1]; ilon2 = ilon_arr[2]; ilon3 = ilon_arr[3];
 
-    ilon1 = (int)(( long_gc_corr*180/M_PI ) / Gravity->dlon_map);
-    // the longitude array of the 3d map varies frm 0 (1st bin) to 360 (last bin)
-    // so it's impossible that ilon1 == nlon - 1 (since long_gc_corr can't be
-    // exactly equal to 360). So we're safe to do: ilon2 = ilon1+1
-        ilon2 = ilon1+1;
-	if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
-	  ilon3 = 1;//  ilon2;
-    order_interpo_map = 2; // otherwise the denominator in the interpolation formula is 0
-    }
-    else{
-    ilon3 = ilon2+1;
-    }
-    if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ //in theory shold ilon0 should be Gravity->nlon_map-1 but then the delta lon is big (360) so would have to handle that too - complicated  enough for now
-      ilon0 = Gravity->nlon_map-2; // example: ilon1 = 0 and ilon0 = 359 (Gravity->nlon_map-1 = 360 so neeed to have ilon0 = Gravity->nlon_map-2, not ilon0 = Gravity->nlon_map-1)
-    }
-    else{
-    ilon0 = ilon1-1;
-    }
-    int printVar;
-    if (ilon0 == (Gravity->nlon_map-2)){
-      //      printf("lla %f %d %d %d %d  (%f %f %f %f) | %f %d %d %d %d | %f %d %d %d %d\n", long_gc_corr*180/M_PI, ilon0, ilon1, ilon2, ilon3, Gravity->lon_map[ilon0], Gravity->lon_map[ilon1], Gravity->lon_map[ilon2],Gravity->lon_map[ilon3], lat_gc*180/M_PI, ilat0, ilat1, ilat2, ilat3, rmag-Gravity->radius, iradius0, iradius1, iradius2, iradius3);
-            printVar = 1;
-    }
-    else{
-      printVar = 0;
-      
-    }
-    //    xlon = (long_gc_corr*180/M_PI - Gravity->lon_map[ilon1]) / Gravity->dlon_map;
-    //        printf("%f %d %d %d %f %d %d %d %f %d %d %d\n", rmag - Gravity->radius, iradius1, iradius2, Gravity->nradius_map, lat_gc*180/M_PI, ilat1, ilat2, Gravity->nlat_map, long_gc_corr*180/M_PI, ilon1, ilon2, Gravity->nlon_map);
+    // Determine the x bins (longitude, latitude, radius) for the interpolations
+    gravity_map_xinter(xinter_lon, xinter_lat, xinter_radius,   long_gc_corr,  lat_gc,  rmag, Gravity, ilon_arr,  ilat_arr,  iradius_arr);
 
-    //    printf("%f %f, %f %f, %f %f\n", rmag - Gravity->radius, xradius, lat_gc*180/M_PI, xlat, long_gc_corr*180/M_PI, xlon);
-    // interpolate dUdr, dUdlat, and dUdlong
-    /* printf("\n%d %d %d %d | %f\n",ilon1, ilon2, ilon3, Gravity->nlon_map, long_gc_corr*180/M_PI); */
-    /* printf("%d %d %d %d | %f\n",ilat1, ilat2, ilat3, Gravity->nlat_map, lat_gc*180/M_PI); */
-    /* printf("%d %d %d %d | %f\n",iradius1, iradius2, iradius3, Gravity->nradius_map, rmag); */
-    /* printf("%d\n", order_interpo_map); */
+    // Interpolate over longitude, latitude, and radius      
     for (ii = 0; ii < 3; ii++){
-
-
+      
       // RADIUS0
       y_radius0_lat0_lon0 = Gravity->gravity_map[iradius0][ilat0][ilon0][ii];
       y_radius0_lat0_lon1 = Gravity->gravity_map[iradius0][ilat0][ilon1][ii];
@@ -1979,60 +1871,26 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       y_radius0_lat3_lon1 = Gravity->gravity_map[iradius0][ilat3][ilon1][ii];
       y_radius0_lat3_lon2 = Gravity->gravity_map[iradius0][ilat3][ilon2][ii];
       y_radius0_lat3_lon3 = Gravity->gravity_map[iradius0][ilat3][ilon3][ii];
-    //y_radius0_lat1 = xlon*y_radius0_lat1_lon2 + (1-xlon)*y_radius0_lat1_lon1;
-    //        y_radius0_lat2 = xlon*y_radius0_lat2_lon2 + (1-xlon)*y_radius0_lat2_lon1;
-      if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ // ilon0 = Gravity->nlon_map-2 but ilon1 = 0 so avoid a difference of about 360 degrees between both lon by setting xinter[0] to, for example, -1 (instead of 359)
-	xinter[0] = Gravity->lon_map[Gravity->nlon_map-2] - Gravity->lon_map[Gravity->nlon_map-1]; 
-	xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
-      else if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
-	xinter[3] = Gravity->lon_map[Gravity->nlon_map-1] + (Gravity->lon_map[1] - Gravity->lon_map[0]);
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2];
-      }
-      else{
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
 
-    yinter[0] = y_radius0_lat0_lon0; yinter[1] = y_radius0_lat0_lon1; yinter[2] = y_radius0_lat0_lon2; yinter[3] = y_radius0_lat0_lon3;
-      polynomial_interpo(printVar,&y_radius0_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius0_lat1_lon0; yinter[1] = y_radius0_lat1_lon1; yinter[2] = y_radius0_lat1_lon2; yinter[3] = y_radius0_lat1_lon3;
-      polynomial_interpo(printVar,&y_radius0_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius0_lat2_lon0; yinter[1] = y_radius0_lat2_lon1; yinter[2] = y_radius0_lat2_lon2; yinter[3] = y_radius0_lat2_lon3;
-      polynomial_interpo(printVar,&y_radius0_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius0_lat3_lon0; yinter[1] = y_radius0_lat3_lon1; yinter[2] = y_radius0_lat3_lon2; yinter[3] = y_radius0_lat3_lon3;
-      polynomial_interpo(printVar,&y_radius0_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius0 = y_radius0_lat1*(1-xlat) + y_radius0_lat2*xlat; */
-	    /* printf("%e\n", y_radius0); */
-      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
-	xinter[0] = Gravity->lat_map[ilat0];
-	yinter[0] = y_radius0_lat0;
-	order_interpo_map = 1;
-      }
-      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] =  Gravity->lat_map[ilat3];
-	yinter[0] = y_radius0_lat0; yinter[1] = y_radius0_lat2; yinter[2] = y_radius0_lat3;
-	order_interpo_map = 3;
-      }
-      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1];
-	yinter[0] = y_radius0_lat0; yinter[1] = y_radius0_lat1;
-	order_interpo_map = 2;
-      }
-      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2];
-	yinter[0] = y_radius0_lat0; yinter[1] = y_radius0_lat1; yinter[2] = y_radius0_lat2;
-	order_interpo_map = 3;
-    }
-      else{
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-	yinter[0] = y_radius0_lat0; yinter[1] = y_radius0_lat1; yinter[2] = y_radius0_lat2; yinter[3] = y_radius0_lat3;
-    	order_interpo_map = 4;
-      }
-      polynomial_interpo(printVar,&y_radius0, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      	  /* printf("%e\n", y_radius0                       ); */
-	  /* 	  exitf(); */
+      // longitude
+      order_interpo_map = 4;
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius0_lat0_lon0, y_radius0_lat0_lon1, y_radius0_lat0_lon2, y_radius0_lat0_lon3);
+      polynomial_interpo(&y_radius0_lat0, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
 
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius0_lat1_lon0, y_radius0_lat1_lon1, y_radius0_lat1_lon2, y_radius0_lat1_lon3);
+      polynomial_interpo(&y_radius0_lat1, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
 
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius0_lat2_lon0, y_radius0_lat2_lon1, y_radius0_lat2_lon2, y_radius0_lat2_lon3);
+      polynomial_interpo(&y_radius0_lat2, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius0_lat3_lon0, y_radius0_lat3_lon1, y_radius0_lat3_lon2, y_radius0_lat3_lon3);      
+      polynomial_interpo(&y_radius0_lat3, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);      
+
+      // latitude
+      gravity_map_yinter_lat(yinter, &order_interpo_map, lat_gc, Gravity, y_radius0_lat0, y_radius0_lat1, y_radius0_lat2, y_radius0_lat3);
+      polynomial_interpo(&y_radius0, order_interpo_map, xinter_lat, yinter, lat_gc*180/M_PI);  
+
+      
       // RADIUS1
       y_radius1_lat0_lon0 = Gravity->gravity_map[iradius1][ilat0][ilon0][ii];
       y_radius1_lat0_lon1 = Gravity->gravity_map[iradius1][ilat0][ilon1][ii];
@@ -2050,56 +1908,24 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       y_radius1_lat3_lon1 = Gravity->gravity_map[iradius1][ilat3][ilon1][ii];
       y_radius1_lat3_lon2 = Gravity->gravity_map[iradius1][ilat3][ilon2][ii];
       y_radius1_lat3_lon3 = Gravity->gravity_map[iradius1][ilat3][ilon3][ii];
-    //y_radius1_lat1 = xlon*y_radius1_lat1_lon2 + (1-xlon)*y_radius1_lat1_lon1;
-    //        y_radius1_lat2 = xlon*y_radius1_lat2_lon2 + (1-xlon)*y_radius1_lat2_lon1;
-      if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ // ilon0 = Gravity->nlon_map-2 but ilon1 = 0 so avoid a difference of about 360 degrees between both lon by setting xinter[0] to, for example, -1 (instead of 359)
-	xinter[0] = Gravity->lon_map[Gravity->nlon_map-2] - Gravity->lon_map[Gravity->nlon_map-1]; 
-	xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
-      else if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
-	xinter[3] = Gravity->lon_map[Gravity->nlon_map-1] + (Gravity->lon_map[1] - Gravity->lon_map[0]);
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2];
-      }
-      else{
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
 
-    yinter[0] = y_radius1_lat0_lon0; yinter[1] = y_radius1_lat0_lon1; yinter[2] = y_radius1_lat0_lon2; yinter[3] = y_radius1_lat0_lon3;
-      polynomial_interpo(printVar,&y_radius1_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius1_lat1_lon0; yinter[1] = y_radius1_lat1_lon1; yinter[2] = y_radius1_lat1_lon2; yinter[3] = y_radius1_lat1_lon3;
-      polynomial_interpo(printVar,&y_radius1_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius1_lat2_lon0; yinter[1] = y_radius1_lat2_lon1; yinter[2] = y_radius1_lat2_lon2; yinter[3] = y_radius1_lat2_lon3;
-      polynomial_interpo(printVar,&y_radius1_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius1_lat3_lon0; yinter[1] = y_radius1_lat3_lon1; yinter[2] = y_radius1_lat3_lon2; yinter[3] = y_radius1_lat3_lon3;
-      polynomial_interpo(printVar,&y_radius1_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius1 = y_radius1_lat1*(1-xlat) + y_radius1_lat2*xlat; */
-	    /* printf("%e\n", y_radius1); */
-      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
-	xinter[0] = Gravity->lat_map[ilat0];
-	yinter[0] = y_radius1_lat0;
-	order_interpo_map = 1;
-      }
-      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] =  Gravity->lat_map[ilat3];
-	yinter[0] = y_radius1_lat0; yinter[1] = y_radius1_lat2; yinter[2] = y_radius1_lat3;
-	order_interpo_map = 3;
-      }
-      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1];
-	yinter[0] = y_radius1_lat0; yinter[1] = y_radius1_lat1;
-	order_interpo_map = 2;
-      }
-      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2];
-	yinter[0] = y_radius1_lat0; yinter[1] = y_radius1_lat1; yinter[2] = y_radius1_lat2;
-	order_interpo_map = 3;
-    }
-      else{
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-	yinter[0] = y_radius1_lat0; yinter[1] = y_radius1_lat1; yinter[2] = y_radius1_lat2; yinter[3] = y_radius1_lat3;
-    	order_interpo_map = 4;
-      }
-      polynomial_interpo(printVar,&y_radius1, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
+      // longitude
+      order_interpo_map = 4;
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius1_lat0_lon0, y_radius1_lat0_lon1, y_radius1_lat0_lon2, y_radius1_lat0_lon3);
+      polynomial_interpo(&y_radius1_lat0, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius1_lat1_lon0, y_radius1_lat1_lon1, y_radius1_lat1_lon2, y_radius1_lat1_lon3);
+      polynomial_interpo(&y_radius1_lat1, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius1_lat2_lon0, y_radius1_lat2_lon1, y_radius1_lat2_lon2, y_radius1_lat2_lon3);
+      polynomial_interpo(&y_radius1_lat2, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius1_lat3_lon0, y_radius1_lat3_lon1, y_radius1_lat3_lon2, y_radius1_lat3_lon3);      
+      polynomial_interpo(&y_radius1_lat3, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);      
+
+      // Latitude
+      gravity_map_yinter_lat(yinter, &order_interpo_map, lat_gc, Gravity, y_radius1_lat0, y_radius1_lat1, y_radius1_lat2, y_radius1_lat3);
+      polynomial_interpo(&y_radius1, order_interpo_map, xinter_lat, yinter, lat_gc*180/M_PI);  
       	  /* printf("%e\n", y_radius1              ); */
 	  /* 	  exitf(); */
 
@@ -2122,54 +1948,25 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       y_radius2_lat3_lon3 = Gravity->gravity_map[iradius2][ilat3][ilon3][ii];
     //y_radius2_lat1 = xlon*y_radius2_lat1_lon2 + (1-xlon)*y_radius2_lat1_lon1;
     //        y_radius2_lat2 = xlon*y_radius2_lat2_lon2 + (1-xlon)*y_radius2_lat2_lon1;
-      if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ // ilon0 = Gravity->nlon_map-2 but ilon1 = 0 so avoid a difference of about 360 degrees between both lon by setting xinter[0] to, for example, -1 (instead of 359)
-	xinter[0] = Gravity->lon_map[Gravity->nlon_map-2] - Gravity->lon_map[Gravity->nlon_map-1]; 
-	xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
-      else if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
-	xinter[3] = Gravity->lon_map[Gravity->nlon_map-1] + (Gravity->lon_map[1] - Gravity->lon_map[0]);
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2];
-      }
-      else{
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
 
-    yinter[0] = y_radius2_lat0_lon0; yinter[1] = y_radius2_lat0_lon1; yinter[2] = y_radius2_lat0_lon2; yinter[3] = y_radius2_lat0_lon3;
-      polynomial_interpo(printVar,&y_radius2_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius2_lat1_lon0; yinter[1] = y_radius2_lat1_lon1; yinter[2] = y_radius2_lat1_lon2; yinter[3] = y_radius2_lat1_lon3;
-      polynomial_interpo(printVar,&y_radius2_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius2_lat2_lon0; yinter[1] = y_radius2_lat2_lon1; yinter[2] = y_radius2_lat2_lon2; yinter[3] = y_radius2_lat2_lon3;
-      polynomial_interpo(printVar,&y_radius2_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius2_lat3_lon0; yinter[1] = y_radius2_lat3_lon1; yinter[2] = y_radius2_lat3_lon2; yinter[3] = y_radius2_lat3_lon3;
-      polynomial_interpo(printVar,&y_radius2_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius2 = y_radius2_lat1*(1-xlat) + y_radius2_lat2*xlat; */
-	    /* printf("%e\n", y_radius2); */
-      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
-	xinter[0] = Gravity->lat_map[ilat0];
-	yinter[0] = y_radius2_lat0;
-	order_interpo_map = 1;
-      }
-      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] =  Gravity->lat_map[ilat3];
-	yinter[0] = y_radius2_lat0; yinter[1] = y_radius2_lat2; yinter[2] = y_radius2_lat3;
-	order_interpo_map = 3;
-      }
-      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1];
-	yinter[0] = y_radius2_lat0; yinter[1] = y_radius2_lat1;
-	order_interpo_map = 2;
-      }
-      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2];
-	yinter[0] = y_radius2_lat0; yinter[1] = y_radius2_lat1; yinter[2] = y_radius2_lat2;
-	order_interpo_map = 3;
-    }
-      else{
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-	yinter[0] = y_radius2_lat0; yinter[1] = y_radius2_lat1; yinter[2] = y_radius2_lat2; yinter[3] = y_radius2_lat3;
-    	order_interpo_map = 4;
-      }
-      polynomial_interpo(printVar,&y_radius2, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
+
+      // longitude
+      order_interpo_map = 4;
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius2_lat0_lon0, y_radius2_lat0_lon1, y_radius2_lat0_lon2, y_radius2_lat0_lon3);
+      polynomial_interpo(&y_radius2_lat0, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius2_lat1_lon0, y_radius2_lat1_lon1, y_radius2_lat1_lon2, y_radius2_lat1_lon3);
+      polynomial_interpo(&y_radius2_lat1, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius2_lat2_lon0, y_radius2_lat2_lon1, y_radius2_lat2_lon2, y_radius2_lat2_lon3);
+      polynomial_interpo(&y_radius2_lat2, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius2_lat3_lon0, y_radius2_lat3_lon1, y_radius2_lat3_lon2, y_radius2_lat3_lon3);      
+      polynomial_interpo(&y_radius2_lat3, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);      
+
+      // latitude
+      gravity_map_yinter_lat(yinter, &order_interpo_map, lat_gc, Gravity, y_radius2_lat0, y_radius2_lat1, y_radius2_lat2, y_radius2_lat3);
+      polynomial_interpo(&y_radius2, order_interpo_map, xinter_lat, yinter, lat_gc*180/M_PI);  
       	  /* printf("%e\n", y_radius2); */
 	  /* 	  exitf(); */
 
@@ -2193,97 +1990,40 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
       y_radius3_lat3_lon3 = Gravity->gravity_map[iradius3][ilat3][ilon3][ii];
     //y_radius3_lat1 = xlon*y_radius3_lat1_lon2 + (1-xlon)*y_radius3_lat1_lon1;
     //        y_radius3_lat2 = xlon*y_radius3_lat2_lon2 + (1-xlon)*y_radius3_lat2_lon1;
-      if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ // ilon0 = Gravity->nlon_map-2 but ilon1 = 0 so avoid a difference of about 360 degrees between both lon by setting xinter[0] to, for example, -1 (instead of 359)
-	xinter[0] = Gravity->lon_map[Gravity->nlon_map-2] - Gravity->lon_map[Gravity->nlon_map-1]; 
-	xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
-      else if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
-	xinter[3] = Gravity->lon_map[Gravity->nlon_map-1] + (Gravity->lon_map[1] - Gravity->lon_map[0]);
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2];
-      }
-      else{
-	xinter[0] = Gravity->lon_map[ilon0]; xinter[1] = Gravity->lon_map[ilon1]; xinter[2] = Gravity->lon_map[ilon2]; xinter[3] = Gravity->lon_map[ilon3];
-      }
 
-    yinter[0] = y_radius3_lat0_lon0; yinter[1] = y_radius3_lat0_lon1; yinter[2] = y_radius3_lat0_lon2; yinter[3] = y_radius3_lat0_lon3;
-      polynomial_interpo(printVar,&y_radius3_lat0, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-    yinter[0] = y_radius3_lat1_lon0; yinter[1] = y_radius3_lat1_lon1; yinter[2] = y_radius3_lat1_lon2; yinter[3] = y_radius3_lat1_lon3;
-      polynomial_interpo(printVar,&y_radius3_lat1, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius3_lat2_lon0; yinter[1] = y_radius3_lat2_lon1; yinter[2] = y_radius3_lat2_lon2; yinter[3] = y_radius3_lat2_lon3;
-      polynomial_interpo(printVar,&y_radius3_lat2, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);
-      yinter[0] = y_radius3_lat3_lon0; yinter[1] = y_radius3_lat3_lon1; yinter[2] = y_radius3_lat3_lon2; yinter[3] = y_radius3_lat3_lon3;
-      polynomial_interpo(printVar,&y_radius3_lat3, order_interpo_map, xinter, yinter, long_gc_corr*180/M_PI);      
-            /*    y_radius3 = y_radius3_lat1*(1-xlat) + y_radius3_lat2*xlat; */
-	    /* printf("%e\n", y_radius3); */
-      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
-	xinter[0] = Gravity->lat_map[ilat0];
-	yinter[0] = y_radius3_lat0;
-	order_interpo_map = 1;
-      }
-      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat2]; xinter[2] =  Gravity->lat_map[ilat3];
-	yinter[0] = y_radius3_lat0; yinter[1] = y_radius3_lat2; yinter[2] = y_radius3_lat3;
-	order_interpo_map = 3;
-      }
-      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1];
-	yinter[0] = y_radius3_lat0; yinter[1] = y_radius3_lat1;
-	order_interpo_map = 2;
-      }
-      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2];
-	yinter[0] = y_radius3_lat0; yinter[1] = y_radius3_lat1; yinter[2] = y_radius3_lat2;
-	order_interpo_map = 3;
-    }
-      else{
-	xinter[0] = Gravity->lat_map[ilat0]; xinter[1] = Gravity->lat_map[ilat1]; xinter[2] = Gravity->lat_map[ilat2]; xinter[3] = Gravity->lat_map[ilat3];
-	yinter[0] = y_radius3_lat0; yinter[1] = y_radius3_lat1; yinter[2] = y_radius3_lat2; yinter[3] = y_radius3_lat3;
-    	order_interpo_map = 4;
-      }
-      polynomial_interpo(printVar,&y_radius3, order_interpo_map, xinter, yinter, lat_gc*180/M_PI);  
-      	  /* printf("%e\n", y_radius3); */
-	  /* 	  exitf(); */
+      // longitude
+      order_interpo_map = 4;
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius3_lat0_lon0, y_radius3_lat0_lon1, y_radius3_lat0_lon2, y_radius3_lat0_lon3);
+      polynomial_interpo(&y_radius3_lat0, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
 
-      
-      
-      // INTERPO OVER RADIUS
-      if ((rmag < Gravity->min_radius_map) || (rmag >= Gravity->max_radius_map + Gravity->dradius_map)){ // all iradius the same
-      xinter[0] = Gravity->radius_map[iradius0];
-      yinter[0] = y_radius0;
-      order_interpo_map = 1;
-    }
-    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){ // iradius0 = iradius1
-      xinter[0] = Gravity->radius_map[iradius0]; xinter[1] =  Gravity->radius_map[iradius2]; xinter[2] = Gravity->radius_map[iradius3];
-      yinter[0] = y_radius0; yinter[1] = y_radius2; yinter[2] = y_radius3;
-      order_interpo_map = 3;
-    }
-    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){ // iradius2 and 3 = iradius 1
-      xinter[0] = Gravity->radius_map[iradius0]; xinter[1] =  Gravity->radius_map[iradius1];
-      yinter[0] = y_radius0; yinter[1] = y_radius1;
-      order_interpo_map = 2;
-    }
-    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){ // iradius3 = iradius2
-      xinter[0] = Gravity->radius_map[iradius0]; xinter[1] =  Gravity->radius_map[iradius1]; xinter[2] = Gravity->radius_map[iradius2];
-      yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2;
-      order_interpo_map = 3;
-    }
-    else{
-          xinter[0] = Gravity->radius_map[iradius0];   xinter[1] = Gravity->radius_map[iradius1]; xinter[2] = Gravity->radius_map[iradius2]; xinter[3] = Gravity->radius_map[iradius3];
-	    yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2; yinter[3] = y_radius3;
-	    order_interpo_map = 4;
-    }
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius3_lat1_lon0, y_radius3_lat1_lon1, y_radius3_lat1_lon2, y_radius3_lat1_lon3);
+      polynomial_interpo(&y_radius3_lat1, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius3_lat2_lon0, y_radius3_lat2_lon1, y_radius3_lat2_lon2, y_radius3_lat2_lon3);
+      polynomial_interpo(&y_radius3_lat2, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);
+
+      gravity_map_yinter_lon(yinter, &order_interpo_map, long_gc_corr, Gravity, y_radius3_lat3_lon0, y_radius3_lat3_lon1, y_radius3_lat3_lon2, y_radius3_lat3_lon3);      
+      polynomial_interpo(&y_radius3_lat3, order_interpo_map, xinter_lon, yinter, long_gc_corr*180/M_PI);      
+
+      // latitude
+      gravity_map_yinter_lat(yinter, &order_interpo_map, lat_gc, Gravity, y_radius3_lat0, y_radius3_lat1, y_radius3_lat2, y_radius3_lat3);
+      polynomial_interpo(&y_radius3, order_interpo_map, xinter_lat, yinter, lat_gc*180/M_PI);  
+
+      // Interpo over radius
+      gravity_map_yinter_radius( yinter, &order_interpo_map,  rmag, Gravity,  y_radius0,  y_radius1,  y_radius2,  y_radius3);
+	// Interpolate dUdr, Dudlat, DUdlong
     if (ii == 0){
       // dUdr = y_radius2*xradius + y_radius1*(1-xradius);
-      polynomial_interpo(printVar,&dUdr, order_interpo_map, xinter, yinter, rmag);
+      polynomial_interpo(&dUdr, order_interpo_map, xinter_radius, yinter, rmag);
     }
     else if (ii == 1){
       //      dUdlat = y_radius2*xradius + y_radius1*(1-xradius);
-      polynomial_interpo(printVar,&dUdlat, order_interpo_map, xinter, yinter, rmag);    
+      polynomial_interpo(&dUdlat, order_interpo_map, xinter_radius, yinter, rmag);    
     }
     else{
       //      dUdlong = y_radius2*xradius + y_radius1*(1-xradius);
 
-      polynomial_interpo(printVar,&dUdlong, order_interpo_map, xinter, yinter, rmag);    
+      polynomial_interpo(&dUdlong, order_interpo_map, xinter_radius, yinter, rmag);    
     }
 
 
@@ -2326,6 +2066,9 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 
   return 0;
 }
+
+
+
 
 
 
@@ -2903,6 +2646,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
+  int order_interpo_map = 4;
+  double cr;
   double r_earth_elt_body[3];
   double r_earth_elt_lvlh_norm[3], r_earth_elt_lvlh_norm_minus[3];
   double cos_kappa;
@@ -2930,35 +2675,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   double radius_sc, beta, alpha, mp, sm, beta_max, alpha_max, sm_max, sp, oh;
   double delta, sh;
   v_mag( &radius_sc, r_i2cg_INRTL);
-  sh = radius_sc - PARAMS->EARTH.radius;
-  beta_max = acos(PARAMS->EARTH.radius/radius_sc); // every M with beta < beta_max is visible from the satellite
-  alpha_max = M_PI/2. - beta_max; 
-  sm_max = sqrt(radius_sc*radius_sc - PARAMS->EARTH.radius*PARAMS->EARTH.radius);
-
-  // define the coordinates of a point on the surface of the Earth visible from the satellite
-  // in the LVLH coordinate system (appropriate because the z axis is the direction OS)
-  // we use the idea that if P is a distance between sp_max and SH (ie beta is between
-  // beta_max and 0), and that MP is equal to PARAMS->EARTH.radius*sin(beta), then
-  // M is necessarily a point on the surface of the Earth (and in sight from the satellite)
-
-      int nbeta =  5;// number of slices, the first one being the cap -> 5 is the min number to keep good accuracy                  
-  int ibeta = 0;
-  int ndelta_at_beta_max = 10.; // 10 is the min number to keep good accuracy
-  double ddelta_length_at_beta_max = 2*M_PI*PARAMS->EARTH.radius*sin(beta_max) / ndelta_at_beta_max;
-  // find the "latitudinal" angular width of each Earth element that is not the "polar cap" and find the "latitudinal" angular width of the Earth element that is the polar cap
-  // -> all elts that are not the polar cap have the same "latitudinal" angular width. Howver, the "longitudinal" angular width is calculated so that each elt has the same projected attenuated area (see further comments)
-  double dbeta_cap = 0.5 * M_PI / 180.; ; // -> any number smaller than 0.5 deg is ok
-  double dbeta_not_cap = (beta_max - dbeta_cap)/(nbeta - 1); // for example, if nbeta = 3,  we want 3 slices, the first one being the cap
-  double ap, bp, cp; // the euqation to find dbeta_cap is quadratic. It comes from the fact that we want 
-  /* ap = 4*M_PI*PARAMS->EARTH.radius; */
-  /* bp = -(ddelta_length_at_beta_max + 4*beta_max*M_PI*PARAMS->EARTH.radius) */
-
-  
-  double dbeta;
-  double ddelta;// = 0.1 * M_PI / 180.;
   double r_earth_elt_lvlh[3];
   double r_eci_norm[3];
-  beta = beta_max - dbeta_not_cap / 2.; // finish with M at the sub-satellite point (beta = 0)
   int row;
   double x[6];
   double lt;
@@ -3047,157 +2765,74 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   v_mag( &dist_sat_to_sun, r_cg2sun_J2000 );
   double prad;
   prad = solar_luminosity / (4 * M_PI * light_speed * 1000 * dist_sat_to_sun * dist_sat_to_sun * 1000000.); // in N/m2. should be about 4.5e-6 N./m2 (the flux prad*c should be about 1350 W/m2)
-
-    
+  double zenith_sc, cos_zenith_sc, r_earth2sun_J2000_mag;
+    v_mag(&r_earth2sun_J2000_mag, r_earth2sun_J2000);
+    v_dot(&cos_zenith_sc, r_i2cg_INRTL, r_earth2sun_J2000);
+    cos_zenith_sc = cos_zenith_sc / ( radius_sc *  r_earth2sun_J2000_mag);
+    zenith_sc = acos(cos_zenith_sc); // doesn't matter if get +-zenith angle
   if (INTEGRATOR->coll_vcm != 1){
-    compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
-    m_x_v(r_cg2sun_LVLH, T_inrtl_2_lvlh, r_cg2sun_J2000);
-
-    /* r_cg2sun_J2000_normalized LVLH to body */
-    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
-    //  compute_T_sc_to_lvlh(T_sc_to_lvlh, INTEGRATOR->attitude.lvlh_alongtrack_in_body_cartesian, INTEGRATOR->attitude.lvlh_crosstrack_in_body_cartesian, &et, r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR); 
-    m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
-
-
-
-    r_i2cg_lvlh[0] = 0; r_i2cg_lvlh[1] = 0; r_i2cg_lvlh[2] = radius_sc;
-    double area_earth_elt;
-    a_earth_pressure_in_body[0] = 0; a_earth_pressure_in_body[1] = 0; a_earth_pressure_in_body[2] = 0;
-    double delta_max = 1;  // don't care about the value now, it's going to be modified as soon as we enter the while loop on delta
-    //                  printf("beta_max %f\n", beta_max*180/M_PI);
-    double f_beta, f_beta_max;
-    //    printf("\n\n");
-    while (ibeta != nbeta){ // move M until beta reaches beta_max (see satellite at horizon)
-      ibeta = ibeta + 1;
-      sp = radius_sc - PARAMS->EARTH.radius*cos(beta); // distance along z_lvlh
-      mp = PARAMS->EARTH.radius*sin(beta);
-      sm = sqrt(sp*sp + mp*mp);
-      r_earth_elt_lvlh[2] = -sp;// sp > 0 and z_lvlh is always < 0 because z axis in lvlh is from
-      // center of Earth to satellite
-
-
-
-      
-      delta = 0.; // start in the direction defined by the along-track direction (x_lvlh)
-      int idelta = 0;
-      while (delta <= delta_max){
-	idelta = idelta + 1;
-	r_earth_elt_lvlh[0] = mp * cos(delta);
-	r_earth_elt_lvlh[1] = mp * sin(delta);
-	// compute vector M to Sun in LVLH
-	v_sub(earth_elt_to_sun_lvlh, r_cg2sun_LVLH, r_earth_elt_lvlh);
-	v_norm(earth_elt_to_sun_lvlh_norm, earth_elt_to_sun_lvlh);
-	v_add(earth_center_to_earth_elt_lvlh, r_i2cg_lvlh, r_earth_elt_lvlh);
-	v_norm(earth_center_to_earth_elt_lvlh_norm, earth_center_to_earth_elt_lvlh);
-	v_dot(&cos_zenith, earth_center_to_earth_elt_lvlh_norm, earth_elt_to_sun_lvlh_norm);
-
-	// do some work to define ddelta so that the projected attenuated area of the Earth element is constant from a beta to another. The projected attenuated area is the area of the Earth element projected along the direction "Earth elt to satellite" and divided by the square of the distance "Earth elt to satellite". For the definition of the projected attenuated area, refer to Knocke, P.C. et al, “Earth Radiation Pressure Effects on Satellites.” Proceedings of the AIAA/AAS Astrodynamics Specialist Conference, Washington DC, 1988, pp. 577-586.
-	if (idelta == 1){ // no need to do those calcaultions for more delta since it's not delta dependent. Still do it in the delta while loop though cause r_earth_elt_lvlh is needed here	
-	  v_norm(r_earth_elt_lvlh_norm, r_earth_elt_lvlh);
-	  v_scale(r_earth_elt_lvlh_norm_minus, r_earth_elt_lvlh_norm, -1);// vector MS
-	  v_dot(&cos_kappa, earth_center_to_earth_elt_lvlh_norm, r_earth_elt_lvlh_norm_minus );
-	  f_beta = cos_kappa / (M_PI * sm * sm);
-	  if (ibeta == 1){
-	    f_beta_max = f_beta;
-	  }
-	  ddelta = ddelta_length_at_beta_max / (PARAMS->EARTH.radius*sin(beta)) * f_beta_max / f_beta;
-	}
-      
-	  if (beta == 0){ // this corresponds to the disk right below the sc so it's not a crown so it's has to be treaty a bit differently from the other beta
-	    area_earth_elt = 2*M_PI*PARAMS->EARTH.radius*PARAMS->EARTH.radius*(1 - cos(dbeta_cap)); // some math: area of a portion of a sphere
-	    delta_max = -1;// arbitrary, so that we only go once in the delta loop (since only Earth elt for beta  = 0 (whih is the disk right below the sc)
-	  }
-	  else{
-	    area_earth_elt = PARAMS->EARTH.radius * dbeta_not_cap * mp * ddelta;
-	    delta_max = 2*M_PI;
-	  }
-	  	  area_earth_elt = area_earth_elt*cos_kappa; // projection of the earth element area on the direction  "earth elt to satellite" 
-	  // the goal is to have area_earth_elt/(M_PI * sm * sm) constant from a beta to another
-	  if (idelta == 1){ // no need to do those calcaultions for more delta since it's not delta dependent. Still do it in the delta while loop though cause r_earth_elt_lvlh is needed here
-		            /* printf("%f %f %f\n", beta*180/M_PI, dbeta*180/M_PI, beta_max*180/M_PI); */
-			    /* printf("C = %e | physical area %f | ddelta %f\n", area_earth_elt/(M_PI * sm * sm), area_earth_elt/cos_kappa, ddelta*180/M_PI);  */
-
-
-		}
-
-	  
-	/* printf("delta %f, beta %f\n", beta*180/M_PI, delta*180/M_PI); */
-	/* v_print(earth_center_to_earth_elt_lvlh_norm, "earth_center_to_earth_elt_lvlh_norm"); */
-	/* v_print(earth_elt_to_sun_lvlh, "earth_elt_to_sun_lvlh"); */
-	/* v_print(r_cg2sun_LVLH,"r_cg2sun_LVLH"); */
-	/* printf("cos_zenith %f, zenith %f\n", cos_zenith, acos(cos_zenith) * 180/M_PI); */
-
-	m_x_v(r_earth_elt_body, T_lvlh_to_sc, r_earth_elt_lvlh);
-	double r_earth_elt_body_norm[3];
-	v_norm(r_earth_elt_body_norm, r_earth_elt_body);
-	// go over each surface of the sc
-	double cr, emiss, albedo;
-	emiss = compute_earth_emissivity();
-	albedo = compute_earth_albedo();
 	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
 	  cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
-	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
-
-	  if (cos_phi > 0){ // the sc surface sees the Earth element
-
-	    
-	    //  if (INTEGRATOR->index_in_attitude_interpolated == INTEGRATOR->index_in_attitude_interpolated_first){ //!!!!!! only compute the IR at the irst time step -> assumes that the Earthdurface rea seen frmo the satellite is constat during the entire propgatrion and that the emmissivity (equivalent of albedo for IR) doesn't vary with latitude. The first condition means that the distance Earth to satellite doesn't vary much during the simulation, which means that the ecceentricity is close to 0 and that the orbit doens't decay too much...
-   
-	    // IR pressure: even if Earth elt doesn't see the Sun
-	    a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	    a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	    a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * 0.25 * emiss * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
-
-	    //  }
-	    // albedo: only if Earth elt sees the Sun
-	    if (cos_zenith > 0){
-
-	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, area_earth_elt in km2 but divide by sm*sm in km2 so area_earth_elt/(M_PI * sm * sm) has no unit. prad in N/m2. at the end "/1000." to convert from m/s2 to km/s2
-	      a_earth_pressure_in_body[1] = a_earth_pressure_in_body[1] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[1]/ 1000.;
-	      a_earth_pressure_in_body[2] = a_earth_pressure_in_body[2] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[2]/ 1000.;
-	      //if (sss == 10){
-
-	      //printf("%d, %e\n", sss, cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. *cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm));
-	      //}
-
-	    } // end of if the Earth elt sees the Sun
-
-	  } // end of if the sc surface sees the Earth elt 
-   
-	} // end of all surfaces
-
-	delta = delta + ddelta;
-
-      } // end of go over all delta
-      //      printf("ndelta %d\n", idelta);
-      if (ibeta == nbeta-1){ 
-	beta = 0;
-      }
-      else{
-	beta = beta - dbeta_not_cap;
-      }
+    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+    double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
+    double T_lvlh_to_inrtl[3][3];
+    	for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){
+    	m_x_v(sc_normal_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[sss].normal);
+	compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
+    m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
+    m_x_v(sc_normal_eci, T_lvlh_to_inrtl, sc_normal_lvlh);
+    double T_inrtl_2_earth_pres_frame[3][3];
+    compute_T_inrtl_2_earth_pres_frame( T_inrtl_2_earth_pres_frame, r_i2cg_INRTL, et);
+    m_x_v(sc_normal_epf, T_inrtl_2_earth_pres_frame, sc_normal_eci);
+    double elev_surf, azim_surf;
+    elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180 
+    azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
 
 
-    } // end of go over all beta
+    
+    int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
+    int iradius0, iradius1, iradius2, iradius3;
+        int izenith0, izenith1, izenith2, izenith3;
+	        int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
+        int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
+	double azim_surf_corr;
+    // determine the bin for the radius
+    compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
+    iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
 
-    double a_earth_pressure_in_LVLH[3];
-    m_x_v(a_earth_pressure_in_LVLH, T_sc_to_lvlh, a_earth_pressure_in_body);
-    m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh);
-    m_x_v(a_earth_pressure_INRTL, T_lvlh_2_inrtl, a_earth_pressure_in_LVLH);  
+    // determine the bin for the zenith
+	compute_izenith_gravity_map(izenith_arr, &PARAMS->EARTH.GRAVITY, zenith_sc);
+      izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
 
+      // determine the bin for the elevation of the normal of the surface
+	compute_ielev_surf_gravity_map(ielev_surf_arr, &PARAMS->EARTH.GRAVITY, elev_surf);
+      ielev_surf0 = ielev_surf_arr[0]; ielev_surf1 = ielev_surf_arr[1]; ielev_surf2 = ielev_surf_arr[2]; ielev_surf3 = ielev_surf_arr[3];
+
+    // determine the bin for the azimuth of the normal of the surface
+    if (azim_surf >= 0){ // azim_surf_corr varies from 0 to 2*M_PI
+      azim_surf_corr = azim_surf;
+    }
+    else{
+      azim_surf_corr = 2*M_PI + azim_surf;
+    }    
+    compute_iazim_surf_gravity_map(iazim_surf_arr, &PARAMS->EARTH.GRAVITY, azim_surf_corr, &order_interpo_map);
+    iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
+
+    
+
+    //    Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]
+
+    //    printf("%d: elev %f, azim %f\n",sss,elev_surf*180/M_PI, azim_surf*180/M_PI);
+    //  v_print(sc_normal_epf, "sc_normal_epf");
+	}
+
+  	
+	  //	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
+
+	  //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
+	}
   }  // end of no collision with VCM as colllision input file
 
-
-  double temp_norm;
-  double old_i = 5.8399019126e-11;
-  double old_f = 5.0263347875e-11;
-  v_mag(&temp_norm, a_earth_pressure_INRTL);
-  //  v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL")  ;
-  /* printf("r = %.1f\n", ((temp_norm-5.8399019126e-11)/ 5.8399019126e-11)*100); */
-  //  printf("%d %d\n", INTEGRATOR->index_in_attitude_interpolated, INTEGRATOR->index_in_attitude_interpolated_first);
-  if (INTEGRATOR->index_in_attitude_interpolated == 1){
-         exitf();
-  }
   return 0;
 
 }
@@ -4584,13 +4219,16 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.dradius_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY. min_lat_map = -40;//-0.11;
   PARAMS->EARTH.GRAVITY.max_lat_map = 40;//0.11;
-  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 480;//200.;
+  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 450;//200.;
   PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 600;//501;//40000.;
+  PARAMS->EARTH.GRAVITY.nlon_map = (int)(ceil( 360./PARAMS->EARTH.GRAVITY.dlon_map)) + 1;// nb lon bins
+  PARAMS->EARTH.GRAVITY.nlat_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map)) + 1;// nb lat bins
+  PARAMS->EARTH.GRAVITY.nradius_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_radius_map - PARAMS->EARTH.GRAVITY.min_radius_map)/PARAMS->EARTH.GRAVITY.dradius_map)) + 1;
 
 
   // for the earth pressure map (the radius maping is the same as for the gravity map)
   // // zenith
-  PARAMS->EARTH.GRAVITY.dzenith_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY.dzenith_map = 30.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
   PARAMS->EARTH.GRAVITY.max_zenith_map = 90.;
 
@@ -4599,21 +4237,28 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
   
-  PARAMS->EARTH.GRAVITY.delev_elt_map = 10.;
+  PARAMS->EARTH.GRAVITY.delev_elt_map = 30.;
   PARAMS->EARTH.GRAVITY.min_elev_elt_map = 0;
-  PARAMS->EARTH.GRAVITY.max_elev_elt_map = 90.;
+  PARAMS->EARTH.GRAVITY.max_elev_elt_map = acos(PARAMS->EARTH.radius/PARAMS->EARTH.GRAVITY.max_radius_map) * 180./M_PI;
 
   // // azim and elevation of the surface normal vector (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
   PARAMS->EARTH.GRAVITY.dazim_surf_map = 10.;
   PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
-  
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 10.;
-  PARAMS->EARTH.GRAVITY.min_elev_surf_map = 0;
-  PARAMS->EARTH.GRAVITY.max_elev_surf_map = 90.;
- 
-  
+
+  PARAMS->EARTH.GRAVITY.delev_surf_map = 30.;
+  PARAMS->EARTH.GRAVITY.min_elev_surf_map = PARAMS->EARTH.GRAVITY.max_elev_elt_map; // any surface which elev_surf_map lower than this value won't see any Earth element
+  PARAMS->EARTH.GRAVITY.max_elev_surf_map = 180;
+
+    PARAMS->EARTH.GRAVITY.nzenith_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_zenith_map - PARAMS->EARTH.GRAVITY.min_zenith_map)/PARAMS->EARTH.GRAVITY.dzenith_map)) + 1;
+        PARAMS->EARTH.GRAVITY.nazim_elt_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_azim_elt_map - PARAMS->EARTH.GRAVITY.min_azim_elt_map)/PARAMS->EARTH.GRAVITY.dazim_elt_map)) + 1;
+        PARAMS->EARTH.GRAVITY.nelev_elt_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_elev_elt_map - PARAMS->EARTH.GRAVITY.min_elev_elt_map)/PARAMS->EARTH.GRAVITY.delev_elt_map)) + 1;
+        PARAMS->EARTH.GRAVITY.nazim_surf_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_azim_surf_map - PARAMS->EARTH.GRAVITY.min_azim_surf_map)/PARAMS->EARTH.GRAVITY.dazim_surf_map)) + 1;
+        PARAMS->EARTH.GRAVITY.nelev_surf_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_elev_surf_map - PARAMS->EARTH.GRAVITY.min_elev_surf_map)/PARAMS->EARTH.GRAVITY.delev_surf_map)) + 1;
+
   // end of for the earth pressure map 
+
+
 
   
   PARAMS->MOON.flattening     = 0.0012;//https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
@@ -4665,11 +4310,47 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
 
   if (earth_pressure == 1){
-    PARAMS->EARTH.GRAVITY.nzenith_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_zenith_map - PARAMS->EARTH.GRAVITY.min_zenith_map)/PARAMS->EARTH.GRAVITY.dzenith_map)) + 1;
-    
-    
+
+  char text[200];
+  strcpy(text, "");
+  strcpy(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "earthPres");
+  sprintf(text, "%d", degree);
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_alt");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.min_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "-");
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.max_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "-");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dradius_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_zenith");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dzenith_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_elev_surf");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.delev_surf_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_azim_surf");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dazim_surf_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_elev_elt");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.delev_elt_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+    strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_azim_elt");
+    sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dazim_elt_map );
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
+  
+  //strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".txt");  // txt
+  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
+  printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
+
+        build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+	//read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+
   }
 
+  
   if (gravity_map_use == 1){
 
     
@@ -4705,12 +4386,9 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
 
   
-  PARAMS->EARTH.GRAVITY.nlon_map = (int)(ceil( 360./PARAMS->EARTH.GRAVITY.dlon_map)) + 1;// nb lon bins
-  PARAMS->EARTH.GRAVITY.nlat_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map)) + 1;// nb lat bins
-  PARAMS->EARTH.GRAVITY.nradius_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_radius_map - PARAMS->EARTH.GRAVITY.min_radius_map)/PARAMS->EARTH.GRAVITY.dradius_map)) + 1;
 
 
-      //       build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  //      build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
      read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
   }
 
@@ -5652,10 +5330,32 @@ int calculate_cd_opengl(double *cd,
 
 
 
+/* Assumptions: */
+/* - the zenith angle of the satellite is approximated to be the same as the angle between the direction "center of the Earth to satelltie" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to satelltie" and the direction "satelltie to Sun"). This approximation is valid since the distance Earth to Sun is much larger than the distance Earth to satellite */
+/* - Similarly, the zenith angle of the Earth element is approximated to be the same as the angle between the direction "center of the Earth to Earth element" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to Earth element" and the direction "Earth element to Sun"). */
+/* - albedo and infra-red emmissivities are uniform (don't depend on latitude) */
+int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 
-int build_earth_pressure_map(GRAVITY_T  *Gravity){
-
-
+  /*  Notations: */
+  /* - O center of the Earth */
+  /* - C position of the satellite */
+  /* - H projection of the satellite lcoation on the surface of the Earth (ie sub-satellite point) */
+  /* - M position of the Earth surface elements */
+  /* - S position of the Sun */
+  /* - P: projection of M on the direction OC */
+  /* - nvec: normal to the satellite surface in the reference frame defined as: */
+  // - the z vector is the direction OH
+  // - the y vector is the vector in the plane OHS and in the direction of the Sun
+  // - the x vector completes the orthogonal basis
+  // Declarations
+  double mp, elt_area;
+  int ccc= 0;
+  double a_earth_pressure_fac[3];
+  double nvec[3];
+  	  double cm[3], oc[3], om[3];
+	  double cos_nvec_cm, cm_mag;
+	  double albedo = 0.34; 
+	  double emiss = 0.68;
     double max_radius = Gravity->max_radius_map; // max radius of all sc (km)
     double min_radius = Gravity->min_radius_map; // min radius of all sc (km)
     double dradius, radius;
@@ -5680,9 +5380,28 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity){
     int nazim_elt = Gravity->nazim_elt_map;
     int iazim_elt;
 
+    double max_elev_surf = Gravity->max_elev_surf_map; 
+    double min_elev_surf = Gravity->min_elev_surf_map; 
+    double delev_surf, elev_surf;
+    int nelev_surf = Gravity->nelev_surf_map;
+    int ielev_surf;
 
-    
-  for (iradius = 0; iradius < nradius; iradius++){ // go over radii
+    double max_azim_surf = Gravity->max_azim_surf_map; 
+    double min_azim_surf = Gravity->min_azim_surf_map; 
+    double dazim_surf, azim_surf;
+    int nazim_surf = Gravity->nazim_surf_map;
+    int iazim_surf;
+
+    double om_norm[3], os[3];
+    double osmag = 149597871. ;// average distance Earth-Sun
+    double zenith_elt, cos_zenith_elt;
+
+    //		    printf("nradius %d, nzenith %d, nelev_surf %d, nazim_surf %d, nelev_elt %d, nazim_elt %d | max elt %f %f | total size %.1fM\n", nradius, nzenith, nelev_surf, nazim_surf, nelev_elt, nazim_elt, Gravity->max_elev_elt_map, Gravity->max_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*4./1024./1024.);
+    		    printf("Map: max elevation elt %.1f, min elevation surface normal %.1f | total size %.1fM\n",  Gravity->max_elev_elt_map, Gravity->min_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*4./1024./1024.);
+  Gravity->file_earth_pressure_map = fopen(Gravity->filename_earth_pressure_map, "wb");		    
+    for (iradius = 0; iradius < nradius; iradius++){ // go over radii (distance center of the Earth to satellite)
+
+
       	if (iradius == nradius - 1){
 	  dradius = max_radius - (min_radius + (nradius - 2)*Gravity->dradius_map);//not used 
 	  radius = max_radius;
@@ -5692,6 +5411,258 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity){
 	  radius = min_radius + iradius * dradius;
 	}
 	for (izenith = 0; izenith < nzenith; izenith++){ // go over zeniths
+
+
+	  
+	  if (izenith == nzenith - 1){
+	    dzenith = max_zenith - (min_zenith + (nzenith - 2)*Gravity->dzenith_map);//not used 
+	    zenith = max_zenith;
+	  }
+	  else{
+	    dzenith =  Gravity->dzenith_map;
+	    zenith = min_zenith + izenith * dzenith;
+	  }
+	  zenith = zenith * M_PI / 180.;
+	for (ielev_surf = 0; ielev_surf < nelev_surf; ielev_surf++){ // go over all "elevations" of satellite normal vector. See the definition of this "elevation" in comments a bit below
+	  
+	  if (ielev_surf == nelev_surf - 1){
+	    delev_surf = max_elev_surf - (min_elev_surf + (nelev_surf - 2)*Gravity->delev_surf_map);//not used 
+	    elev_surf = max_elev_surf;
+	  }
+	  else{
+	    delev_surf =  Gravity->delev_surf_map;
+	    elev_surf = min_elev_surf + ielev_surf * delev_surf             ;
+	  }
+	  elev_surf = elev_surf * M_PI / 180.;
+	for (iazim_surf = 0; iazim_surf < nazim_surf; iazim_surf++){ // go over all "azimuth" of satellite normal vector. See the definition of this "azimuth" in comments a bit below
+
+	  
+	  if (iazim_surf == nazim_surf - 1){
+	    dazim_surf = max_azim_surf - (min_azim_surf + (nazim_surf - 2)*Gravity->dazim_surf_map);//not used 
+	    azim_surf = max_azim_surf;
+	  }
+	  else{
+	    dazim_surf =  Gravity->dazim_surf_map;
+	    azim_surf = min_azim_surf + iazim_surf * dazim_surf             ;
+	  }
+	  azim_surf = azim_surf * M_PI / 180.;
+	  // the "elevation" of the satellite normal vector is the angle between nvec and CO (direction satellite to center of the Earth, ie -z direction where z has been previously defined)
+
+	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;
+	  
+	for (ielev_elt = 0; ielev_elt < nelev_elt; ielev_elt++){ // go over all "elevations" of Earth element. See the definition of this "elevation" in comments a bit below
+	  if (ielev_elt == nelev_elt - 1){
+	    delev_elt = max_elev_elt - (min_elev_elt + (nelev_elt - 2)*Gravity->delev_elt_map);//not used 
+	    elev_elt = max_elev_elt;
+	  }
+	  else{
+	    delev_elt =  Gravity->delev_elt_map;
+	    elev_elt = min_elev_elt + ielev_elt * delev_elt             ;
+	  }
+	  elev_elt = elev_elt * M_PI / 180.;
+	for (iazim_elt = 0; iazim_elt < nazim_elt; iazim_elt++){ // go over all "azimuth" of Earth element. See the definition of this "azimuth" in comments a bit below
+	  if (iazim_elt == nazim_elt - 1){
+	    dazim_elt = max_azim_elt - (min_azim_elt + (nazim_elt - 2)*Gravity->dazim_elt_map);//not used 
+	    azim_elt = max_azim_elt;
+	  }
+	  else{
+	    dazim_elt =  Gravity->dazim_elt_map;
+	    azim_elt = min_azim_elt + iazim_elt * dazim_elt             ;
+	  }
+	  azim_elt = azim_elt * M_PI / 180.;
+	  nvec[0] = sin(elev_surf) * cos (azim_surf);
+	  nvec[1] = sin(elev_surf) * sin (azim_surf);
+	  nvec[2] = cos(elev_surf);
+
+	  // Compute the solar zenith angle of the Earth element as a function of the solar zenith angle of the satellite
+	  // The reference frame is defined in the comments at the beginning of this function
+	  // The "elevation" of the surface element (elev_elt) is defined as the angle (OH, OM).
+	  // The "elevation" of the surface element (elev_elt) is defined as the angle (OH, OM), ie the angle (z, OM) (where z is previously defined)
+	  // The "azimuth" of the surface element (azim_elt) is defined as the angle (x, OM_proj), where M_proj is the projection of M on the xy plane previously defined.
+
+	  //	  if ((ielev_surf == 0) && (iazim_surf == 0)){ // only need to calculate the zenith angle of the Earth element for the first surface since the zenith angle of the Earth element is not dependent on the satellite surface
+	  om_norm[0] = sin(elev_elt) * cos (azim_elt);
+	  om_norm[1] = sin(elev_elt) * sin (azim_elt);
+	  om_norm[2] = cos (elev_elt);
+	  os[0] = 0;
+	  os[1] = osmag * sin(zenith);
+	  os[2] = osmag * cos(zenith);
+	  v_dot(&cos_zenith_elt, om_norm, os);
+	  cos_zenith_elt = cos_zenith_elt / osmag;
+	  //	  zenith_elt = acos(cos_zenith_elt); // doesn't matter if you get it right by + or minus - (ie if it's 40 deg instead of -40 deg, it's the same in terms of results for the earth radiation pressure).
+	  //	  }
+	  oc[0] = 0; oc[1] = 0; oc[2] = radius; // by definiton of the reference frame (see comments at the beginning of the script), the satellite (C) is along the z direction
+	  v_scale(om, om_norm, Gravity->radius); // assume spherical Earth
+	  v_sub(cm, om, oc);
+	  v_mag(&cm_mag, cm);
+	  v_dot(&cos_nvec_cm, cm, nvec);
+	  cos_nvec_cm = cos_nvec_cm  / cm_mag;
+	  if (cos_nvec_cm > 0){ // if the satellite surface sees the Earth element
+	    mp = Gravity->radius * sin(elev_elt);
+	    elt_area = Gravity->radius * delev_elt * M_PI/180. * mp * dazim_elt * M_PI/180.;
+	    if (cos_zenith_elt > 0){ // if the Earth element sees the Sun
+	    a_earth_pressure_fac[0] = a_earth_pressure_fac[0] + albedo * cos_zenith_elt * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[0] / cm_mag;
+	    a_earth_pressure_fac[1] = a_earth_pressure_fac[1] + albedo * cos_zenith_elt * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[1] / cm_mag;
+	    a_earth_pressure_fac[2] = a_earth_pressure_fac[2] + albedo * cos_zenith_elt * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[2] / cm_mag;
+	    } // end of if the Earth element sees the Sun
+	    a_earth_pressure_fac[0] = a_earth_pressure_fac[0] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[0] / cm_mag;
+	    a_earth_pressure_fac[1] = a_earth_pressure_fac[1] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[1] / cm_mag;
+	    a_earth_pressure_fac[2] = a_earth_pressure_fac[2] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[2] / cm_mag;
+	    
+	  } // end of if the satellite surface sees the Earth element  
+	} // go over all azimuth of Earth element	
+	
+	} // go over all elevation of Earth element
+		  	fwrite(&(a_earth_pressure_fac[0]), sizeof(a_earth_pressure_fac[0]), 1, Gravity->file_earth_pressure_map);
+		fwrite(&(a_earth_pressure_fac[1]), sizeof(a_earth_pressure_fac[1]), 1, Gravity->file_earth_pressure_map);
+		fwrite(&(a_earth_pressure_fac[2]), sizeof(a_earth_pressure_fac[2]), 1, Gravity->file_earth_pressure_map); 
+
+
+	} // go over all azimuth of satellite normal vector
+
+	} // go over all elevation of satellite normal vector
+
+
+	
+	}// go over zeniths
+	
+  } // go over radii
+    //    printf("%d\n",ccc,  ccc / 1024./1024);
+    fclose(Gravity->file_earth_pressure_map);
+    exitf();
+  return 0;
+}
+
+/* Assumptions: */
+/* - the zenith angle of the satellite is approximated to be the same as the angle between the direction "center of the Earth to satelltie" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to satelltie" and the direction "satelltie to Sun"). This approximation is valid since the distance Earth to Sun is much larger than the distance Earth to satellite */
+/* - Similarly, the zenith angle of the Earth element is approximated to be the same as the angle between the direction "center of the Earth to Earth element" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to Earth element" and the direction "Earth element to Sun"). */
+/* - albedo and infra-red emmissivities are uniform (don't depend on latitude) */
+int read_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
+
+  /*  Notations: */
+  /* - O center of the Earth */
+  /* - C position of the satellite */
+  /* - H projection of the satellite lcoation on the surface of the Earth (ie sub-satellite point) */
+  /* - M position of the Earth surface elements */
+  /* - S position of the Sun */
+  /* - P: projection of M on the direction OC */
+  /* - nvec: normal to the satellite surface in the reference frame defined as: */
+  // - the z vector is the direction OH
+  // - the y vector is the vector in the plane OHS and in the direction of the Sun
+  // - the x vector completes the orthogonal basis
+  // Declarations
+
+  double a_earth_pressure_fac[3];
+  double nvec[3];
+  	  double cm[3], oc[3], om[3];
+	  double cos_nvec_cm, cm_mag;
+	  double albedo = 0.34; 
+	  double emiss = 0.68;
+    double max_radius = Gravity->max_radius_map; // max radius of all sc (km)
+    double min_radius = Gravity->min_radius_map; // min radius of all sc (km)
+    double dradius, radius;
+    int nradius = Gravity->nradius_map;
+    int iradius;
+
+    double max_zenith = Gravity->max_zenith_map; 
+    double min_zenith = Gravity->min_zenith_map; 
+    double dzenith, zenith;
+    int nzenith = Gravity->nzenith_map;
+    int izenith;
+
+    double max_elev_elt = Gravity->max_elev_elt_map; 
+    double min_elev_elt = Gravity->min_elev_elt_map; 
+    double delev_elt, elev_elt;
+    int nelev_elt = Gravity->nelev_elt_map;
+    int ielev_elt;
+
+    double max_azim_elt = Gravity->max_azim_elt_map; 
+    double min_azim_elt = Gravity->min_azim_elt_map; 
+    double dazim_elt, azim_elt;
+    int nazim_elt = Gravity->nazim_elt_map;
+    int iazim_elt;
+
+    double max_elev_surf = Gravity->max_elev_surf_map; 
+    double min_elev_surf = Gravity->min_elev_surf_map; 
+    double delev_surf, elev_surf;
+    int nelev_surf = Gravity->nelev_surf_map;
+    int ielev_surf;
+
+    double max_azim_surf = Gravity->max_azim_surf_map; 
+    double min_azim_surf = Gravity->min_azim_surf_map; 
+    double dazim_surf, azim_surf;
+    int nazim_surf = Gravity->nazim_surf_map;
+    int iazim_surf;
+
+    double om_norm[3], os[3];
+    double osmag = 149597871. ;// average distance Earth-Sun
+    double zenith_elt, cos_zenith_elt;
+		    FILE *file_earth_pressure_map = NULL;
+    
+		    printf("nradius %d, nzenith %d, nelev_surf %d, nazim_surf %d, nelev_elt %d, nazim_elt %d | max elt %f %f | total size %.1fM\n", nradius, nzenith, nelev_surf, nazim_surf, nelev_elt, nazim_elt, Gravity->max_elev_elt_map, Gravity->max_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*8./1024./1024.);
+
+      file_earth_pressure_map = fopen(Gravity->filename_earth_pressure_map, "r");
+
+  if (iProc == 0){
+  if (file_earth_pressure_map == NULL){
+    printf("!***!\nThe 4D Earth pressure map file:\n%s\ncould not be found. The program will stop.\n!***!\n", Gravity->filename_earth_pressure_map); MPI_Finalize(); exit(0);
+  }
+  }
+
+      
+  Gravity->earth_pressure_map = malloc(nradius  * sizeof(double ****) );
+  Gravity->radius_map = malloc(nradius  * sizeof(double) );
+    Gravity->zenith_map = malloc(nzenith  * sizeof(double) );
+      Gravity->elev_surf_map = malloc(nelev_surf  * sizeof(double) );
+        Gravity->azim_surf_map = malloc(nazim_surf  * sizeof(double) );
+     
+  if ( Gravity->earth_pressure_map == NULL){
+    printf("***! Could not allow memory to Gravity->earth_pressure_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->radius_map == NULL){
+    printf("***! Could not allow memory to Gravity->radius_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->zenith_map == NULL){
+    printf("***! Could not allow memory to Gravity->zenith_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->elev_surf_map == NULL){
+    printf("***! Could not allow memory to Gravity->elev_surf_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+  if ( Gravity->azim_surf_map == NULL){
+    printf("***! Could not allow memory to Gravity->azim_surf_map. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+  }
+
+    for (iradius = 0; iradius < nradius; iradius++){ // go over radii (distance center of the Earth to satellite)
+      Gravity->earth_pressure_map[iradius] = malloc(nzenith * sizeof(double ***));
+          if ( Gravity->earth_pressure_map[iradius] == NULL){
+      printf("***! Could not allow memory to Gravity->earth_pressure_map[iradius]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+    }
+
+  
+      	if (iradius == nradius - 1){
+	  dradius = max_radius - (min_radius + (nradius - 2)*Gravity->dradius_map);//not used 
+	  radius = max_radius;
+	}
+	else{
+	  dradius =  Gravity->dradius_map;
+	  radius = min_radius + iradius * dradius;
+	}
+
+		Gravity->radius_map[iradius] = radius;
+	for (izenith = 0; izenith < nzenith; izenith++){ // go over zeniths
+
+	  	  Gravity->earth_pressure_map[iradius][izenith] = malloc(nelev_surf  * sizeof(double**) );
+	  if ( Gravity->earth_pressure_map[iradius][izenith] == NULL){ 
+	    printf("***! Could not allow memory to Gravity->earth_pressure_map[iradius][izenith]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+	  }
+
 	  if (izenith == nzenith - 1){
 	    dzenith = max_zenith - (min_zenith + (nzenith - 2)*Gravity->dzenith_map);//not used 
 	    zenith = max_zenith;
@@ -5701,34 +5672,69 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity){
 	    zenith = min_zenith + izenith * dzenith;
 	  }
 
-	for (ielev_elt = 0; ielev_elt < nelev_elt; ielev_elt++){ // go over all elevation of Earth element 
-	  if (ielev_elt == nelev_elt - 1){
-	    delev_elt = max_elev_elt - (min_elev_elt + (nelev_elt - 2)*Gravity->delev_elt_map);//not used 
-	    elev_elt = max_elev_elt;
+	Gravity->zenith_map[izenith] = zenith;	  
+	  zenith = zenith * M_PI / 180.;
+	for (ielev_surf = 0; ielev_surf < nelev_surf; ielev_surf++){ // go over all "elevations" of satellite normal vector. See the definition of this "elevation" in comments a bit below
+	  	  Gravity->earth_pressure_map[iradius][izenith][ielev_surf] = malloc(nazim_surf  * sizeof(double*) );
+	  if ( Gravity->earth_pressure_map[iradius][izenith][ielev_surf] == NULL){ 
+	    printf("***! Could not allow memory to Gravity->earth_pressure_map[iradius][izenith][ielev_surf]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
+	  }
+
+
+	  if (ielev_surf == nelev_surf - 1){
+	    delev_surf = max_elev_surf - (min_elev_surf + (nelev_surf - 2)*Gravity->delev_surf_map);//not used 
+	    elev_surf = max_elev_surf;
 	  }
 	  else{
-	    delev_elt =  Gravity->delev_elt_map;
-	    elev_elt = min_elev_elt + ielev_elt * delev_elt             ;
+	    delev_surf =  Gravity->delev_surf_map;
+	    elev_surf = min_elev_surf + ielev_surf * delev_surf             ;
+	  }
+	Gravity->elev_surf_map[ielev_surf] = elev_surf;	  
+	  
+	  elev_surf = elev_surf * M_PI / 180.;
+	for (iazim_surf = 0; iazim_surf < nazim_surf; iazim_surf++){ // go over all "azimuth" of satellite normal vector. See the definition of this "azimuth" in comments a bit below
+	  	  Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf] = malloc(3  * sizeof(double) );
+	  if ( Gravity->earth_pressure_map[iradius][izenith][ielev_surf] == NULL){ 
+	    printf("***! Could not allow memory to Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf]. \
+The program will stop. !***\n"); MPI_Finalize(); exit(0);
 	  }
 
-	for (iazim_elt = 0; iazim_elt < nazim_elt; iazim_elt++){ // go over all azimuth of Earth element 
-	  if (iazim_elt == nazim_elt - 1){
-	    dazim_elt = max_azim_elt - (min_azim_elt + (nazim_elt - 2)*Gravity->dazim_elt_map);//not used 
-	    azim_elt = max_azim_elt;
+	  if (iazim_surf == nazim_surf - 1){
+	    dazim_surf = max_azim_surf - (min_azim_surf + (nazim_surf - 2)*Gravity->dazim_surf_map);//not used 
+	    azim_surf = max_azim_surf;
 	  }
 	  else{
-	    dazim_elt =  Gravity->dazim_elt_map;
-	    azim_elt = min_azim_elt + iazim_elt * dazim_elt             ;
+	    dazim_surf =  Gravity->dazim_surf_map;
+	    azim_surf = min_azim_surf + iazim_surf * dazim_surf             ;
 	  }
+	Gravity->azim_surf_map[iazim_surf] = azim_surf;	  
+	  
+	  azim_surf = azim_surf * M_PI / 180.;
+	  // the "elevation" of the satellite normal vector is the angle between nvec and CO (direction satellite to center of the Earth, ie -z direction where z has been previously defined)
+ 
+	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;
+	  	fread(&Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][0],
+	      sizeof(Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][0]),1,file_earth_pressure_map);
+	fread(&Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][1],
+	      sizeof(Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][1]),1,file_earth_pressure_map);
+	fread(&Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2],
+	      sizeof(Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]),1,file_earth_pressure_map);
+
+	//	printf("earth[%f][%f][%f][%f]: (%.2e, %.2e, %.2e)\n", Gravity->radius_map[iradius] - Gravity->radius, Gravity->zenith_map[izenith], Gravity->elev_surf_map[ielev_surf], Gravity->azim_surf_map[iazim_surf], Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][0], Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][1], Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]);
+	
+	} // go over all azimuth of satellite normal vector
+
+	} // go over all elevation of satellite normal vector
 
 
-	} // go over all azimuth of Earth element
-	  
-	} // go over all elevation of Earth element
-	  
+	
 	}// go over zeniths
 	
   } // go over radii
+
+    fclose(file_earth_pressure_map);
+
   return 0;
 }
 
@@ -5895,6 +5901,7 @@ int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
 
   return 0;
 }
+ 
 
 
 int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc){
@@ -6067,7 +6074,7 @@ double compute_earth_emissivity(){ // see http://ocw.upm.es/ingenieria-aeroespac
   return emiss;
 }
 
-int polynomial_interpo(int printVar, double *val, int n, double *x, double *y, double to_inter){
+int polynomial_interpo(double *val, int n, double *x, double *y, double to_inter){
   //  printf("%d\n", n);
   float s=1,t=1;
   int i,j;
@@ -6105,4 +6112,379 @@ int polynomial_interpo(int printVar, double *val, int n, double *x, double *y, d
   }
   return 0;
 
+}
+
+
+int compute_iradius_gravity_map(int iradius_arr[4], GRAVITY_T *Gravity, double rmag){
+
+  int iradius0, iradius1, iradius2, iradius3;
+  
+  
+    if (rmag < Gravity->min_radius_map){ // this happens if Gravity->min_radius_map was not set correctly, ie too large compared to the min radius of the satellite
+      iradius0 = 0;
+      iradius1 = 0;
+      iradius2 = 0;
+      iradius3 = 0;
+      //      xradius = 0;
+    }
+    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){
+      iradius0 = 0;
+      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map); // should be 0
+      iradius2 = iradius1 + 1;  // 1
+      iradius3 = iradius2 + 1; // 2
+
+    }
+    else if (rmag >= Gravity->max_radius_map + Gravity->dradius_map){
+      iradius1 = Gravity->nradius_map - 1;
+      iradius2 = iradius1;
+      iradius3 = iradius2;
+      iradius0 = iradius1;
+      //      xradius = 0;
+    }
+    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){
+      iradius0 = Gravity->nradius_map - 2;
+      iradius1 = Gravity->nradius_map - 1;
+      iradius2 = iradius1;
+      iradius3 = iradius2;
+      //      xradius = 0;
+    }
+    
+    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){
+      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
+      iradius2 = iradius1 + 1; 
+      iradius3 = iradius2;
+      iradius0 = iradius1-1;
+	}
+    else{
+      iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
+      iradius2 = iradius1 + 1; 
+      iradius3 = iradius2 + 1; 
+      iradius0 = iradius1 - 1;
+      //      xradius = (rmag - Gravity->radius_map[iradius1]) / Gravity->dradius_map;
+    }
+
+    iradius_arr[0] = iradius0; iradius_arr[1] = iradius1; iradius_arr[2] = iradius2; iradius_arr[3] = iradius3; 
+
+    return 0;
+    
+    }
+
+
+int compute_ilat_gravity_map(int ilat_arr[4], GRAVITY_T *Gravity, double lat_gc){
+
+  int ilat0, ilat1, ilat2, ilat3;
+  
+    // determine the bin for the lat
+    if (lat_gc*180/M_PI < Gravity->min_lat_map){ // this happens if Gravity->min_lat_map was not set correctly, ie too large compared to the min latitude of the satellite
+      ilat0 = 0;
+      ilat1 = 0;
+      ilat2 = 0;
+      ilat3 = 0;
+      //           xlat = 0;
+    }
+    else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){
+      ilat0 = 0;
+      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map); // should be 0
+      ilat2 = ilat1 + 1; // 1
+      ilat3 = ilat2 + 1; // 2
+    }
+    else if (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map){
+      ilat1 = Gravity->nlat_map - 1;
+      ilat2 = ilat1;
+      ilat3 = ilat1;
+      ilat0 = ilat1;
+      //            xlat = 0;
+    }
+    else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){// this happens only if the Gravity->max_lat_map was not set correctly, ie too small compared to the max latitude of the satellite
+      ilat1 = Gravity->nlat_map - 1;
+      ilat2 = ilat1;
+      ilat3 = ilat1;
+      ilat0 = ilat1-1;
+      //            xlat = 0;
+    }
+
+    else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){
+      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
+      ilat2 = ilat1 + 1;
+      ilat3 = ilat2;
+      ilat0 = ilat1 - 1;
+      //      xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
+    }
+
+    else{
+      ilat1 = (int)(( lat_gc*180/M_PI - Gravity->min_lat_map ) / Gravity->dlat_map);
+      ilat2 = ilat1 + 1; 
+      ilat3 = ilat2 + 1; 
+      ilat0 = ilat1 - 1;
+      // so we're safe doing: ilat2 = ilat1 + 1
+      //           xlat = (lat_gc*180/M_PI - Gravity->lat_map[ilat1]) / Gravity->dlat_map;
+    }
+
+
+    ilat_arr[0] = ilat0; ilat_arr[1] = ilat1; ilat_arr[2] = ilat2; ilat_arr[3] = ilat3; 
+    return 0;
+    
+    }
+
+
+
+
+int compute_izenith_gravity_map(int izenith_arr[4], GRAVITY_T *Gravity, double zenith){
+
+  int izenith0, izenith1, izenith2, izenith3;
+  
+    // determine the bin for the zenith
+
+   if ((zenith*180/M_PI < Gravity->min_zenith_map + Gravity->dzenith_map) && (zenith*180/M_PI >= Gravity->min_zenith_map)){
+      izenith0 = 0;
+      izenith1 = (int)(( zenith*180/M_PI - Gravity->min_zenith_map ) / Gravity->dzenith_map); // should be 0
+      izenith2 = izenith1 + 1; // 1
+      izenith3 = izenith2 + 1; // 2
+    }
+
+
+    else if ( (zenith*180/M_PI >= Gravity->max_zenith_map-Gravity->dzenith_map) && (zenith*180/M_PI < Gravity->max_zenith_map)){
+      izenith1 = (int)(( zenith*180/M_PI - Gravity->min_zenith_map ) / Gravity->dzenith_map);
+      izenith2 = izenith1 + 1;
+      izenith3 = izenith2;
+      izenith0 = izenith1 - 1;
+    }
+
+    else{
+      izenith1 = (int)(( zenith*180/M_PI - Gravity->min_zenith_map ) / Gravity->dzenith_map);
+      izenith2 = izenith1 + 1; 
+      izenith3 = izenith2 + 1; 
+      izenith0 = izenith1 - 1;
+    }
+
+
+    izenith_arr[0] = izenith0; izenith_arr[1] = izenith1; izenith_arr[2] = izenith2; izenith_arr[3] = izenith3; 
+    return 0;
+    
+    }
+
+
+int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, double elev_surf){
+
+  int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
+  
+    // determine the bin for the elev_surf
+
+   if ((elev_surf*180/M_PI < Gravity->min_elev_surf_map + Gravity->delev_surf_map) && (elev_surf*180/M_PI >= Gravity->min_elev_surf_map)){
+      ielev_surf0 = 0;
+      ielev_surf1 = (int)(( elev_surf*180/M_PI - Gravity->min_elev_surf_map ) / Gravity->delev_surf_map); // should be 0
+      ielev_surf2 = ielev_surf1 + 1; // 1
+      ielev_surf3 = ielev_surf2 + 1; // 2
+    }
+
+
+    else if ( (elev_surf*180/M_PI >= Gravity->max_elev_surf_map-Gravity->delev_surf_map) && (elev_surf*180/M_PI < Gravity->max_elev_surf_map)){
+      ielev_surf1 = (int)(( elev_surf*180/M_PI - Gravity->min_elev_surf_map ) / Gravity->delev_surf_map);
+      ielev_surf2 = ielev_surf1 + 1;
+      ielev_surf3 = ielev_surf2;
+      ielev_surf0 = ielev_surf1 - 1;
+    }
+
+    else{
+      ielev_surf1 = (int)(( elev_surf*180/M_PI - Gravity->min_elev_surf_map ) / Gravity->delev_surf_map);
+      ielev_surf2 = ielev_surf1 + 1; 
+      ielev_surf3 = ielev_surf2 + 1; 
+      ielev_surf0 = ielev_surf1 - 1;
+    }
+
+
+    ielev_surf_arr[0] = ielev_surf0; ielev_surf_arr[1] = ielev_surf1; ielev_surf_arr[2] = ielev_surf2; ielev_surf_arr[3] = ielev_surf3; 
+    return 0;
+    
+    }
+
+
+
+
+
+
+int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double long_gc_corr){
+
+  int ilon0, ilon1, ilon2, ilon3;
+
+
+    ilon1 = (int)(( long_gc_corr*180/M_PI ) / Gravity->dlon_map);
+    // the longitude array of the 3d map varies frm 0 (1st bin) to 360 (last bin)
+    // so it's impossible that ilon1 == nlon - 1 (since long_gc_corr can't be
+    // exactly equal to 360). So we're safe to do: ilon2 = ilon1+1
+        ilon2 = ilon1+1;
+	if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
+	  ilon3 = 1;//  ilon2;
+    }
+    else{
+    ilon3 = ilon2+1;
+    }
+    if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ 
+      ilon0 = Gravity->nlon_map-2; // example: ilon1 = 0 and ilon0 = 359 (Gravity->nlon_map-1 = 360 so neeed to have ilon0 = Gravity->nlon_map-2, not ilon0 = Gravity->nlon_map-1)
+    }
+    else{
+    ilon0 = ilon1-1;
+    }
+  
+    ilon_arr[0] = ilon0; ilon_arr[1] = ilon1; ilon_arr[2] = ilon2; ilon_arr[3] = ilon3; 
+    return 0;
+    
+    }
+
+
+
+int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr, int *order_interpo_map){
+
+  int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
+  iazim_surf1 = (int)(( azim_surf_corr*180/M_PI ) / Gravity->dazim_surf_map);
+  // the longitude array of the 3d map varies frm 0 (1st bin) to 360 (last bin)
+  // so it's impossible that iazim_surf1 == nlon - 1 (since azim_surf_corr can't be
+  // exactly equal to 360). So we're safe to do: iazim_surf2 = iazim_surf1+1
+  iazim_surf2 = iazim_surf1+1;
+  if (azim_surf_corr*180/M_PI >= 360 - Gravity->dazim_surf_map){
+    iazim_surf3 = 1;//  iazim_surf2;
+    //    *order_interpo_map = 2; // otherwise the denominator in the interpolation formula is 0
+  }
+  else{
+    iazim_surf3 = iazim_surf2+1;
+  }
+  if (azim_surf_corr*180/M_PI <= Gravity->dazim_surf_map){ //in theory shold iazim_surf0 should be Gravity->nlon_map-1 but then the delta lon is big (360) so would have to handle that too - complicated  enough for now
+    iazim_surf0 = Gravity->nlon_map-2; // example: iazim_surf1 = 0 and iazim_surf0 = 359 (Gravity->nlon_map-1 = 360 so neeed to have iazim_surf0 = Gravity->nlon_map-2, not iazim_surf0 = Gravity->nlon_map-1)
+  }
+  else{
+    iazim_surf0 = iazim_surf1-1;
+  }
+  
+  iazim_surf_arr[0] = iazim_surf0; iazim_surf_arr[1] = iazim_surf1; iazim_surf_arr[2] = iazim_surf2; iazim_surf_arr[3] = iazim_surf3; 
+  return 0;
+    
+}
+
+
+int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_gc_corr, GRAVITY_T *Gravity, double y_lon0, double y_lon1, double y_lon2, double y_lon3){
+    yinter[0] = y_lon0; yinter[1] = y_lon1; yinter[2] = y_lon2; yinter[3] = y_lon3;
+
+    /* if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){ */
+    /*   *order_interpo_map = 2; // otherwise the denominator in the interpolation formula is 0 */
+    /* } */
+    /* else{ */
+    /*   *order_interpo_map = 4; */
+    /* } */
+    return 0;
+
+}
+
+int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3){
+      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
+	yinter[0] = y_lat0;
+	*order_interpo_map = 1;
+      }
+      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
+	yinter[0] = y_lat0; yinter[1] = y_lat2; yinter[2] = y_lat3;
+	*order_interpo_map = 3;
+      }
+      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
+	yinter[0] = y_lat0; yinter[1] = y_lat1;
+	*order_interpo_map = 2;
+      }
+      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
+	yinter[0] = y_lat0; yinter[1] = y_lat1; yinter[2] = y_lat2;
+	*order_interpo_map = 3;
+    }
+      else{
+	yinter[0] = y_lat0; yinter[1] = y_lat1; yinter[2] = y_lat2; yinter[3] = y_lat3;
+    	*order_interpo_map = 4;
+      }
+
+return 0;
+}
+
+
+int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double y_radius0, double y_radius1, double y_radius2, double y_radius3){
+
+      if ((rmag < Gravity->min_radius_map) || (rmag >= Gravity->max_radius_map + Gravity->dradius_map)){ // all iradius the same
+      yinter[0] = y_radius0;
+      *order_interpo_map = 1;
+
+    }
+    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){ // iradius0 = iradius1
+      yinter[0] = y_radius0; yinter[1] = y_radius2; yinter[2] = y_radius3;
+      *order_interpo_map = 3;
+
+    }
+    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){ // iradius2 and 3 = iradius 1
+      yinter[0] = y_radius0; yinter[1] = y_radius1;
+      *order_interpo_map = 2;
+
+    }
+    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){ // iradius3 = iradius2
+      yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2;
+      *order_interpo_map = 3;
+
+    }
+    else{
+	    yinter[0] = y_radius0; yinter[1] = y_radius1; yinter[2] = y_radius2; yinter[3] = y_radius3;
+	    *order_interpo_map = 4;
+    }
+
+  return 0;
+}
+
+int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity,
+		       int *ilon_arr, int *ilat_arr, int *iradius_arr){
+  
+  int iradius1, ilat1, ilon1, iradius2, ilat2, ilon2, ilon3, ilat3, iradius3, ilon0, ilat0, iradius0;
+  ilon0 = ilon_arr[0]; ilon1 = ilon_arr[1]; ilon2 = ilon_arr[2]; ilon3 = ilon_arr[3];
+  ilat0 = ilat_arr[0]; ilat1 = ilat_arr[1]; ilat2 = ilat_arr[2]; ilat3 = ilat_arr[3];
+  iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
+  
+    // xinter_lon
+      if (long_gc_corr*180/M_PI <= Gravity->dlon_map){ // ilon0 = Gravity->nlon_map-2 but ilon1 = 0 so avoid a difference of about 360 degrees between both lon by setting xinter_lon[0] to, for example, -1 (instead of 359)
+	xinter_lon[0] = Gravity->lon_map[Gravity->nlon_map-2] - Gravity->lon_map[Gravity->nlon_map-1]; 
+	xinter_lon[1] = Gravity->lon_map[ilon1]; xinter_lon[2] = Gravity->lon_map[ilon2]; xinter_lon[3] = Gravity->lon_map[ilon3];
+      }
+      else if (long_gc_corr*180/M_PI >= 360 - Gravity->dlon_map){
+	xinter_lon[3] = Gravity->lon_map[Gravity->nlon_map-1] + (Gravity->lon_map[1] - Gravity->lon_map[0]);
+	xinter_lon[0] = Gravity->lon_map[ilon0]; xinter_lon[1] = Gravity->lon_map[ilon1]; xinter_lon[2] = Gravity->lon_map[ilon2];
+      }
+      else{
+	xinter_lon[0] = Gravity->lon_map[ilon0]; xinter_lon[1] = Gravity->lon_map[ilon1]; xinter_lon[2] = Gravity->lon_map[ilon2]; xinter_lon[3] = Gravity->lon_map[ilon3];
+
+      }
+
+      // xinter_lat
+      if ((lat_gc*180/M_PI < Gravity->min_lat_map) || (lat_gc*180/M_PI >= Gravity->max_lat_map + Gravity->dlat_map)){ // all ilat the same
+	xinter_lat[0] = Gravity->lat_map[ilat0];
+      }
+      else if ((lat_gc*180/M_PI < Gravity->min_lat_map + Gravity->dlat_map) && (lat_gc*180/M_PI >= Gravity->min_lat_map)){ // ilat1 = ilat0
+	xinter_lat[0] = Gravity->lat_map[ilat0]; xinter_lat[1] = Gravity->lat_map[ilat2]; xinter_lat[2] =  Gravity->lat_map[ilat3];
+      }
+      else if ((lat_gc*180/M_PI >= Gravity->max_lat_map) && (Gravity->max_lat_map < Gravity->max_lat_map + Gravity->dlat_map)){ //ilat3 = ilat2 = ilat1
+	xinter_lat[0] = Gravity->lat_map[ilat0]; xinter_lat[1] = Gravity->lat_map[ilat1];
+      }
+      else if ( (lat_gc*180/M_PI >= Gravity->max_lat_map-Gravity->dlat_map) && (lat_gc*180/M_PI < Gravity->max_lat_map)){ // ilat3 =ilat2
+	xinter_lat[0] = Gravity->lat_map[ilat0]; xinter_lat[1] = Gravity->lat_map[ilat1]; xinter_lat[2] = Gravity->lat_map[ilat2];
+    }
+      else{
+	xinter_lat[0] = Gravity->lat_map[ilat0]; xinter_lat[1] = Gravity->lat_map[ilat1]; xinter_lat[2] = Gravity->lat_map[ilat2]; xinter_lat[3] = Gravity->lat_map[ilat3];
+      }
+
+      // xinter_radius
+      if ((rmag < Gravity->min_radius_map) || (rmag >= Gravity->max_radius_map + Gravity->dradius_map)){ // all iradius the same
+      xinter_radius[0] = Gravity->radius_map[iradius0];
+    }
+    else if ((rmag < Gravity->min_radius_map+Gravity->dradius_map) && (rmag >= Gravity->min_radius_map)){ // iradius0 = iradius1
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius2]; xinter_radius[2] = Gravity->radius_map[iradius3];
+    }
+    else if ((rmag >= Gravity->max_radius_map) && (rmag < Gravity->max_radius_map + Gravity->dradius_map)){ // iradius2 and 3 = iradius 1
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius1];
+    }
+    else if ((rmag >= Gravity->max_radius_map-Gravity->dradius_map) && (rmag < Gravity->max_radius_map)){ // iradius3 = iradius2
+      xinter_radius[0] = Gravity->radius_map[iradius0]; xinter_radius[1] =  Gravity->radius_map[iradius1]; xinter_radius[2] = Gravity->radius_map[iradius2];
+    }
+    else{
+          xinter_radius[0] = Gravity->radius_map[iradius0];   xinter_radius[1] = Gravity->radius_map[iradius1]; xinter_radius[2] = Gravity->radius_map[iradius2]; xinter_radius[3] = Gravity->radius_map[iradius3];
+    }
+
+  return 0;
 }

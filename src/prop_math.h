@@ -167,4 +167,9 @@ int m_x_v9(  double v_out[9],
 int q_copy(double q_out[4], double q_in[4]);
 
 
+int compute_T_inrtl_2_earth_pres_frame( double T_inrtl_2_earth_pres_frame[3][3],
+					double r[3],
+					double et);
+
+
 #endif

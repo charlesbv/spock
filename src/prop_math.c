@@ -1112,6 +1112,72 @@ int compute_T_inrtl_2_lvlh( double T_inrtl_2_lvlh[3][3],
 }
 
 
+
+
+   /* Inertial to Earth pressure frame. The Earth pressure frame is defined as follow: */
+  /*  Notations: */
+  /* - O center of the Earth */
+  /* - C position of the satellite */
+  /* - H projection of the satellite lcoation on the surface of the Earth (ie sub-satellite point) */
+   /* - S position of the Sun */
+   // - the z vector is the direction OH
+  // - the y vector is the vector in the plane OHS and in the direction of the Sun
+  // - the x vector completes the orthogonal basis
+int compute_T_inrtl_2_earth_pres_frame( double T_inrtl_2_earth_pres_frame[3][3],
+                            double r[3],
+					double et)
+{
+    // Declarations
+  double xep[3], yep[3], zep[3]; // "ep": Earth Pressure frame -> coordiantes of the vectors of the EP frame in the inertial refererence frame
+  double xep_temp[3];
+  double rmag;
+    double x[6];
+  double lt;
+  double r_earth2sun_J2000[3];
+  v_mag(&rmag, r);  	  
+  spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
+  r_earth2sun_J2000[0] = x[0];
+  r_earth2sun_J2000[1] = x[1];
+  r_earth2sun_J2000[2] = x[2];
+  double r_earth2sun_J2000_norm[3];
+  v_norm(r_earth2sun_J2000_norm, r_earth2sun_J2000);
+  v_norm(zep, r);
+  v_cross(xep_temp, zep, r_earth2sun_J2000_norm);
+  double xep_temp_norm[3];
+  v_norm(xep_temp_norm, xep_temp);
+  double yep_temp[3];
+  v_cross(yep_temp, zep, xep_temp_norm);
+  double  cos_yep_temp_earth2sun;
+  v_dot(&cos_yep_temp_earth2sun, yep_temp, r_earth2sun_J2000_norm);
+  if (cos_yep_temp_earth2sun < 0){// we want yep to be in the direction of the Sun.
+    v_scale(yep, yep_temp, -1);
+  }
+  else{
+    v_scale(yep, yep_temp, 1);
+  }
+  v_cross(xep, yep, zep);
+
+  // vecotr completing the orthogonal basis
+    T_inrtl_2_earth_pres_frame[0][0] = xep[0]; 
+    T_inrtl_2_earth_pres_frame[0][1] = xep[1];
+    T_inrtl_2_earth_pres_frame[0][2] = xep[2];
+    
+    // vector in the plane OCS and in the direction of the Sun
+    T_inrtl_2_earth_pres_frame[1][0] = yep[0];
+    T_inrtl_2_earth_pres_frame[1][1] = yep[1];
+    T_inrtl_2_earth_pres_frame[1][2] = yep[2];
+    
+    // vector Earth to satellite
+    T_inrtl_2_earth_pres_frame[2][0] = zep[0]; 
+    T_inrtl_2_earth_pres_frame[2][1] = zep[1]; 
+    T_inrtl_2_earth_pres_frame[2][2] = zep[2]; 
+    
+
+    return 0;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Name:           Compute_T_Inrtl_2_Lvlh
