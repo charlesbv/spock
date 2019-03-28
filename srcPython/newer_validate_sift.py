@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -3138,6 +3137,9 @@ fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox
 
 #itime_netcdf = 100; itime_spock = index_in_spock_date_netcdf_same_dt_output[itime_netcdf]; print date_spock[itime_spock]
 
+
+
+# BEACON PRESENTATION ON MARCH 27 2019 CALLED beacon_spock_yaw.pdf
 nb_date = len(time_diff_prn_all_date)
 time_first_gain_wrong_all_date = []
 time_second_gain_wrong_all_date = []
