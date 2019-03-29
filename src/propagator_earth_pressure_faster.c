@@ -5134,7 +5134,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-    build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+  //    build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
