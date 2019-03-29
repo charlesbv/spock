@@ -1468,14 +1468,14 @@ int compute_dxdt(   double          drdt[3],
   if (INTEGRATOR->include_solar_pressure == 1){
     compute_solar_pressure(a_solar_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
     v_add(dvdt, dvdt , a_solar_pressure_INRTL);
-    //  v_norm_print(a_solar_pressure_INRTL, "\nSun");
+      v_norm_print(a_solar_pressure_INRTL, "\nSun");
   }
 
   /* Earth radiation pressure */
   if (INTEGRATOR->include_earth_pressure == 1){
     if (OPTIONS->opengl != 1){
     compute_earth_pressure(a_earth_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
-    //        v_norm_print(a_earth_pressure_INRTL, "Earth");
+           v_norm_print(a_earth_pressure_INRTL, "Earth");
 
     v_add(dvdt, dvdt , a_earth_pressure_INRTL);
     }
@@ -3623,7 +3623,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
     
   }  // end of no collision with VCM as colllision input file
-  /* v_print(a_earth_pressure_fac, "a_earth_pressure_fac"); */
+  v_print(a_earth_pressure_fac, "a_earth_pressure_fac");
   /*   v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL"); */
   return 0;
 
@@ -5020,30 +5020,30 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
   // for the earth pressure map (the radius maping is the same as for the gravity map)
   // // zenith
-  PARAMS->EARTH.GRAVITY.dzenith_map = 3.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY.dzenith_map = 1.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
   PARAMS->EARTH.GRAVITY.max_zenith_map = 180.;
 
   // // azim and elevation of the Earth element (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_elt_map = 5.;
+  PARAMS->EARTH.GRAVITY.dazim_elt_map = 1.;
   PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
   
-  PARAMS->EARTH.GRAVITY.delev_elt_map = 3.;
+  PARAMS->EARTH.GRAVITY.delev_elt_map = 1.;
   PARAMS->EARTH.GRAVITY.min_elev_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_elev_elt_map = acos(PARAMS->EARTH.radius/PARAMS->EARTH.GRAVITY.max_radius_map) * 180./M_PI;
 
   // // azim and elevation of the surface normal vector (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_surf_map = 5.;
+  PARAMS->EARTH.GRAVITY.dazim_surf_map = 1.;
   PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
 
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 3.;
+  PARAMS->EARTH.GRAVITY.delev_surf_map = 1.;
   PARAMS->EARTH.GRAVITY.min_elev_surf_map = PARAMS->EARTH.GRAVITY.max_elev_elt_map; // any surface which elev_surf_map lower than this value won't see any Earth element
   PARAMS->EARTH.GRAVITY.max_elev_surf_map = 180;
 
     PARAMS->EARTH.GRAVITY.nzenith_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_zenith_map - PARAMS->EARTH.GRAVITY.min_zenith_map)/PARAMS->EARTH.GRAVITY.dzenith_map)) + 1;
-        PARAMS->EARTH.GRAVITY.nazim_elt_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_azim_elt_map - PARAMS->EARTH.GRAVITY.min_azim_elt_map)/PARAMS->EARTH.GRAVITY.dazim_elt_map)) + 1;
+    PARAMS->EARTH.GRAVITY.nazim_elt_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_azim_elt_map - PARAMS->EARTH.GRAVITY.min_azim_elt_map)/PARAMS->EARTH.GRAVITY.dazim_elt_map)); //not +1 here because we wawnt to exlude 360 otherwise the pressure from the elemetn at 0 deg and the element at 360 deg are both counted, while they correspond to a single and same element
         PARAMS->EARTH.GRAVITY.nelev_elt_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_elev_elt_map - PARAMS->EARTH.GRAVITY.min_elev_elt_map)/PARAMS->EARTH.GRAVITY.delev_elt_map)) + 1;
         PARAMS->EARTH.GRAVITY.nazim_surf_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_azim_surf_map - PARAMS->EARTH.GRAVITY.min_azim_surf_map)/PARAMS->EARTH.GRAVITY.dazim_surf_map)) + 1;
         PARAMS->EARTH.GRAVITY.nelev_surf_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_elev_surf_map - PARAMS->EARTH.GRAVITY.min_elev_surf_map)/PARAMS->EARTH.GRAVITY.delev_surf_map)) + 1;
@@ -5102,7 +5102,6 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
 
   if (earth_pressure == 1){
-
   char text[200];
   strcpy(text, "");
   strcpy(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "earthPres");
@@ -5135,7 +5134,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-  build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+    build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
@@ -6141,6 +6140,7 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
   double mp, elt_area;
   int ccc= 0;
   double a_earth_pressure_fac[3];
+    double a_earth_pressure_fac_ir[3];
   double nvec[3];
   	  double cm[3], oc[3], om[3];
 	  double cos_nvec_cm, cm_mag;
@@ -6220,6 +6220,8 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	    delev_surf =  Gravity->delev_surf_map;
 	    elev_surf = min_elev_surf + ielev_surf * delev_surf             ;
 	  }
+
+	  elev_surf = -180;//!!!!!!!!!!!!!!!!!!! remove line
 	  elev_surf = elev_surf * M_PI / 180.;
 	for (iazim_surf = 0; iazim_surf < nazim_surf; iazim_surf++){ // go over all "azimuth" of satellite normal vector. See the definition of this "azimuth" in comments a bit below
 
@@ -6236,7 +6238,10 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	  // the "elevation" of the satellite normal vector is the angle between nvec and CO (direction satellite to center of the Earth, ie -z direction where z has been previously defined)
 
 	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;
-	  
+	  a_earth_pressure_fac_ir[0] = 0; a_earth_pressure_fac_ir[1] = 0; a_earth_pressure_fac_ir[2] = 0;
+	  double om_sum[3], cm_sum[3];
+	  om_sum[0] = 0; om_sum[1] = 0; om_sum[2] = 0;
+	  cm_sum[0] = 0; cm_sum[1] = 0; cm_sum[2] = 0;
 	for (ielev_elt = 0; ielev_elt < nelev_elt; ielev_elt++){ // go over all "elevations" of Earth element. See the definition of this "elevation" in comments a bit below
 	  if (ielev_elt == nelev_elt - 1){
 	    delev_elt = max_elev_elt - (min_elev_elt + (nelev_elt - 2)*Gravity->delev_elt_map);//not used 
@@ -6248,14 +6253,15 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	  }
 	  elev_elt = elev_elt * M_PI / 180.;
 	for (iazim_elt = 0; iazim_elt < nazim_elt; iazim_elt++){ // go over all "azimuth" of Earth element. See the definition of this "azimuth" in comments a bit below
-	  if (iazim_elt == nazim_elt - 1){
-	    dazim_elt = max_azim_elt - (min_azim_elt + (nazim_elt - 2)*Gravity->dazim_elt_map);//not used 
-	    azim_elt = max_azim_elt;
-	  }
-	  else{
+	  // COMMENT block below because we wawnt to exlude 360 otherwise the pressure from the elemetn at 0 deg and the element at 360 deg are both counted, while they correspond to a single and same element
+	  /* if (iazim_elt == nazim_elt - 1){ */
+	  /*   dazim_elt = max_azim_elt - (min_azim_elt + (nazim_elt - 2)*Gravity->dazim_elt_map);//not used  */
+	  /*   azim_elt = max_azim_elt; */
+	  /* } */
+	  /* else{ */
 	    dazim_elt =  Gravity->dazim_elt_map;
 	    azim_elt = min_azim_elt + iazim_elt * dazim_elt             ;
-	  }
+	    //	  }
 	  azim_elt = azim_elt * M_PI / 180.;
 	  nvec[0] = sin(elev_surf) * cos (azim_surf);
 	  nvec[1] = sin(elev_surf) * sin (azim_surf);
@@ -6281,6 +6287,8 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	  oc[0] = 0; oc[1] = 0; oc[2] = radius; // by definiton of the reference frame (see comments at the beginning of the script), the satellite (C) is along the z direction
 	  v_scale(om, om_norm, Gravity->radius); // assume spherical Earth
 	  v_sub(cm, om, oc);
+	  v_add(om_sum, om_sum, om);
+	  v_add(cm_sum, cm_sum, cm);
 	  v_mag(&cm_mag, cm);
 	  v_dot(&cos_nvec_cm, cm, nvec);
 	  cos_nvec_cm = cos_nvec_cm  / cm_mag;
@@ -6295,7 +6303,11 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 	    a_earth_pressure_fac[0] = a_earth_pressure_fac[0] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[0] / cm_mag;
 	    a_earth_pressure_fac[1] = a_earth_pressure_fac[1] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[1] / cm_mag;
 	    a_earth_pressure_fac[2] = a_earth_pressure_fac[2] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[2] / cm_mag;
-	    
+
+	    	    a_earth_pressure_fac_ir[0] = a_earth_pressure_fac_ir[0] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[0] / cm_mag;
+	    a_earth_pressure_fac_ir[1] = a_earth_pressure_fac_ir[1] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[1] / cm_mag;
+	    a_earth_pressure_fac_ir[2] = a_earth_pressure_fac_ir[2] + 0.25 * emiss * cos_nvec_cm * elt_area / (M_PI * cm_mag * cm_mag) * cm[2] / cm_mag;
+
 	  } // end of if the satellite surface sees the Earth element  
 	} // go over all azimuth of Earth element	
 	
@@ -6303,8 +6315,7 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
 		  	fwrite(&(a_earth_pressure_fac[0]), sizeof(a_earth_pressure_fac[0]), 1, Gravity->file_earth_pressure_map);
 		fwrite(&(a_earth_pressure_fac[1]), sizeof(a_earth_pressure_fac[1]), 1, Gravity->file_earth_pressure_map);
 		fwrite(&(a_earth_pressure_fac[2]), sizeof(a_earth_pressure_fac[2]), 1, Gravity->file_earth_pressure_map); 
-
-
+		//		v_print(a_earth_pressure_fac_ir, "a_earth_pressure_fac_ir");// should be only along the 3rd coordinate since the IR pressure is purely radial
 	} // go over all azimuth of satellite normal vector
 
 	} // go over all elevation of satellite normal vector
