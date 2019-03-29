@@ -5134,7 +5134,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-     build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+  //     build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
@@ -6187,6 +6187,7 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
     double zenith_elt, cos_zenith_elt;
 
     //		    printf("nradius %d, nzenith %d, nelev_surf %d, nazim_surf %d, nelev_elt %d, nazim_elt %d | max elt %f %f | total size %.1fM\n", nradius, nzenith, nelev_surf, nazim_surf, nelev_elt, nazim_elt, Gravity->max_elev_elt_map, Gravity->max_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*4./1024./1024.);
+    		    printf("nradius %d, nzenith %d, nelev_surf %d, nazim_surf %d, nelev_elt %d, nazim_elt %d | max elt %f %f | total size %.1fM\n", nradius, nzenith, nelev_surf, nazim_surf, nelev_elt, nazim_elt, Gravity->max_elev_elt_map, Gravity->max_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*8./1024./1024.);
     		    printf("Map: max elevation elt %.1f, min elevation surface normal %.1f | total size %.1fM\n",  Gravity->max_elev_elt_map, Gravity->min_elev_surf_map, nradius*nzenith*nelev_surf*nazim_surf*3*4./1024./1024.);
   Gravity->file_earth_pressure_map = fopen(Gravity->filename_earth_pressure_map, "wb");		    
     for (iradius = 0; iradius < nradius; iradius++){ // go over radii (distance center of the Earth to satellite)
