@@ -2645,9 +2645,13 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
+          double a_earth_pressure_fac_per_surf[3];
+          double a_earth_pressure_fac_temp[3];
+	  a_earth_pressure_fac_temp[0] = 0; a_earth_pressure_fac_temp[1] = 0; a_earth_pressure_fac_temp[2] = 0;   
           double a_earth_pressure_fac[3];
 	  a_earth_pressure_fac[0] = 0; a_earth_pressure_fac[1] = 0; a_earth_pressure_fac[2] = 0;   
-  int ii;
+
+	  int ii;
   		// radius0 zenith0
   double y_radius0_zenith0_elev_surf0_azim_surf0, y_radius0_zenith0_elev_surf0_azim_surf1, y_radius0_zenith0_elev_surf0_azim_surf2, y_radius0_zenith0_elev_surf0_azim_surf3, y_radius0_zenith0_elev_surf0;
     double y_radius0_zenith0_elev_surf1_azim_surf0, y_radius0_zenith0_elev_surf1_azim_surf1, y_radius0_zenith0_elev_surf1_azim_surf2, y_radius0_zenith0_elev_surf1_azim_surf3, y_radius0_zenith0_elev_surf1;
@@ -2890,23 +2894,24 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   zenith_sc = acos(cos_zenith_sc); // doesn't matter if get +-zenith angle
   if (INTEGRATOR->coll_vcm != 1){
       compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
-      double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
+      double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf_temp[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
       double T_lvlh_to_inrtl[3][3];
+      double T_inrtl_2_earth_pres_frame[3][3];
+      double T_earth_pres_frame_2_inrtl[3][3];
+      compute_T_inrtl_2_earth_pres_frame( T_inrtl_2_earth_pres_frame, r_i2cg_INRTL, et);
+      m_trans(T_earth_pres_frame_2_inrtl, T_inrtl_2_earth_pres_frame);
+      compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
+      m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
       for (sss = 0; sss < 1; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
-	      cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
+	a_earth_pressure_fac_per_surf[0] = 0; a_earth_pressure_fac_per_surf[1] = 0; a_earth_pressure_fac_per_surf[2] = 0;   
+	cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
     	m_x_v(sc_normal_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[sss].normal);
-	compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
-	m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
 	m_x_v(sc_normal_eci, T_lvlh_to_inrtl, sc_normal_lvlh);
-	double T_inrtl_2_earth_pres_frame[3][3];
-	compute_T_inrtl_2_earth_pres_frame( T_inrtl_2_earth_pres_frame, r_i2cg_INRTL, et);
-	m_x_v(sc_normal_epf, T_inrtl_2_earth_pres_frame, sc_normal_eci);
+	m_x_v(sc_normal_epf_temp, T_inrtl_2_earth_pres_frame, sc_normal_eci);
+	v_norm(sc_normal_epf, sc_normal_epf_temp);// if sc_normal_epf has a norm not exactly equal to 1 then the acos right below can return nan (for example acos(-1.00000001) = nan)
 	double elev_surf, azim_surf;
 	elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180 
 	azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
-
-
-    
 	int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
 	int iradius0, iradius1, iradius2, iradius3;
         int izenith0, izenith1, izenith2, izenith3;
@@ -2936,7 +2941,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
 
 	if (elev_surf*180/M_PI >= PARAMS->EARTH.GRAVITY.min_elev_surf_map){ // otherwise the surface doesn't see any part of the Earthzenith
-	  
+
 	  // Determine the x bins (radius, zenith, elev_surf, azim_surf) for the interpolations
 	  earth_pressure_map_xinter(xinter_radius, xinter_zenith, xinter_elev_surf, xinter_azim_surf, radius_sc, zenith_sc, elev_surf, azim_surf_corr, &PARAMS->EARTH.GRAVITY, iradius_arr, izenith_arr, ielev_surf_arr, iazim_surf_arr);
 
@@ -3581,23 +3586,16 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       // END OF GIANT BLOCK      
       // Interpo over radius. function gravity_map_yinter_radius is used because it has the same purpose here
       gravity_map_yinter_radius( yinter, &order_interpo_map,  radius_sc, &PARAMS->EARTH.GRAVITY,  y_radius0,  y_radius1,  y_radius2,  y_radius3);
-	// Interpolate dUdr, Dudlat, DUdlong
+	// Interpolate a_pressure_fac 
     if (ii == 0){
-      // dUdr = y_radius2*xradius + y_radius1*(1-xradius);
-
-
-      polynomial_interpo(&a_pressure_epf[0], order_interpo_map, xinter_radius, yinter, rmag);
+      polynomial_interpo(&a_earth_pressure_fac_temp[0], order_interpo_map, xinter_radius, yinter, radius_sc);
     }
     else if (ii == 1){
-      //      dUdlat = y_radius2*xradius + y_radius1*(1-xradius);
-      polynomial_interpo(&dUdlat, order_interpo_map, xinter_radius, yinter, rmag);    
+      polynomial_interpo(&a_earth_pressure_fac_temp[1], order_interpo_map, xinter_radius, yinter, radius_sc);
     }
     else{
-      //      dUdlong = y_radius2*xradius + y_radius1*(1-xradius);
-
-      polynomial_interpo(&dUdlong, order_interpo_map, xinter_radius, yinter, rmag);    
+      polynomial_interpo(&a_earth_pressure_fac_temp[2], order_interpo_map, xinter_radius, yinter, radius_sc);
     }
-
 
       
     }
@@ -3607,22 +3605,26 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	/* printf("elev_surf %.0f %.0f %.2f %.0f %.0f\n", xinter_elev_surf[0], xinter_elev_surf[1], elev_surf*180/M_PI, xinter_elev_surf[2], xinter_elev_surf[3]); */
 	/* printf("azim_surf %.0f %.0f %.2f %.0f %.0f\n", xinter_azim_surf[0], xinter_azim_surf[1], azim_surf_corr*180/M_PI, xinter_azim_surf[2], xinter_azim_surf[3]); */
 
-
-		
+    // a_earth_pressure_fac_temp is in unit of km^(-1), INTEGRATOR->surface[sss].area is km^2 so a_earth_pressure_fac_temp * INTEGRATOR->surface[sss].area is in km. prad is in N/m2 so convert a_earth_pressure_fac_temp * INTEGRATOR->surface[sss].area in m -> * 1000 in expresssion below
+    v_scale(a_earth_pressure_fac_per_surf,  a_earth_pressure_fac_temp, prad * cr * INTEGRATOR->surface[sss].area * 1000. / INTEGRATOR->mass);
 	}
 	//    Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]
 
 	//    printf("%d: elev %f, azim %f\n",sss,elev_surf*180/M_PI, azim_surf*180/M_PI);
 	//  v_print(sc_normal_epf, "sc_normal_epf");
+      a_earth_pressure_fac[0] = a_earth_pressure_fac[0] + a_earth_pressure_fac_per_surf[0];
+      a_earth_pressure_fac[1] = a_earth_pressure_fac[1] + a_earth_pressure_fac_per_surf[1];
+      a_earth_pressure_fac[2] = a_earth_pressure_fac[2] + a_earth_pressure_fac_per_surf[2];
       }
 
-  	
+      m_x_v(a_earth_pressure_INRTL, T_earth_pres_frame_2_inrtl, a_earth_pressure_fac);
       //	  v_dot(&cos_phi, r_earth_elt_body_norm, INTEGRATOR->surface[sss].normal);
 
       //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
     
   }  // end of no collision with VCM as colllision input file
-
+  /* v_print(a_earth_pressure_fac, "a_earth_pressure_fac"); */
+  /*   v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL"); */
   return 0;
 
 }
@@ -5027,7 +5029,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
   
-  PARAMS->EARTH.GRAVITY.delev_elt_map = 30.;
+  PARAMS->EARTH.GRAVITY.delev_elt_map = 5.;
   PARAMS->EARTH.GRAVITY.min_elev_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_elev_elt_map = acos(PARAMS->EARTH.radius/PARAMS->EARTH.GRAVITY.max_radius_map) * 180./M_PI;
 
@@ -5036,7 +5038,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
 
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 30.;
+  PARAMS->EARTH.GRAVITY.delev_surf_map = 5.;
   PARAMS->EARTH.GRAVITY.min_elev_surf_map = PARAMS->EARTH.GRAVITY.max_elev_elt_map; // any surface which elev_surf_map lower than this value won't see any Earth element
   PARAMS->EARTH.GRAVITY.max_elev_surf_map = 180;
 
@@ -5104,8 +5106,6 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   char text[200];
   strcpy(text, "");
   strcpy(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "earthPres");
-  sprintf(text, "%d", degree);
-  strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_alt");
   sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.min_radius_map-PARAMS->EARTH.GRAVITY.radius);
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
