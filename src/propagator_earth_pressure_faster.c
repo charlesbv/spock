@@ -5020,25 +5020,25 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
   // for the earth pressure map (the radius maping is the same as for the gravity map)
   // // zenith
-  PARAMS->EARTH.GRAVITY.dzenith_map = 1.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY.dzenith_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
   PARAMS->EARTH.GRAVITY.max_zenith_map = 180.;
 
   // // azim and elevation of the Earth element (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_elt_map = 1.;
+  PARAMS->EARTH.GRAVITY.dazim_elt_map = 10.;
   PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
   
-  PARAMS->EARTH.GRAVITY.delev_elt_map = 1.;
+  PARAMS->EARTH.GRAVITY.delev_elt_map = 10.;
   PARAMS->EARTH.GRAVITY.min_elev_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_elev_elt_map = acos(PARAMS->EARTH.radius/PARAMS->EARTH.GRAVITY.max_radius_map) * 180./M_PI;
 
   // // azim and elevation of the surface normal vector (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_surf_map = 1.;
+  PARAMS->EARTH.GRAVITY.dazim_surf_map = 10.;
   PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
 
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 1.;
+  PARAMS->EARTH.GRAVITY.delev_surf_map = 10.;
   PARAMS->EARTH.GRAVITY.min_elev_surf_map = PARAMS->EARTH.GRAVITY.max_elev_elt_map; // any surface which elev_surf_map lower than this value won't see any Earth element
   PARAMS->EARTH.GRAVITY.max_elev_surf_map = 180;
 
@@ -5134,7 +5134,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-  //    build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+     build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
