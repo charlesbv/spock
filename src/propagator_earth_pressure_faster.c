@@ -2645,6 +2645,14 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 
 
   // Declarations
+  	double elev_surf, azim_surf;
+	int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
+	int iradius0, iradius1, iradius2, iradius3;
+        int izenith0, izenith1, izenith2, izenith3;
+	int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
+        int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
+	double azim_surf_corr;
+
           double a_earth_pressure_fac_per_surf[3];
           double a_earth_pressure_fac_temp[3];
 	  a_earth_pressure_fac_temp[0] = 0; a_earth_pressure_fac_temp[1] = 0; a_earth_pressure_fac_temp[2] = 0;   
@@ -2902,22 +2910,18 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       m_trans(T_earth_pres_frame_2_inrtl, T_inrtl_2_earth_pres_frame);
       compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
       m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
+
       for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
+	
 	a_earth_pressure_fac_per_surf[0] = 0; a_earth_pressure_fac_per_surf[1] = 0; a_earth_pressure_fac_per_surf[2] = 0;   
 	cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
     	m_x_v(sc_normal_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[sss].normal);
 	m_x_v(sc_normal_eci, T_lvlh_to_inrtl, sc_normal_lvlh);
 	m_x_v(sc_normal_epf_temp, T_inrtl_2_earth_pres_frame, sc_normal_eci);
 	v_norm(sc_normal_epf, sc_normal_epf_temp);// if sc_normal_epf has a norm not exactly equal to 1 then the acos right below can return nan (for example acos(-1.00000001) = nan)
-	double elev_surf, azim_surf;
-	elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180 
+	elev_surf = acos(sc_normal_epf[2]); // elev_surf varies from 0 to 180
+	if (elev_surf*180/M_PI >= PARAMS->EARTH.GRAVITY.min_elev_surf_map){ // otherwise the surface doesn't see any part of the Earthzenith
 	azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
-	int iradius_arr[4], iazim_surf_arr[4], izenith_arr[4], ielev_surf_arr[4];
-	int iradius0, iradius1, iradius2, iradius3;
-        int izenith0, izenith1, izenith2, izenith3;
-	int ielev_surf0, ielev_surf1, ielev_surf2, ielev_surf3;
-        int iazim_surf0, iazim_surf1, iazim_surf2, iazim_surf3;
-	double azim_surf_corr;
 	// determine the bin for the radius
 	compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
 	iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
@@ -2940,11 +2944,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	compute_iazim_surf_gravity_map(iazim_surf_arr, &PARAMS->EARTH.GRAVITY, azim_surf_corr);
 	iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
 
-	if (elev_surf*180/M_PI >= PARAMS->EARTH.GRAVITY.min_elev_surf_map){ // otherwise the surface doesn't see any part of the Earthzenith
-
 	  // Determine the x bins (radius, zenith, elev_surf, azim_surf) for the interpolations
 	  earth_pressure_map_xinter(xinter_radius, xinter_zenith, xinter_elev_surf, xinter_azim_surf, radius_sc, zenith_sc, elev_surf, azim_surf_corr, &PARAMS->EARTH.GRAVITY, iradius_arr, izenith_arr, ielev_surf_arr, iazim_surf_arr);
-
 
     // Interpolate over longitude, latitude, and radius
 	  // !!!!-> GIANT BLOCKS FOR EACH RADIUS (RADIUS0, 1, 2,3). All radius block are identical to the block radius0 except that the chracters 'radius0' are replaced by 'radius1' in the block radius1, by 'radius2' in the block radius2, by 'radius3' in the block radius3. Of coures, we could make a funciton but the problem is that we loop over ii, which is the last dimension of PARAMS->EARTH.GRAVITY.earth_pressure_map, whcih makes the function not possible. if ii was the first dimension then we could have factorized in functions easily... This is super ugly but you can move the end of the giant block by looking for "END OF GIANT BLOCK" 
@@ -3608,6 +3609,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
     // a_earth_pressure_fac_temp is in unit of km^(-1), INTEGRATOR->surface[sss].area is km^2 so a_earth_pressure_fac_temp * INTEGRATOR->surface[sss].area is in km. prad is in N/m2 so convert a_earth_pressure_fac_temp * INTEGRATOR->surface[sss].area in m -> * 1000 in expresssion below
     v_scale(a_earth_pressure_fac_per_surf,  a_earth_pressure_fac_temp, prad * cr * INTEGRATOR->surface[sss].area * 1000. / INTEGRATOR->mass);
 	}
+	  
 	//    Gravity->earth_pressure_map[iradius][izenith][ielev_surf][iazim_surf][2]
 
 	//    printf("%d: elev %f, azim %f\n",sss,elev_surf*180/M_PI, azim_surf*180/M_PI);
