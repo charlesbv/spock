@@ -1468,14 +1468,14 @@ int compute_dxdt(   double          drdt[3],
   if (INTEGRATOR->include_solar_pressure == 1){
     compute_solar_pressure(a_solar_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
     v_add(dvdt, dvdt , a_solar_pressure_INRTL);
-      v_norm_print(a_solar_pressure_INRTL, "\nSun");
+    //      v_norm_print(a_solar_pressure_INRTL, "\nSun");
   }
 
   /* Earth radiation pressure */
   if (INTEGRATOR->include_earth_pressure == 1){
     if (OPTIONS->opengl != 1){
     compute_earth_pressure(a_earth_pressure_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, CONSTELLATION, et_initial_epoch, et_sc_initial, index_in_attitude_interpolated);
-           v_norm_print(a_earth_pressure_INRTL, "Earth");
+    //           v_norm_print(a_earth_pressure_INRTL, "Earth");
 
     v_add(dvdt, dvdt , a_earth_pressure_INRTL);
     }
@@ -2902,7 +2902,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       m_trans(T_earth_pres_frame_2_inrtl, T_inrtl_2_earth_pres_frame);
       compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
       m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
-      for (sss = 0; sss < 1; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
+      for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
 	a_earth_pressure_fac_per_surf[0] = 0; a_earth_pressure_fac_per_surf[1] = 0; a_earth_pressure_fac_per_surf[2] = 0;   
 	cr = INTEGRATOR->surface[sss].solar_radiation_coefficient; // shorter notation
     	m_x_v(sc_normal_lvlh, T_sc_to_lvlh, INTEGRATOR->surface[sss].normal);
@@ -3623,7 +3623,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       //	      a_earth_pressure_in_body[0] = a_earth_pressure_in_body[0] - cr * albedo * cos_zenith * prad  * INTEGRATOR->surface[sss].area*1000000. * cos_phi / INTEGRATOR->mass * area_earth_elt / (M_PI * sm * sm) * r_earth_elt_body_norm[0]/ 1000.; // surface[sss].area in km2 -> m2, a   
     
   }  // end of no collision with VCM as colllision input file
-  v_print(a_earth_pressure_fac, "a_earth_pressure_fac");
+  //  v_print(a_earth_pressure_fac, "a_earth_pressure_fac");
   /*   v_norm_print(a_earth_pressure_INRTL, "a_earth_pressure_INRTL"); */
   return 0;
 
@@ -5020,12 +5020,12 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
 
   // for the earth pressure map (the radius maping is the same as for the gravity map)
   // // zenith
-  PARAMS->EARTH.GRAVITY.dzenith_map = 1.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
+  PARAMS->EARTH.GRAVITY.dzenith_map = 3.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
   PARAMS->EARTH.GRAVITY.min_zenith_map = 0;
   PARAMS->EARTH.GRAVITY.max_zenith_map = 180.;
 
   // // azim and elevation of the Earth element (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_elt_map = 1.;
+  PARAMS->EARTH.GRAVITY.dazim_elt_map = 30.;
   PARAMS->EARTH.GRAVITY.min_azim_elt_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_elt_map = 360.;
   
@@ -5034,11 +5034,11 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.max_elev_elt_map = acos(PARAMS->EARTH.radius/PARAMS->EARTH.GRAVITY.max_radius_map) * 180./M_PI;
 
   // // azim and elevation of the surface normal vector (these azim and elev are not technically azimuth or elevation angles but these nominations are used)
-  PARAMS->EARTH.GRAVITY.dazim_surf_map = 1.;
+  PARAMS->EARTH.GRAVITY.dazim_surf_map = 30.;
   PARAMS->EARTH.GRAVITY.min_azim_surf_map = 0;
   PARAMS->EARTH.GRAVITY.max_azim_surf_map = 360.;
 
-  PARAMS->EARTH.GRAVITY.delev_surf_map = 1.;
+  PARAMS->EARTH.GRAVITY.delev_surf_map = 3.;
   PARAMS->EARTH.GRAVITY.min_elev_surf_map = PARAMS->EARTH.GRAVITY.max_elev_elt_map; // any surface which elev_surf_map lower than this value won't see any Earth element
   PARAMS->EARTH.GRAVITY.max_elev_surf_map = 180;
 
@@ -5134,7 +5134,7 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, ".bin");
   printf("Map: <%s>\n", PARAMS->EARTH.GRAVITY.filename_earth_pressure_map);
 
-       build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
+  //      build_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 	read_earth_pressure_map(&(PARAMS->EARTH.GRAVITY), iProc);
 
   }
