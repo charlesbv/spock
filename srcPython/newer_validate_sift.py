@@ -3193,12 +3193,12 @@ print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + 
 print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong, ".2f") 
 
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
-idate = 1
-itime_diff = 100
-duration_diagram = 3. # in minutes
+idate = 2
+itime_diff = 20
+duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
-itime_start = time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
+itime_start = time_first_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
 itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]
                + duration_diagram_sec)[0][0] + 1
 
@@ -3221,7 +3221,7 @@ jet = cm = plt.get_cmap('jet')
 cNorm  = colors.Normalize(vmin=0, vmax=values[-1])
 scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
 
-height_fig = 11.  # the width is calculated as height_fig * 4/3.                                                                             
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25      
 ratio_fig_size = 4./3
 fig_title = ''#Accuracy VS RCG
@@ -3253,29 +3253,48 @@ for itime in range(itime_start, itime_stop):
         prn_netcdf_value = np.where(prn_list_sort == prn_netcdf)[0][0]
         gps_netcdf_value_sub.append(prn_netcdf_value)
         #colorVal = scalarMap.to_rgba(prn_spock_value)
-        if (gain_sort_index[ispec] == 0):
+        if (ispec == gain_sort_index[0]): # top PRN gain
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 80)
-        elif (gain_sort_index[ispec] == 1):
+                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 90)
+        elif (ispec == gain_sort_index[1]): # second to top PRN gain
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 30)
-
+                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
         else:
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.1)            
+                       prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.03, s=20)            
         ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                   prn_netcdf_value + 1.05,  marker = '.', color = 'red')
+                   prn_netcdf_value + 1.05,  marker = '.', color = 'red', s=20)
 
     gps_spock_value.append(gps_spock_value_sub)
     gps_netcdf_value.append(gps_netcdf_value_sub)
 
-istart_second = np.where(np.array(time_second_gain_wrong_all_date[idate]) >= itime_start)[0][0]
-istop_second = np.where(np.array(time_second_gain_wrong_all_date[idate]) <= itime_stop)[0][-1]
-ax.scatter()
+istart_second_temp = np.where(np.array(time_second_gain_wrong_all_date[idate]) >= itime_start)[0]
+if len(istart_second_temp) > 0:
+    istart_second = istart_second_temp[0]
+istop_second_temp = np.where(np.array(time_second_gain_wrong_all_date[idate]) <= itime_stop)[0]
+if len(istop_second_temp) > 0:
+    istop_second = istop_second_temp[-1]+1
+if ((len(istart_second_temp) > 0) & (len(istop_second_temp) > 0)):
+    ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][time_second_gain_wrong_all_date[idate][istart_second:istop_second]]-
+                nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+               np.zeros([istop_second - istart_second]), color= 'black', marker = '.',  s = 20)
+    ax.text(0,0,'2nd wrong: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+istart_first_temp = np.where(np.array(time_first_gain_wrong_all_date[idate]) >= itime_start)[0]
+if len(istart_first_temp) > 0:
+    istart_first = istart_first_temp[0]
+istop_first_temp = np.where(np.array(time_first_gain_wrong_all_date[idate]) <= itime_stop)[0]
+if len(istop_first_temp) > 0:
+    istop_first = istop_first_temp[-1]+1
+if ((len(istart_first_temp) > 0) & (len(istop_first_temp) > 0)):
+    ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_gain_wrong_all_date[idate][istart_first:istop_first]]-
+                nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+               np.zeros([istop_first - istart_first])+0.35, color= 'black',  marker = '.', s = 20)
+ax.text(0,0.35,'Top wrong: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+
 ax.yaxis.set_ticks(np.arange(1, nprn+1))
 ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
 ax.margins(0,0)
-ax.set_ylim([0, nprn+1])
+ax.set_ylim([-0.25, nprn+0.5])
 fig_save_name = '/Users/cbv/test.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
