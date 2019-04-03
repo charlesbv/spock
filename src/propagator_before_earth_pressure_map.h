@@ -59,44 +59,12 @@ typedef struct {
   int nlat_map;
   int nlon_map;
   int nradius_map;
-  
-    double dzenith_map; // size of zenith bins for the map (in km);
-    int nzenith_map;
-    double max_zenith_map; // max zenith for the map
-  double min_zenith_map;
-    double delev_elt_map; // size of elev_elt bins for the map (in km);
-    int nelev_elt_map;
-    double max_elev_elt_map; // max elev_elt for the map
-  double min_elev_elt_map;
-    double dazim_elt_map; // size of azim_elt bins for the map (in km);
-    int nazim_elt_map;
-    double max_azim_elt_map; // max azim_elt for the map
-  double min_azim_elt_map;
-
-    double delev_surf_map; // size of elev_surf bins for the map (in km);
-    int nelev_surf_map;
-    double max_elev_surf_map; // max elev_surf for the map
-  double min_elev_surf_map;
-    double dazim_surf_map; // size of azim_surf bins for the map (in km);
-    int nazim_surf_map;
-    double max_azim_surf_map; // max azim_surf for the map
-  double min_azim_surf_map;
-
-  
   double ****gravity_map;
-  double *****earth_pressure_map;
   double *radius_map;
   double *lat_map;
   double *lon_map;
-
-  double *zenith_map;
-  double *elev_surf_map;
-  double *azim_surf_map;
   FILE *file_gravity_map;
     char filename_gravity_map[200];
-  FILE *file_earth_pressure_map;
-    char filename_earth_pressure_map[200];
-
 }  GRAVITY_T;
 
 typedef struct {
@@ -475,7 +443,7 @@ int compute_gravity(    double      a_i2cg_INRTL[3],
 	
 //newstructure 		
 //int load_params( PARAMS_T *PARAMS, char main_directory_location[256], int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc);
-int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use, int earth_pressure);
+int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100] , double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use);
 //newstructure 
 
 int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
@@ -551,29 +519,6 @@ int calculate_cd_opengl(double *cd,
 double factorial(unsigned long f);
 int build_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
 int read_gravity_map(GRAVITY_T  *Gravity, int degree,  int iProc);
-int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc);
-int read_earth_pressure_map(GRAVITY_T  *Gravity, int iProc);
-
 double compute_earth_albedo();
 double compute_earth_emissivity();
-int polynomial_interpo(double *val, int  n, double *x, double *y, double to_inter);
-int compute_iradius_gravity_map(int iradius_arr[2], GRAVITY_T *Gravity, double rmag);
-int compute_ilat_gravity_map(int ilat_arr[4], GRAVITY_T *Gravity, double lat_gc);
-int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double lon_gc_corr);
-int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr);
-int compute_izenith_gravity_map(int izenith_arr[4], GRAVITY_T *Gravity, double zenith);
-int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, double elev_surf);
-int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3);
-int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double y_radius0, double y_radius1, double y_radius2, double y_radius3);
-
-int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity,
-		       int *ilon_arr, int *ilat_arr, int *iradius_arr);
-int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_gc_corr, GRAVITY_T *Gravity, double y_lon0, double y_lon1, double y_lon2, double y_lon3);
-
-
-int earth_pressure_map_yinter_azim_surf(double **yinter, int *order_interpo_map, double azim_surf_corr, GRAVITY_T *Gravity, double **y_az, int iazim_surf_arr[4]);
-int earth_pressure_map_yinter_elev_surf(double **yinter, int *order_interpo_map, double elev_surf, GRAVITY_T *Gravity, double **y_el);
-int earth_pressure_map_yinter_zenith(double **yinter, int *order_interpo_map, double zenith, GRAVITY_T *Gravity, double **y_zen);
-int polynomial_interpo_earth(double *val, int n, double *x, double **y, double to_inter);
-int gravity_map_yinter_radius_earth(double **yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double **y_rad);
-int earth_pressure_map_xinter_radius_zenith(double *xinter_radius, double *xinter_zenith, double rmag, double zenith, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr);
+int polynomial_interpo(int printVar, double *val, int  n, double *x, double *y, double to_inter);

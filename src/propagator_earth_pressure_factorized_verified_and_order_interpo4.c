@@ -2808,10 +2808,6 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
       m_trans(T_earth_pres_frame_2_inrtl, T_inrtl_2_earth_pres_frame);
       compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
       m_trans(T_lvlh_to_inrtl, T_inrtl_2_lvlh);
-	// determine the bin for the radius
-	compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
-	// determine the bin for the zenith
-	compute_izenith_gravity_map(izenith_arr, &PARAMS->EARTH.GRAVITY, zenith_sc);
 
       for (sss = 0; sss < INTEGRATOR->nb_surfaces; sss++){// !!!!! < INTEGRATOR->nb_surfaces; sss++){
 	
@@ -2825,8 +2821,18 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	if (elev_surf*180/M_PI >= PARAMS->EARTH.GRAVITY.min_elev_surf_map){ // otherwise the surface doesn't see any part of the Earthzenith
 
 	azim_surf = atan2(sc_normal_epf[1], sc_normal_epf[0]);
+	// determine the bin for the radius
+	compute_iradius_gravity_map(iradius_arr, &PARAMS->EARTH.GRAVITY, radius_sc);
+	iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
+
+	// determine the bin for the zenith
+	compute_izenith_gravity_map(izenith_arr, &PARAMS->EARTH.GRAVITY, zenith_sc);
+	izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
+
 	// determine the bin for the elevation of the normal of the surface
 	compute_ielev_surf_gravity_map(ielev_surf_arr, &PARAMS->EARTH.GRAVITY, elev_surf);
+	ielev_surf0 = ielev_surf_arr[0]; ielev_surf1 = ielev_surf_arr[1]; ielev_surf2 = ielev_surf_arr[2]; ielev_surf3 = ielev_surf_arr[3];
+
 	// determine the bin for the azimuth of the normal of the surface
 	if (azim_surf >= 0){ // azim_surf_corr varies from 0 to 2*M_PI
 	  azim_surf_corr = azim_surf;
@@ -2835,6 +2841,8 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
 	  azim_surf_corr = 2*M_PI + azim_surf;
 	}    
 	compute_iazim_surf_gravity_map(iazim_surf_arr, &PARAMS->EARTH.GRAVITY, azim_surf_corr);
+	iazim_surf0 = iazim_surf_arr[0]; iazim_surf1 = iazim_surf_arr[1]; iazim_surf2 = iazim_surf_arr[2]; iazim_surf3 = iazim_surf_arr[3];
+
 	// Determine the x bins (radius, zenith, elev_surf, azim_surf) for the interpolations
 	earth_pressure_map_xinter(xinter_radius, xinter_zenith, xinter_elev_surf, xinter_azim_surf, radius_sc, zenith_sc, elev_surf, azim_surf_corr, &PARAMS->EARTH.GRAVITY, iradius_arr, izenith_arr, ielev_surf_arr, iazim_surf_arr);
 
@@ -6616,7 +6624,7 @@ int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rma
 }
 
 
-int earth_pressure_map_xinter_elev_azim_surf(double *xinter_radius, double *xinter_zenith, double *xinter_elev_surf, double *xinter_azim_surf, double rmag, double zenith, double elev_surf, double azim_surf_corr, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr, int *ielev_surf_arr, int *iazim_surf_arr)
+int earth_pressure_map_xinter(double *xinter_radius, double *xinter_zenith, double *xinter_elev_surf, double *xinter_azim_surf, double rmag, double zenith, double elev_surf, double azim_surf_corr, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr, int *ielev_surf_arr, int *iazim_surf_arr)
 	  {
   
   int iradius1, iradius2, iradius3, iradius0;
@@ -6685,46 +6693,6 @@ int earth_pressure_map_xinter_elev_azim_surf(double *xinter_radius, double *xint
 
   return 0;
 }
-
-int earth_pressure_map_xinter_radius_zenith(double *xinter_radius, double *xinter_zenith, int *iradius_arr, int *izenith_arr, double rmag, double zenith, GRAVITY_T *Gravity);
-	  {
-  
-  int iradius1, iradius2, iradius3, iradius0;
-  int izenith0, izenith1, izenith2, izenith3;
-  iradius0 = iradius_arr[0]; iradius1 = iradius_arr[1]; iradius2 = iradius_arr[2]; iradius3 = iradius_arr[3];
-  izenith0 = izenith_arr[0]; izenith1 = izenith_arr[1]; izenith2 = izenith_arr[2]; izenith3 = izenith_arr[3];
-      // xinter_zenith
-      if ((zenith*180/M_PI < Gravity->min_zenith_map + Gravity->dzenith_map) && (zenith*180/M_PI >= Gravity->min_zenith_map)){ // izenith1 = izenith0
-	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith2]; xinter_zenith[2] =  Gravity->zenith_map[izenith3];
-      }
-      else if ( (zenith*180/M_PI >= Gravity->max_zenith_map-Gravity->dzenith_map) && (zenith*180/M_PI < Gravity->max_zenith_map)){ // izenith3 =izenith2
-	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith1]; xinter_zenith[2] = Gravity->zenith_map[izenith2];
-    }
-      else{
-	xinter_zenith[0] = Gravity->zenith_map[izenith0]; xinter_zenith[1] = Gravity->zenith_map[izenith1]; xinter_zenith[2] = Gravity->zenith_map[izenith2]; xinter_zenith[3] = Gravity->zenith_map[izenith3];
-      }
-
-      
-      // xinter_radius
-      if (rmag < Gravity->min_radius_map){
-	iradius0 = 0;
-	xinter_radius[0] = Gravity->radius_map[iradius0];
-      }
-      else if (rmag >= Gravity->max_radius_map){ 
-	iradius0 = Gravity->nradius_map - 1;
-	xinter_radius[0] = Gravity->radius_map[iradius0];
-      }
-
-    else{
-            iradius1 = (int)(( rmag - Gravity->min_radius_map ) / Gravity->dradius_map);
-	    iradius0 = iradius1 - 1;
-
-          xinter_radius[0] = Gravity->radius_map[iradius0];   xinter_radius[1] = Gravity->radius_map[iradius1]; 
-    }
-    iradius_arr[0] = iradius0; iradius_arr[1] = iradius1;
-  return 0;
-}
-
 
 int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity,
 		       int *ilon_arr, int *ilat_arr, int *iradius_arr){
