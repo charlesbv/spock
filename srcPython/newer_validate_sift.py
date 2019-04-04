@@ -396,7 +396,6 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     date_flight_date_rounded = datetime.strptime(date_flight_temp.split('.')[0], "%Y-%m-%dT%H:%M:%S" )
                 else: #if time can't be rounded by less than 100 ms
                     time_remove = 1
-
                 # only select times in netcdf that are also date of SpOCK output (SpOCK output as specified in main input  file, not output imes of spec (these are very second))
                     #print np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ), date_flight_date_rounded, date_flight_temp_date
                 #dt_spock_output = 1.; date_spock_not_interpolated = date_spock # !!!!!!!!!!!!!!!! remove line
@@ -3193,12 +3192,12 @@ print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + 
 print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong, ".2f") 
 
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
-idate = 2
+idate = 1
 itime_diff = 20
 duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
-itime_start = time_first_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
+itime_start = time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
 itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]
                + duration_diagram_sec)[0][0] + 1
 
@@ -3261,7 +3260,7 @@ for itime in range(itime_start, itime_stop):
                        prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
         else:
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.03, s=20)            
+                       prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
         ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
                    prn_netcdf_value + 1.05,  marker = '.', color = 'red', s=20)
 
@@ -3290,6 +3289,11 @@ if ((len(istart_first_temp) > 0) & (len(istop_first_temp) > 0)):
                 nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
                np.zeros([istop_first - istart_first])+0.35, color= 'black',  marker = '.', s = 20)
 ax.text(0,0.35,'Top wrong: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+
+ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
+        [0.6,0.6], linestyle = 'dashed', linewidth = 2, color = 'black')
+ax.text(0,0.6,'-----------------', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+
 
 ax.yaxis.set_ticks(np.arange(1, nprn+1))
 ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
