@@ -1081,12 +1081,14 @@
     }
     else{
       OPTIONS->n_surfaces = 1;
+      OPTIONS->n_surfaces_eff = 1;
     }
 
   }
   else{
     OPTIONS->initialize_geo_with_bstar = 1;
     OPTIONS->n_surfaces = 1;
+        OPTIONS->n_surfaces_eff = 1;
   }
 
   if ( (strcmp(OPTIONS->filename_surface, text_ball_coeff) == 0) && (OPTIONS->solar_cell_efficiency != -1) ){
@@ -4461,7 +4463,11 @@ int load_surface( OPTIONS_T *OPTIONS,
 		  int       nProcs){
 
   /* Declarations */
+
+  double cos_surf;
+  double cos_limit = 0.9998476951563913;
 	double cd_or_acco;
+	int sss, is_surf_eff;
 int found_new_surface;
   double temp_normal[3];
   FILE *fp = NULL;
@@ -4473,7 +4479,7 @@ int found_new_surface;
   char str_len[256];
   size_t len = 0;
   char text[256];
-
+  OPTIONS->n_surfaces_eff = 0;
 
   /* Algorithm */
   // Open geometry file
@@ -4565,6 +4571,28 @@ int found_new_surface;
       v_norm(OPTIONS->surface[surface_counter].normal, temp_normal);// normalize the normal vector in case the user forgot to do so
       getline(&line, &len, fp);
       sscanf( line, "%lf", &OPTIONS->surface[surface_counter].area );
+      // is this surface an effective surface? A surface is effective if its normal is in a  direction that is different from that of all the other effective surfaces
+      sss = 0;
+      is_surf_eff = 1;
+      while (sss < surface_counter){
+	v_dot(&cos_surf, OPTIONS->surface[surface_counter].normal, OPTIONS->surface[sss].normal);
+	if (cos_surf >= cos_limit){ // this means that the directions of the two sirfaces are different by less than acos(cos_limit) degrees, ie that they basically point in the same direction, so surface_counter is not a surface effective
+	  is_surf_eff = 0;
+	  break;
+	}
+	sss = sss + 1;
+      }
+      OPTIONS->surface[surface_counter].ieff = -1;
+      if (is_surf_eff == 1){
+      	  v_copy(OPTIONS->surface_eff[OPTIONS->n_surfaces_eff].normal, OPTIONS->surface[surface_counter].normal);
+	  OPTIONS->surface_eff[OPTIONS->n_surfaces_eff].area = OPTIONS->surface[surface_counter].area;
+	  OPTIONS->surface[surface_counter].ieff = OPTIONS->n_surfaces_eff; // ieff is the index of the first surface that has a particular direction, ie the first surface to be effective in this direction
+	  OPTIONS->n_surfaces_eff = OPTIONS->n_surfaces_eff + 1;
+      }
+      else{
+	  OPTIONS->surface_eff[OPTIONS->surface[sss].ieff].area = OPTIONS->surface_eff[OPTIONS->surface[sss].ieff].area + OPTIONS->surface[surface_counter].area;
+      }
+      
       getline(&line, &len, fp);
       sscanf( line, "%lf", &OPTIONS->surface[surface_counter].area_solar_panel );
       getline(&line, &len, fp);
@@ -4611,6 +4639,12 @@ int found_new_surface;
 
     //  }
 
+  /* printf("%d %f\n", OPTIONS->n_surfaces_eff, OPTIONS->n_surfaces); */
+  /* for (sss = 0; sss < OPTIONS->n_surfaces_eff; sss++){ */
+  /*   printf("normal[%d]: (%f, %f, %f) | total area: %f\n", sss, OPTIONS->surface_eff[sss].normal[0], OPTIONS->surface_eff[sss].normal[1],OPTIONS->surface_eff[sss].normal[2], OPTIONS->surface_eff[sss].area); */
+  /* } */
+  /* exitf(); */
+  
   if (OPTIONS->opengl == 1){
     FILE *fp_opengl;
     fp_opengl = fopen(OPTIONS->filename_area_attitude_opengl, "r");

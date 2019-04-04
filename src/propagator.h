@@ -229,7 +229,7 @@ typedef struct {
   char name_of_surface[100]; // name of the surface
   double power_per_surface; // solar power per area
   double acco_coeff; // accommodation coefficient of surface
-
+  int ieff;
 } SURFACE_T;
 
 // Integrator options
@@ -247,7 +247,9 @@ typedef struct {
   double solar_cell_efficiency;  // Efficiency of the solar cells
   char opengl_filename_solar_power[1000]; // name of file with corners of solar panels, read by opengl
   SURFACE_T surface[N_SURFACES]; // Properties of the surface
+  SURFACE_T surface_eff[N_SURFACES]; // Properties of the surface effective
   double nb_surfaces;            // number of surfaces
+  int nb_surfaces_eff;
   ATTITUDE_T attitude;           // Attitude of the satellite
   double degree;                 // Gravity degree
   double order;                  // Gravity order
@@ -560,20 +562,20 @@ int polynomial_interpo(double *val, int  n, double *x, double *y, double to_inte
 int compute_iradius_gravity_map(int iradius_arr[2], GRAVITY_T *Gravity, double rmag);
 int compute_ilat_gravity_map(int ilat_arr[4], GRAVITY_T *Gravity, double lat_gc);
 int compute_ilon_gravity_map(int ilon_arr[4], GRAVITY_T *Gravity, double lon_gc_corr);
-int compute_iazim_surf_gravity_map(int iazim_surf_arr[4], GRAVITY_T *Gravity, double azim_surf_corr);
-int compute_izenith_gravity_map(int izenith_arr[4], GRAVITY_T *Gravity, double zenith);
-int compute_ielev_surf_gravity_map(int ielev_surf_arr[4], GRAVITY_T *Gravity, double elev_surf);
 int gravity_map_yinter_lat(double *yinter, int *order_interpo_map, double lat_gc, GRAVITY_T *Gravity, double y_lat0, double y_lat1, double y_lat2, double y_lat3);
 int gravity_map_yinter_radius(double *yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double y_radius0, double y_radius1, double y_radius2, double y_radius3);
-
-int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity,
-		       int *ilon_arr, int *ilat_arr, int *iradius_arr);
+int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_radius,  double long_gc_corr, double lat_gc, double rmag, GRAVITY_T *Gravity, int *ilon_arr, int *ilat_arr, int *iradius_arr);
 int gravity_map_yinter_lon(double *yinter, int *order_interpo_map, double long_gc_corr, GRAVITY_T *Gravity, double y_lon0, double y_lon1, double y_lon2, double y_lon3);
 
 
-int earth_pressure_map_yinter_azim_surf(double **yinter, int *order_interpo_map, double azim_surf_corr, GRAVITY_T *Gravity, double **y_az, int iazim_surf_arr[4]);
+
+int compute_iradius_earth_pressure_map(double *xinter_radius, int iradius_arr[2], int *nradius_interpo, GRAVITY_T *Gravity, double rmag);
+int compute_izenith_earth_pressure_map(double *xinter_zenith, int izenith_arr[2], int *nzenith_interpo, GRAVITY_T *Gravity, double zenith);
+int compute_ielev_surf_earth_pressure_map(double *xinter_elev_surf, int ielev_surf_arr[2], int *nelev_interpo, GRAVITY_T *Gravity, double elev_surf);
+int compute_iazim_surf_earth_pressure_map(double *xinter_azim_surf, int iazim_surf_arr[2], int *nazim_interpo, GRAVITY_T *Gravity, double azim_surf_corr);
+
+int earth_pressure_map_yinter_azim_surf(double **yinter, int *order_interpo_map, double azim_surf_corr, GRAVITY_T *Gravity, double **y_az, int iazim_surf_arr[2]);
 int earth_pressure_map_yinter_elev_surf(double **yinter, int *order_interpo_map, double elev_surf, GRAVITY_T *Gravity, double **y_el);
 int earth_pressure_map_yinter_zenith(double **yinter, int *order_interpo_map, double zenith, GRAVITY_T *Gravity, double **y_zen);
-int polynomial_interpo_earth(double *val, int n, double *x, double **y, double to_inter);
 int gravity_map_yinter_radius_earth(double **yinter, int *order_interpo_map, double rmag, GRAVITY_T *Gravity, double **y_rad);
-int earth_pressure_map_xinter_radius_zenith(double *xinter_radius, double *xinter_zenith, double rmag, double zenith, GRAVITY_T *Gravity, int *iradius_arr, int *izenith_arr);
+int polynomial_interpo_earth(double *val, int n, double *x, double **y, double to_inter);

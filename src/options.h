@@ -227,7 +227,9 @@ typedef struct {
   double          mass;           // Mass of spacecraft
   double          solar_cell_efficiency; // Solar cell efficiency
   double             n_surfaces;     // number of surfaces on each satellite (has to be the same number for every satellite...) (CBV 07-29-2015)
+  int n_surfaces_eff;
   SURFACE_T       surface[N_SURFACES]; // Properties of the surface
+  SURFACE_T       surface_eff[N_SURFACES]; // effective surface. a surface is effective if its normal is in a  direction that is different from that of all the other effective surfaces
   double          degree;         // Gravity degree
   double          order;          // Gravity order
   char            leap_sec_file[256]; // SPICE leap seconds file

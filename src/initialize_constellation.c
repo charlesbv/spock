@@ -1548,6 +1548,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	// Integrator
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt            = OPTIONS->dt;
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces   = OPTIONS->n_surfaces;   // Number of surfaces on the SC
+	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces_eff   = OPTIONS->n_surfaces_eff;   // Number of surfaces on the SC
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.mass          = OPTIONS->mass;         // Mass of spacecraft
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency = OPTIONS->solar_cell_efficiency; // Solar cell efficiency
 	strcpy( CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.opengl_filename_solar_power, OPTIONS->opengl_filename_solar_power ); // Solar cell efficiency
@@ -2359,6 +2360,65 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].normal[nnn]         = OPTIONS->surface[sss].normal[nnn];           // normal vector in the SC reference system
 	  }
 	}
+	for (sss = 0; sss < OPTIONS->n_surfaces_eff; sss++){
+
+	  CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].area                  = OPTIONS->surface_eff[sss].area / (1e10);
+
+	  // !!!!!!!!!!!!!!!!!! TO ERASE
+	  /* if (ii == 3 || ii == 7){ */
+	  /*   	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[8].area                  = 5000.0 / (1e10); */
+	  /* } */
+	  // !!!!!!!!!!!!!!!!!! END OF TO ERASE
+
+
+	  /*************************************************************************************/
+	  /*********************** COE AND TLE INITIALIZE: ensembles on Cd *****************************/
+	  /*************************************************************************************/
+	  if (OPTIONS->nb_ensembles_cd > 0){ // if we run ensembles on Cd
+	    if (eee == 0){
+	      CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].Cd = OPTIONS->surface[0].Cd * OPTIONS->cd_modification[ii]; // !!!!!!!!! assumes that for all effective have the same cd
+	    }
+	    else{
+	      CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].Cd = randn( OPTIONS->surface[0].Cd * OPTIONS->cd_modification[ii], OPTIONS->surface[0].Cd_sigma); // !!!!!!!!! assumes that for all effective have the same cd
+	      //	    	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].Cd = OPTIONS->surface[sss].Cd * 2 * eee;  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ERASE THIS LINE AND UNCOMMENT THE PREVIOUS ONE!!!
+	    }
+	
+	  } // end of if we run ensembles on Cd
+	  else{ // if we do not run ensembles on Cd
+	    // new cd
+	    if (OPTIONS->new_cd == 1){
+	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].acco_coeff  = 
+	      OPTIONS->surface[0].acco_coeff;        // !!!!!!!!! assumes that for all effective have the same acco_coeff
+	    }
+	    else{
+
+	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].Cd  =
+	      OPTIONS->surface[0].Cd * OPTIONS->cd_modification[ii];           // Coefficient of drag
+	    }
+	    // end of new cd
+	    // !!!!!!!!!!!!!!!!!!!!!!!! ERASE THIS BLOCK BELOW
+	    //if ( ( ii == 2 ) || ( ii == 7 ) ){
+	    //CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].Cd                    = OPTIONS->surface[sss].Cd*6;
+	    //}
+	    // !!!!!!!!!!!!!!!!!!!!!!!! END OF ERASE THIS BLOCK BELOW
+
+	  }// end of if we do not run ensembles on Cd
+
+	  // !!!!!!!!!!! THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES)
+	  CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].solar_radiation_coefficient  = OPTIONS->surface[0].solar_radiation_coefficient; // !!!!!!!!! assumes that for all effective have the same solar_radiation_coefficient
+	  // !!!!!!!!!!! END OF THIS BLOCK IS USING THE EQUATION FROM STK (http://www.agi.com/resources/help/online/stk/10.1/index.html?page=source%2Fhpop%2Fhpop-05.htm). UNCOMMENT THE BLOCK BELOW THAT USES VALLADO AND COMMENT THIS STK BLOCK IF YOU WANT TO USE VALLADO'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES)
+	  // !!!!!!!!!! THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES)
+	  /* CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].specular_reflectivity = OPTIONS->surface[sss].specular_reflectivity; */
+	  /* CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface[sss].diffuse_reflectivity  = OPTIONS->surface[sss].diffuse_reflectivity; */
+	  // !!!!!!!!!! END OF THIS BLOCK USES VALLADO'S EQUATIONS. COMMENT IT AND UNCOMMENT THE BLOCK ABOVE THAT USES STK IF YOU WANT TO USE STK'S EQUATIONS. ALSO NEED TO CHANGE initialize_constellation.c AND load_options.c TO READ THE SPECULAR AND DIFFUSE REFLECIVITIES IF YOU WANT TO USE VALLADO'S EQUATIONS (SEE COMMENTS IN THESE CODES)
+
+	  strcpy(CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].name_of_surface, "Area effective - ignore name"); //
+
+	  for (nnn = 0; nnn < 3; nnn++){
+	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].normal[nnn]         = OPTIONS->surface_eff[sss].normal[nnn];           // normal vector in the SC reference system
+	  }
+	} // end of surface effective
+	
   if (OPTIONS->opengl == 1){
   
     CONSTELLATION->area_attitude_opengl_phi0 = OPTIONS->area_attitude_opengl_phi0;
@@ -2546,6 +2606,13 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	
       } // end of if main sc ii is run by this iProc OR  ( if this main sc is not run by this iProc and eee corresponds to an ensemble sc
 
+ /* printf("%d\n", CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces_eff); */
+ /*  for (sss = 0; sss < CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces_eff; sss++){ */
+ /*    printf("normal[%d]: (%f, %f, %f) | total area: %f\n", sss, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].normal[0], CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].normal[1], CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].normal[2], CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.surface_eff[sss].area*1e10); */
+ /*  } */
+ /*  exitf(); */
+ 
+      
     } // end go through all sc (including ensembels, if you run ensembles) other than GPS
 
     if (write_attitude_file == 1){
@@ -2616,7 +2683,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
 
   
-
+ 
   /*************************************************************************************/
   /*************************************************************************************/
   /*************************************************************************************/
@@ -2900,6 +2967,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt            = OPTIONS->dt;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.nb_surfaces   = 1;
+      CONSTELLATION->spacecraft[ii][0].INTEGRATOR.nb_surfaces_eff   = 1;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.mass          = 1630.0; // Wikipedia...
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.solar_cell_efficiency = -1; // do not care for now
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.degree        = OPTIONS->degree;       // Gravity degree
