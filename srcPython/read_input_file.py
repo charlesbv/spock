@@ -279,7 +279,7 @@ def read_input_file(filename):
     #ORBIT
     if (read_file_input[line_start_section_orbit + 1].split()[0].replace("\n","") == "collision"):
         filename_collision = read_file_input[line_start_section_orbit + 2].split()[0]
-        file_collision = open(run_dir + filename_collision)
+        file_collision = open(filename_collision)
         read_file_collision = file_collision.readlines()
         find_nb_ens = 0
         while (read_file_collision[find_nb_ens].split(' ')[0].replace("\n","") != "#NB_ENSEMBLES_COLLISION" ):

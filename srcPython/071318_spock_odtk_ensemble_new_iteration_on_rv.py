@@ -27,8 +27,8 @@
 
 # PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
 isbig = 0 # if runnign script from Big
-ispleiades = 1 # if runnign script from Pleaides
-
+ispleiades = 0 # if runnign script from Pleaides
+dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
 interval = 1.5 # interval of time to compare the two trajectories (data and SpOCK). In hours
 nb_ensemble_ini_state = 50
 sigma_x = 0.0592388134632#!!!!!!!!!!! should be 1 # in m # standard deviation
@@ -59,7 +59,7 @@ elif ispleiades == 1:
     nb_proc = 0    
 
 else:
-    sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+    sys.path.append("/Users/cbv/work/spock/srcPython")
     path_mpirun = 'mpirun'
     spice_path = '/Users/cbv/cspice/data'
     nb_proc = 4
@@ -77,15 +77,25 @@ import matplotlib.ticker as mtick
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 import matplotlib.gridspec as gridspec
-if ((isbig != 1) & (ispleiades !=1)):
-    from convert_cygnss_obs_ecef_to_eci import *
+# if ((isbig != 1) & (ispleiades !=1)):
+#     from convert_cygnss_obs_ecef_to_eci import *
 from eci_to_lvlh import *
 
+# Read r/v of observations
+if dir_simu[-1] != '/':
+    dir_simu = dir_simu + '/'
 
 
 # Read r/v of observations
-obs_rv_filename = 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt' #spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt
-obs_att_filename = 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt' #spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt
+obs_rv_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
+obs_att_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
+
 
 # Convert ECEF file to ECI file
 # if ((isbig == 1) | (ispleiades == 1)):
@@ -147,7 +157,7 @@ if len(np.where(rho_mod_arr == 1)[0]) == 0:
 ## Create SpOCK main input file: same epoch and initial r/v
 dt  = 1
 dt_output = 1
-gravity_order = 50 # !!!!!!!!!! put 50
+gravity_order = '50 map'# !!!!!!!!!! put 50
 rho_mod = 1
 it = -1
 
@@ -167,10 +177,10 @@ sigma_vx_list_acceptable = []
 sigma_vy_list_acceptable = []
 sigma_vz_list_acceptable = []
 main_input_filename_root = date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '.txt'
-raise Exception
+
 while min_mean_dist_itime_iens[-1]*1000 > 10.5: # iterate to minimize the distance to observation
     it = it + 1
-    main_input_filename = date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_iteration' + str(it) + '.txt'
+    main_input_filename = dir_simu + date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_iteration' + str(it) + '.txt'
 
     if it == 0: # first iteration is initizliae with the r0/v0 of the observations
         # r0 = format(r_obs[index_obs_interval_start, 0]*1000, '.14e')
@@ -287,7 +297,7 @@ while min_mean_dist_itime_iens[-1]*1000 > 10.5: # iterate to minimize the distan
                 1,
         '0',
         29,
-        "cygnss_geometry_2016_acco08.txt", 
+        dir_simu + "cygnss_geometry_2016_acco08.txt", 
         # for ORBIT section
             ['collision', filename_ini_state ],
         # for FORCES section
@@ -295,7 +305,7 @@ while min_mean_dist_itime_iens[-1]*1000 > 10.5: # iterate to minimize the distan
         "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
         "swpc",
         # for OUTPUT section
-                "out",
+              dir_simu +   "out",
         dt_output, 
         # for ATTITUDE section
         obs_att_filename,
@@ -315,7 +325,7 @@ while min_mean_dist_itime_iens[-1]*1000 > 10.5: # iterate to minimize the distan
     #os.system("rm -Rf " + main_input_filename.replace(".txt", "")) #!!!!!!!! remove this line
     ## Run SpOCK
     if ispleiades != 1:
-        os.system(path_mpirun + ' -np ' + str(nb_proc) + ' spock ' + main_input_filename)
+        os.system(path_mpirun + ' -np ' + str(nb_proc) + ' spock_grav_read_bin_earth_map ' + main_input_filename)
         print "Concatenating processor files..."
         os.system(path_mpirun + ' -np ' + str(nb_proc) + ' python new_mpi_concatenate_proc.py ' + main_input_filename )
 

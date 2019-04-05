@@ -28,8 +28,8 @@ kplist = [1.] # list of proportional gains for PID
 kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
-inter_start_algo = 1.0
-prefix_name = 'fastearth_sp13'
+inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
+prefix_name = 'test'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -98,7 +98,7 @@ obs_rv_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt
 obs_att_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
 #HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
 #'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
-# 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt''
+# 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
 
 
 # #Convert ECEF file to ECI file
@@ -315,7 +315,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             rho_control[iinter] = rho_control[iinter-1] + drho
             rho_control_spock = 1 + rho_control[iinter]#['msis_lat_depend', 1 + rho_control[iinter], 0.7*(1 + rho_control[iinter]), rho_phase] #1 + rho_control[iinter]
         else:# don't apply the PID for the first 3 intervals (36 horus) and take rho_control = 0
-            rho_control[iinter] = -0.46# -0.5 # !!!!!!uncomment
+            rho_control[iinter] = -0.2# -0.5 # !!!!!!uncomment
             rho_control_spock = 1 + rho_control[iinter] # not latitude dependent -> equivalent to ['msis_lat_depend', 1 + rho_control, 0, 0]
             error_change_sign = 1 #no iteration for this interval
         # !!!!!!! remove block
@@ -338,7 +338,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                         1,
                 '0',
                 29,
-                dir_simu + "cygnss_geometry_2016_acco09_sp13.txt", #cygnss_geometry_2016_acco09.txt", 
+                dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section
@@ -561,7 +561,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         sign_last_error_previous_rho = np.sign(last_error_previous_rho)
         if (irho == 0):
             sign_last_error_previous_rho = np.sign(last_error)
-        if ( (np.sign(last_error) != sign_last_error_previous_rho) | (iinter < inter_start_algo) | ( np.abs(rho_control[iinter-1] + drho + step_drho) >= 1 ) | ( np.abs(rho_control[iinter-1] + drho - step_drho) >=1  ) ): # in this case (first condition), it means that we've added (or removed) too much density and inverted the trend so we found the optimum rho. So we'll move to the next inter. iinter<=2 is here becasue for the first 3 intervals ndistance_lvlh_pid_oro iteratio
+        if ( (np.sign(last_error) != sign_last_error_previous_rho) | (iinter < inter_start_algo) | ( np.abs(rho_control[iinter-1] + drho + step_drho) >= 1 ) | ( np.abs(rho_control[iinter-1] + drho - step_drho) >=1  ) ): # in this case (first condition), it means that we've added (or removed) too much density and inverted the trend so we found the optimum rho. So we'll move to the next inter.
             error_change_sign = 1
             
             # start and end dates of next interval
@@ -605,8 +605,6 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             argper_orbit_mid_average_interval_all_inter.append(argper_orbit_mid_average_interval_sub)
             argper_orbit_average_interval_all_inter.append(argper_orbit_average_interval_sub)
             argper_spock_ok_pid_all_inter.append(argper_spock_ok_pid)
-
-
 
             print 'last_error' , last_error, last_error_previous_rho, rho_control[iinter]
             print 'OPTIMUM RHO CONTROL', rho_control[:iinter+1] 

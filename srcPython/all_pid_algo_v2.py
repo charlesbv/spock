@@ -2,7 +2,8 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ["fastearth_sp13_mid", "earth_sp13_mid", "gravMap_sp13_mid"]
+pickle_root_list = ["test_mid"]
+#["fastearth_sp10_mid", "fastearth_sp11_mid", "fastearth_sp12_mid", "fastearth_sp13_mid", "earth_sp13_mid", "gravMap_sp13_mid"]
 #["grav50_mid", "sp11_mid", "sp12_mid", "sp13_mid", "sp14_mid", "sp15_mid", "sp16_mid", "sp20_mid"]
 #['solpres05_mid']#['dt02_mid']#['noSolarPressure_mid']#['grav50_mid']#['dt02_mid']#['onlyDrag_mid']
 #pickle_root_list = ['dec17_pole', 'dec17_mid', 'dec17_highamp_pole', 'dec17_equator']
@@ -11,7 +12,7 @@ pickle_root_list = ["fastearth_sp13_mid", "earth_sp13_mid", "gravMap_sp13_mid"]
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho_control' # raw, amplitude, rho_control
+toplot = 'raw' # raw, amplitude, rho_control
 color_arr = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -116,9 +117,9 @@ for ipickle in range(nb_pickle):
         label = 'Cr = 1.0'
     else:
         label_temp = pickle_root_list[ipickle].replace('_mid', '')
-        label_temp = label_temp.replace('sp', '')
-        label = 'Cd = ' + label_temp[0] + '.' + label_temp[1]        
-
+        # label_temp = label_temp.replace('sp', '')
+        # label = 'Cd = ' + label_temp[0] + '.' + label_temp[1]        
+        label = label_temp
 
     if ipickle == 0:
         nb_interval_previous = nb_interval
