@@ -155,7 +155,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 54#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -361,7 +361,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if iinter >= 0:
+            if iinter >= 53:
             #if ((iinter > 0) | ((iinter== 0) & (irho >=2))):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)

@@ -1596,6 +1596,7 @@
 
 
   if ( strcmp(OPTIONS->type_orbit_initialisation, "collision" ) == 0 ){
+
     char filename_input_collision_temp[256];
     getline(&line, &len, fp);     
     //newstructure
@@ -10093,6 +10094,7 @@ int ini_collision( OPTIONS_T *OPTIONS, int iProc ){ // !!!!!! the collision inpu
        /*     int s; */
 
   if (OPTIONS->coll_vcm == 0){ // if collison file is not a vcm
+
   FILE *file_in_collision= NULL;
   char filename_in_collision[256];
   strcpy(filename_in_collision, OPTIONS->filename_input_collision);
@@ -10541,7 +10543,8 @@ int ini_collision( OPTIONS_T *OPTIONS, int iProc ){ // !!!!!! the collision inpu
 	if  ( OPTIONS->eigenvalue_covariance_matrix[isc][i] < 0 ){
 	  print_error(iProc, "The eigenvalue of the covariance matrix is negative");
 	}
-	//	printf("%e %d %d\n", OPTIONS->eigenvalue_covariance_matrix[isc][i], isc, i);
+	printf("balbalbalbalbal %e %d %d\n", OPTIONS->eigenvalue_covariance_matrix[isc][i], isc, i);
+	exitf();
 	// Eigenvectors
 	gsl_vector_complex_view evec_i = gsl_matrix_complex_column (evec, i);
 
@@ -11024,6 +11027,7 @@ int read_cdm(char filename[1000], OPTIONS_T *OPTIONS){
 /* - cvoaraine atrix of object is in equinoctial elements */
 /* - ballistic coeff and solar radiation pressure coeff are in m2/kg  */
 int read_vcm(char filename[1000], OPTIONS_T *OPTIONS, int isc){
+
     FILE *fp;
     char *line = NULL;
     size_t len = 0;
