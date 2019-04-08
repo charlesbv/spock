@@ -10543,8 +10543,8 @@ int ini_collision( OPTIONS_T *OPTIONS, int iProc ){ // !!!!!! the collision inpu
 	if  ( OPTIONS->eigenvalue_covariance_matrix[isc][i] < 0 ){
 	  print_error(iProc, "The eigenvalue of the covariance matrix is negative");
 	}
-	printf("balbalbalbalbal %e %d %d\n", OPTIONS->eigenvalue_covariance_matrix[isc][i], isc, i);
-	exitf();
+	/* printf("balbalbalbalbal %e %d %d\n", OPTIONS->eigenvalue_covariance_matrix[isc][i], isc, i); */
+	/* exitf(); */
 	// Eigenvectors
 	gsl_vector_complex_view evec_i = gsl_matrix_complex_column (evec, i);
 
