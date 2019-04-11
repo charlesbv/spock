@@ -6,7 +6,7 @@
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 prefix_pass = 'pass_5'
-csv_dir = 'outputCygnssOct/FM08'
+csv_dir = 'outputCygnssOct/FM03'
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')

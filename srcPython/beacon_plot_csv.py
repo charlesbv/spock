@@ -13,7 +13,7 @@ from beacon_read_csv import *
 from struct import *
 from tabulate import tabulate
 deg2rad = np.pi/180
-filename = 'outputCygnssOct/FM01/pass_3_PRN_21.csv'
+filename = 'outputCygnssOct/FM03/pass_5_PRN_10.csv'
 
 date, prn, target_lat, target_lon, target_alt, target_ecef_x, target_ecef_y, target_ecef_z, target_rx_sat_look_angle_az, target_rx_sat_look_angle_el, target_rx_sat_range, sp_lat, sp_lon, sp_ecef_pos_x, sp_ecef_pos_y, sp_ecef_pos_z, sp_gain, rx_sub_sat_lat, rx_sub_sat_lon, rx_sat_ecef_pos_x, rx_sat_ecef_pos_y, rx_sat_ecef_pos_z, rx_sat_ecef_vel_x, rx_sat_ecef_vel_y, rx_sat_ecef_vel_z, tx_sat_ecef_pos_x, tx_sat_ecef_pos_y, tx_sat_ecef_pos_z, rx_power = beacon_read_csv(filename)
 
