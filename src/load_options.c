@@ -10513,9 +10513,18 @@ int ini_collision( OPTIONS_T *OPTIONS, int iProc ){ // !!!!!! the collision inpu
   /* } */
   for ( isc = 0; isc < OPTIONS->nb_satellites_not_including_gps; isc++){
     // Convert covariance matrix in correct format for GSL library
-    for (i = 0; i < 6; i++){
-      for (j = 0; j < 6; j++){
-	data[i*6 + j] = OPTIONS->covariance_matrix_equinoctial_only_rv[isc][i][j]; // !!!!!!!! should be data[i*6 + j] = OPTIONS->covariance_matrix[isc][i][j];      
+    if ( strcmp(OPTIONS->type_orbit_initialisation, "collision" ) == 0 ){
+      for (i = 0; i < 6; i++){
+	for (j = 0; j < 6; j++){
+	  data[i*6 + j] = OPTIONS->covariance_matrix[isc][i][j]; // !!!!!!!! should be data[i*6 + j] = OPTIONS->covariance_matrix[isc][i][j];      
+	}
+      }
+    }
+    else if ( strcmp(OPTIONS->type_orbit_initialisation, "collision_vcm" ) == 0 ){
+      for (i = 0; i < 6; i++){
+	for (j = 0; j < 6; j++){
+	  data[i*6 + j] = OPTIONS->covariance_matrix_equinoctial_only_rv[isc][i][j]; // !!!!!!!! should be data[i*6 + j] = OPTIONS->covariance_matrix[isc][i][j];      
+	}
       }
     }
 

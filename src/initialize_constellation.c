@@ -64,6 +64,9 @@ int initialize_constellation(CONSTELLATION_T *CONSTELLATION, OPTIONS_T       *OP
   double collision_equinoctial_sigma_in_diag_basis[6];
   double collision_equinoctial_sigma_in_equinoctial_basis[6];
 
+  double collision_eci_sigma_in_diag_basis[6];
+  double collision_eci_sigma_in_eci_basis[6];
+  
   /* double collision_x_eci_sigma, collision_y_eci_sigma, collision_z_eci_sigma, collision_vx_eci_sigma, collision_vy_eci_sigma, collision_vz_eci_sigma; */
   /* double collision_x_eci_sigma_in_diag_basis, collision_y_eci_sigma_in_diag_basis, collision_z_eci_sigma_in_diag_basis, collision_vx_eci_sigma_in_diag_basis, collision_vy_eci_sigma_in_diag_basis, collision_vz_eci_sigma_in_diag_basis; */
   /* int aaa_count; */
@@ -1049,6 +1052,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	  }
 
 	  else if (( OPTIONS->nb_ensembles > 0 ) && (( strcmp(OPTIONS->type_orbit_initialisation, "collision" ) == 0 ) || ( strcmp(OPTIONS->type_orbit_initialisation, "collision_vcm" ) == 0 ) )){ // initialize state eci and OE if we run ensembles on state eci from a collision input file
+	    if ( strcmp(OPTIONS->type_orbit_initialisation, "collision_vcm" ) == 0 ){
 	    // GOOD REFERENCE: http://www.prepacom.net/HEC2/math/cours/Changement%20de%20bases.pdf
 	    // generate random uncertainties from teh eigenvalues. These uncertainties corresponds to the the basis of the principal axes of the ellipsoid
 
@@ -1186,7 +1190,75 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	      MPI_Finalize();
 	      exit(0);
 	    }
+	  }
+	    else if ( strcmp(OPTIONS->type_orbit_initialisation, "collision" ) == 0 ){
+	    // GOOD REFERENCE: http://www.prepacom.net/HEC2/math/cours/Changement%20de%20bases.pdf
+	    // generate random uncertainties from teh eigenvalues. These uncertainties corresponds to the the basis of the principal axes of the ellipsoid
 
+	    /* // !!!!!!! DELETE BLOCK BELOW AND UNCOMMENT THE ONE BELOW IT */
+	    /* struct timeval t1; */
+	    /* gettimeofday(&t1, NULL); */
+	    /* seed = t1.tv_usec * t1.tv_sec;// time (NULL) + iProc; //\* getpid(); */
+	    /* gsl_rng_set (r_gaussian_generator, seed);                  // set seed */
+	    /* collision_eci_sigma_in_diag_basis[0] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][0]  ) ); */
+	    /* collision_eci_sigma_in_diag_basis[1] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][1]  ) ); */
+	    /* collision_eci_sigma_in_diag_basis[2] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][2]  ) ); */
+	    /* collision_eci_sigma_in_diag_basis[3] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][3]  ) ); */
+	    /* collision_eci_sigma_in_diag_basis[4] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][4]  ) ); */
+	    /* collision_eci_sigma_in_diag_basis[5] = gsl_ran_gaussian(r_gaussian_generator, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][5]  ) ); */
+
+	    collision_eci_sigma_in_diag_basis[0] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][0]  ) );
+	    collision_eci_sigma_in_diag_basis[1] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][1]  ) );
+	    collision_eci_sigma_in_diag_basis[2] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][2]  ) );
+	    collision_eci_sigma_in_diag_basis[3] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][3]  ) );
+	    collision_eci_sigma_in_diag_basis[4] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][4]  ) );
+	    collision_eci_sigma_in_diag_basis[5] = randn( 0, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][5]  ) );
+
+
+
+	    // convert thes e unertainties rfom the ellipsoid basis to ECI p
+	    m_x_v6( collision_eci_sigma_in_eci_basis, OPTIONS->rotation_matrix_for_diagonalization[ii], collision_eci_sigma_in_diag_basis );
+
+
+
+	    //	  printf("\n");
+	    for (ccc = 0; ccc < 6; ccc++){
+	      collision_eci_sigma_in_eci_basis[ccc] = collision_eci_sigma_in_eci_basis[ccc] / 1000.; // / 1000. to convert the eigenvalues from m to km (or from m/s to km/s)
+	      //	    printf("%15.10e %15.10e %d %d %d\n", collision_eci_sigma_in_eci_basis[ccc], OPTIONS->eigenvalue_covariance_matrix[ii][ccc] / 1000. ,eee, ccc, ii);
+	    }
+
+
+	    CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL[0] = OPTIONS->x_eci[ii] + collision_eci_sigma_in_eci_basis[0];
+	    CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL[1] = OPTIONS->y_eci[ii] + collision_eci_sigma_in_eci_basis[1];
+	    CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL[2] = OPTIONS->z_eci[ii] + collision_eci_sigma_in_eci_basis[2]; 
+
+	    CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL[0] = OPTIONS->vx_eci[ii] + collision_eci_sigma_in_eci_basis[3];
+	    CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL[1] = OPTIONS->vy_eci[ii] + collision_eci_sigma_in_eci_basis[4];
+	    CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL[2] = OPTIONS->vz_eci[ii] + collision_eci_sigma_in_eci_basis[5];
+
+	    /* if ( ( ii == 0 )  && ( eee == start_ensemble + iProc * OPTIONS->nb_ensemble_min_per_proc ) ){  */
+	    /*   printf("delta_vx_eci: %.10e - delta_vx_diag: %.10e - eee: %d - iProc: %d - vxsigma: %e - total vx_eci: %.10e\n", collision_eci_sigma_in_eci_basis[3], collision_eci_sigma_in_diag_basis[3]/1000., eee, iProc, sqrt( OPTIONS->eigenvalue_covariance_matrix[ii][3] )/1000., CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL[0] ); */
+	    /*   //	    m_print6(OPTIONS->inverse_rotation_matrix_for_diagonalization[ii], "OPTIONS->inverse_rotation_matrix_for_diagonalization[ii]"); */
+	    /*   } */
+
+	    // This will be used to save position of sc in the time span of the TCA if collisions assessment is on
+	    CONSTELLATION->spacecraft[ii][eee].ispan = 0;
+
+	  
+	  
+	    // Orbital elements
+	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
+
+
+	    radius_perigee = CONSTELLATION->spacecraft[ii][eee].OE.sma * ( 1 - CONSTELLATION->spacecraft[ii][eee].OE.eccentricity  );
+	    if (radius_perigee < PARAMS->EARTH.radius){
+	      printf("***! The orbit of satellite %d intersects the Earth (altitude of perigee = %f km). The program will stop. !***\n",ii, radius_perigee-PARAMS->EARTH.radius);
+	      MPI_Finalize();
+	      exit(0);
+	    }
+
+	    }
+	    
 	  } // end of initialize state eci and OE if we run ensembles on state eci from a collision input file
 
 	  else { // initialize COE if we do not run ensembles on the orbital elements or on state eci (including collision case)
