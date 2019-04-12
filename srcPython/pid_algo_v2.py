@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'test'
+prefix_name = 'new_rv0'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -276,12 +276,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
         # with spock_FM5_20171216_eng_pvt_query...
-        r0 = '-2.54076587561000e+03'#
-        r1 = '-5.06266991514000e+03'#
-        r2 = '-3.95089081204000e+03'#
-        v0 = '6.76840081300000e+00'#'
-        v1 = '-3.44599707500000e+00'#
-        v2 = '4.16872280000000e-02'#'
+        r0 = '-2.54076679624900e+03'#!!!!!!before 041119 was '-2.54076587561000e+03'#
+        r1 = '-5.06267227903800e+03'#'-5.06266991514000e+03'#
+        r2 = '-3.95089227291900e+03'#'-3.95089081204000e+03'#
+        v0 = '6.76839892900000'#'6.76840081300000e+00'#'
+        v1 = '-3.44599615900000'#'-3.44599707500000e+00'#
+        v2 = '4.16872720000000e-02'#'4.16872280000000e-02'#'
 #         # with spock_FM5_20180521_eng_pvt_query...
 #         r0 = '5.10860462753000e+03'
 #         r1 = '3.05387469849000e+03'
@@ -361,7 +361,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if iinter >= 53:
+            if iinter >= 0:
             #if ((iinter > 0) | ((iinter== 0) & (irho >=2))):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)

@@ -1,3 +1,20 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+
+#   http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 # copy of spock_odtk_ensemble_new_iteration_on_rv.py on 071318
 # This script runs SpOCK with ensembles on the initial state (r, v ECI). The initial mean r,v is taken from GPS measurements. It's a similiar script ot ~/Google Drive/Work/PhD/Research/Code/cygnss/eclipse/ensemble_ini_state/spock_odtk_ensemble_dev.py but this one here uses GPS measuremnts while the other used Kyle Nave ODTK states.
 # ASSUMPTIONS
@@ -12,35 +29,19 @@
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-interval = 4.5 # interval of time to compare the two trajectories (data and SpOCK). In hours
-nb_ensemble_ini_state = 200
-optim_var = 'dist' # dist, dist_weight, v_diff, or sma_diff
-value_stop_simu = 5. # min value that distance needs to be to stop reiterations
-#over 0.4 hour:
-plot_or_not = 0
-# 0.4h:
-# 16 3.52802361289 0.0891383939176
-# 0.0487035127061 0.00487035127061
-
-# 1.5h:
-# it 15 min dist 7.9120997714 min distance to beat 8.1042459922
-# sigmab 0.0577329577737 0.00577329577737 but let's do 0.1 m on r0
-sigma_x = 5.#0.0592388134632#!!!!!!!!!!! should be 1 # in m # standard deviation
-sigma_y = 5.#0.0592388134632#1 # in m
-sigma_z = 5.#0.0592388134632#1 # in m
-sigma_vx = 0.1# 0.00592388134632#0.1 # in m/s
-sigma_vy = 0.1#0.00592388134632#0.1 # in m/s
-sigma_vz = 0.1#0.00592388134632#0.1 # in m/s
+interval = 1.5 # interval of time to compare the two trajectories (data and SpOCK). In hours
+nb_ensemble_ini_state = 50
+sigma_x = 0.0592388134632#!!!!!!!!!!! should be 1 # in m # standard deviation
+sigma_y = 0.0592388134632#1 # in m
+sigma_z = 0.0592388134632#1 # in m
+sigma_vx = 0.00592388134632#0.1 # in m/s
+sigma_vy = 0.00592388134632#0.1 # in m/s
+sigma_vz = 0.00592388134632#0.1 # in m/s
 rho_mod_min = 0.7# min rho_mod
 rho_mod_max = 1. # max rho_mod
 drho_mod = 0.3 # step in rho_mod -> rho_mod varies from rho_mod_min to rho_mod_max by values of drho_mod
 #spock_FM5_20171216_eng_adcs_query-13528.txt
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
-
-var_list_to_optim = ['dist', 'dist_weight', 'v_diff', 'sma_diff']
-if ( optim_var in var_list_to_optim ) == False:
-    print "***! You need to choose optim_var among var_list_to_optim. The program will stop. !***"; raise Exception
-
 
 if isbig == 1 & ispleiades == 1:
     print "***! Choose to run on Pleiades or Big, but not both. The program will stop. !***"; raise Exception
@@ -79,15 +80,22 @@ import matplotlib.gridspec as gridspec
 # if ((isbig != 1) & (ispleiades !=1)):
 #     from convert_cygnss_obs_ecef_to_eci import *
 from eci_to_lvlh import *
-plt.ion()
-
 
 # Read r/v of observations
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt' #spock_FM5_20171216_eng_pvt_query-13527.txt'#'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt' #spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt
-obs_att_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt' #spock_FM5_20171216_eng_adcs_query-13528.txt'#'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt' #spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt
+
+# Read r/v of observations
+obs_rv_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
+#'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
+obs_att_filename = dir_simu + 'HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
+#'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
+# 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
+
 
 # Convert ECEF file to ECI file
 # if ((isbig == 1) | (ispleiades == 1)):
@@ -108,8 +116,6 @@ date_obs = []
 date_obs_str = []
 r_obs = np.zeros([nb_obs, 3])
 v_obs = np.zeros([nb_obs, 3])
-
-earth_mu = 398600.4418 # km^3/s^2
 
 for iobs in range(nb_obs):
     date_obs_str.append( read_obs_rv_file[iobs + nb_header].split()[0] )
@@ -132,14 +138,7 @@ nb_interval = (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( inter
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
 distance = []
-distance_weight = []
-v_diff = []
-v_diff_ref = []
 distance_ref = []
-distance_weight_ref = []
-sma_diff = []
-sma_diff_ref = []
-
 
 date_start = date_obs_start
 date_end = date_start + timedelta(seconds = interval_sec)
@@ -147,7 +146,7 @@ date_end_str = datetime.strftime(date_end, "%Y-%m-%dT%H:%M:%S")
 date_start_str = datetime.strftime(date_start, "%Y-%m-%dT%H:%M:%S")
 
 index_obs_interval_start = 0 # !!!!!!!!!!! to change
-rho_mod_arr = np.array([0.25, 0.5, 0.75, 1., 1.25, 1.5, 2.])#np.array([0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 3., 4.])#np.arange(rho_mod_min, rho_mod_max+drho_mod, drho_mod)
+rho_mod_arr = np.arange(rho_mod_min, rho_mod_max+drho_mod, drho_mod)
 nb_rho = len(rho_mod_arr)
 
 irho_equal_1 = np.where(rho_mod_arr == 1)[0][0]
@@ -155,32 +154,16 @@ if len(np.where(rho_mod_arr == 1)[0]) == 0:
     print "***! The array of density factors must include 1. The program will stop. !***"; raise Exception
 
 
-## Crareate SpOCK main input file: same epoch and initial r/v
+## Create SpOCK main input file: same epoch and initial r/v
 dt  = 1
-dt_output = 60 # !!!!!!!!!used to be 1
-gravity_order = '50 map' # !!!!!!!!!! put 50
+dt_output = 1
+gravity_order = '50 map'# !!!!!!!!!! put 50
 rho_mod = 1
 it = -1
 
 which_ens_min_dist = []
-which_ens_min_dist_weight = []
-which_ens_min_vdiff = []
-which_ens_min_sma_diff = []
-
 min_mean_dist_itime_iens = []
 min_mean_dist_itime_iens.append(1e10)
-
-min_mean_dist_weight_itime_iens = []
-min_mean_dist_weight_itime_iens.append(1e10)
-
-min_mean_vdiff_itime_iens = []
-min_mean_vdiff_itime_iens.append(1e10)
-
-min_mean_sma_diff_itime_iens = []
-min_mean_sma_diff_itime_iens.append(1e10)
-
-var_min_stop_simu = []
-var_min_stop_simu.append(1e10)
 sigma_x_list = []
 sigma_y_list = []
 sigma_z_list = []
@@ -193,16 +176,11 @@ sigma_z_list_acceptable = []
 sigma_vx_list_acceptable = []
 sigma_vy_list_acceptable = []
 sigma_vz_list_acceptable = []
-min_mean_dist_acceptable = []
-min_mean_dist_weight_acceptable = []
-min_mean_vdiff_acceptable = []
-min_mean_sma_diff_acceptable = []
 main_input_filename_root = date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '.txt'
 
-#while min_mean_dist_itime_iens[-1]*1000 > 12:#10.5: # iterate to minimize the distance to observation
-while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minimize the distance to observation
+while min_mean_dist_itime_iens[-1]*1000 > 10.5: # iterate to minimize the distance to observation
     it = it + 1
-    main_input_filename =  dir_simu + date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_iteration' + str(it) + '_gravity20.txt'
+    main_input_filename = dir_simu + date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_iteration' + str(it) + '.txt'
 
     if it == 0: # first iteration is initizliae with the r0/v0 of the observations
         # r0 = format(r_obs[index_obs_interval_start, 0]*1000, '.14e')
@@ -212,85 +190,34 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
         # v1 = format(v_obs[index_obs_interval_start, 1]*1000, '.14e')
         # v2 = format(v_obs[index_obs_interval_start, 2]*1000, '.14e')
 
-        # # # !!!!!!! remove block below 
-        # #over 0.4hour: 
-        # # 16 3.52802361289 0.0891383939176
-        # # -2.54076756505000e+06 -5.06267001862000e+06 -3.95089350350000e+06
-        # # 6.76841280100000e+03 -3.44599497200000e+03 4.16943300000000e+01
-
-        # orver 1.5h:
-        # it 15 min dist 7.9120997714 min distance to beat 8.1042459922
-        # r0b -2.54076600034000e+06 -5.06266983838000e+06 -3.95089069223000e+06
-        # v0b 6.76840029700000e+03 -3.44599982200000e+03 4.16889810000000e+01
-        # 4.5h:
-        # it 0 min dist 14.4463901862 min distance to beat 14.4463901862
-        # r0b -2.54076587561000e+06 -5.06266991514000e+06 -3.95089081204000e+06
-        # v0b 6.76840081300000e+03 -3.44599707500000e+03 4.16872280000000e+01
-
-
-        r0 = '-2.54076587561000e+06' #'-2.54076686451000e+06' #'-2.54076684997000e+06'
-        r1 = '-5.06266991514000e+06'# '-5.06267222955000e+06' #'-5.06267228702000e+06'
-        r2 = '-3.95089081204000e+06'#'-3.95089219235000e+06' #'-3.95089226458000e+06'
-        v0 = '6.76840081300000e+03'#'6.76839827100000e+03' #'6.76839628300000e+03'
-        v1 = '-3.44599707500000e+03'#'-3.44599793800000e+03' #'-3.44599994200000e+03'
-        v2 = '4.16872280000000e+01'#'4.16890430000000e+01' #'4.16930640000000e+01'
-        # # # # !!!!!!! end of remove block below
+        # !!!!!!! remove block below
+        r0 = '-2.54076684997000e+06'
+        r1 = '-5.06267228702000e+06'
+        r2 = '-3.95089226458000e+06'
+        v0 = '6.76839628300000e+03'
+        v1 = '-3.44599994200000e+03'
+        v2 = '4.16930640000000e+01'
+        # # !!!!!!! end of remove block below
     else: # following iterations are initizliaze with r0/v0 of the optimized trajectory from the preivous iteration
-    # the standard deviation on r0/v0 is divided by iter_std_fac but only ig the new distance to observations is smaller than at the previous iteration         
-        if acceptable == 1:#min_mean_dist_itime_iens[-1] < min_mean_dist_itime_iens[-2]*1.:
-            if (optim_var == 'dist'): # if minimizing distance
-                if it == 1:
-                    iter_std_fac = 2.
-                else:
-                    iter_std_fac = min_mean_dist_itime_iens[-2] / min_mean_dist_itime_iens[-1]
-                r0 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 0]*1000, '.14e')
-                r1 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 1]*1000, '.14e')
-                r2 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 2]*1000, '.14e')
-                v0 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 0]*1000, '.14e')
-                v1 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 1]*1000, '.14e')
-                v2 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 2]*1000, '.14e')
-            if (optim_var == 'dist_weight'): # if minimizing distance
-                if it == 1:
-                    iter_std_fac = 2.
-                else:
-                    iter_std_fac = min_mean_dist_weight_itime_iens[-2] / min_mean_dist_weight_itime_iens[-1] 
-                r0 = format(r_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 0]*1000, '.14e')
-                r1 = format(r_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 1]*1000, '.14e')
-                r2 = format(r_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 2]*1000, '.14e')
-                v0 = format(v_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 0]*1000, '.14e')
-                v1 = format(v_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 1]*1000, '.14e')
-                v2 = format(v_spock_ok[0, (int)(which_ens_min_dist_weight[it-1]), 2]*1000, '.14e')
+    # the standard deviation on r0/v0 is divided by iter_std_fac but only ig the new distance to observations is smaller than at the previous iteration
 
-            elif optim_var == 'sma_diff':         # if minimizing sma difference
-                if it == 1:
-                    iter_std_fac = 2.
-                else:
-                    iter_std_fac = min_mean_sma_diff_itime_iens[-2] / min_mean_sma_diff_itime_iens[-1]
-                r0 = format(r_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 0]*1000, '.14e')
-                r1 = format(r_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 1]*1000, '.14e')
-                r2 = format(r_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 2]*1000, '.14e')
-                v0 = format(v_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 0]*1000, '.14e')
-                v1 = format(v_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 1]*1000, '.14e')
-                v2 = format(v_spock_ok[0, (int)(which_ens_min_sma_diff[it-1]), 2]*1000, '.14e')
-
-            elif optim_var == 'v_diff': # if minizing velcoity difference
-                if it == 1:
-                    iter_std_fac = 2.
-                else:
-                    iter_std_fac = min_mean_vdiff_itime_iens[-2] / min_mean_vdiff_itime_iens[-1]
-                r0 = format(r_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 0]*1000, '.14e')
-                r1 = format(r_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 1]*1000, '.14e')
-                r2 = format(r_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 2]*1000, '.14e')
-                v0 = format(v_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 0]*1000, '.14e')
-                v1 = format(v_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 1]*1000, '.14e')
-                v2 = format(v_spock_ok[0, (int)(which_ens_min_vdiff[it-1]), 2]*1000, '.14e')
-
+        if min_mean_dist_itime_iens[-1] < min_mean_dist_itime_iens[-2]*1.:
+            if it == 1:
+                iter_std_fac = 2.
+            else:
+                iter_std_fac = min_mean_dist_itime_iens[-2] / min_mean_dist_itime_iens[-1]
             sigma_x = np.sqrt(sigma_x)/iter_std_fac # we taje the square after so need to take the square root here
             sigma_y = np.sqrt(sigma_y)/iter_std_fac
             sigma_z = np.sqrt(sigma_z)/iter_std_fac
             sigma_vx = np.sqrt(sigma_vx)/iter_std_fac
             sigma_vy = np.sqrt(sigma_vy)/iter_std_fac
             sigma_vz = np.sqrt(sigma_vz)/iter_std_fac
+            r0 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 0]*1000, '.14e')
+            r1 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 1]*1000, '.14e')
+            r2 = format(r_spock_ok[0, (int)(which_ens_min_dist[it-1]), 2]*1000, '.14e')
+            v0 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 0]*1000, '.14e')
+            v1 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 1]*1000, '.14e')
+            v2 = format(v_spock_ok[0, (int)(which_ens_min_dist[it-1]), 2]*1000, '.14e')
 
         else:  # if the decrease in distance hasn't been good enough, then don't stay too close to the new solution because otherwise you're going to get stuck there. So go back to the previous sigma. Also go back to the r0/v0 that gave a smaller distance
             print 'previous iteration not acceptable'
@@ -300,22 +227,23 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
             sigma_vx = sigma_vx_list_acceptable[-1]
             sigma_vy = sigma_vy_list_acceptable[-1]
             sigma_vz = sigma_vz_list_acceptable[-1]
-            r0 = r0#previous_r0
-            r1 = r1#previous_r1
-            r2 = r2#previous_r2
-            v0 = v0#previous_v0
-            v1 = v1#previous_v1
-            v2 = v2#previous_v2
+            r0 = previous_r0
+            r1 = previous_r1
+            r2 = previous_r2
+            v0 = previous_v0
+            v1 = previous_v1
+            v2 = previous_v2
+
 
         # as the distance to observation decreases, increase order of gravity model. 
        #this is because the error on r0/v0 has been reduced so now the error on gravity model has as much effects as the error on r0/v0
-        # if min_mean_dist_itime_iens[-1]*1000 < 60:
-        #     gravity_order = 50
-    acceptable = 0 # reset acceptable to 0.
+        if min_mean_dist_itime_iens[-1]*1000 < 60:
+            gravity_order = 50
+
     print '\nNOW'
-    print 'r0', r0,r1,r2
-    print 'v0', v0,v1,v2
-    print 'sigma', sigma_x, sigma_vx
+    print r0,r1,r2
+    print v0,v1,v2
+    print sigma_x, sigma_vx
     # SpOCK inital state uncetainty file
     # In SpOCK collision file, the diagnoal terms of the covaraiance matrix represent the variance, which is the sqaure of the strand deviation
     sigma_x = sigma_x**2
@@ -358,8 +286,7 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
     print >> file_ini_state, "\n#MIN_DISTANCE_CLOSE_APPROACH\n10000\n\n#MIN_DISTANCE_COLLISION\n1.3"
 
     file_ini_state.close()
-
-    #SpOCK main input file
+    # SpOCK main input file
     spock_main_input( # need to be in spokc/srcPython to run this script   
         main_input_filename,
         # for TIME section
@@ -370,7 +297,7 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
                 1,
         '0',
         29,
-         dir_simu +"cygnss_geometry_2016_acco08.txt", 
+        dir_simu + "cygnss_geometry_2016_acco08.txt", 
         # for ORBIT section
             ['collision', filename_ini_state ],
         # for FORCES section
@@ -378,7 +305,7 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
         "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
         "swpc",
         # for OUTPUT section
-             dir_simu +     "out",
+              dir_simu +   "out",
         dt_output, 
         # for ATTITUDE section
         obs_att_filename,
@@ -390,7 +317,7 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
                 rho_mod
     )
 
-    #add in SpOCK main input file the section #OUTPUT_ENSEMBLES
+    # add in SpOCK main input file the section #OUTPUT_ENSEMBLES
     file_spock = open(main_input_filename, "a")
     print >> file_spock, "#OUTPUT_ENSEMBLES\neci_r, eci_v"
     file_spock.close()
@@ -403,7 +330,7 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
         os.system(path_mpirun + ' -np ' + str(nb_proc) + ' python new_mpi_concatenate_proc.py ' + main_input_filename )
 
     else:
-        os.system(path_mpirun + ' /home1/cbussy/spock ' + main_input_filename)
+        #os.system(path_mpirun + ' /home1/cbussy/spock ' + main_input_filename)
         print "Concatenating processor files"
         #os.system(path_mpirun + ' python new_mpi_concatenate_proc.py ' + main_input_filename )
 
@@ -419,7 +346,6 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
     var_to_read = ["position", "velocity"]
     var_out, var_out_order = read_output_file( output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
     date_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'date')])
-    nb_seconds_since_start_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'nb_seconds_since_start')])
     date_datetime_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'date_datetime')])
     date_datetime_round_sec_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'date_datetime_round_sec')])
     n_spock = len(date_spock)
@@ -465,6 +391,9 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
             nb_header_ens_eci_z = nb_header_ens_eci_z + 1
         nb_header_ens_eci_z = nb_header_ens_eci_z + 1
         nb_ensemble_ini_state_corrected = len(read_file_eci_z[nb_header_ens_eci_z].split())-2
+
+        r_spock_ref = var_out[find_in_read_input_order_variables(var_out_order, 'position')]
+        v_spock_ref = var_out[find_in_read_input_order_variables(var_out_order, 'velocity')]
 
         for itime_ens in range(n_spock):
             for iens in range(nb_ensemble_ini_state_corrected):
@@ -522,46 +451,24 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
         file_eci_vz.close()
 
 
-
-
-    r_spock_ref = var_out[find_in_read_input_order_variables(var_out_order, 'position')]
-    v_spock_ref = var_out[find_in_read_input_order_variables(var_out_order, 'velocity')]
-    nhere = r_spock_ref.shape[0]
-    weight_value_dist = np.zeros([nhere])
-
-    for iw in range(nhere): # define the weights every dt_output 
-        weight_value_dist[iw] = nhere-iw 
-
-    weight_value_dist = weight_value_dist / np.double(np.sum(weight_value_dist)) # normalize weights (doesnt really matter actually)
-
     # Compare SpOCK and data
     # Assumption: SpOCK was run with a 1s time step to avoid having to do interpolation here: the steps in SpOCK falls at the same time as the steps in data 
     ## Select the time where date_spock = date_obs 
-
-
     print 'Computing distances between ensembles and observations'
     if it == 0:
         index_spock_same_date_as_obs = []
-        index_obs_kept = []
         iobs = 0
         while iobs < nb_obs:
             if date_obs[iobs] >= date_datetime_round_sec_spock[-1]:
                 break
             else:
                 index_spock_same_date_as_obs.append(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0][0])
-                index_obs_kept.append(iobs)
                 nb_seconds_since_start.append( ( date_obs[iobs] - date_obs[0] ).total_seconds() )
-            iobs = iobs + 60 # jump by 60 observation time steps (uusualyy one time step is one second)    #!!!!!!! used to be iobs + 1
+            iobs = iobs + 1
 
-    date_obs_arr = np.array(date_obs)
-    date_obs_ok = date_obs_arr[index_obs_kept]
-    r_obs_ok = r_obs[index_obs_kept]
-    v_obs_ok = v_obs[index_obs_kept]
 
-    n = len(index_obs_kept)# !!!!! used to be iobs #!!!!!!!!!! j-index_interval[iinter]
-
+    n = iobs #!!!!!!!!!! j-index_interval[iinter]
     date_spock_ok = date_spock[index_spock_same_date_as_obs]
-    nb_seconds_since_start_spock_ok = nb_seconds_since_start_spock[index_spock_same_date_as_obs]
 
     r_spock_ref_ok = np.zeros([n, 3])
     r_spock_ref_ok[:, 0] = r_spock_ref[index_spock_same_date_as_obs, 0]
@@ -572,8 +479,6 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
     v_spock_ref_ok[:, 1] = v_spock_ref[index_spock_same_date_as_obs, 1]
     v_spock_ref_ok[:, 2] = v_spock_ref[index_spock_same_date_as_obs, 2]
 
-    weight_value_dist_ok = weight_value_dist[index_spock_same_date_as_obs]
-
     r_spock_ok = np.zeros([n, nb_ensemble_ini_state_corrected, 3])
     r_spock_ok[:, :, 0] = r_spock[index_spock_same_date_as_obs, :, 0]
     r_spock_ok[:, :, 1] = r_spock[index_spock_same_date_as_obs,:, 1]
@@ -583,264 +488,64 @@ while var_min_stop_simu[-1]*1000 > value_stop_simu:#12:#10.5: # iterate to minim
     v_spock_ok[:, :, 1] = v_spock[index_spock_same_date_as_obs, :, 1]
     v_spock_ok[:, :, 2] = v_spock[index_spock_same_date_as_obs, :, 2]
 
-        
-        
 
-    nb_steps = v_spock_ref_ok.shape[0]
+    nb_steps = v_spock_ok.shape[0]
     if it == 0:
         index_obs = 0 # !!!!!!!!!!!!!!! index_interval[itime]
         for i in range(nb_steps):
-            distance_ref.append( np.linalg.norm(r_obs_ok[index_obs, :] - r_spock_ref_ok[i, :]) )
-            distance_weight_ref.append(  np.linalg.norm(r_obs_ok[index_obs, :] - r_spock_ref_ok[i, :]) * weight_value_dist_ok[i] )
-            v_diff_ref.append( np.linalg.norm(v_obs_ok[index_obs, :] - v_spock_ref_ok[i, :]) )
-
-            # SMA
-            rspock_mag = np.linalg.norm(r_spock_ref_ok[i, :])
-            vspock_mag = np.linalg.norm(v_spock_ref_ok[i, :])
-            sma_spock = 1. / ( 2 / rspock_mag - vspock_mag**2 / earth_mu ); # 1.0 / ( (2.0/rrss) - ( (vrss*vrss)/u ) );
-            
-            robs_mag = np.linalg.norm(r_obs_ok[index_obs, :])
-            vobs_mag = np.linalg.norm(v_obs_ok[index_obs, :])
-            sma_obs = 1. / ( 2 / robs_mag - vobs_mag**2 / earth_mu ); # 1.0 / ( (2.0/rrss) - ( (vrss*vrss)/u ) );
-
-            sma_diff_ref.append( np.abs(sma_obs - sma_spock ) )
+            distance_ref.append( np.linalg.norm(r_obs[index_obs, :] - r_spock_ref_ok[i, :]) )
             index_obs = index_obs + 1
 
-    
-    fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., np.array(distance_ref)*1000); plt.show(); fig_save_name = dir_simu +\
-    'fig/' + main_input_filename.split('/')[-1].replace('.txt', '.png'); fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight'); #raise Exception
 
     distance_sub = []
-    distance_weight_sub = []
-    v_diff_sub = []
-    sma_diff_sub = []
     for iens in range(nb_ensemble_ini_state_corrected):
         index_obs = 0 # !!!!!!!!! index_interval[itime]
         distance_sub_ens = []
-        distance_weight_sub_ens = []
-        v_diff_sub_ens = []
-        sma_diff_sub_ens = []
         for i in range(n):
-            distance_weight_sub_ens.append( np.linalg.norm(r_obs_ok[index_obs, :] - r_spock_ok[i, iens, :]) * weight_value_dist_ok[i] )
-            distance_sub_ens.append( np.linalg.norm(r_obs_ok[index_obs, :] - r_spock_ok[i, iens, :]) )
-            v_diff_sub_ens.append( np.linalg.norm(v_obs_ok[index_obs, :] - v_spock_ok[i, iens, :]) )
-
-            # SMA
-            rspock_mag = np.linalg.norm(r_spock_ok[i, iens, :])
-            vspock_mag = np.linalg.norm(v_spock_ok[i, iens, :])
-            sma_spock = 1. / ( 2 / rspock_mag - vspock_mag**2 / earth_mu ); # 1.0 / ( (2.0/rrss) - ( (vrss*vrss)/u ) );
-            
-            robs_mag = np.linalg.norm(r_obs_ok[index_obs, :])
-            vobs_mag = np.linalg.norm(v_obs_ok[index_obs, :])
-            sma_obs = 1. / ( 2 / robs_mag - vobs_mag**2 / earth_mu ); # 1.0 / ( (2.0/rrss) - ( (vrss*vrss)/u ) );
-
-            sma_diff_sub_ens.append( np.abs( sma_obs - sma_spock ) )
-
+            distance_sub_ens.append( np.linalg.norm(r_obs[index_obs, :] - r_spock_ok[i, iens, :]) )
             index_obs = index_obs + 1                  
         distance_sub.append( distance_sub_ens )
-        distance_weight_sub.append( distance_weight_sub_ens )
-        v_diff_sub.append( v_diff_sub_ens )
-        sma_diff_sub.append( sma_diff_sub_ens )
+
 
     distance.append( distance_sub )
-    distance_weight.append( distance_weight_sub )
-    v_diff.append( v_diff_sub )
-    sma_diff.append( sma_diff_sub )
+
 
     #nb_seconds_since_start = np.array(nb_seconds_since_start)
     mean_dist_itime_iens = np.zeros([nb_ensemble_ini_state_corrected]) # mean of the distance for
-    mean_dist_weight_itime_iens = np.zeros([nb_ensemble_ini_state_corrected]) # mean of the distance for
     # a given internval, aand a given ensemble. We first want to find the min of this variable over all ensembles
-    mean_vdiff_itime_iens = np.zeros([nb_ensemble_ini_state_corrected]) 
-    mean_sma_diff_itime_iens = np.zeros([nb_ensemble_ini_state_corrected]) 
 
-    if optim_var == 'dist':
-        print 'Determining the ensemble that minimizes the distance...'
-    elif optim_var == 'dist_weight':
-        print 'Determining the ensemble that minimizes the weighted distance...'
-    elif optim_var == 'sma_diff':
-        print 'Determining the ensemble that minimizes the sma difference...'
-    elif optim_var == 'v_diff':
-        print 'Determining the ensemble that minimizes the velocity difference...'
+    print 'Determining the ensemble that minimizes the distance...'
     for iens in range(nb_ensemble_ini_state_corrected):
         dist_itime_iens = np.array(distance[-1][iens])
-        dist_weight_itime_iens = np.array(distance_weight[-1][iens])
-        vdiff_itime_iens = np.array(v_diff[-1][iens])
-        sma_diff_itime_iens = np.array(sma_diff[-1][iens])
-
         mean_dist_itime_iens[ iens] = np.mean(dist_itime_iens)
-        mean_dist_weight_itime_iens[ iens] = np.mean(dist_weight_itime_iens)
-        mean_vdiff_itime_iens[ iens] = np.mean(vdiff_itime_iens)
-        mean_sma_diff_itime_iens[ iens] = np.mean(sma_diff_itime_iens)
-
     which_ens_min_dist.append( np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0] )
-    which_ens_min_dist_weight.append( np.where( mean_dist_weight_itime_iens ==  np.nanmin(mean_dist_weight_itime_iens) )[0][0] )
-    which_ens_min_vdiff.append( np.where( mean_vdiff_itime_iens ==  np.nanmin(mean_vdiff_itime_iens) )[0][0] )
-    which_ens_min_sma_diff.append( np.where( mean_sma_diff_itime_iens ==  np.nanmin(mean_sma_diff_itime_iens) )[0][0] )
-
     min_mean_dist_itime_iens.append( np.nanmin(mean_dist_itime_iens) )
-    min_mean_dist_weight_itime_iens.append( np.nanmin(mean_dist_weight_itime_iens) )
-    min_mean_vdiff_itime_iens.append( np.nanmin(mean_vdiff_itime_iens) )
-    min_mean_sma_diff_itime_iens.append( np.nanmin(mean_sma_diff_itime_iens) )
 
-
-
-    if it == 0:
-        min_mean_dist_acceptable.append(min_mean_dist_itime_iens[-1])
-        min_mean_dist_weight_acceptable.append(min_mean_dist_weight_itime_iens[-1])
-        min_mean_vdiff_acceptable.append(min_mean_vdiff_itime_iens[-1])
-        min_mean_sma_diff_acceptable.append(min_mean_sma_diff_itime_iens[-1])
-
-    if optim_var == 'dist': # if optimizing distance  
-        var_min_stop_simu.append(np.mean(distance[-1][which_ens_min_dist[-1]]))
-    elif optim_var == 'dist_weight': # if optimizing eighted distance  
-        var_min_stop_simu.append(np.mean(distance[-1][which_ens_min_dist[-1]]))
-    elif optim_var == 'sma_diff': # if optimizing sma difference
-        var_min_stop_simu.append(np.mean(distance[-1][which_ens_min_sma_diff[-1]]))
-    elif optim_var == 'v_diff': # if optimizing velcoity difference
-        var_min_stop_simu.append(np.mean(distance[-1][which_ens_min_vdiff[-1]]))
-
-    
     #main_input_filename_root = main_input_filename
-    if optim_var == 'dist': # if optimizing distance                                                                                                                                                                                            
-        #print it, min_mean_dist_itime_iens[-1]*1000., min_mean_vdiff_itime_iens[-1]*1000. # 
-        print 'it', it, 'min dist',  np.mean(distance[-1][which_ens_min_dist[-1]])*1000., 'min distance to beat', min_mean_dist_acceptable[-1]*1000 # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print 'r0b', format(r_spock_ok[0, which_ens_min_dist[-1], 0]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_dist[-1], 1]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_dist[-1], 2]*1000, '.14e')
-        print 'v0b', format(v_spock_ok[0, which_ens_min_dist[-1], 0]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_dist[-1], 1]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_dist[-1], 2]*1000, '.14e')
-        print  'sigmab',  np.sqrt(sigma_x), np.sqrt( sigma_vx )
-    elif optim_var == 'dist_weight': # if optimizing weighted distance                                              
-        #print it, min_mean_dist_itime_iens[-1]*1000., min_mean_vdiff_itime_iens[-1]*1000. # 
-        print 'it', it, 'optim dist',  np.mean(distance[-1][which_ens_min_dist_weight[-1]])*1000., 'min weighted dist', np.mean(distance_weight[-1][which_ens_min_dist_weight[-1]])*1000.,'min weighted distance to beat', min_mean_dist_weight_acceptable[-1]*1000 # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print 'r0b', format(r_spock_ok[0, which_ens_min_dist_weight[-1], 0]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_dist_weight[-1], 1]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_dist_weight[-1], 2]*1000, '.14e')
-        print 'v0b', format(v_spock_ok[0, which_ens_min_dist_weight[-1], 0]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_dist_weight[-1], 1]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_dist_weight[-1], 2]*1000, '.14e')
-        print  'sigmab',  np.sqrt(sigma_x), np.sqrt( sigma_vx )
+    print it, min_mean_dist_itime_iens[-1]*1000.
+    print format(r_spock_ok[0, which_ens_min_dist[-1], 0]*1000, '.14e'),\
+        format(r_spock_ok[0, which_ens_min_dist[-1], 1]*1000, '.14e'),\
+        format(r_spock_ok[0, which_ens_min_dist[-1], 2]*1000, '.14e')
+    print format(v_spock_ok[0, which_ens_min_dist[-1], 0]*1000, '.14e'),\
+        format(v_spock_ok[0, which_ens_min_dist[-1], 1]*1000, '.14e'),\
+        format(v_spock_ok[0, which_ens_min_dist[-1], 2]*1000, '.14e')
+    print  np.sqrt(sigma_x), np.sqrt( sigma_vx )
+    if min_mean_dist_itime_iens[-1] < min_mean_dist_itime_iens[-2]*0.85:
+        print 'acceptable'
+        sigma_x_list_acceptable.append( np.sqrt( sigma_x ) )
+        sigma_y_list_acceptable.append( np.sqrt( sigma_y ) )
+        sigma_z_list_acceptable.append( np.sqrt( sigma_z ) )
 
-    elif optim_var == 'sma_diff': # if optimizing sma difference
-        #print it, min_mean_dist_itime_iens[-1]*1000., min_mean_sma_diff_itime_iens[-1]*1000. # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print it, 'min dist with optim sma', np.mean(distance[-1][which_ens_min_sma_diff[-1]])*1000., np.mean(sma_diff[-1][which_ens_min_sma_diff[-1]])*1000., 'min sma diff to beat', min_mean_sma_diff_acceptable[-1]*1000. # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print format(r_spock_ok[0, which_ens_min_sma_diff[-1], 0]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_sma_diff[-1], 1]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_sma_diff[-1], 2]*1000, '.14e')
-        print format(v_spock_ok[0, which_ens_min_sma_diff[-1], 0]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_sma_diff[-1], 1]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_sma_diff[-1], 2]*1000, '.14e')
-        print  np.sqrt(sigma_x), np.sqrt( sigma_vx )
+        sigma_vx_list_acceptable.append( np.sqrt( sigma_vx ) )
+        sigma_vy_list_acceptable.append( np.sqrt( sigma_vy ) )
+        sigma_vz_list_acceptable.append( np.sqrt( sigma_vz ) )
 
-    elif optim_var == 'v_diff': # if optimizing velcoity difference
-        #print it, min_mean_dist_itime_iens[-1]*1000., min_mean_vdiff_itime_iens[-1]*1000. # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print it, np.mean(distance[-1][which_ens_min_vdiff[-1]])*1000., np.mean(v_diff[-1][which_ens_min_vdiff[-1]])*1000. # ax.plot(distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]])
-        print format(r_spock_ok[0, which_ens_min_vdiff[-1], 0]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_vdiff[-1], 1]*1000, '.14e'),\
-            format(r_spock_ok[0, which_ens_min_vdiff[-1], 2]*1000, '.14e')
-        print format(v_spock_ok[0, which_ens_min_vdiff[-1], 0]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_vdiff[-1], 1]*1000, '.14e'),\
-            format(v_spock_ok[0, which_ens_min_vdiff[-1], 2]*1000, '.14e')
-        print  np.sqrt(sigma_x), np.sqrt( sigma_vx )
-    if optim_var == 'dist': # if optimizing distance
-        fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]]); plt.show(); plt.show();
-        if min_mean_dist_itime_iens[-1] <= min_mean_dist_acceptable[-1]:#min_mean_dist_itime_iens[-2]*1.:#0.85:
-            min_mean_dist_acceptable.append(min_mean_dist_itime_iens[-1])
-            acceptable = 1
-            print 'acceptable'
-            # if plot_or_not == 1:
-            #     fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., distance[-1][np.where( mean_dist_itime_iens ==  np.nanmin(mean_dist_itime_iens) )[0][0]]); plt.show();
-            sigma_x_list_acceptable.append( np.sqrt( sigma_x ) )
-            sigma_y_list_acceptable.append( np.sqrt( sigma_y ) )
-            sigma_z_list_acceptable.append( np.sqrt( sigma_z ) )
-
-            sigma_vx_list_acceptable.append( np.sqrt( sigma_vx ) )
-            sigma_vy_list_acceptable.append( np.sqrt( sigma_vy ) )
-            sigma_vz_list_acceptable.append( np.sqrt( sigma_vz ) )
-
-            previous_r0 = r0
-            previous_r1 = r1
-            previous_r2 = r2
-            previous_v0 = v0
-            previous_v1 = v1
-            previous_v2 = v2
-    elif optim_var == 'dist_weight': # if optimizing weighted distance
-        if plot_or_not == 1:
-            fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., np.array(distance[-1][np.where( mean_dist_weight_itime_iens ==  np.nanmin(mean_dist_weight_itime_iens) )[0][0]])*1000); plt.show();
-            #fig_save_name = 'fig/' + main_input_filename.replace('.txt', '.png')
-            #fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
-            #os.system("scp -p " + fig_save_name + " lin:fig_density/" )
-
-        if min_mean_dist_weight_itime_iens[-1] <= min_mean_dist_weight_acceptable[-1]:#min_mean_dist_itime_iens[-2]*1.:#0.85:
-            min_mean_dist_weight_acceptable.append(min_mean_dist_weight_itime_iens[-1])
-            acceptable = 1
-            print 'acceptable'
-            # if plot_or_not == 1:
-            #     fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., np.array(distance[-1][np.where( mean_dist_weight_itime_iens ==  np.nanmin(mean_dist_weight_itime_iens) )[0][0]])*1000)#; plt.show();
-            #     fig_save_name = 'fig/' + main_input_filename.replace('.txt', '.png')
-            #     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
-            #     #os.system("scp -p " + fig_save_name + " lin:fig_density/" )
-
-            sigma_x_list_acceptable.append( np.sqrt( sigma_x ) )
-            sigma_y_list_acceptable.append( np.sqrt( sigma_y ) )
-            sigma_z_list_acceptable.append( np.sqrt( sigma_z ) )
-
-            sigma_vx_list_acceptable.append( np.sqrt( sigma_vx ) )
-            sigma_vy_list_acceptable.append( np.sqrt( sigma_vy ) )
-            sigma_vz_list_acceptable.append( np.sqrt( sigma_vz ) )
-
-            previous_r0 = r0
-            previous_r1 = r1
-            previous_r2 = r2
-            previous_v0 = v0
-            previous_v1 = v1
-            previous_v2 = v2
-
-    elif optim_var == 'sma_diff': # if optimizing sma difference
-        if min_mean_sma_diff_itime_iens[-1] <= min_mean_sma_diff_acceptable[-1]:#min_mean_sma_diff_itime_iens[-2]*1.:#0.85:
-            min_mean_sma_diff_acceptable.append(min_mean_sma_diff_itime_iens[-1])
-            acceptable = 1
-            print 'acceptable'
-            if plot_or_not == 1:
-                fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., distance[-1][np.where( mean_sma_diff_itime_iens ==  np.nanmin(mean_sma_diff_itime_iens) )[0][0]]); plt.show();
-            sigma_x_list_acceptable.append( np.sqrt( sigma_x ) )
-            sigma_y_list_acceptable.append( np.sqrt( sigma_y ) )
-            sigma_z_list_acceptable.append( np.sqrt( sigma_z ) )
-
-            sigma_vx_list_acceptable.append( np.sqrt( sigma_vx ) )
-            sigma_vy_list_acceptable.append( np.sqrt( sigma_vy ) )
-            sigma_vz_list_acceptable.append( np.sqrt( sigma_vz ) )
-
-            previous_r0 = r0
-            previous_r1 = r1
-            previous_r2 = r2
-            previous_v0 = v0
-            previous_v1 = v1
-            previous_v2 = v2
-    elif optim_var == 'v_diff': # if optimizing velcoity difference
-        if min_mean_vdiff_itime_iens[-1] <= min_mean_vdiff_acceptable[-1]:#< min_mean_vdiff_itime_iens[-2]*0.85:
-            min_mean_vdiff_acceptable.append(min_mean_vdiff_itime_iens[-1])
-            
-            acceptable = 1
-            print 'acceptable'
-            if plot_or_not == 1:
-                fig, ax = plt.subplots(); ax.plot(nb_seconds_since_start_spock_ok / 3600., np.mean(distance[-1][which_ens_min_vdiff[-1]])*1000.); plt.show();
-            sigma_x_list_acceptable.append( np.sqrt( sigma_x ) )
-            sigma_y_list_acceptable.append( np.sqrt( sigma_y ) )
-            sigma_z_list_acceptable.append( np.sqrt( sigma_z ) )
-
-            sigma_vx_list_acceptable.append( np.sqrt( sigma_vx ) )
-            sigma_vy_list_acceptable.append( np.sqrt( sigma_vy ) )
-            sigma_vz_list_acceptable.append( np.sqrt( sigma_vz ) )
-
-            previous_r0 = r0
-            previous_r1 = r1
-            previous_r2 = r2
-            previous_v0 = v0
-            previous_v1 = v1
-            previous_v2 = v2
+        previous_r0 = r0
+        previous_r1 = r1
+        previous_r2 = r2
+        previous_v0 = v0
+        previous_v1 = v1
+        previous_v2 = v2
 
 
 
@@ -850,8 +555,6 @@ raise Exception
 # Initialize SpOCK with this ooptimized r0/v0 and propagate it for each interval using different values of the coeffieicnt on rho
 # For each interval, record the rho coefficient that minimizes the distance to the observation
 ## The 4 lines below are redundant with before but are here for when  ic opy paste. 
-nb_interval = 4 # !!!!!!!!!!!!remove line
-no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 date_start = date_obs_start
 date_end = date_start + timedelta(seconds = interval_sec)
 date_end_str = datetime.strftime(date_end, "%Y-%m-%dT%H:%M:%S")
@@ -867,13 +570,9 @@ last_r2_rho = np.zeros([nb_rho])
 last_v0_rho = np.zeros([nb_rho])
 last_v1_rho = np.zeros([nb_rho])
 last_v2_rho = np.zeros([nb_rho])
-index_obs_kept = []
-date_obs_rho_ok = []
-rho_center = 1 # factor to apply to each rho_mod_arr[irho]
-rho_center_list = []
 for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     nb_seconds_since_start_rho_inter = []
-    index_obs_kept_inter = []
+
     distance_rho_interval = []
     distance_lvlh_rho_interval = []
     print ''
@@ -891,12 +590,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
 #             v1 = format(v_spock_ok[0, (int)(which_ens_min_dist[-1]), 1], '.14e')
 #             v2 = format(v_spock_ok[0, (int)(which_ens_min_dist[-1]), 2], '.14e')
             # !!!!!!! COMMENT BLOCK BELOW AND UNCOMMENT BLOCK ABOVE
-            r0 = '-2.54076587561000e+03' #'-2.54076675858000e+03'
-            r1 = '-5.06266991514000e+03' #'-5.06267229759000e+03'
-            r2 = '-3.95089081204000e+03' #'-3.95089213639000e+03'
-            v0 = '6.76840081300000e+00' #'6.76839848600000'
-            v1 = '-3.44599707500000e+00' #'-3.44599792600000'
-            v2 = '4.16872280000000e-02' #'4.16913030000000e-2'
+            r0 = '-2.54076675858000e+03'
+            r1 = '-5.06267229759000e+03'
+            r2 = '-3.95089213639000e+03'
+            v0 = '6.76839848600000'
+            v1 = '-3.44599792600000'
+            v2 = '4.16913030000000e-2'
             # !!!!!!! end of COMMENT BLOCK BELOW AND UNCOMMENT BLOCK ABOVE
 
         else:
@@ -913,47 +612,45 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         print ''
 
         rho_mod = rho_mod_arr[irho]
-        main_input_filename = 'long_' + date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_rhomod_' + format(rho_mod, ".2f").replace(".", "_") + '.txt'
-        if no_prop != 1:
-            spock_main_input( # need to be in spokc/srcPython to run this script   
-                main_input_filename,
-                # for TIME section
-                   date_start_str, # first interval: same as during the r/v optimization. subsequent intervals: last date of previous interval
-                date_end_str,
-                dt,
-                # for SPACECRAFT section
-                        1,
-                '0',
-                29,
-                "cygnss_geometry_2016_acco08.txt", #"cygnss_geometry_2016_smaller_solar_radiation_coeff.txt", #"cygnss_geometry_2016.txt",#"cygnss_geometry_2016_acco09.txt",
-                # for ORBIT section
-                    ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
-                # for FORCES section
-                gravity_order, # !!!!!!!!!!! put back 20
-                "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
-                'swpc',
-                # for OUTPUT section
-                        "out",
-                dt_output, 
-                # for ATTITUDE section
-                obs_att_filename,
-                # for GROUND_STATIONS section
-                        "0",
-                # for SPICE section
-                        spice_path,
-                # FOR #DENSITY_MOD section
-                        rho_mod * rho_center
-            )
+        main_input_filename = date_start_str.replace(":","_") + '_' + date_end_str.replace(":","_")+ '_rhomod_' + format(rho_mod, ".2f").replace(".", "_") + '.txt'
+        spock_main_input( # need to be in spokc/srcPython to run this script   
+            main_input_filename,
+            # for TIME section
+               date_start_str, # first interval: same as during the r/v optimization. subsequent intervals: last date of previous interval
+            date_end_str,
+            dt,
+            # for SPACECRAFT section
+                    1,
+            '0',
+            29,
+            "cygnss_geometry_2016_acco08.txt", #"cygnss_geometry_2016_smaller_solar_radiation_coeff.txt", #"cygnss_geometry_2016.txt",#"cygnss_geometry_2016_acco09.txt",
+            # for ORBIT section
+                ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
+            # for FORCES section
+              gravity_order, # !!!!!!!!!!! put back 20
+            "drag solar_pressure sun_gravity moon_gravity", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
+            'swpc',
+            # for OUTPUT section
+                    "out",
+            dt_output, 
+            # for ATTITUDE section
+            obs_att_filename,
+            # for GROUND_STATIONS section
+                    "0",
+            # for SPICE section
+                    spice_path,
+            # FOR #DENSITY_MOD section
+                    rho_mod
+        )
 
-            #Run SpOCK
-            if iinter > 2: # !!!!!!!! remvove this if
+        ## Run SpOCK
+        #if iinter > 0: # !!!!!!!! remvove this if
+        # if ispleiades != 1:
+        #     os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
+        # else:
+        #     os.system(path_mpirun + ' /home1/cbussy/spock_new ' + main_input_filename)
 
-                if ispleiades != 1:
-                    os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
-                else:
-                    os.system(path_mpirun + ' /home1/cbussy/spock ' + main_input_filename)
-
-        #save position and velocity
+        ## save position and velocity
         #os.system("python state_dev.py ./ " + main_input_filename + " save position velocity")
 
 
@@ -975,32 +672,20 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             index_spock_same_date_as_obs_rho = []
             if iinter == 0: # for the next interval, start date_obs[iobs] at the last observation of the previous interval
                 iobs = 0
-            print 'iobs', iobs
             while iobs < nb_obs:
                 if date_obs[iobs] > date_datetime_round_sec_spock[-1]:
                     break
                 else:
                     if len(index_spock_same_date_as_obs_rho) == 0:
                         first_obs = iobs
-                    if len(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0]) != 0:#can be = 0 if an observation is missing at that time
-                        index_spock_same_date_as_obs_rho.append(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0][0])
-                        nb_seconds_since_start_rho_inter.append( ( date_obs[iobs] - date_obs[0] ).total_seconds() )
-                        index_obs_kept_inter.append(iobs)
-                        iobs = iobs + 60
-                    else: # find next obs
-                        while len(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0]) == 0:
-                            iobs = iobs + 1
-                        index_spock_same_date_as_obs_rho.append(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0][0])
-                        nb_seconds_since_start_rho_inter.append( ( date_obs[iobs] - date_obs[0] ).total_seconds() )
-                        index_obs_kept_inter.append(iobs)
-                        iobs = iobs + 60
-
-                        
+                    index_spock_same_date_as_obs_rho.append(np.where(date_datetime_round_sec_spock == date_obs[iobs])[0][0])
+                    nb_seconds_since_start_rho_inter.append( ( date_obs[iobs] - date_obs[0] ).total_seconds() )
+                iobs = iobs + 1
             nb_seconds_since_start_rho.append(nb_seconds_since_start_rho_inter)
-            index_obs_kept.append(index_obs_kept_inter)
+
             n = len(index_spock_same_date_as_obs_rho) #!!!!!!!!!! j-index_interval[iinter]
             date_datetime_round_sec_spock_rho_ok.append(date_datetime_round_sec_spock[index_spock_same_date_as_obs_rho])
-            date_obs_rho_ok.append(np.array(date_obs)[index_obs_kept[-1]])
+            
 
         # Compare SpOCK and data
         r_spock_ok_rho = np.zeros([n, 3])
@@ -1032,14 +717,14 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
 
         distance_rho_sub = []
         distance_lvlh_rho_sub = []
-        index_obs = first_obs # !!!!!!!!!index_interval[itime].stopped using index_obs after aug 31 2018
+        index_obs = first_obs # !!!!!!!!!index_interval[itime]
         #print 'DETAILS', iinter, irho
         for i in range(n):
-            distance_here = r_spock_ok_rho[i, :] - r_obs[index_obs_kept[-1]][i, :]
+            distance_here = r_spock_ok_rho[i, :] - r_obs[index_obs, :]
             distance_here_mag = np.linalg.norm(distance_here)
-            #print 'inter', iinter, irho, r_spock_ok_rho[i, :],  r_obs[index_obs_kept[-1]][i, :], '|', index_obs, distance_here_mag
+            #print 'inter', iinter, irho, r_spock_ok_rho[i, :],  r_obs[index_obs, :], '|', index_obs, distance_here_mag
             distance_rho_sub.append( distance_here_mag )
-            distance_lvlh_rho_sub.append( eci_to_lvlh(r_obs[index_obs_kept[-1]][i, :], v_obs[index_obs_kept[-1]][i, :], distance_here) )
+            distance_lvlh_rho_sub.append( eci_to_lvlh(r_obs[index_obs, :], v_obs[index_obs, :], distance_here) )
             index_obs = index_obs + 1
         distance_rho_interval.append( distance_rho_sub )
         #print 'END OF DETAILS', iinter, irho
@@ -1067,9 +752,6 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     last_v0 = last_v0_rho[index_rho_min_dist[iinter]]
     last_v1 = last_v1_rho[index_rho_min_dist[iinter]]
     last_v2 = last_v2_rho[index_rho_min_dist[iinter]]
-    
-    rho_center = rho_center * which_rho_min_dist[iinter]
-    rho_center_list.append(rho_center)
     print '-->\n-->'
     print '--> rho that min', index_rho_min_dist[iinter], which_rho_min_dist[iinter]
     print format(last_r0,".14e"),format(last_r1,".14e"),format(last_r2,".14e")
@@ -1157,7 +839,7 @@ if nb_rho > 1:
     alpha_arr = np.arange(0.2,1+0.2/nb_rho,(1-0.2)/(nb_rho-1))
 else: 
     alpha_arr = [1]
-ymax = 1600
+
 for iinter in range(nb_interval):
     for irho in range(nb_rho):
         if alpha_arr[irho] >1:
@@ -1166,8 +848,7 @@ for iinter in range(nb_interval):
         #ax.plot(x_axis, (np.array(distance_rho[iinter][irho]) - np.array(distance_rho[iinter][0]))*1000, linewidth = 2, color = 'b', alpha = alpha_arr[irho])
         #ax.text(x_axis[-1], (np.array(distance_rho[iinter][irho]) - np.array(distance_rho[iinter][0]))[-1]*1000, format(rho_mod_arr[irho], ".1f"), horizontalalignment = 'left', fontsize = fontsize_plot, weight = 'bold', color = 'b', alpha = alpha_arr[irho], verticalalignment = 'center')
         #ax.text(x_axis[-1], distance_min_concatenate[irho][-1]*1000, format(rho_mod_arr[irho], ".1f"), horizontalalignment = 'left', fontsize = fontsize_plot, weight = 'bold', color = 'b', alpha = alpha_arr[irho], verticalalignment = 'center')
-        if np.array(distance_rho[iinter][irho][-1])*1000 < ymax:
-            ax.text(nb_seconds_since_start_rho[iinter][-1], np.array(distance_rho[iinter][irho][-1])*1000, str(rho_mod_arr[irho]), horizontalalignment = 'left', fontsize = fontsize_plot, weight = 'bold', color = 'b', alpha = alpha_arr[irho], verticalalignment = 'center')
+        #ax.text(x_axis[-1], distance_rho[iinter][irho][-1], str(rho_mod_arr[irho]), horizontalalignment = 'left', fontsize = fontsize_plot, weight = 'bold', color = 'b', alpha = alpha_arr[irho], verticalalignment = 'center')
         print irho
 ax.plot(x_axis, distance_min_concatenate*1000, linewidth = 2, color = 'r')
 # x axis label is in real time
@@ -1189,12 +870,11 @@ for i in range(len(xticks)):
         ax.margins(0,0); ax.set_xlim([min(xticks), max(xticks)])
 #        ax.set_xlim([ax.get_xlim()[0], most_recent_tle_among_all_sc])
 
-ax.set_ylim([0, ymax])
 legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="", fontsize = fontsize_plot)
 #legend.get_title().set_fontsize(str(fontsize_plot))
 
 
-fig_save_name = 'fig/long_071318_distance_optimum_rho_to_obs_' + main_input_filename_root.replace(".txt", ".pdf")
+fig_save_name = '071318_distance_optimum_rho_to_obs_' + main_input_filename_root.replace("txt", "pdf")
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1450,7 +1130,7 @@ ax_x.plot([r_obs[index_in_obs, 0], r_obs[index_in_obs, 0]],[0,np.nanmax(n)], lin
 
 legend = ax_x.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_save_name = 'x_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_save_name = 'x_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_x.savefig(fig_save_name, facecolor=fig_x.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1488,7 +1168,7 @@ ax_y.plot([r_obs[index_in_obs, 1], r_obs[index_in_obs, 1]],[0,np.nanmax(n)], lin
 
 legend = ax_y.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_save_name = 'y_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_save_name = 'y_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_y.savefig(fig_save_name, facecolor=fig_y.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1526,7 +1206,7 @@ ax_z.plot([r_obs[index_in_obs, 2], r_obs[index_in_obs, 2]],[0,np.nanmax(n)], lin
 
 legend = ax_z.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_save_name = 'z_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_save_name = 'z_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_z.savefig(fig_save_name, facecolor=fig_z.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1565,7 +1245,7 @@ ax_vx.plot([v_obs[index_in_obs, 0], v_obs[index_in_obs, 0]],[0,np.nanmax(n)], li
 
 legend = ax_vx.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_vsave_name = 'vx_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_vsave_name = 'vx_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_vx.savefig(fig_vsave_name, facecolor=fig_vx.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1603,7 +1283,7 @@ ax_vy.plot([v_obs[index_in_obs, 1], v_obs[index_in_obs, 1]],[0,np.nanmax(n)], li
 
 legend = ax_vy.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_vsave_name = 'vy_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_vsave_name = 'vy_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_vy.savefig(fig_vsave_name, facecolor=fig_vy.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
@@ -1641,7 +1321,7 @@ ax_vz.plot([v_obs[index_in_obs, 2], v_obs[index_in_obs, 2]],[0,np.nanmax(n)], li
 
 legend = ax_vz.legend(loc='top right', numpoints = 1,  title="", fontsize = fontsize_plot)
 
-fig_vsave_name = 'vz_eci_' + main_input_filename.replace(".txt", "_test.pdf")
+fig_vsave_name = 'vz_eci_' + main_input_filename.replace(".txt", ".pdf")
 fig_vz.savefig(fig_vsave_name, facecolor=fig_vz.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
