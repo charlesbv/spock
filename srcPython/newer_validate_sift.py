@@ -62,10 +62,10 @@ import os.path
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 2 #1 # which CYGNSS to look at
+cygfm = 3 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-09-24T00:00:00'#'2018-03-20T00:00:00'#"2017-06-01T00:00:00"
-spock_input_filename = 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
+spock_input_filename = 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -79,7 +79,7 @@ yaw_max = 180. # filter out when yaw is greater than this value (in magnitude)
 load_pickle = 0 # set to 1 if results have been previously saved in a pickle so no computation is made here
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 date_start_val_start = datetime.strptime(date_start_val_start, "%Y-%m-%dT%H:%M:%S")
-date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,4,1)])
+date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])
 nb_date = len(date_start_val_array)
 
 
@@ -3192,6 +3192,8 @@ print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + 
 print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong, ".2f") 
 
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
+## Either select idate, itime_diff, duration_diagram OR select start_date_interval and stop_date_interval in the next block (that starts with "look at particular interval")
+## if select idate, itime_diff, duration_diagram  the comment the block that start with "look at particular interval"
 idate = 1
 itime_diff = 20
 duration_diagram = 10. # in minutes
@@ -3200,6 +3202,19 @@ duration_diagram_sec = duration_diagram * 60.
 itime_start = time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
 itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]
                + duration_diagram_sec)[0][0] + 1
+
+
+# look at particular interval of time defined by start_date_interval and stop_date_interval (becareful: UTC times)
+## !!!!!!! assumes:
+## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
+idate = 0
+start_date_interval = '2018-10-31T18:48:00'
+stop_date_interval = '2018-10-31T18:55:32'
+start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
+stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
+itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
+itime_stop = np.where(date_spock_same_time_as_netcdf <= stop_date_interval_date)[0][-1]
+
 
 # figure out the number of different prn (SpOCK and on-board) during that time intervals
 prn_list = []
@@ -3301,7 +3316,6 @@ ax.margins(0,0)
 ax.set_ylim([-0.25, nprn+0.5])
 fig_save_name = '/Users/cbv/test.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
-
 
 
 

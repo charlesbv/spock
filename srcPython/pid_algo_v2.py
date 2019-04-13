@@ -20,7 +20,7 @@ rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the i
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
+no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho = 0.1 # the rho control will vary by this amount to find the optimum rho over an interval
@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'new_rv0'
+prefix_name = 'rv0_error16m'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -155,7 +155,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 44#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -276,12 +276,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
         # with spock_FM5_20171216_eng_pvt_query...
-        r0 = '-2.54077134743000e+03'#!!!!!!before 041119 was '-2.54076587561000e+03'#
-        r1 = '-5.06266435889000e+03'#'-5.06266991514000e+03'#
-        r2 = '-3.95088581082000e+03'#'-3.95089081204000e+03'#
-        v0 = '6.76839926700000'#'6.76840081300000e+00'#'
-        v1 = '-3.44601093800000'#'-3.44599707500000e+00'#
-        v2 = '4.16865900000000e-02'#'4.16872280000000e-02'#'
+        r0 = '-2.54076213193000e+03'#!!!!!!before 041119 was '-2.54076587561000e+03'#
+        r1 = '-5.06266607697000e+03'#'-5.06266991514000e+03'#
+        r2 = '-3.95089510674000e+03'#'-3.95089081204000e+03'#
+        v0 = '6.76840176100000'#'6.76840081300000e+00'#'
+        v1 = '-3.44599998600000'#'-3.44599707500000e+00'#
+        v2 = '4.16861820000000e-02'#'4.16872280000000e-02'#'
 #         # with spock_FM5_20180521_eng_pvt_query...
 #         r0 = '5.10860462753000e+03'
 #         r1 = '3.05387469849000e+03'
