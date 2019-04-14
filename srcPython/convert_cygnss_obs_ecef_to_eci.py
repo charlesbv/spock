@@ -18,7 +18,7 @@
 # This script converts an obsevation file from ECEF to ECI coordinates and write thee output in a file
 import numpy as np
 import sys
-sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
+sys.path.append("/Users/cbv/work/spock/srcPython")
 import os
 from ecef2eci import *
 
