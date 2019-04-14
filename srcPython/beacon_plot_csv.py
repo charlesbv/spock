@@ -13,7 +13,12 @@ from beacon_read_csv import *
 from struct import *
 from tabulate import tabulate
 deg2rad = np.pi/180
-filename = 'outputCygnssOct/FM03/pass_5_PRN_10.csv'
+
+# PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
+filename = 'FM03_2018-10-31/pass_1_PRN_21.csv' #'outputCygnssOct/FM03/pass_5_PRN_10.csv'
+yaw_90 = 0 # if 1 then rotation of 90 of the antenna map. otherwise no yaw rotation
+# end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
+
 
 date, prn, target_lat, target_lon, target_alt, target_ecef_x, target_ecef_y, target_ecef_z, target_rx_sat_look_angle_az, target_rx_sat_look_angle_el, target_rx_sat_range, sp_lat, sp_lon, sp_ecef_pos_x, sp_ecef_pos_y, sp_ecef_pos_z, sp_gain, rx_sub_sat_lat, rx_sub_sat_lon, rx_sat_ecef_pos_x, rx_sat_ecef_pos_y, rx_sat_ecef_pos_z, rx_sat_ecef_vel_x, rx_sat_ecef_vel_y, rx_sat_ecef_vel_z, tx_sat_ecef_pos_x, tx_sat_ecef_pos_y, tx_sat_ecef_pos_z, rx_power = beacon_read_csv(filename)
 
@@ -74,8 +79,10 @@ for i in range(n):
 # Until now, azim_beacon_from_rx_90port = 90 means beacon is port of rx, 270 means beacon is startboarf of rx, - means beacon is on the ram side of rx, 180 means beacon is on the wake side of rx
 # Convert so that 0 is ram, 90 is starboard, 180 is wake, 270 is port
 azim_beacon_from_rx = 360 - azim_beacon_from_rx_90port
-azim_beacon_from_rx_body = np.mod(azim_beacon_from_rx + 90., 360)
-
+if yaw_90 == 1:
+    azim_beacon_from_rx_body = np.mod(azim_beacon_from_rx + 90., 360)
+else:
+    azim_beacon_from_rx_body = np.mod(azim_beacon_from_rx, 360)
 
 
         
