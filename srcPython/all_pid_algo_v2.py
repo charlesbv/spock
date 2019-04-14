@@ -2,7 +2,7 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ["rv0_error16m_mid"]
+pickle_root_list = ["test_mid"]
 #["fastearth_sp10_mid", "fastearth_sp11_mid", "fastearth_sp12_mid", "fastearth_sp13_mid", "earth_sp13_mid", "gravMap_sp13_mid"]
 #["grav50_mid", "sp11_mid", "sp12_mid", "sp13_mid", "sp14_mid", "sp15_mid", "sp16_mid", "sp20_mid"]
 #['solpres05_mid']#['dt02_mid']#['noSolarPressure_mid']#['grav50_mid']#['dt02_mid']#['onlyDrag_mid']
