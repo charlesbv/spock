@@ -29,7 +29,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'fm4'
+prefix_name = '2018jan12'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -91,13 +91,17 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20171216_eng_pvt_query-13525_start18000.txt'
+obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_pvt_query-13841_start20180113T170000_end20180126T170000.txt'
+# FM4 20171216 starting at 18:00:00
+# spock_FM4_20171216_eng_pvt_query-13525_start18000.txt'
 # FM5_20171216:
 # spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
-obs_att_filename = dir_simu + 'HD_data/spock_FM4_20171216_eng_adcs_query-13526_start18000.txt'
+obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_end20180126T170000.txt'
+# FM4 20171216 starting at 18:00:00
+# spock_FM4_20171216_eng_adcs_query-13526_start18000.txt
 # FM5_20171216:
 # spock_FM5_20171216_eng_adcs_query-13528.txt'
 #HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
@@ -279,13 +283,21 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     print 'NEW INTERVAL', iinter, nb_interval-1,
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
-        # with  FM4_20171216 starting at 18:00:00
-        r0 = '1.48903692290000e+02' # 1.48903692290000e+05 5.86036162919000e+06 3.62086259413000e+06
-        r1 = '5.86036162919000e+03'
-        r2 = '3.62086259413000e+03'
-        v0 = '-7.30954620800000' # -7.30954620800000e+03 1.24290090200000e+03 -1.72455126000000e+03
-        v1 = '1.24290090200000'
-        v2 = '-1.72455126000000'
+        # with FM4_20180112 start 20180113T170000
+        r0 = '3.99031942362000e+03'
+        r1 = '-5.16211445413000e+03'
+        r2 = '2.23395939782000e+03'
+        v0 = '5.97453948000000'
+        v1 = '3.04191975000000'
+        v2 = '-3.59491565800000'
+
+        # # with  FM4_20171216 starting at 18:00:00
+        # r0 = '1.48903692290000e+02' # 1.48903692290000e+05 5.86036162919000e+06 3.62086259413000e+06
+        # r1 = '5.86036162919000e+03'
+        # r2 = '3.62086259413000e+03'
+        # v0 = '-7.30954620800000' # -7.30954620800000e+03 1.24290090200000e+03 -1.72455126000000e+03
+        # v1 = '1.24290090200000'
+        # v2 = '-1.72455126000000'
         
         # # with spock_FM5_20171216_eng_pvt_query...
         # r0 = '-2.54076213193000e+03'#!!!!!!before 041119 was '-2.54076587561000e+03'#
