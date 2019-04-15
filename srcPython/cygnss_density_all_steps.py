@@ -12,8 +12,8 @@ from convert_cygnss_obs_ecef_to_eci import *
 
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-eng_pvt = 'FM4_20171216_eng_pvt_query-13525.txt'
-eng_adcs = 'FM4_20171216_eng_adcs_query-13526.txt'
+eng_pvt = 'FM4_20180112_eng_pvt_query-13841.txt'
+eng_adcs = 'FM4_20180112_eng_adcs_query-13840.txt'
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 
