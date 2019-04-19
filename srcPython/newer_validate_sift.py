@@ -62,10 +62,10 @@ import os.path
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 3 #1 # which CYGNSS to look at
+cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
+spock_input_filename = 'newfm02SepYaw_1s_out.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -3191,6 +3191,140 @@ print '    - percentage of time the top PRN is incorrectly selected: ' + format(
 print '    - percentage of time the 2nd to top PRN is incorrectly selected: ' + format(percentage_second_gain_wrong, ".2f")
 print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' + format(percentage_first_and_second_gain_wrong, ".2f") 
 
+
+interv_dur = 10 # in min, duration of the interval of time to look at. It'sa ctually not exactly in minutes, see comment right below for delta_inter
+delta_inter = 60 # move forward the interval of time interv_dur delta_inter indices (in theory seconds but sometimes there is missing data in the
+#netcdf so you imght jump more than delta_inter seconds) 
+interv_dur = (int)(interv_dur); delta_inter = (int)(delta_inter)
+inter_dur_sec = interv_dur * 60 # It' actually not exactly in seconds, see comment right above for delta_inter
+
+time_first_score_wrong = []
+duration_first_score_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+# -> for each interval iinterv_dur, duration_first_score_wrong_idate[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
+# be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
+time_second_score_wrong = []
+duration_second_score_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+time_first_and_second_score_wrong = []
+duration_first_and_second_score_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+first_and_second_score = []
+time_first_or_second_score_wrong = []
+duration_first_or_second_score_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+first_or_second_score = []
+first_score = []
+second_score = []
+duration_first_score_wrong_list_conc = []
+duration_second_score_wrong_list_conc = []
+duration_first_and_second_score_wrong_list_conc = []
+duration_first_or_second_score_wrong_list_conc = []
+for idate in range(nb_date):
+    #idate = 0
+    ntot = len(gps_spock_all_date[idate])
+    time_first_score_wrong_idate = []
+    duration_first_score_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    # -> for each interval iinterv_dur, duration_first_score_wrong_list[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
+    # be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
+    time_second_score_wrong_idate = []
+    duration_second_score_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    time_first_and_second_score_wrong_idate = []
+    duration_first_and_second_score_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    first_and_second_score_idate = []
+    time_first_or_second_score_wrong_idate = []
+    duration_first_or_second_score_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    first_or_second_score_idate = []
+    first_score_idate = []
+    second_score_idate = []
+    for itime in np.arange(0, ntot-inter_dur_sec, delta_inter):
+        print itime, ntot,idate
+        time_first_score_wrong_itime = []
+        time_second_score_wrong_itime = []
+        time_first_and_second_score_wrong_itime = []
+        time_first_or_second_score_wrong_itime = []
+        # BLOCK BELOW IF LOOKING AT BINOMIAL SCORE METRIC
+        score_prn = np.zeros([33,33])
+        prn_list = []
+        for iin in range(inter_dur_sec):
+            for ispec in range(4):
+                if ( gps_spock_all_date[idate][itime+iin][ispec] in prn_list ) == False:
+                    prn_list.append(gps_spock_all_date[idate][itime+iin][ispec])
+        prn_list = np.array(prn_list)
+        nprn = len(prn_list)
+        prn_list_sort = prn_list[np.argsort(prn_list)]        
+        for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
+            iout = -1
+            for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
+                #ipdb.set_trace()
+                iout = iout + 1
+                if len(np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time
+                    iprn_out = np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0][0]
+                    gain_out = fom_spock_all_date[idate][itime+iin][iprn_out]
+                else:
+                    gain_out = -1
+                for prn_in in prn_list_sort[iout+1:]:
+                    if len(np.where(gps_spock_all_date[idate][itime+iin] == prn_in)[0]) > 0: #the prn is selected by SpOCK at this particular time
+                        iprn_in = np.where(gps_spock_all_date[idate][itime+iin] == prn_in)[0][0]
+                        gain_in = fom_spock_all_date[idate][itime+iin][iprn_in]
+                        max_gain_out_in = np.max([gain_out, gain_in])
+                    else:
+                        gain_in = -1
+                        max_gain_out_in = np.max([gain_out, gain_in])
+                    score_prn[prn_out, prn_in] = score_prn[prn_out, prn_in] + max_gain_out_in
+        comb =  unravel_index(score_prn.argmax(), score_prn.shape)
+        first_score_idate.append(comb[0])
+        second_score_idate.append(comb[1])
+        # end of BLOCK BELOW IF LOOKING AT BINOMIAL SCORE METRIC
+        # BLOCK BELOW IF LOOKING AT DIFFERENT SCORE METRIC
+        # score_prn = np.zeros([33])
+        # for iin in range(inter_dur_sec):
+        #     for ispec in range(4):
+        #         prn_now = gps_spock_all_date[idate][itime+iin][ispec]
+        #         gain_now = fom_spock_all_date[idate][itime+iin][ispec]
+        #         score_prn[prn_now] = score_prn[prn_now] + gain_now
+        # first_score_idate.append( np.where(score_prn == np.max(score_prn))[0][0] )
+        # score_prn[first_score_idate[-1]] = -1
+        # second_score_idate.append( np.where(score_prn == np.max(score_prn))[0][0] )
+        # end of BLOCK BELOW IF LOOKING AT DIFFERENT SCORE METRIC
+        for iin in range(inter_dur_sec):
+            if (first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False:#        if (first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False:
+                time_first_score_wrong_itime.append(iin+itime)
+            if (second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False:
+                time_second_score_wrong_itime.append(iin+itime)
+            if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) & ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
+                time_first_and_second_score_wrong_itime.append(iin+itime)
+            if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) | ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
+                time_first_or_second_score_wrong_itime.append(iin+itime)
+        time_first_score_wrong_idate.append(time_first_score_wrong_itime)
+        duration_first_score_wrong_list_idate.append(np.float(len(time_first_score_wrong_itime)))
+        time_second_score_wrong_idate.append(time_second_score_wrong_itime)
+        duration_second_score_wrong_list_idate.append(np.float(len(time_second_score_wrong_itime)))
+        time_first_and_second_score_wrong_idate.append(time_first_and_second_score_wrong_itime)
+        duration_first_and_second_score_wrong_list_idate.append(np.float(len(time_first_and_second_score_wrong_itime)))
+        time_first_or_second_score_wrong_idate.append(time_first_or_second_score_wrong_itime)
+        duration_first_or_second_score_wrong_list_idate.append(np.float(len(time_first_or_second_score_wrong_itime)))
+
+        duration_first_score_wrong_list_conc.append(np.float(len(time_first_score_wrong_itime)))
+        duration_second_score_wrong_list_conc.append(np.float(len(time_second_score_wrong_itime)))
+        duration_first_and_second_score_wrong_list_conc.append(np.float(len(time_first_and_second_score_wrong_itime)))
+        duration_first_or_second_score_wrong_list_conc.append(np.float(len(time_first_or_second_score_wrong_itime)))
+        
+    time_first_score_wrong.append( time_first_score_wrong_idate )
+    duration_first_score_wrong_idate.append( np.array(duration_first_score_wrong_list_idate) ) 
+    time_second_score_wrong.append( time_second_score_wrong_idate )
+    duration_second_score_wrong_idate.append( np.array(duration_second_score_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
+    time_first_and_second_score_wrong.append( time_first_and_second_score_wrong_idate )
+    duration_first_and_second_score_wrong_idate.append( np.array(duration_first_and_second_score_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
+    first_and_second_score.append( first_and_second_score_idate )
+    time_first_or_second_score_wrong.append( time_first_or_second_score_wrong_idate )
+    duration_first_or_second_score_wrong_idate.append( np.array(duration_first_or_second_score_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
+    first_or_second_score.append( first_or_second_score_idate )
+    first_score.append( first_score_idate )
+    second_score.append( second_score_idate )
+    
+duration_first_score_wrong_conc = np.array(duration_first_score_wrong_list_conc)
+duration_second_score_wrong_conc = np.array(duration_second_score_wrong_list_conc)
+duration_first_and_second_score_wrong_conc = np.array(duration_first_and_second_score_wrong_list_conc)
+duration_first_or_second_score_wrong_conc = np.array(duration_first_or_second_score_wrong_list_conc)
+
+
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
 ## Either select idate, itime_diff, duration_diagram OR select start_date_interval and stop_date_interval in the next block (that starts with "look at particular interval")
 ## if select idate, itime_diff, duration_diagram  the comment the block that start with "look at particular interval"
@@ -3199,89 +3333,132 @@ itime_diff = 20
 duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
-itime_start = time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
-itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]
-               + duration_diagram_sec)[0][0] + 1
+
+for itime_in in range(0,len(np.where(duration_first_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])/10):
+    print itime_in, len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])
+    #itime_in = 10;
+    itime_fac = np.where(duration_first_score_wrong_idate[idate] > 0)[0][itime_in];
+    itime_start = itime_fac * delta_inter #time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
+    itime_stop = itime_start + inter_dur_sec#np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]  + duration_diagram_sec)[0][0] + 1
 
 
-# look at particular interval of time defined by start_date_interval and stop_date_interval (becareful: UTC times)
-## !!!!!!! assumes:
-## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
-idate = 0
-start_date_interval = '2018-10-31T18:48:00'
-stop_date_interval = '2018-10-31T18:55:32'
-start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
-stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
-itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
-itime_stop = np.where(date_spock_same_time_as_netcdf <= stop_date_interval_date)[0][-1]
+    # # look at particular interval of time defined by start_date_interval and stop_date_interval (becareful: UTC times)
+    # ## !!!!!!! assumes:
+    # ## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
+    # idate = 0
+    # start_date_interval = '2018-10-31T18:48:00'
+    # stop_date_interval = '2018-10-31T18:55:32'
+    # start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
+    # stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
+    # itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
+    # itime_stop = np.where(date_spock_same_time_as_netcdf <= stop_date_interval_date)[0][-1]
 
 
-# figure out the number of different prn (SpOCK and on-board) during that time intervals
-prn_list = []
-for itime in range(itime_start, itime_stop):
-    for ispec in range(4):
-        if ( gps_spock_all_date[idate][itime][ispec] in prn_list ) == False:
-            prn_list.append(gps_spock_all_date[idate][itime][ispec])
-        if ( gps_netcdf_all_date[idate][itime][ispec] in prn_list ) == False:
-            prn_list.append(gps_netcdf_all_date[idate][itime][ispec])
-prn_list = np.array(prn_list)
-nprn = len(prn_list)
-prn_list_sort = prn_list[np.argsort(prn_list)]
-NCURVES = nprn
-np.random.seed(101)
-curves = [np.random.random(20) for i in range(NCURVES)]
-values = range(NCURVES)
-jet = cm = plt.get_cmap('jet') 
-cNorm  = colors.Normalize(vmin=0, vmax=values[-1])
-scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
+    # figure out the number of different prn (SpOCK and on-board) during that time intervals
+    prn_list = []
+    for itime in range(itime_start, itime_stop):
+        for ispec in range(4):
+            if ( gps_spock_all_date[idate][itime][ispec] in prn_list ) == False:
+                prn_list.append(gps_spock_all_date[idate][itime][ispec])
+            if ( gps_netcdf_all_date[idate][itime][ispec] in prn_list ) == False:
+                prn_list.append(gps_netcdf_all_date[idate][itime][ispec])
+    prn_list = np.array(prn_list)
+    nprn = len(prn_list)
+    prn_list_sort = prn_list[np.argsort(prn_list)]
+    NCURVES = nprn
+    np.random.seed(101)
+    curves = [np.random.random(20) for i in range(NCURVES)]
+    values = range(NCURVES)
+    jet = cm = plt.get_cmap('jet') 
+    cNorm  = colors.Normalize(vmin=0, vmax=values[-1])
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
 
-height_fig = 11.  # the width is calculated as height_fig * 4/3.
-fontsize_plot = 25      
-ratio_fig_size = 4./3
-fig_title = ''#Accuracy VS RCG
-y_label = 'PRN'
-x_label = 'Time (min)'
-fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
-fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
-plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
-gs = gridspec.GridSpec(1, 1)
-gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
-ax = fig.add_subplot(gs[0, 0])
-ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
-ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
-[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
-ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
-plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
-gps_spock_value = []
-gps_netcdf_value = []
-for itime in range(itime_start, itime_stop):
-    gps_spock_value_sub = []
-    gps_netcdf_value_sub = []
-    gain_spock_now = fom_spock_all_date[idate][itime]
-    gain_sort_index = np.argsort(-gain_spock_now) # descending order
-    for ispec in range(4):
-        prn_spock = gps_spock_all_date[idate][itime][ispec]
-        prn_spock_value = np.where(prn_list_sort == prn_spock)[0][0]
-        gps_spock_value_sub.append(prn_spock_value)        
-        prn_netcdf = gps_netcdf_all_date[idate][itime][ispec]
-        prn_netcdf_value = np.where(prn_list_sort == prn_netcdf)[0][0]
-        gps_netcdf_value_sub.append(prn_netcdf_value)
-        #colorVal = scalarMap.to_rgba(prn_spock_value)
-        if (ispec == gain_sort_index[0]): # top PRN gain
+    height_fig = 11.  # the width is calculated as height_fig * 4/3.
+    fontsize_plot = 25      
+    ratio_fig_size = 4./3
+    fig_title = ''#Accuracy VS RCG
+    y_label = 'PRN'
+    x_label = 'Time (min)'
+    fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+    fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+    plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
+    gs = gridspec.GridSpec(1, 1)
+    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+    ax = fig.add_subplot(gs[0, 0])
+    ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+    ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+    [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
+    ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+    plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
+    gps_spock_value = []
+    gps_netcdf_value = []
+    for itime in range(itime_start, itime_stop):
+        gps_spock_value_sub = []
+        gps_netcdf_value_sub = []
+        gain_spock_now = fom_spock_all_date[idate][itime]
+        gain_sort_index = np.argsort(-gain_spock_now) # descending order
+        for ispec in range(4):
+            prn_spock = gps_spock_all_date[idate][itime][ispec]
+            prn_spock_value = np.where(prn_list_sort == prn_spock)[0][0]
+            gps_spock_value_sub.append(prn_spock_value)        
+            prn_netcdf = gps_netcdf_all_date[idate][itime][ispec]
+            prn_netcdf_value = np.where(prn_list_sort == prn_netcdf)[0][0]
+            gps_netcdf_value_sub.append(prn_netcdf_value)
+            #colorVal = scalarMap.to_rgba(prn_spock_value)
+            if (ispec == gain_sort_index[0]): # top PRN gain
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+                           prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 90)
+            elif (ispec == gain_sort_index[1]): # second to top PRN gain
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+                           prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
+            else:
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+                           prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 90)
-        elif (ispec == gain_sort_index[1]): # second to top PRN gain
-            ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
-        else:
-            ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
-        ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                   prn_netcdf_value + 1.05,  marker = '.', color = 'red', s=20)
+                       prn_netcdf_value + 1.05,  marker = '.', color = 'red', s=20)
 
-    gps_spock_value.append(gps_spock_value_sub)
-    gps_netcdf_value.append(gps_netcdf_value_sub)
+        gps_spock_value.append(gps_spock_value_sub)
+        gps_netcdf_value.append(gps_netcdf_value_sub)
 
+    # time_first_score_wrong[idate][itime_fac] represents all the steps in the itime_fac interval
+    # for which the top PRN selected by SpOCK at the start of the itime_fac interval were not selected by on the on-board alrorithm
+    # recall that each itime_fac interval last for inter_dur_sec steps (basically inter_dur_sec seconds, since comment for variable delta_inter)
+    if (len(time_first_score_wrong[idate][itime_fac]) > 0):
+        xfirst = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+        ax.scatter(xfirst, np.zeros([len(xfirst)])+0.35, color= 'black',  marker = '.', s = 20)
+    ax.text(0,0.35,'Top (' + str(first_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.35,' ' +
+            format(duration_first_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+    if (len(time_second_score_wrong[idate][itime_fac]) > 0):
+        xsecond = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+        ax.scatter(xsecond, np.zeros([len(xsecond)])+0., color= 'black',  marker = '.', s = 20)
+    ax.text(0,0.,'2nd (' + str(second_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.,' ' + format(duration_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+
+    if (len(time_first_and_second_score_wrong[idate][itime_fac]) > 0):
+        xfirst_and_second = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_and_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+        ax.scatter(xfirst_and_second, np.zeros([len(xfirst_and_second)])-0.35, color= 'black',  marker = '.', s = 20)
+    ax.text(0,-0.35, str(first_score[idate][itime_fac]) + '-' +  str(second_score[idate][itime_fac]) + ' gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,-0.35,' ' + format(duration_first_and_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+
+
+    ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
+            [0.6,0.6], linestyle = 'dashed', linewidth = 2, color = 'black')
+    ax.text(0,0.6,'--------------------', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+
+
+    ax.yaxis.set_ticks(np.arange(1, nprn+1))
+    ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
+    ax.margins(0,0)
+    ax.set_ylim([-0.6, nprn+0.5])
+    fig_save_name = '/Users/cbv/test'+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
+    fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+# BLOCK BELOW SHOWS AT THE BOTTOM THE TIME WHEN, AT EACH SECOND OF THE INTERVAL, THE TOP OR SECOND TOP PRN IS WRONG
 istart_second_temp = np.where(np.array(time_second_gain_wrong_all_date[idate]) >= itime_start)[0]
 if len(istart_second_temp) > 0:
     istart_second = istart_second_temp[0]
@@ -3304,20 +3481,124 @@ if ((len(istart_first_temp) > 0) & (len(istop_first_temp) > 0)):
                 nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
                np.zeros([istop_first - istart_first])+0.35, color= 'black',  marker = '.', s = 20)
 ax.text(0,0.35,'Top wrong: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
-
-ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
-        [0.6,0.6], linestyle = 'dashed', linewidth = 2, color = 'black')
-ax.text(0,0.6,'-----------------', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+# end of BLOCK BELOW SHOWS AT THE BOTTOM THE TIME WHEN, AT EACH SECOND OF THE INTERVAL, THE TOP OR SECOND TOP PRN IS WRONG
 
 
-ax.yaxis.set_ticks(np.arange(1, nprn+1))
-ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
+# Histogram of time when one of the two top scores PRN is not selected during an overpass (either)
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 25      
+ratio_fig_size = 4./3
+fig_title = 'Distribution of the total gap time per overpass'#Accuracy VS RCG
+y_label = 'Percentage'
+x_label = 'Gap time (min)'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+fig.suptitle(fig_title, y = 1.007,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                                                                                                                  
+gs = gridspec.GridSpec(1, 2)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.17)
+min_bin = 0.00001 # not eaxctaly 0 so that elements with a gap of 0 min are excluded from the histrogram ( we
+max_bin = interv_dur
+bin_size = 1. # in min
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+# First score
+ax_title = 'Top score PRN'
+ax = fig.add_subplot(gs[0, 0])
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                                                                                                                       
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+yhist = duration_first_score_wrong_conc / 60.
+hist_first_data = np.histogram(yhist, np.arange(min_bin, max_bin + bin_size, bin_size))#, range = [range_min, range_max])
+bin_array_temp = hist_first_data[1]
+bin_array = ( bin_array_temp[:-1] + np.roll(bin_array_temp,-1)[:-1] ) /2.
+binsize_actual = bin_array[1] - bin_array[0]
+hist_first = hist_first_data[0] * 100. / len(yhist)
+ax.bar(bin_array, hist_first, binsize_actual)
+y_max = np.max(hist_first)*1.1
+y_max_axis = 20
 ax.margins(0,0)
-ax.set_ylim([-0.25, nprn+0.5])
-fig_save_name = '/Users/cbv/test.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
+ax.set_ylim([0, y_max_axis])
+# Seconc score
+ax = fig.add_subplot(gs[0, 1])
+ax_title = '2nd score PRN'
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                                                                                                                       
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+yhist = duration_second_score_wrong_conc / 60.
+hist_first_data = np.histogram(yhist, np.arange(min_bin, max_bin + bin_size, bin_size))#, range = [range_min, range_max])
+bin_array_temp = hist_first_data[1]
+bin_array = ( bin_array_temp[:-1] + np.roll(bin_array_temp,-1)[:-1] ) /2.
+binsize_actual = bin_array[1] - bin_array[0]
+hist_first = hist_first_data[0] * 100. / len(yhist)
+ax.bar(bin_array, hist_first, binsize_actual)
+y_max = np.max(hist_first)*1.1
+ax.margins(0,0)
+ax.set_ylim([0, y_max_axis])
+ax.yaxis.set_ticklabels([])
+fig.set_figheight(height_fig)
+fig.set_figwidth(height_fig*ratio_fig_size)
+fig_save_name = '/Users/cbv/beacon_hist_either_3d.pdf'#
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
-
+# Histogram of time when the two top scores PRN is not selected during an overpass (or, and)
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 25      
+ratio_fig_size = 4./3
+fig_title = 'Distribution of the total gap time per overpass'#Accuracy VS RCG
+y_label = 'Percentage'
+x_label = 'Gap time (min)'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+fig.suptitle(fig_title, y = 1.007,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                                                                                                                  
+gs = gridspec.GridSpec(1, 2)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.17, wspace = 0.1)
+min_bin = 0.00001 # not eaxctaly 0 so that elements with a gap of 0 min are excluded from the histrogram ( we
+# don't want them to be counted in the [0, 1] bin)
+max_bin = interv_dur
+bin_size = 1. # in min
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+# Or
+ax_title = 'Top or 2nd score PRN'
+ax = fig.add_subplot(gs[0, 0])
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                                                                                                                       
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+yhist = duration_first_or_second_score_wrong_conc / 60.
+hist_first_data = np.histogram(yhist, np.arange(min_bin, max_bin + bin_size, bin_size))#, range = [range_min, range_max])
+bin_array_temp = hist_first_data[1]
+bin_array = ( bin_array_temp[:-1] + np.roll(bin_array_temp,-1)[:-1] ) /2.
+binsize_actual = bin_array[1] - bin_array[0]
+hist_first = hist_first_data[0] * 100. / len(yhist)
+ax.bar(bin_array, hist_first, binsize_actual)
+y_max = np.max(hist_first)*1.1
+ax.margins(0,0)
+ax.set_ylim([0, y_max_axis])
+# And
+ax = fig.add_subplot(gs[0, 1])
+ax_title = 'Top and 2nd score PRN'
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                                                                                                                       
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+yhist = duration_first_and_second_score_wrong_conc / 60.
+hist_first_data = np.histogram(yhist, np.arange(min_bin, max_bin + bin_size, bin_size))#, range = [range_min, range_max])
+bin_array_temp = hist_first_data[1]
+bin_array = ( bin_array_temp[:-1] + np.roll(bin_array_temp,-1)[:-1] ) /2.
+binsize_actual = bin_array[1] - bin_array[0]
+hist_first = hist_first_data[0] * 100. / len(yhist)
+ax.bar(bin_array, hist_first, binsize_actual)
+y_max = np.max(hist_first)*1.1
+ax.margins(0,0)
+ax.set_ylim([0, y_max_axis])
+ax.yaxis.set_ticklabels([])
+fig.set_figheight(height_fig)
+fig.set_figwidth(height_fig*ratio_fig_size)
+fig_save_name = '/Users/cbv/beacon_hist_or_and_3d.pdf'#
+fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
 
