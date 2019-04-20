@@ -68,7 +68,7 @@ else:
     tle_spacetrack = open(name_tle)
     read_tle_spacetrack = tle_spacetrack.readlines()
     nb_tle = len(read_tle_spacetrack) / 3
-    name_new_tle = "gps_" + tle_epoch  + ".txt"
+    name_new_tle = "gps_" + tle_epoch  + "_beacon.txt"
     new_tle_spacetrack_name = name_new_tle
     new_tle_spacetrack = open(name_new_tle, "w+")
     read_new_tle_spacetrack = new_tle_spacetrack.readlines()
