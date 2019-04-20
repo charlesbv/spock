@@ -3130,6 +3130,19 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
 
 
+double randu ( double mu, double sigma) // source: http://phoxis.org/2013/05/04/plot-histogram-in-terminal/
+{
+  double U1;
+  struct timeval t1;
+  gettimeofday(&t1, NULL);
+  srand(t1.tv_usec * t1.tv_sec);
+
+  U1 = -1 + ((double) rand () / RAND_MAX) * 2;
+ 
+  return (mu + sigma * (double) U1);
+}
+
+
 
 double randn ( double mu, double sigma) // source: http://phoxis.org/2013/05/04/plot-histogram-in-terminal/
 {

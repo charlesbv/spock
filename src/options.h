@@ -289,6 +289,7 @@ int previous_index(int *x_min_index, double *x_before_interpo, double value, dou
 
 int read_gps_tle(char gps_tle_filename[1000], int *nb_gps, char gps_name[N_SATS][1000]);
 
+double randu(double mu, double sigma);
 double randn(double mu, double sigma);
 double randn_iproc (int iProc, double mu, double sigma);
 void RemoveSpaces(char* source);
