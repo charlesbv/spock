@@ -3193,10 +3193,12 @@ print '    - percentage of time the top 2 PRNs are both incorrectly selected: ' 
 
 
 interv_dur = 10 # in min, duration of the interval of time to look at. It'sa ctually not exactly in minutes, see comment right below for delta_inter
-delta_inter = 60 # move forward the interval of time interv_dur delta_inter indices (in theory seconds but sometimes there is missing data in the
-#netcdf so you imght jump more than delta_inter seconds) 
-interv_dur = (int)(interv_dur); delta_inter = (int)(delta_inter)
+interv_dur = (int)(interv_dur);
 inter_dur_sec = interv_dur * 60 # It' actually not exactly in seconds, see comment right above for delta_inter
+
+delta_inter = inter_dur_sec#!!!!!! was putting 60 before 04-23-2019 # move forward the interval of time interv_dur delta_inter indices (in theory seconds but sometimes there is missing data in the
+#netcdf so you imght jump more than delta_inter seconds) 
+delta_inter = (int)(delta_inter)
 
 time_first_score_wrong = []
 duration_first_score_wrong_idate = [] # not really a duration in seconds but a numebr of steps
@@ -3216,7 +3218,9 @@ duration_first_score_wrong_list_conc = []
 duration_second_score_wrong_list_conc = []
 duration_first_and_second_score_wrong_list_conc = []
 duration_first_or_second_score_wrong_list_conc = []
-for idate in range(nb_date):
+seconds_sampling_start = []
+seconds_sampling_stop = []
+for idate in range(1,2):#!!!!!nb_date):
     #idate = 0
     ntot = len(gps_spock_all_date[idate])
     time_first_score_wrong_idate = []
@@ -3233,6 +3237,8 @@ for idate in range(nb_date):
     first_or_second_score_idate = []
     first_score_idate = []
     second_score_idate = []
+    seconds_sampling_start_idate = []
+    seconds_sampling_stop_idate = []
     for itime in np.arange(0, ntot-inter_dur_sec, delta_inter):
         print itime, ntot,idate
         time_first_score_wrong_itime = []
@@ -3248,7 +3254,9 @@ for idate in range(nb_date):
                     prn_list.append(gps_spock_all_date[idate][itime+iin][ispec])
         prn_list = np.array(prn_list)
         nprn = len(prn_list)
-        prn_list_sort = prn_list[np.argsort(prn_list)]        
+        prn_list_sort = prn_list[np.argsort(prn_list)]
+        seconds_sampling_start_idate.append(nb_seconds_since_initial_epoch_spock_all_date[idate][itime])
+        seconds_sampling_stop_idate.append(nb_seconds_since_initial_epoch_spock_all_date[idate][itime+inter_dur_sec-1])
         for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
             iout = -1
             for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
@@ -3305,7 +3313,9 @@ for idate in range(nb_date):
         duration_second_score_wrong_list_conc.append(np.float(len(time_second_score_wrong_itime)))
         duration_first_and_second_score_wrong_list_conc.append(np.float(len(time_first_and_second_score_wrong_itime)))
         duration_first_or_second_score_wrong_list_conc.append(np.float(len(time_first_or_second_score_wrong_itime)))
-        
+
+    seconds_sampling_start.append(seconds_sampling_start_idate)
+    seconds_sampling_stop.append(seconds_sampling_stop_idate)
     time_first_score_wrong.append( time_first_score_wrong_idate )
     duration_first_score_wrong_idate.append( np.array(duration_first_score_wrong_list_idate) ) 
     time_second_score_wrong.append( time_second_score_wrong_idate )
@@ -3324,6 +3334,7 @@ duration_second_score_wrong_conc = np.array(duration_second_score_wrong_list_con
 duration_first_and_second_score_wrong_conc = np.array(duration_first_and_second_score_wrong_list_conc)
 duration_first_or_second_score_wrong_conc = np.array(duration_first_or_second_score_wrong_list_conc)
 
+pickle.dump([date_spock[0], seconds_sampling_start, seconds_sampling_stop, first_score, second_score], open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_1st_2nd_prn_score_"+ "FM" + str(cygfm) + ".pickle", "w"))
 
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
 ## Either select idate, itime_diff, duration_diagram OR select start_date_interval and stop_date_interval in the next block (that starts with "look at particular interval")
@@ -3599,6 +3610,49 @@ fig.set_figheight(height_fig)
 fig.set_figwidth(height_fig*ratio_fig_size)
 fig_save_name = '/Users/cbv/beacon_hist_or_and_3d.pdf'#
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+# PLOT THE PRN VS TIME FOR SPOCK
+
+
+    if (( date_flight_date_rounded >= date_start_ani) & (date_flight_date_rounded <= date_stop_ani)):
+        plot_ani = 1
+        istep_start_save_temp = istep_start_save_temp + 1
+        fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
+        gs = gridspec.GridSpec(1, 1)
+        gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+        ax = fig.add_subplot(gs[0, 0])
+        [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
+        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
+        if istep_start_save_temp == 1:
+            istep_start_save = itime
+
+            ax_title = date_flight_str_rounded[11:]
+            ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+
+
+            ax.text(0.1, 0.2, str(prn[-1][0]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+            ax.text(0.1, 0.4, str(prn[-1][1]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+            ax.text(0.1, 0.6, str(prn[-1][2]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+            ax.text(0.1, 0.8, str(prnb[-1][3]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+
+        ax.margins(0,0)
+        ax.set_ylim([0.1,0.9])
+        ax.set_xlim([0,0.2])
+        ax.xaxis.set_ticks([])
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticks([])
+        ax.yaxis.set_ticklabels([])
+        fig.set_figheight(height_fig)
+        fig.set_figwidth(2)
+        fig_save_name = '/Users/cbv/work/spockOut/beacon/ani/spock_' +  date_start_ani_str.replace(':','')  + '_to_' + date_stop_ani_str.replace(':','')  + '_ifig' + str(itime) + '.png'
+        fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+        plt.close('all')
+
+
+
 
 
 

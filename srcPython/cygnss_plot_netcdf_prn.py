@@ -18,7 +18,17 @@
 # This script is a copy of cygnss_read_netcdf.py on 2019-04-23. It
 # It was then modified to plot the 4 PRN selected
 # by the on-obard algorithm VS time
-
+# ALso, if want to compare to SpOCK's slected PRNs, set
+# spock_comp to 1 and set the name of the pickle to load
+# This pickle includes the 2 PRNs selected by SpOCK in
+# newer_validate_sift.py (first_score, second_score)
+# as a function of the number of seconds since each interval
+# start time (seconds_sampling_start) and stop time (seconds_sampling_stop)
+# since the start of the SpOCK simulation (date_spock_start (called date_spock[0]
+# in newer_validate_sift.py). Basically, in newer_validate_sift, for eahc of those
+# intervals of time, newer_validate_sift selected the top two PRNs looking at
+# a certain metric (an optimizatino between the gain and how long the PRN
+# is selected) -> see block aournd lines 3200-3300 in newer_validate_sift)
 
 # Assumptions:
 # - see section PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
@@ -51,7 +61,27 @@ from cygnss_name_to_norad_id import *
 import os.path
 
 #def cygnss_read_netcdf(filename):
-filename = '/Users/cbv/cygnss/netcdf/2018/270/cyg02.ddmi.s20180927-000000-e20180927-235959.l1.power-brcs.a21.d21.nc'
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+filename = '/Users/cbv/cygnss/netcdfPodaac/2018/269/cyg02.ddmi.s20180926-000000-e20180926-235959.l1.power-brcs.a21.d21.nc'
+date_start_ani_str = '2018-09-26T00:00:00'
+date_stop_ani_str = '2018-09-26T23:59:59'
+spock_comp = 1
+spock_pickle = '/Users/cbv/cygnss/pickle/newfm02SepYaw_1s_out_1st_2nd_prn_score_FM2.pickle'
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+date_start_ani = datetime.strptime(date_start_ani_str, '%Y-%m-%dT%H:%M:%S')
+date_stop_ani = datetime.strptime(date_stop_ani_str, '%Y-%m-%dT%H:%M:%S')
+
+
+if  spock_comp == 1:
+    date_spock_start, seconds_sampling_start, seconds_sampling_stop, first_score, second_score = pickle.load(open(spock_pickle))
+    nday = len(seconds_sampling_start)
+    
+    
+
+height_fig = 11.  # the width is calculated as height_fig * 4/3.                                                                             
+fontsize_plot = 25      
+ratio_fig_size = 4./3
+
 
 time_gain_0 = []
 x_spec = []
@@ -157,11 +187,17 @@ date_flight_rounded_temp = []
 time_remove_list = []
 itime = -1
 prog = 0
-while itime < nb_time_flight_temp-1:
+itime_ani = 1010 #5025 # !!!!!!!! 0
+istep_start_save_temp = 0
+istep_start_save = 0
+while itime < 10000:#!!!!!!!!! nb_time_flight_temp-1:
+    print itime, nb_time_flight_temp-1
+
     if itime*100./(nb_time_flight_temp-1) > prog:
         #print str(prog)+'%'
         prog = prog + 10
     itime = itime + 1
+
 
     time_remove = 0
     date_flight_temp_date = time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6))
@@ -179,7 +215,23 @@ while itime < nb_time_flight_temp-1:
     else: #if time can't be rounded by less than 100 ms
         time_remove = 1
 
+    if (( date_flight_date_rounded >= date_start_ani) & (date_flight_date_rounded <= date_stop_ani)):
+        plot_ani = 1
+        istep_start_save_temp = istep_start_save_temp + 1
+        fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
+        gs = gridspec.GridSpec(1, 1)
+        gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+        ax = fig.add_subplot(gs[0, 0])
+        [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
+        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
+        if istep_start_save_temp == 1:
+            istep_start_save = itime
+    else:
+        plot_ani = 0
 
+    
     if ( time_remove == 1 ): # remove time if can't be rounded by ess than 100 ms 
         time_remove_list.append(itime)
     else:
@@ -296,7 +348,54 @@ while itime < nb_time_flight_temp-1:
         date_flight_rounded.append(date_flight_str_rounded)
         date_flight_rounded_date.append(date_flight_date_rounded)
 
+        if plot_ani == 1:
+            ax_title = date_flight_str_rounded[11:]
+            ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+            date_flight_rounded_since_spock_start = (date_flight_date_rounded - date_spock_start).total_seconds()
 
-        
+            if istep_start_save_temp == 1:
+                # figure out which day to look at in SpOCK simulatino (SpOCK's simulation might be over several days
+                # but the netcdf data is only over one day so find ou which day it is in the SpOCK's simulation)
+                for iday in range(nday):
+                    if ((date_flight_rounded_since_spock_start >= seconds_sampling_start[iday][0]) & (date_flight_rounded_since_spock_start <= seconds_sampling_stop[iday][-1])):
+                        idayok = iday
+                        seconds_sampling_start_ok = np.array(seconds_sampling_start[iday])
+                        seconds_sampling_stop_ok = np.array(seconds_sampling_stop[iday])
+                        
+            #figure out which top 2 PRNs were selcted by SpOCK in newer_validate_sift (see definition of "top" a tthe beginning of this script)
+            interv_spock_start = np.where(date_flight_rounded_since_spock_start >= seconds_sampling_start_ok)[0][-1]
+            first_score_spock = first_score[iday][interv_spock_start]
+            second_score_spock = second_score[iday][interv_spock_start]
+            color0 = 'k'; color1 = 'k'; color2 = 'k'; color3 = 'k'
+            if ((gps[-1][0] == first_score_spock) | (gps[-1][0] == second_score_spock)):
+                color0 = 'r'
+            if ((gps[-1][1] == first_score_spock) | (gps[-1][1] == second_score_spock)):
+                color1 = 'r'
+            if ((gps[-1][2] == first_score_spock) | (gps[-1][2] == second_score_spock)):
+                color2 = 'r'
+            if ((gps[-1][3] == first_score_spock) | (gps[-1][3] == second_score_spock)):
+                color3 = 'r'
+            ax.text(0.1, 0.2, str(gps[-1][0]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color0 )
+            ax.text(0.1, 0.4, str(gps[-1][1]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color1 )
+            ax.text(0.1, 0.6, str(gps[-1][2]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color2 )
+            ax.text(0.1, 0.8, str(gps[-1][3]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color3 )
+    if plot_ani == 1:
+        ax.margins(0,0)
+        ax.set_ylim([0.1,0.9])
+        ax.set_xlim([0,0.2])
+        ax.xaxis.set_ticks([])
+        ax.xaxis.set_ticklabels([])
+        ax.yaxis.set_ticks([])
+        ax.yaxis.set_ticklabels([])
+        fig.set_figheight(height_fig)
+        fig.set_figwidth(2)
+        fig_save_name = '/Users/cbv/work/spockOut/beacon/ani/' +  date_start_ani_str.replace(':','')  + '_to_' + date_stop_ani_str.replace(':','')  + '_ifig' + str(itime) + '.png'
+        fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+        plt.close('all')
+
+ani_name = '/Users/cbv/test.mp4'#fig_save_name.split('ifig')[0] + 'ani.mp4'
+os.system('ffmpeg -start_number ' + str(istep_start_save) + ' -y -r 50 -i ' + fig_save_name.split('ifig')[0] + 'ifig%d.png -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ' + ani_name)
+#os.system('ffmpeg -start_number ' + str(istep_start_save) + ' -y -r 30 -i ani/%d_' +  str(nb_steps_ani_sc-1) + '.png -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ' + video_name)
+
     # return date_flight_rounded, lon_cyg, lat_cyg, lon_spec, lat_spec, fom, gps,\
     #     x_cyg, y_cyg, z_cyg, vx_cyg, vy_cyg, vz_cyg,date_flight_rounded_date
