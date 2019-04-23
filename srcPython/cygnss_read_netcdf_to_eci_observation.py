@@ -60,20 +60,18 @@ from cygnss_name_to_norad_id import *
 import os.path
 
 # load_spice_override: if 1 then ignored; if 0 then the spice kernels (to convert ecef to eci and orbital elements) won't be loaded, even though it's the first iteration of reading filename
-def cygnss_read_netcdf_and_convert_to_eci_and_oe(filename_list):
+def cygnss_read_netcdf_to_eci_observation(filename_list):
     # filename = '/Users/cbv/cygnss/netcdf/2018/013/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.nc'
     # load_spice_override = 1
     nfile = len(filename_list)    
     for ifile in range(nfile):
         filename = filename_list[ifile]
+        print ifile, nfile-1
         if ifile == 0:
-            load_spice = 1
             filename_eci  = filename.replace('.nc', '_eci.txt')
             file_eci = open(filename_eci, 'w')
             print >> file_eci,'#Date position(km/s) velocity(km/s)'
             print >> file_eci,'#START'
-        else:
-            load_spice = 0
         time_gain_0 = []
         x_spec = []
         y_spec = []
@@ -330,10 +328,10 @@ def cygnss_read_netcdf_and_convert_to_eci_and_oe(filename_list):
                     vz_cyg.append(vz_cyg_temp[itime])
                 r_ecef = [x_cyg[-1]/1000., y_cyg[-1]/1000., z_cyg[-1]/1000.]
                 v_ecef = [vx_cyg[-1]/1000., vy_cyg[-1]/1000., vz_cyg[-1]/1000.]
-                # if (len(x_cyg) == 1):
-                #     load_spice = 1
-                # else:
-                #     load_spice = 0
+                if ((len(x_cyg) == 1) & (ifile == 0)):
+                    load_spice = 1
+                else:
+                    load_spice = 0
                 # if (load_spice_override == 0):
                 #     load_spice = 0
                 r_eci_temp, v_eci_temp = ecef2eci(r_ecef, v_ecef, date_flight_str_rounded, load_spice)
