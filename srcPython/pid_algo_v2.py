@@ -30,7 +30,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'nadir'
+prefix_name = 'fm01_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -92,10 +92,12 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt'
-    
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt'
+
+# FM01 20170817 nadir:
+# nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt
 # FM03 20180113 nadir:
-#nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt                 
+# nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt                 
 # FM4 20171216 starting at 18:00:00
 # spock_FM4_20171216_eng_pvt_query-13525_start18000.txt'
 # FM5_20171216:
@@ -292,13 +294,23 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     print 'NEW INTERVAL', iinter, nb_interval-1,
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
-        # with FM03 20180113 nadir:
-        r0 = '6.78246384534000e+03'
-        r1 = '-8.04260316880000e+02'
-        r2 = '-1.03375536014000e+03'
-        v0 = '1.18359925000000e-01'
-        v1 = '6.32291335300000'
-        v2 = '-4.20713750600000'
+        # FM01 20170817 nadir:
+        # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06                                              
+        # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03                                               
+        r0 = '-2.39619629675000e+03'
+        r1 = '-5.42660274124000e+03'
+        r2 = '-3.52867259398000e+03'
+        v0 = '7.09842316800000'
+        v1 = '-1.86796667100000'
+        v2 = '-1.97307331700000'
+        
+        # # with FM03 20180113 nadir:
+        # r0 = '6.78246384534000e+03'
+        # r1 = '-8.04260316880000e+02'
+        # r2 = '-1.03375536014000e+03'
+        # v0 = '1.18359925000000e-01'
+        # v1 = '6.32291335300000'
+        # v2 = '-4.20713750600000'
         
         # # with FM4_20180112 start 20180113T170000
         # r0 = '3.99031942362000e+03'
@@ -402,7 +414,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if iinter >= 0:
+            if iinter >= 30:
             #if ((iinter > 0) | ((iinter== 0) & (irho >=2))):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
@@ -493,6 +505,9 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         #if pid_mod_arr[irho] == 1:
         if irho == 0:
             #ipdb.set_trace()
+            index_step_move_temp = np.where(date_datetime_round_sec_spock_ok_pid == (date_start + timedelta(seconds = step_move_sec)))[0]
+            while len(np.where(date_datetime_round_sec_spock_ok_pid == (date_start + timedelta(seconds = step_move_sec)))[0]) == 0:
+                step_move_sec = step_move_sec + 1
             index_step_move = np.where(date_datetime_round_sec_spock_ok_pid == (date_start + timedelta(seconds = step_move_sec)))[0][0]
             index_step_move_save.append(index_step_move)
         last_r0_pid[irho] = r_spock_ok_pid[index_step_move, 0]
