@@ -15,6 +15,7 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
+nadir = 1
 plot_var = 'ecc' # dist, ecc, argper
 rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the ighhes tlatitude of the orbit)
 isbig = 0 # if runnign script from Big
@@ -29,7 +30,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = '2018jan12'
+prefix_name = 'nadir'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -91,7 +92,10 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_pvt_query-13841_start20180113T170000_end20180126T170000.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt'
+    
+# FM03 20180113 nadir:
+#nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt                 
 # FM4 20171216 starting at 18:00:00
 # spock_FM4_20171216_eng_pvt_query-13525_start18000.txt'
 # FM5_20171216:
@@ -99,7 +103,12 @@ obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_pvt_query-13841_sta
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
-obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_end20180126T170000.txt'
+if nadir != 1:
+    obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_10hr.txt'
+else:
+    obs_att_filename = 'nadir'
+
+
 # FM4 20171216 starting at 18:00:00
 # spock_FM4_20171216_eng_adcs_query-13526_start18000.txt
 # FM5_20171216:
@@ -283,13 +292,21 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     print 'NEW INTERVAL', iinter, nb_interval-1,
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
-        # with FM4_20180112 start 20180113T170000
-        r0 = '3.99031942362000e+03'
-        r1 = '-5.16211445413000e+03'
-        r2 = '2.23395939782000e+03'
-        v0 = '5.97453948000000'
-        v1 = '3.04191975000000'
-        v2 = '-3.59491565800000'
+        # with FM03 20180113 nadir:
+        r0 = '6.78246384534000e+03'
+        r1 = '-8.04260316880000e+02'
+        r2 = '-1.03375536014000e+03'
+        v0 = '1.18359925000000e-01'
+        v1 = '6.32291335300000'
+        v2 = '-4.20713750600000'
+        
+        # # with FM4_20180112 start 20180113T170000
+        # r0 = '3.99031942362000e+03'
+        # r1 = '-5.16211445413000e+03'
+        # r2 = '2.23395939782000e+03'
+        # v0 = '5.97453948000000'
+        # v1 = '3.04191975000000'
+        # v2 = '-3.59491565800000'
 
         # # with  FM4_20171216 starting at 18:00:00
         # r0 = '1.48903692290000e+02' # 1.48903692290000e+05 5.86036162919000e+06 3.62086259413000e+06
