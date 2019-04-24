@@ -63,7 +63,7 @@ import os.path
 #def cygnss_read_netcdf(filename):
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 filename = '/Users/cbv/cygnss/netcdfPodaac/2018/269/cyg02.ddmi.s20180926-000000-e20180926-235959.l1.power-brcs.a21.d21.nc'
-date_start_ani_str = '2018-09-26T00:00:00'
+date_start_ani_str = '2018-09-26T18:15:26'
 date_stop_ani_str = '2018-09-26T23:59:59'
 spock_comp = 1
 spock_pickle = '/Users/cbv/cygnss/pickle/newfm02SepYaw_1s_out_1st_2nd_prn_score_FM2.pickle'
@@ -187,11 +187,10 @@ date_flight_rounded_temp = []
 time_remove_list = []
 itime = -1
 prog = 0
-itime_ani = 1010 #5025 # !!!!!!!! 0
 istep_start_save_temp = 0
 istep_start_save = 0
-while itime < 10000:#!!!!!!!!! nb_time_flight_temp-1:
-    print itime, nb_time_flight_temp-1
+while itime < nb_time_flight_temp-1:
+    #print itime, nb_time_flight_temp-1
 
     if itime*100./(nb_time_flight_temp-1) > prog:
         #print str(prog)+'%'
@@ -379,6 +378,8 @@ while itime < 10000:#!!!!!!!!! nb_time_flight_temp-1:
             ax.text(0.1, 0.4, str(gps[-1][1]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color1 )
             ax.text(0.1, 0.6, str(gps[-1][2]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color2 )
             ax.text(0.1, 0.8, str(gps[-1][3]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center', color = color3 )
+            if ( (color0 == 'k') & (color1 == 'k')  & (color2 == 'k') &  (color3 == 'k') ):
+                print date_flight_str_rounded[11:], 'XXXXXX'
     if plot_ani == 1:
         ax.margins(0,0)
         ax.set_ylim([0.1,0.9])
