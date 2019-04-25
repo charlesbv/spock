@@ -1,0 +1,39 @@
+; Satellite Beacon Overpass Planner Input Parameters
+
+; Start of planning period, UTC
+start_date=2019/04/24
+start_time=00:00:00
+
+; End of planning period, UTC
+end_date=2019/04/24
+end_time=23:59:59
+
+; Beacon latitude, +/-deg N, 0-90
+beacon_lat=32.86843
+
+; Beacon longitude, +/-deg E, 0-180
+beacon_long=-106.12885
+
+; Beacon altitude, WGS-84, km
+beacon_alt=1.21559
+
+ Minimum rx satellite elevation, degrees
+ Overpasses must achieve at least this elevation
+ angle to be considered acceptable.
+min_elev_angle=60.0
+
+; GPS TLE file path. May be relative to the current directory or
+;  absolute. Always use / as directory delimiter (even on Windows).
+;  Defaults to the current working directory.
+gps_tle_file_path=gps_2019-04-24.txt
+
+; Rx satellite TLE file path. May be relative to the current directory or
+;  absolute. Always use / as directory delimiter (even on Windows).
+;  Defaults to the current working directory.
+rx_sat_tle_file_path=CYGFM01_2019-04-24.txt
+
+; Output directory. May be relative to the current directory or
+;  absolute. Always use / as directory delimiter (even on Windows).
+;  Defaults to the current working directory.
+output_directory=testttt
+

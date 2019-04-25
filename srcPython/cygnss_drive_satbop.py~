@@ -1,0 +1,37 @@
+# This script prepares a sat-bop simulation:
+# Inputs:
+# - start_time (%Y-%m-%dT%H:%M:%S) 
+# - end_time
+
+
+import sys
+import os
+sys.path.append('/Users/cbv/work/spock/srcPython')
+from cygnss_beacon_write_input_satbop import *
+from cygnss_beacon_package import *
+from pathlib import Path
+from shutil import copyfile, move
+from distutils.dir_util import copy_tree
+
+
+# PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
+start_time = '2019-04-21T00:00:00'
+end_time = '2019-04-21T23:59:59'
+# end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
+
+current_dir = str(Path().absolute()) + '/'
+#os.chdir(current_dir) if script crases afet chanding dir, can go back to initial dir
+
+# Create the package and run structure for these dates
+satbop_package_dir, satbop_simu_dir, satbop_fm_dir = cygnss_beacon_package(start_time, end_time)
+
+# For each FM, set up the sat-bop simulation and run it
+os.system('gps_tle_beacon.py ' + start_time[0:10])
+os.system('cygnss_tle_beacon.py ' + start_time[0:10])
+for cygfm in range(1, 9):
+    os.chdir(satbop_fm_dir[cygfm-1])
+    cygnss_tle_filename, gps_tle_filename, output_dir = cygnss_beacon_write_input_satbop(start_time, end_time, cygfm)
+    copyfile(current_dir + gps_tle_filename, gps_tle_filename)
+    move(current_dir + cygnss_tle_filename, cygnss_tle_filename)
+    copy_tree(current_dir + 'simu/satbop_original_adapted', '.')
+    os.chdir(current_dir)
