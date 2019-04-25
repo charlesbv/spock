@@ -3196,7 +3196,7 @@ interv_dur = 10 # in min, duration of the interval of time to look at. It'sa ctu
 interv_dur = (int)(interv_dur);
 inter_dur_sec = interv_dur * 60 # It' actually not exactly in seconds, see comment right above for delta_inter
 
-delta_inter = inter_dur_sec#!!!!!! was putting 60 before 04-23-2019 # move forward the interval of time interv_dur delta_inter indices (in theory seconds but sometimes there is missing data in the
+delta_inter = 60. # inter_dur_sec#!!!!!! was putting 60 before 04-23-2019 # move forward the interval of time interv_dur delta_inter indices (in theory seconds but sometimes there is missing data in the
 #netcdf so you imght jump more than delta_inter seconds) 
 delta_inter = (int)(delta_inter)
 
@@ -3220,7 +3220,7 @@ duration_first_and_second_score_wrong_list_conc = []
 duration_first_or_second_score_wrong_list_conc = []
 seconds_sampling_start = []
 seconds_sampling_stop = []
-for idate in range(1,2):#!!!!!nb_date):
+for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     #idate = 0
     ntot = len(gps_spock_all_date[idate])
     time_first_score_wrong_idate = []
@@ -3334,7 +3334,7 @@ duration_second_score_wrong_conc = np.array(duration_second_score_wrong_list_con
 duration_first_and_second_score_wrong_conc = np.array(duration_first_and_second_score_wrong_list_conc)
 duration_first_or_second_score_wrong_conc = np.array(duration_first_or_second_score_wrong_list_conc)
 
-pickle.dump([date_spock[0], seconds_sampling_start, seconds_sampling_stop, first_score, second_score], open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_1st_2nd_prn_score_"+ "FM" + str(cygfm) + ".pickle", "w"))
+#pickle.dump([date_spock[0], seconds_sampling_start, seconds_sampling_stop, first_score, second_score], open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_1st_2nd_prn_score_"+ "FM" + str(cygfm) + "_delta_inter" + str((int)(delta_inter)) + ".pickle", "w"))
 
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
 ## Either select idate, itime_diff, duration_diagram OR select start_date_interval and stop_date_interval in the next block (that starts with "look at particular interval")
@@ -3345,10 +3345,10 @@ duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
 
-for itime_in in range(0,len(np.where(duration_first_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])/10):
-    print itime_in, len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])
+for itime_in in range(0,len(np.where(duration_first_and_second_score_wrong_idate[idate] > 0)[0])):#, len(np.where(duration_first_and_second_score_wrong_idate[idate] > 0)[0])/10):
+    print itime_in, len(np.where(duration_first_and_second_score_wrong_idate[idate] > 0)[0])
     #itime_in = 10;
-    itime_fac = np.where(duration_first_score_wrong_idate[idate] > 0)[0][itime_in];
+    itime_fac = np.where(duration_first_and_second_score_wrong_idate[idate] > 0)[0][itime_in];
     itime_start = itime_fac * delta_inter #time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
     itime_stop = itime_start + inter_dur_sec#np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]  + duration_diagram_sec)[0][0] + 1
 
