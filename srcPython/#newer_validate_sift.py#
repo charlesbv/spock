@@ -3345,10 +3345,10 @@ duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
 
-for itime_in in range(0,len(np.where(duration_first_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])/10):
-    print itime_in, len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])
+for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_second_score_wrong_idate[idate] > 0)[0])/5):
+    print itime_in, len(np.where(duration_second_score_wrong_idate[idate] > 0)[0])
     #itime_in = 10;
-    itime_fac = np.where(duration_first_score_wrong_idate[idate] > 0)[0][itime_in];
+    itime_fac = np.where(duration_second_score_wrong_idate[idate] > 0)[0][itime_in];
     itime_start = itime_fac * delta_inter #time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
     itime_stop = itime_start + inter_dur_sec#np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]  + duration_diagram_sec)[0][0] + 1
 
