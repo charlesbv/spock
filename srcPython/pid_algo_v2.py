@@ -15,7 +15,7 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
-nadir = 1
+nadir = 0
 plot_var = 'ecc' # dist, ecc, argper
 rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the ighhes tlatitude of the orbit)
 isbig = 0 # if runnign script from Big
@@ -24,13 +24,14 @@ dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are r
 no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
-step_drho = 0.1 # the rho control will vary by this amount to find the optimum rho over an interval
+step_drho_coarse = 0.1 # the rho control will vary by this amount to find the optimum rho_coarse over an interval
+step_drho_fine = 0.01 # once the rho_coarse has been found, the rho control will vary by this amount to find the optimum rho over an interval
 kplist = [1.] # list of proportional gains for PID
 kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'fm01_20170817'
+prefix_name = 'FM4_20180112_fine'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -92,12 +93,15 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_pvt_query-13841_start20180113T170000_end20180126T170000.txt'
 
 # FM01 20170817 nadir:
 # nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt
 # FM03 20180113 nadir:
-# nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt                 
+# nadir/cyg03.ddmi.s20180113-000000-e20180113-235959.l1.power-brcs.a21.d21.txt
+# FM4 20180112 start20180113T170000:
+# spock_FM4_20180112_eng_pvt_query-13841_start20180113T170000_end20180126T170000.txt
+# spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_end20180126T170000.txt
 # FM4 20171216 starting at 18:00:00
 # spock_FM4_20171216_eng_pvt_query-13525_start18000.txt'
 # FM5_20171216:
@@ -105,11 +109,6 @@ obs_rv_filename = dir_simu + 'HD_data/nadir/cyg01.ddmi.s20170817-000000-e2017081
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527.txt'
 #'HD_data/spock_FM5_20171216_eng_pvt_query-13527_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_pvt_query-13527_2days.txt'
-if nadir != 1:
-    obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_10hr.txt'
-else:
-    obs_att_filename = 'nadir'
-
 
 # FM4 20171216 starting at 18:00:00
 # spock_FM4_20171216_eng_adcs_query-13526_start18000.txt
@@ -118,6 +117,12 @@ else:
 #HD_data/spock_FM5_20171216_eng_adcs_query-13528.txt'
 #'HD_data/spock_FM5_20171216_eng_adcs_query-13528_1800tomorrow.txt'
 # 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
+
+if nadir != 1:
+    obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_end20180126T170000.txt'
+else:
+    obs_att_filename = 'nadir'
+
 
 
 # #Convert ECEF file to ECI file
@@ -207,7 +212,7 @@ nb_seconds_since_start_pid = []
 date_datetime_round_sec_spock_pid_ok = []
 
 nkp = len(kplist); nkd = len(kdlist); nki = len(kilist); 
-nk = (int)( 2. / step_drho ) + 1# this is the maximum of iteration to find the optim rho (since rho_control vaies from -1 to 1 with a step step_drho
+nk = (int)( 2. / step_drho_fine ) + 1# this is the maximum of iteration to find the optim rho (since rho_control vaies from -1 to 1 with a step step_drho_coarse or step_drho_fine
 
 last_r0_pid = np.zeros([nk])
 last_r1_pid = np.zeros([nk])
@@ -219,16 +224,16 @@ index_obs_kept = []
 date_obs_pid_ok = []
 pid_center = 1 # factor to apply to each pid_mod_arr[ipid]
 pid_center_list = []
-klist = np.zeros([nk,3])
-for ikp in range(nkp):
-    kp = kplist[ikp]
-    for ikd in range(nkd):
-        kd = kdlist[ikd]
-        for iki in range(nki):
-            ki = kilist[iki]
-            klist[ikp*nkd*nki + ikd*nki + iki, 0] = kp
-            klist[ikp*nkd*nki + ikd*nki + iki, 1] = kd
-            klist[ikp*nkd*nki + ikd*nki + iki, 2] = ki
+# klist = np.zeros([nk,3])
+# for ikp in range(nkp):
+#     kp = kplist[ikp]
+#     for ikd in range(nkd):
+#         kd = kdlist[ikd]
+#         for iki in range(nki):
+#             ki = kilist[iki]
+#             klist[ikp*nkd*nki + ikd*nki + iki, 0] = kp
+#             klist[ikp*nkd*nki + ikd*nki + iki, 1] = kd
+#             klist[ikp*nkd*nki + ikd*nki + iki, 2] = ki
 
 
 rho_control = np.zeros([nb_interval]) -0.#-0.5 # -.5 cause first should starts at -0.5
@@ -264,6 +269,7 @@ duration_simu = (nb_interval - inter_start_algo) * step_move_save + inter_start_
 index_period_spock_step_move = np.zeros([nb_interval]) # index in orbit average variables of the end of each interval
 index_step_move_save = []
 nb_seconds_interval = []
+step_drho = step_drho_coarse
 for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     if iinter < inter_start_algo:
         step_move = interval # shoule be = interval
@@ -297,12 +303,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # FM01 20170817 nadir:
         # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06                                              
         # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03                                               
-        r0 = '-2.39619629675000e+03'
-        r1 = '-5.42660274124000e+03'
-        r2 = '-3.52867259398000e+03'
-        v0 = '7.09842316800000'
-        v1 = '-1.86796667100000'
-        v2 = '-1.97307331700000'
+        # r0 = '-2.39619629675000e+03'
+        # r1 = '-5.42660274124000e+03'
+        # r2 = '-3.52867259398000e+03'
+        # v0 = '7.09842316800000'
+        # v1 = '-1.86796667100000'
+        # v2 = '-1.97307331700000'
         
         # # with FM03 20180113 nadir:
         # r0 = '6.78246384534000e+03'
@@ -313,12 +319,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v2 = '-4.20713750600000'
         
         # # with FM4_20180112 start 20180113T170000
-        # r0 = '3.99031942362000e+03'
-        # r1 = '-5.16211445413000e+03'
-        # r2 = '2.23395939782000e+03'
-        # v0 = '5.97453948000000'
-        # v1 = '3.04191975000000'
-        # v2 = '-3.59491565800000'
+        r0 = '3.99032691316000e+03'#'3.99031942362000e+03'
+        r1 = '-5.16211092228000e+03'#'-5.16211445413000e+03'
+        r2 = '2.23395552720000e+03'#'2.23395939782000e+03'
+        v0 = '5.97453343100000'#'5.97453948000000'
+        v1 = '3.04192946300000'#'3.04191975000000'
+        v2 = '-3.59491719800000'#'-3.59491565800000'
 
         # # with  FM4_20171216 starting at 18:00:00
         # r0 = '1.48903692290000e+02' # 1.48903692290000e+05 5.86036162919000e+06 3.62086259413000e+06
@@ -617,7 +623,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         sign_last_error_previous_rho = np.sign(last_error_previous_rho)
         if (irho == 0):
             sign_last_error_previous_rho = np.sign(last_error)
-        if ( (np.sign(last_error) != sign_last_error_previous_rho) | (iinter < inter_start_algo) | ( np.abs(rho_control[iinter-1] + drho + step_drho) >= 1 ) | ( np.abs(rho_control[iinter-1] + drho - step_drho) >=1  ) ): # in this case (first condition), it means that we've added (or removed) too much density and inverted the trend so we found the optimum rho. So we'll move to the next inter.
+        if ( ((np.sign(last_error) != sign_last_error_previous_rho) & (step_drho == step_drho_fine)  )| (iinter < inter_start_algo) | ( np.abs(rho_control[iinter-1] + drho + step_drho) >= 1 ) | ( np.abs(rho_control[iinter-1] + drho - step_drho) >=1  ) ): # in this case (first condition), it means that we've added (or removed) too much density and inverted the trend so we found the optimum rho. So we'll move to the next inter.
             error_change_sign = 1
             
             # start and end dates of next interval
@@ -661,10 +667,26 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             argper_orbit_mid_average_interval_all_inter.append(argper_orbit_mid_average_interval_sub)
             argper_orbit_average_interval_all_inter.append(argper_orbit_average_interval_sub)
             argper_spock_ok_pid_all_inter.append(argper_spock_ok_pid)
-
+            step_drho = step_drho_coarse
+            print 'back to coarse control for next interval, step_drho:', step_drho
             print 'last_error' , last_error, last_error_previous_rho, rho_control[iinter]
-            print 'OPTIMUM RHO CONTROL', rho_control[:iinter+1] 
+            print 'OPTIMUM RHO CONTROL', rho_control[:iinter+1]
+        elif ( (np.sign(last_error) != sign_last_error_previous_rho) & (step_drho == step_drho_coarse) ):
+            step_drho = step_drho_fine
+            print 'fine control, step_drho:', step_drho
+            print 'last_error' , last_error, last_error_previous_rho, rho_control[iinter]
+            previous_rho_control = rho_control[iinter] 
+            last_error_previous_rho = last_error
+            if last_error > 0:
+                drho = drho + step_drho 
+            else:
+                drho = drho - step_drho 
+            
         else:
+            if (step_drho == step_drho_coarse):
+                print 'coarse control, step_drho:', step_drho
+            else:
+                print 'fine control, step_drho:', step_drho
             print 'last_error' , last_error, last_error_previous_rho, rho_control[iinter]
             previous_rho_control = rho_control[iinter] 
             last_error_previous_rho = last_error
