@@ -64,8 +64,8 @@ plt.ion()
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'newfm02SepYaw_1s_out.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-09-24T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
+spock_input_filename = 'newfm02SepYaw_minus90_1s_out.txt'#'newfm02SepYaw_1s_out.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -79,7 +79,7 @@ yaw_max = 180. # filter out when yaw is greater than this value (in magnitude)
 load_pickle = 0 # set to 1 if results have been previously saved in a pickle so no computation is made here
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 date_start_val_start = datetime.strptime(date_start_val_start, "%Y-%m-%dT%H:%M:%S")
-date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])
+date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,4,1)])
 nb_date = len(date_start_val_array)
 
 
@@ -3220,9 +3220,11 @@ duration_first_and_second_score_wrong_list_conc = []
 duration_first_or_second_score_wrong_list_conc = []
 seconds_sampling_start = []
 seconds_sampling_stop = []
+gap_prn_save = []
 for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     #idate = 0
     ntot = len(gps_spock_all_date[idate])
+    gap_prn_save_idate = []
     time_first_score_wrong_idate = []
     duration_first_score_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
     # -> for each interval iinterv_dur, duration_first_score_wrong_list[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
@@ -3247,6 +3249,7 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
         time_first_or_second_score_wrong_itime = []
         # BLOCK BELOW IF LOOKING AT BINOMIAL SCORE METRIC
         score_prn = np.zeros([33,33])
+        gap_prn = np.zeros([33, 33])
         prn_list = []
         for iin in range(inter_dur_sec):
             for ispec in range(4):
@@ -3260,25 +3263,63 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
         for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
             iout = -1
             for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
+                prn_out_is_gap = 0
                 #ipdb.set_trace()
                 iout = iout + 1
                 if len(np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time
                     iprn_out = np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0][0]
                     gain_out = fom_spock_all_date[idate][itime+iin][iprn_out]
+                    if gain_out == 0:# if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0) 
+                        prn_out_is_gap = 1
                 else:
-                    gain_out = -1
+                    gain_out = 0 # !!!!!! used ot be -1 to penalize non selected prn
+                    prn_out_is_gap = 1
                 for prn_in in prn_list_sort[iout+1:]:
+                    prn_in_is_gap = 0
                     if len(np.where(gps_spock_all_date[idate][itime+iin] == prn_in)[0]) > 0: #the prn is selected by SpOCK at this particular time
                         iprn_in = np.where(gps_spock_all_date[idate][itime+iin] == prn_in)[0][0]
                         gain_in = fom_spock_all_date[idate][itime+iin][iprn_in]
                         max_gain_out_in = np.max([gain_out, gain_in])
+                        if gain_in == 0: # if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0)
+                            prn_in_is_gap = 1
                     else:
-                        gain_in = -1
+                        gain_in = 0 # !!!!!! used ot be -1 to penalize non selected prn
                         max_gain_out_in = np.max([gain_out, gain_in])
+                        prn_in_is_gap = 1
                     score_prn[prn_out, prn_in] = score_prn[prn_out, prn_in] + max_gain_out_in
-        comb =  unravel_index(score_prn.argmax(), score_prn.shape)
-        first_score_idate.append(comb[0])
-        second_score_idate.append(comb[1])
+                    if ((prn_out_is_gap == 1) | (prn_in_is_gap == 1)):
+                        gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 1
+                    if ((prn_out_is_gap == 1) & (prn_in_is_gap == 1)):
+                        gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 10000 # we won't to exclude the possiblity of choosing this combination since both prn have the gap at the same time
+                    
+        # comb =  unravel_index(score_prn.argmax(), score_prn.shape)
+        # first_score_idate.append(comb[0])
+        # second_score_idate.append(comb[1])
+        score_index_sort_temp = np.dstack(np.unravel_index(np.argsort(score_prn.ravel()), score_prn.shape))
+        score_index_sort = score_index_sort_temp[0, :, :] # sorted array of combinations that give the ghihest score (ascending order)
+        ncomb = (nprn*(nprn-1))/2/2# total number of combinaiton. /2 because combinaiton [X,Y] is the same as [Y,X]. another/2 because we want to look only at the laf top scores
+        icomb = -1
+        found_comb_without_gap = 0
+        gap_prn_here = np.zeros([ncomb])
+        while icomb >= -ncomb: # go through score_index_sort from the combination that gives the higeshest score (score_index_sort[-1,:]) to the combination that gives the lowest score (score_index_sort[-ncomb, :])
+            comb_now = score_index_sort[icomb, :]
+            prn_out_here = comb_now[0]
+            prn_in_here = comb_now[1]
+            gap_prn_here[icomb] = gap_prn[prn_out_here, prn_in_here]
+            if gap_prn_here[icomb] == 0: # found a combination with no gap at all during the time interval so that's the optimum combination
+                found_comb_without_gap = 1
+                optim_comb = score_index_sort[icomb, :]
+                gap_prn_save_idate.append(0);
+                icomb = -10000 # to get out of the while
+            else:
+                icomb = icomb-1
+        if found_comb_without_gap == 0: # if none of the combinations had no gap (ie if all combinations had at least one second gap) then take the combination with the smallest amount of gap
+            imin_gap = np.where(gap_prn_here == np.min(gap_prn_here))[0][0]
+            gap_prn_save_idate.append( gap_prn_here[-ncomb + imin_gap] )
+            optim_comb = score_index_sort[-ncomb + imin_gap]
+        first_score_idate.append(optim_comb[0])
+        second_score_idate.append(optim_comb[1])
+        
         # end of BLOCK BELOW IF LOOKING AT BINOMIAL SCORE METRIC
         # BLOCK BELOW IF LOOKING AT DIFFERENT SCORE METRIC
         # score_prn = np.zeros([33])
@@ -3298,6 +3339,8 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
                 time_second_score_wrong_itime.append(iin+itime)
             if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) & ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
                 time_first_and_second_score_wrong_itime.append(iin+itime)
+                if len(time_first_and_second_score_wrong_itime) > 20:
+                    ipdb.set_trace()
             if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) | ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
                 time_first_or_second_score_wrong_itime.append(iin+itime)
         time_first_score_wrong_idate.append(time_first_score_wrong_itime)
@@ -3328,7 +3371,7 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     first_or_second_score.append( first_or_second_score_idate )
     first_score.append( first_score_idate )
     second_score.append( second_score_idate )
-    
+    gap_prn_save.append(gap_prn_save_idate)
 duration_first_score_wrong_conc = np.array(duration_first_score_wrong_list_conc)
 duration_second_score_wrong_conc = np.array(duration_second_score_wrong_list_conc)
 duration_first_and_second_score_wrong_conc = np.array(duration_first_and_second_score_wrong_list_conc)
@@ -3345,10 +3388,10 @@ duration_diagram = 10. # in minutes
 duration_diagram_sec = duration_diagram * 60.
 
 
-for itime_in in range(0,len(np.where(duration_first_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])/10):
-    print itime_in, len(np.where(duration_first_score_wrong_idate[idate] > 0)[0])
+for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 0)[0]), len(np.where(duration_second_score_wrong_idate[idate] > 0)[0])/5):
+    print itime_in, len(np.where(duration_second_score_wrong_idate[idate] > 0)[0])
     #itime_in = 10;
-    itime_fac = np.where(duration_first_score_wrong_idate[idate] > 0)[0][itime_in];
+    itime_fac = np.where(duration_second_score_wrong_idate[idate] > 0)[0][itime_in];
     itime_start = itime_fac * delta_inter #time_second_gain_wrong_all_date[idate][itime_diff]#time_second_gain_wrong_all_date[idate][itime_diff] #time_diff_prn_all_date[idate][itime_diff]
     itime_stop = itime_start + inter_dur_sec#np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]  + duration_diagram_sec)[0][0] + 1
 
@@ -3456,9 +3499,9 @@ for itime_in in range(0,len(np.where(duration_first_score_wrong_idate[idate] > 0
             fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
 
 
-    ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
-            [0.6,0.6], linestyle = 'dashed', linewidth = 2, color = 'black')
-    ax.text(0,0.6,'--------------------', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    # ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
+    #         [0.6,0.6], linestyle = 'dashed', linewidth = 2, color = 'black')
+    # ax.text(0,0.6,'--------------------', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
 
 
     ax.yaxis.set_ticks(np.arange(1, nprn+1))
@@ -3615,41 +3658,41 @@ fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bb
 # PLOT THE PRN VS TIME FOR SPOCK
 
 
-    if (( date_flight_date_rounded >= date_start_ani) & (date_flight_date_rounded <= date_stop_ani)):
-        plot_ani = 1
-        istep_start_save_temp = istep_start_save_temp + 1
-        fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
-        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
-        gs = gridspec.GridSpec(1, 1)
-        gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
-        ax = fig.add_subplot(gs[0, 0])
-        [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
-        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
-        plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
-        if istep_start_save_temp == 1:
-            istep_start_save = itime
+    # if (( date_flight_date_rounded >= date_start_ani) & (date_flight_date_rounded <= date_stop_ani)):
+    #     plot_ani = 1
+    #     istep_start_save_temp = istep_start_save_temp + 1
+    #     fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+    #     plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
+    #     gs = gridspec.GridSpec(1, 1)
+    #     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+    #     ax = fig.add_subplot(gs[0, 0])
+    #     [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
+    #     ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+    #     plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
+    #     if istep_start_save_temp == 1:
+    #         istep_start_save = itime
 
-            ax_title = date_flight_str_rounded[11:]
-            ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
+    #         ax_title = date_flight_str_rounded[11:]
+    #         ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
 
 
-            ax.text(0.1, 0.2, str(prn[-1][0]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
-            ax.text(0.1, 0.4, str(prn[-1][1]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
-            ax.text(0.1, 0.6, str(prn[-1][2]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
-            ax.text(0.1, 0.8, str(prnb[-1][3]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+    #         ax.text(0.1, 0.2, str(prn[-1][0]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+    #         ax.text(0.1, 0.4, str(prn[-1][1]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+    #         ax.text(0.1, 0.6, str(prn[-1][2]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
+    #         ax.text(0.1, 0.8, str(prnb[-1][3]), fontsize = fontsize_plot*2, verticalalignment = 'center', horizontalalignment =  'center' )
 
-        ax.margins(0,0)
-        ax.set_ylim([0.1,0.9])
-        ax.set_xlim([0,0.2])
-        ax.xaxis.set_ticks([])
-        ax.xaxis.set_ticklabels([])
-        ax.yaxis.set_ticks([])
-        ax.yaxis.set_ticklabels([])
-        fig.set_figheight(height_fig)
-        fig.set_figwidth(2)
-        fig_save_name = '/Users/cbv/work/spockOut/beacon/ani/spock_' +  date_start_ani_str.replace(':','')  + '_to_' + date_stop_ani_str.replace(':','')  + '_ifig' + str(itime) + '.png'
-        fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
-        plt.close('all')
+    #     ax.margins(0,0)
+    #     ax.set_ylim([0.1,0.9])
+    #     ax.set_xlim([0,0.2])
+    #     ax.xaxis.set_ticks([])
+    #     ax.xaxis.set_ticklabels([])
+    #     ax.yaxis.set_ticks([])
+    #     ax.yaxis.set_ticklabels([])
+    #     fig.set_figheight(height_fig)
+    #     fig.set_figwidth(2)
+    #     fig_save_name = '/Users/cbv/work/spockOut/beacon/ani/spock_' +  date_start_ani_str.replace(':','')  + '_to_' + date_stop_ani_str.replace(':','')  + '_ifig' + str(itime) + '.png'
+    #     fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+    #     plt.close('all')
 
 
 
