@@ -3339,8 +3339,8 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
                 time_second_score_wrong_itime.append(iin+itime)
             if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) & ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
                 time_first_and_second_score_wrong_itime.append(iin+itime)
-                if len(time_first_and_second_score_wrong_itime) > 20:
-                    ipdb.set_trace()
+                # if len(time_first_and_second_score_wrong_itime) > 20:
+                #     ipdb.set_trace()
             if (((first_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False) | ((second_score_idate[-1] in gps_netcdf_all_date[idate][itime+iin]) == False)):
                 time_first_or_second_score_wrong_itime.append(iin+itime)
         time_first_score_wrong_idate.append(time_first_score_wrong_itime)
