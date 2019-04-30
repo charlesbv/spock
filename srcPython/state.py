@@ -1096,18 +1096,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_density_average = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_density_average.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_density_average.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in normal
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_density_average = fig_density_average.add_subplot(gs[0, 0])
 
-                    ax_density_average.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_density_average.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_density_average.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_density_average.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_density_average.spines.itervalues()] # change the width of the frame of the figure
                     ax_density_average.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in normal
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = density_average[isc]
@@ -1129,10 +1129,11 @@ for irun in range(nb_run):
                     ax_density_average.xaxis.set_ticks(xticks)
                     ax_density_average.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
                     ax_density_average.margins(0,0); ax_density_average.set_xlim([min(xticks), max(xticks)])
+                    ax_density_average.set_ylim([np.min(y_axis)*0.9, np.max(y_axis)*1.1])
             #        ax_density_average.set_xlim([ax_density_average.get_xlim()[0], most_recent_tle_among_all_sc])
 
-                    legend = ax_density_average.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="Quantile", fontsize = fontsize_plot)
-                    legend.get_title().set_fontsize(str(fontsize_plot))
+                    # legend = ax_density_average.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="Quantile", fontsize = fontsize_plot)
+                    # legend.get_title().set_fontsize(str(fontsize_plot))
 
                     if save_plots == 1:
                         fig_save_name = 'density_average'
@@ -1576,100 +1577,100 @@ for irun in range(nb_run):
                         fig_given_output.savefig(fig_save_name, facecolor=fig_given_output.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
-            # DENSITY
-            if 'density' in var_to_read:         # !!!!! first date of given output is not necesarrily the same as for the other variables  
-                if ( isc_count == 0 ) & (irun == 0) :
-                    # Plot
-                    fig_title ='' #'Density as a function of time'
-                    y_label = 'Density (kg/m$^3$)'#'rho_control' #'Density (kg/m$^3$)'
-                    x_label = 'Solar zenith angle ' + u'(\N{DEGREE SIGN})'#Local time  'Phase angle ' + u'(\N{DEGREE SIGN})'#Real time'
-                    fig_density = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+#             # DENSITY
+#             if 'density' in var_to_read:         # !!!!! first date of given output is not necesarrily the same as for the other variables  
+#                 if ( isc_count == 0 ) & (irun == 0) :
+#                     # Plot
+#                     fig_title ='' #'Density as a function of time'
+#                     y_label = 'Density (kg/m$^3$)'#'rho_control' #'Density (kg/m$^3$)'
+#                     x_label = 'Solar zenith angle ' + u'(\N{DEGREE SIGN})'#Local time  'Phase angle ' + u'(\N{DEGREE SIGN})'#Real time'
+#                     fig_density = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_density.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
-                    gs = gridspec.GridSpec(1, 1)
-                    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
-                    ax_density = fig_density.add_subplot(gs[0, 0])
+#                     fig_density.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+#                     plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+#                     gs = gridspec.GridSpec(1, 1)
+#                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+#                     ax_density = fig_density.add_subplot(gs[0, 0])
 
-                    ax_density.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_density.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+#                     ax_density.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+#                     ax_density.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
 
-                    [i.set_linewidth(2) for i in ax_density.spines.itervalues()] # change the width of the frame of the figure
-                    ax_density.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+#                     [i.set_linewidth(2) for i in ax_density.spines.itervalues()] # change the width of the frame of the figure
+#                     ax_density.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+#                     plt.rc('font', weight='bold') ## make the labels of the ticks in bold
 
-                colorVal = scalarMap.to_rgba(isc_irun)
+#                 colorVal = scalarMap.to_rgba(isc_irun)
 
-                nb_orb = orb_number[-1][1] # nb of orbits traveled by sc during simu
+#                 nb_orb = orb_number[-1][1] # nb of orbits traveled by sc during simu
 
-                for iorb in range(nb_orb):
-                    if iorb == 0:
-                        iorb_start = 0
-                    else:
-                        iorb_start_previous = iorb_start
-                        iorb_start = orb_number[iorb-1][0] + 1
-                    if iorb > 0:
-                        iorb_end_previous = iorb_end
-                    iorb_end = orb_number[iorb][0]+1
-                    y_axis = density[isc, iorb_start:iorb_end ]  #density[isc]#density[isc]*1e9 - 1
-                    x_axis_density = solar_zenith[isc, iorb_start:iorb_end]#local_time[isc, iorb_start:iorb_end]#phase_angle[isc, iorb_start:iorb_end]#argument_perigee[isc,:nb_steps_new] #latitude[isc,:nb_steps_new]
+#                 for iorb in range(nb_orb):
 #                     if iorb == 0:
-#                         ax_density.scatter(x_axis_density, y_axis, s = 5, color = colorVal, label = label_arr[isc] )
+#                         iorb_start = 0
 #                     else:
-                    if iorb > 0: # ignore first orbit because for density control the desnity is equal to msis for first orbit -> not interested in plotting for the current analysis
-                        ax_density.scatter(x_axis_density, y_axis, s = 5, color = colorVal, label = label_arr[isc] )
-#                     # If looking whwere the perigee is, color where the phase angle is close to perigee or apogee
-#                     if iorb >= 1:
-#                         where_arg_per = np.where(np.abs(x_axis_density - argument_perigee_ave[isc,iorb_start_previous]) < 2.5)[0] # where the phase angle is les than 2.5 deg off the arg per
-#                         ax_density.scatter(x_axis_density[where_arg_per], y_axis[where_arg_per], s = 15, color = 'r' )
+#                         iorb_start_previous = iorb_start
+#                         iorb_start = orb_number[iorb-1][0] + 1
+#                     if iorb > 0:
+#                         iorb_end_previous = iorb_end
+#                     iorb_end = orb_number[iorb][0]+1
+#                     y_axis = density[isc, iorb_start:iorb_end ]  #density[isc]#density[isc]*1e9 - 1
+#                     x_axis_density = solar_zenith[isc, iorb_start:iorb_end]#local_time[isc, iorb_start:iorb_end]#phase_angle[isc, iorb_start:iorb_end]#argument_perigee[isc,:nb_steps_new] #latitude[isc,:nb_steps_new]
+# #                     if iorb == 0:
+# #                         ax_density.scatter(x_axis_density, y_axis, s = 5, color = colorVal, label = label_arr[isc] )
+# #                     else:
+#                     if iorb > 0: # ignore first orbit because for density control the desnity is equal to msis for first orbit -> not interested in plotting for the current analysis
+#                         ax_density.scatter(x_axis_density, y_axis, s = 5, color = colorVal, label = label_arr[isc] )
+# #                     # If looking whwere the perigee is, color where the phase angle is close to perigee or apogee
+# #                     if iorb >= 1:
+# #                         where_arg_per = np.where(np.abs(x_axis_density - argument_perigee_ave[isc,iorb_start_previous]) < 2.5)[0] # where the phase angle is les than 2.5 deg off the arg per
+# #                         ax_density.scatter(x_axis_density[where_arg_per], y_axis[where_arg_per], s = 15, color = 'r' )
 
-#                         where_arg_apo = np.where(np.abs(x_axis_density - (np.mod(argument_perigee_ave[isc,iorb_start_previous]+180, 360))) < 2.5)[0] # where the phase angle is les than 2.5 deg off the arg per
-#                         ax_density.scatter(x_axis_density[where_arg_apo], y_axis[where_arg_apo], s = 15, color = 'limegreen' )
+# #                         where_arg_apo = np.where(np.abs(x_axis_density - (np.mod(argument_perigee_ave[isc,iorb_start_previous]+180, 360))) < 2.5)[0] # where the phase angle is les than 2.5 deg off the arg per
+# #                         ax_density.scatter(x_axis_density[where_arg_apo], y_axis[where_arg_apo], s = 15, color = 'limegreen' )
 
-#                         print iorb_start, argument_perigee_ave[isc,iorb_start], argument_perigee_ave[isc,iorb_start_previous]
+# #                         print iorb_start, argument_perigee_ave[isc,iorb_start], argument_perigee_ave[isc,iorb_start_previous]
 
-#                 #                ax_density.plot(argument_perigee_ave[isc,:nb_steps_new], np.arange(), s = 5, color = colorVal, label = label_arr[isc] )
+# #                 #                ax_density.plot(argument_perigee_ave[isc,:nb_steps_new], np.arange(), s = 5, color = colorVal, label = label_arr[isc] )
 
-                    if ((irun == 0) & (isc_count == 0) & (iorb == 0)):
-                        min_y_density = np.min(y_axis)
-                        max_y_density = np.max(y_axis)
+#                     if ((irun == 0) & (isc_count == 0) & (iorb == 0)):
+#                         min_y_density = np.min(y_axis)
+#                         max_y_density = np.max(y_axis)
 
-                    if np.min(y_axis) < min_y_density:
-                        min_y_density = np.min(y_axis)
-                    if np.max(y_axis) > max_y_density:
-                        max_y_density = np.max(y_axis)
+#                     if np.min(y_axis) < min_y_density:
+#                         min_y_density = np.min(y_axis)
+#                     if np.max(y_axis) > max_y_density:
+#                         max_y_density = np.max(y_axis)
                 
-                if isc == nb_sc - 1:
-                    # x axis label is in real time
-                    # ## all output files of one simulation have the same number of steps, and start at the same date
-                    # nb_ticks_xlabel = 8
-                    # dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
-                    # xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
-                    # date_list_str = []
-                    # date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
-                    # for i in range(len(xticks)):
-                    #     if dt_xlabel >= 3*24*3600:
-                    #         date_list_str.append( str(date_list[i])[5:10] )
-                    #     else:
-                    #         date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
-                    # ax_density.xaxis.set_ticks(xticks)
-                    # ax_density.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
-                    # ax_density.set_xlim([min(xticks), max(xticks)])
-                    ax_density.margins(0,0); ax_density.set_ylim([min_y_density*(1-0.1*np.sign(min_y_density)), max_y_density*1.1])
-                    #        ax_density.set_xlim([ax_density.get_xlim()[0], most_recent_tle_among_all_sc])
+#                 if isc == nb_sc - 1:
+#                     # x axis label is in real time
+#                     # ## all output files of one simulation have the same number of steps, and start at the same date
+#                     # nb_ticks_xlabel = 8
+#                     # dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+#                     # xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel) 
+#                     # date_list_str = []
+#                     # date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+#                     # for i in range(len(xticks)):
+#                     #     if dt_xlabel >= 3*24*3600:
+#                     #         date_list_str.append( str(date_list[i])[5:10] )
+#                     #     else:
+#                     #         date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+#                     # ax_density.xaxis.set_ticks(xticks)
+#                     # ax_density.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+#                     # ax_density.set_xlim([min(xticks), max(xticks)])
+#                     ax_density.margins(0,0); ax_density.set_ylim([min_y_density*(1-0.1*np.sign(min_y_density)), max_y_density*1.1])
+#                     #        ax_density.set_xlim([ax_density.get_xlim()[0], most_recent_tle_among_all_sc])
                     
-                    legend = ax_density.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="", fontsize = fontsize_plot)
-                    legend.get_title().set_fontsize(str(fontsize_plot))
+#                     legend = ax_density.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="", fontsize = fontsize_plot)
+#                     legend.get_title().set_fontsize(str(fontsize_plot))
                     
-                    for handle in legend.legendHandles:
-                        handle.set_sizes([100.0])
-#                     legend.legendHandles[0]._sizes = [100,100,100]
-                    #legend.legendHandles[1]._sizes = [100]
+#                     for handle in legend.legendHandles:
+#                         handle.set_sizes([100.0])
+# #                     legend.legendHandles[0]._sizes = [100,100,100]
+#                     #legend.legendHandles[1]._sizes = [100]
 
-                    if save_plots == 1:
-                        fig_save_name = 'density'
-                        fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
-                        fig_density.savefig(fig_save_name, facecolor=fig_density.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+#                     if save_plots == 1:
+#                         fig_save_name = 'density'
+#                         fig_save_name = root_save_fig_name + fig_save_name + '.pdf'
+#                         fig_density.savefig(fig_save_name, facecolor=fig_density.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 
            # TEMPERATURE
