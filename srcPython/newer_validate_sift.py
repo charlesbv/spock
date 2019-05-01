@@ -3651,7 +3651,7 @@ ax.set_ylim([0, y_max_axis])
 ax.yaxis.set_ticklabels([])
 fig.set_figheight(height_fig)
 fig.set_figwidth(height_fig*ratio_fig_size)
-fig_save_name = '/Users/cbv/beacon_hist_or_and_3d.pdf'#
+fig_save_name = '/Users/cbv/beacon_hist_or_and_3d_yaw-90.pdf'#
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
