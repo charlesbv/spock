@@ -23,9 +23,13 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 import matplotlib.gridspec as gridspec
 
+try:
+    operation = sys.argv[1] # 'predict', 'select'. If 'predict' then run SpOCK to predict SP locations. If 'select' then run the algorithm to select the 2 PRNs for each FM overpass (meaning that 'predict' should have been run at some point before)
+except IndexError:
+    print "***! The argument should be 'predict' or 'select'. !***\n***! The program will stop. !***"; sys.exit();
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-start_time_const = '2018-09-26T10:00:00'
-end_time_const = '2018-09-26T16:00:00'
+start_time_const = '2018-09-26T05:45:00'
+end_time_const = '2018-09-26T12:15:00'
 dir_run_spock = '/Users/cbv/work/spockOut/beacon/'
 start_time_fm = ['','2018-09-26T12:04:58','','','','','','']
 end_time_fm = ['','2018-09-26T12:17:31','','','','','','']
@@ -34,6 +38,16 @@ end_time_fm = ['','2018-09-26T12:17:31','','','','','','']
 if dir_run_spock[-1] != '/':
     dir_run_spock = dir_run_spock + '/'
 
+if ((operation != 'predict') & (operation != 'select')):
+    print "***! The argument should be 'predict' or 'select'. !***\n***! The program will stop. !***"; sys.exit();
+    
+# Predict the position of the specuilar points using SpOCK
+if operation == 'predict':
+    os.system("python spock_cygnss_spec_parallel_beacon.py " + start_time_const + " " + end_time_const + " spec")
+    sys.exit()
+    
+
+print 'For each FM, selecting the two PRNs...'
 # Properties of figures
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25      
@@ -41,9 +55,6 @@ ratio_fig_size = 4./3
 fig_title = ''#Accuracy VS RCG
 y_label = 'PRN'
 x_label = 'Time (min)'
-    
-# Predict the position of the specuilar points using SpOCK
-#os.system("python spock_cygnss_spec_parallel_beacon.py " + start_time_const + " " + end_time_const + " spec")
 
 # For each FM
 first_score_fm = np.zeros([8])
