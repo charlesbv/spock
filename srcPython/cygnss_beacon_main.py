@@ -28,8 +28,8 @@ try:
 except IndexError:
     print "***! The argument should be 'predict' or 'select'. !***\n***! The program will stop. !***"; sys.exit();
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-start_time_const = '2018-09-26T05:45:00'
-end_time_const = '2018-09-26T12:15:00'
+start_time_const = '2018-10-31T04:00:00'
+end_time_const = '2018-10-31T13:15:00'
 dir_run_spock = '/Users/cbv/work/spockOut/beacon/'
 start_time_fm = ['','2018-09-26T12:04:58','','','','','','']
 end_time_fm = ['','2018-09-26T12:17:31','','','','','','']
