@@ -65,7 +65,7 @@ plt.ion()
 cygfm = 1 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
 date_start_val_start = '2018-10-30T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'FM03_2018-10-31_spock.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt' # -90-yaw: 'newfm02SepYaw_minus90_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+spock_input_filename = 'FM01_roll10deg_2018-10-31_spock.txt'# oct31: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg) # 90-yaw: 'newfm02SepYaw_1s_out.txt' # -90-yaw: 'newfm02SepYaw_minus90_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -3508,7 +3508,7 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
     ax.margins(0,0)
     ax.set_ylim([-0.6, nprn+0.5])
-    fig_save_name = '/Users/cbv/test.pdf'#+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
+    fig_save_name = '/Users/cbv/testfm0' + str(cygfm)+ '.pdf'#+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
     fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
