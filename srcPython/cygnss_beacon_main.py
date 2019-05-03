@@ -79,7 +79,10 @@ for cygfm in range(1, 9):
     ## Read the specular point output files from SpOCK
     if start_time_fm[cygfm-1] != '':
         print "   Reading SpOCK specular file for FM0" + str(cygfm) + "..."
-        spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + ".txt" 
+        if cygfm == 1: # !!!!!!!! remove this if condition. It was pu here at some point because FM01 was rolled by 10 deg on Oct 31 2018, but it should not be here anymore
+            spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + "_roll10deg.txt"
+        else:
+            spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + ".txt" 
         var_in, var_in_order = read_input_file(spock_input_filename)
         dt_spock_output = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
         output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
