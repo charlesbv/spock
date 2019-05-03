@@ -223,8 +223,11 @@ for cygfm in range(1, 9):
         ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)
         ax.margins(0,0)
         ax.set_ylim([0.5, nprn+0.5])
-        fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prn'  + str((int)(first_score_fm[cygfm-1])) + '_' +  str((int)(second_score_fm[cygfm-1])) + '_from_' + \
-                        start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
+        # fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prn'  + str((int)(first_score_fm[cygfm-1])) + '_' +  str((int)(second_score_fm[cygfm-1])) + '_from_' + \
+        #                 start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
+        fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prnX_Y_from_' + \
+            start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
+
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
@@ -247,8 +250,8 @@ raise Exception
 
 # to verify with newer_validate_sift.py (so copy paste in the terminal where you run newer_validate_sift, not in the temrinal where you run cygnss_beacon_main):
 idate = 0 # need to set
-date_start = datetime(2018, 10, 31, 18, 30, 53) # need to set 
-date_stop = datetime(2018, 10, 31, 18, 41, 8)  # need to set 
+date_start = datetime(2018, 10, 31, 18, 15, 10) # need to set 
+date_stop = datetime(2018, 10, 31, 18, 27, 34)  # need to set 
 itime_start = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] == (date_start - date_spock[0]).total_seconds())[0][0]
 print (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start] - nb_seconds_since_initial_epoch_spock_all_date[idate][0])/3600. # should be the number of hours of date_start
 # (example if date_start is datetime(2018, 9, 26, 12, 4, 58) then should print 12.0825)
