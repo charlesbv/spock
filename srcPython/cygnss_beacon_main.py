@@ -246,13 +246,10 @@ raise Exception
 
 
 # to verify with newer_validate_sift.py (so copy paste in the terminal where you run newer_validate_sift, not in the temrinal where you run cygnss_beacon_main):
-idate = 1 # need to set
-date_start = datetime(2018, 9, 26, 12, 4, 58) # need to set
-date_stop = datetime(2018, 9, 26, 12, 17, 31)  # need to set
-print 'Original inter_dur_sec', inter_dur_sec, ' DONT FORGET TO RESET IT TO TIHIS VALUE IN NEWER_VALIDATE_SIFT.PY'
-inter_dur_sec = (int)((date_stop - date_start).total_seconds())
+idate = 0 # need to set
+date_start = datetime(2018, 10, 31, 18, 30, 53) # need to set 
+date_stop = datetime(2018, 10, 31, 18, 41, 8)  # need to set 
 itime_start = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] == (date_start - date_spock[0]).total_seconds())[0][0]
 print (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start] - nb_seconds_since_initial_epoch_spock_all_date[idate][0])/3600. # should be the number of hours of date_start
 # (example if date_start is datetime(2018, 9, 26, 12, 4, 58) then should print 12.0825)
-itime_fac = itime_start / delta_inter
-itime_stop = itime_start + inter_dur_sec
+itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] == (date_stop - date_spock[0]).total_seconds())[0][0]
