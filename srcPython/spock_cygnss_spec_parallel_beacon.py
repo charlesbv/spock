@@ -129,7 +129,7 @@ spock_main_input(
     name_output,
     dt_output,
     # for ATTITUDE section
-    "(0;0;0) (0;0;0)", #"nadir",
+    "(0;0;90) (0;0;0)", #"nadir",
     # for GROUNDS_STATIONS section
     "beacon_station.txt",#"my_ground_stations.txt"
      # for SPICE section
