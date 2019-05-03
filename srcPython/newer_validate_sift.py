@@ -62,10 +62,10 @@ from numpy import unravel_index
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 2 #1 # which CYGNSS to look at
+cygfm = 1 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-09-24T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'newfm02SepYaw_minus90_1s_out.txt'#'newfm02SepYaw_1s_out.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-10-30T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
+spock_input_filename = 'FM03_2018-10-31_spock.txt'# oct31: 'FM03_2018-10-31_spock.txt' # 90-yaw: 'newfm02SepYaw_1s_out.txt' # -90-yaw: 'newfm02SepYaw_minus90_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -79,7 +79,7 @@ yaw_max = 180. # filter out when yaw is greater than this value (in magnitude)
 load_pickle = 0 # set to 1 if results have been previously saved in a pickle so no computation is made here
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 date_start_val_start = datetime.strptime(date_start_val_start, "%Y-%m-%dT%H:%M:%S")
-date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,4,1)])
+date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])
 nb_date = len(date_start_val_array)
 
 
@@ -3477,26 +3477,26 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     # time_first_score_wrong[idate][itime_fac] represents all the steps in the itime_fac interval
     # for which the top PRN selected by SpOCK at the start of the itime_fac interval were not selected by on the on-board alrorithm
     # recall that each itime_fac interval last for inter_dur_sec steps (basically inter_dur_sec seconds, since comment for variable delta_inter)
-    if (len(time_first_score_wrong[idate][itime_fac]) > 0):
-        xfirst = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
-        ax.scatter(xfirst, np.zeros([len(xfirst)])+0.35, color= 'black',  marker = '.', s = 20)
-    ax.text(0,0.35,'Top (' + str(first_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
-    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.35,' ' +
-            format(duration_first_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
-            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
-    if (len(time_second_score_wrong[idate][itime_fac]) > 0):
-        xsecond = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
-        ax.scatter(xsecond, np.zeros([len(xsecond)])+0., color= 'black',  marker = '.', s = 20)
-    ax.text(0,0.,'2nd (' + str(second_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
-    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.,' ' + format(duration_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
-            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+    # if (len(time_first_score_wrong[idate][itime_fac]) > 0):
+    #     xfirst = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+    #     ax.scatter(xfirst, np.zeros([len(xfirst)])+0.35, color= 'black',  marker = '.', s = 20)
+    # ax.text(0,0.35,'Top (' + str(first_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    # ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.35,' ' +
+    #         format(duration_first_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+    #         fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+    # if (len(time_second_score_wrong[idate][itime_fac]) > 0):
+    #     xsecond = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+    #     ax.scatter(xsecond, np.zeros([len(xsecond)])+0., color= 'black',  marker = '.', s = 20)
+    # ax.text(0,0.,'2nd (' + str(second_score[idate][itime_fac]) + ') gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    # ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,0.,' ' + format(duration_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+    #         fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
 
-    if (len(time_first_and_second_score_wrong[idate][itime_fac]) > 0):
-        xfirst_and_second = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_and_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
-        ax.scatter(xfirst_and_second, np.zeros([len(xfirst_and_second)])-0.35, color= 'black',  marker = '.', s = 20)
-    ax.text(0,-0.35, str(first_score[idate][itime_fac]) + '-' +  str(second_score[idate][itime_fac]) + ' gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
-    ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,-0.35,' ' + format(duration_first_and_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
-            fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
+    # if (len(time_first_and_second_score_wrong[idate][itime_fac]) > 0):
+    #     xfirst_and_second = (nb_seconds_since_initial_epoch_spock_all_date[idate][time_first_and_second_score_wrong[idate][itime_fac]]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.
+    #     ax.scatter(xfirst_and_second, np.zeros([len(xfirst_and_second)])-0.35, color= 'black',  marker = '.', s = 20)
+    # ax.text(0,-0.35, str(first_score[idate][itime_fac]) + '-' +  str(second_score[idate][itime_fac]) + ' gap: ', fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'right', verticalalignment = 'center')
+    # ax.text((nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,-0.35,' ' + format(duration_first_and_second_score_wrong_idate[idate][itime_fac] / inter_dur_sec * 100., ".1f") + '%',
+    #         fontsize = fontsize_plot, weight = 'normal', horizontalalignment = 'left', verticalalignment = 'center')
 
 
     # ax.plot([0, (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_stop-1]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.],
@@ -3508,7 +3508,7 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
     ax.margins(0,0)
     ax.set_ylim([-0.6, nprn+0.5])
-    fig_save_name = '/Users/cbv/test'+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
+    fig_save_name = '/Users/cbv/test.pdf'#+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
     fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
