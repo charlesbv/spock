@@ -107,6 +107,8 @@ for cygfm in range(1, 9):
         prn_list = np.array(prn_list)
         nprn = len(prn_list)
         prn_list_sort = prn_list[np.argsort(prn_list)]
+        seconds_sampling_start_idate.append(nb_seconds_since_initial_epoch_spock[itime])
+        seconds_sampling_stop_idate.append(nb_seconds_since_initial_epoch_spock[itime+inter_dur_sec-1])
         for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
             iout = -1
             for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
@@ -156,11 +158,13 @@ for cygfm in range(1, 9):
             if gap_prn_here[icomb] == 0: # found a combination with no gap at all during the time interval so that's the optimum combination
                 found_comb_without_gap = 1
                 optim_comb = score_index_sort[icomb, :]
+                gap_prn_save_idate.append(0);
                 icomb = -10000 # to get out of the while
             else:
                 icomb = icomb-1
         if found_comb_without_gap == 0: # if none of the combinations had no gap (ie if all combinations had at least one second gap) then take the combination with the smallest amount of gap
             imin_gap = np.where(gap_prn_here == np.min(gap_prn_here))[0][0]
+            gap_prn_save_idate.append( gap_prn_here[-ncomb + imin_gap] )
             optim_comb = score_index_sort[-ncomb + imin_gap]
 
         first_score_fm[cygfm-1] = optim_comb[0]
@@ -182,8 +186,7 @@ for cygfm in range(1, 9):
 
 
         ax_title = 'FM' + str(cygfm) + ': ' + start_time_fm[cygfm-1].replace('T', ' ') + ' to ' + end_time_fm[cygfm-1][11:19] + ' UTC -> PRNs ' +\
-            'X, Y'
-            # !!!!! should be: str((int)(first_score_fm[cygfm-1])) + ', ' +  str((int)(second_score_fm[cygfm-1]))
+        str((int)(first_score_fm[cygfm-1])) + ', ' +  str((int)(second_score_fm[cygfm-1]))
         fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
         fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
         plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
@@ -226,7 +229,7 @@ for cygfm in range(1, 9):
         fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prn'  + str((int)(first_score_fm[cygfm-1])) + '_' +  str((int)(second_score_fm[cygfm-1])) + '_from_' + \
                         start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
-'
+
 
 
 raise Exception
