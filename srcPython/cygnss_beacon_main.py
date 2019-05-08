@@ -22,6 +22,9 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as mpatches
+
+
 
 try:
     operation = sys.argv[1] # 'predict', 'select'. If 'predict' then run SpOCK to predict SP locations. If 'select' then run the algorithm to select the 2 PRNs for each FM overpass (meaning that 'predict' should have been run at some point before)
@@ -49,6 +52,13 @@ end_time_fm = ['2018-10-31T18:27:34',
                ''] # FM08
 
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
+
+color_gain = ['grey', 'blue', 'limegreen', 'red']
+label_gain = ['0', '2-5', '6-10', '11-15']
+handles_arr = []
+for icat in range(len(label_gain)):
+    handles_arr.append(mpatches.Patch(color=color_gain[icat], label=label_gain[icat]))
+
 
 if dir_run_spock[-1] != '/':
     dir_run_spock = dir_run_spock + '/'
@@ -205,13 +215,23 @@ for cygfm in range(1, 9):
             for ispec in range(4):
                 prn_spock = gps_spock[iin, ispec]
                 prn_spock_value = np.where(prn_list_sort == prn_spock)[0][0]
-                if (ispec == gain_sort_index[0]): # top PRN gain
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 90)
-                elif (ispec == gain_sort_index[1]): # second to top PRN gain
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 20)
+                # if (ispec == gain_sort_index[0]): # top PRN gain
+                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 90)
+                # elif (ispec == gain_sort_index[1]): # second to top PRN gain
+                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 20)
+                # else:
+                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue', alpha = 0.06, s=20)
+                if fom_spock[iin, ispec] == 0: # !!!!!!!!!!! if change gain limmits then need to change also label_gain
+                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[0], s = 90)   
+                elif ((fom_spock[iin, ispec] >= 1) & (fom_spock[iin, ispec] <= 5)):
+                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[1], s = 90)   
+                elif ((fom_spock[iin, ispec] >= 6) & (fom_spock[iin, ispec] <= 10)):
+                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[2], s = 90)   
+                elif ((fom_spock[iin, ispec] >= 11) & (fom_spock[iin, ispec] <= 15)):
+                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[3], s = 90)   
                 else:
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
-
+                    print "***! Error: the gain is not between 0 and 15. !***"; sys.exit()
+                
         dt_xlabel =  1. # min
         xticks = np.arange(0, inter_dur_sec/60.+1, dt_xlabel)
         date_list_str = []
@@ -230,6 +250,8 @@ for cygfm in range(1, 9):
         # fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prnX_Y_from_' + \
         #     start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
 
+        legend = ax.legend( loc='center left',  bbox_to_anchor=(1, 0.5), fontsize = fontsize_plot, handles=handles_arr, ncol=1, frameon=False, title = 'PRN gain')
+        legend.get_title().set_fontsize(str(fontsize_plot)) 
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
