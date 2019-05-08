@@ -3396,16 +3396,16 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     itime_stop = itime_start + inter_dur_sec#np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] >= nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start]  + duration_diagram_sec)[0][0] + 1
 
 
-    # # look at particular interval of time defined by start_date_interval and stop_date_interval (becareful: UTC times)
-    # ## !!!!!!! assumes:
-    # ## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
-    # idate = 0
-    # start_date_interval = '2018-10-31T18:48:00'
-    # stop_date_interval = '2018-10-31T18:55:32'
-    # start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
-    # stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
-    # itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
-    # itime_stop = np.where(date_spock_same_time_as_netcdf <= stop_date_interval_date)[0][-1]
+    # look at particular interval of time defined by start_date_interval and stop_date_interval (becareful: UTC times)
+    ## !!!!!!! assumes:
+    ## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
+    idate = 0
+    start_date_interval = '2018-10-31T18:15:10'
+    stop_date_interval = '2018-10-31T18:27:34'
+    start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
+    stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
+    itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
+    itime_stop = np.where(date_spock_same_time_as_netcdf <= stop_date_interval_date)[0][-1]
 
 
     # figure out the number of different prn (SpOCK and on-board) during that time intervals
