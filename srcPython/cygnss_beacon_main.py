@@ -185,8 +185,7 @@ for cygfm in range(1, 9):
 
 
         ax_title = 'FM' + str(cygfm) + ': ' + start_time_fm[cygfm-1].replace('T', ' ') + ' to ' + end_time_fm[cygfm-1][11:19] + ' UTC -> PRNs ' +\
-            'X, Y'
-            # !!!!! should be: str((int)(first_score_fm[cygfm-1])) + ', ' +  str((int)(second_score_fm[cygfm-1]))
+            str((int)(first_score_fm[cygfm-1])) + ', ' +  str((int)(second_score_fm[cygfm-1]))
         fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
         fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
         plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                      
@@ -226,15 +225,15 @@ for cygfm in range(1, 9):
         ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)
         ax.margins(0,0)
         ax.set_ylim([0.5, nprn+0.5])
-        # fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prn'  + str((int)(first_score_fm[cygfm-1])) + '_' +  str((int)(second_score_fm[cygfm-1])) + '_from_' + \
-        #                 start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
-        fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prnX_Y_from_' + \
-            start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
+        fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prn'  + str((int)(first_score_fm[cygfm-1])) + '_' +  str((int)(second_score_fm[cygfm-1])) + '_from_' + \
+                        start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
+        # fig_save_name = '/Users/cbv/fm' + str(cygfm) + '_prnX_Y_from_' + \
+        #     start_time_fm[cygfm-1].replace('-','').replace(':','') + '_to_' + end_time_fm[cygfm-1].replace('-','').replace(':','') + '_utc.pdf'
 
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
-
+        
 raise Exception
 # download CYGNSS and GPS TLEs in the format required by sat-bop.py
 
