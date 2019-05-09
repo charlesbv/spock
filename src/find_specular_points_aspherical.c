@@ -117,6 +117,7 @@ struct specular_point_info {
 
   //  double gain;
   int8_t gain;
+    int8_t which_ant; // 0 is port, 1 is starboard
     double power;
   //int power;
   //  double NormPower;
@@ -2077,7 +2078,7 @@ int read_antenna_info() {
   AntennaInfo.dTheta = 90.0/nThetaAntenna;
   AntennaInfo.dPhi = 360.0/nPhiAntenna;
 
-  // starboard antenna
+  // port antenna
   iant = 0;
   fpAntenna = fopen(AntennaInfo.AntennaFileNamePort,"r");
   if (!fpAntenna) {
@@ -2117,7 +2118,7 @@ int read_antenna_info() {
   fclose(fpAntenna);
 
 
-  // port antenna
+  // starboard antenna
   iant = 1;
   fpAntenna = fopen(AntennaInfo.AntennaFileNameStarboard,"r");
   if (!fpAntenna) {
@@ -3650,7 +3651,7 @@ return 0;
 
   //  float GainHighest=-1.0e32;
   int8_t GainHighest=-99;
-
+  info->which_ant = 0;
 
   for (iAnt=0; iAnt < AntennaInfo.nAnt; iAnt++) {
 
@@ -3815,7 +3816,11 @@ return 0;
       gainR = -100;
     }
 
+    if (gainR > GainHighest) info->which_ant = iAnt; // !!!! added on 05/09/2019
+    
     if (gainR > GainHighest) GainHighest = gainR;
+
+
 
     
   }
@@ -4215,6 +4220,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 		SpecularPointsAllGps[iGps].CygnssLOSVel = specularpoint.CygnssLOSVel;
 		SpecularPointsAllGps[iGps].GpsLOSVel    = specularpoint.GpsLOSVel;
 		SpecularPointsAllGps[iGps].gain         = specularpoint.gain;
+		SpecularPointsAllGps[iGps].which_ant         = specularpoint.which_ant;
 		SpecularPointsAllGps[iGps].power        = specularpoint.power;
 		SpecularPointsAllGps[iGps].NormPower    = specularpoint.NormPower;
 		SpecularPointsAllGps[iGps].Incidence    = specularpoint.Incidence;
@@ -4360,13 +4366,18 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 	      }
 	      int8_t tmp_gain = SpecularPointsAllGps[iGps].gain;
 	      fwrite(&tmp_gain,sizeof(tmp_gain),1,fpOutput);
+
 	      // CBV 05/09/16
 	      //	      if ((iPtInner == 0) && (iPt %2 == 0)){// THAT IS TO OUTPUT THE POSITION AND VELOCITY OF THE GPS/CYGNSS EVERY 60 SECONDS (WHEN THE PROPAGATOR OUTPUTS EVERY 30 SECONDS (THIS EXPLAINS THE iPt %2 == 0))
 
 	      gps_x_inner = x * GPS[iGps].x[iPt+1] + (1-x) * GPS[iGps].x[iPt];
 	      gps_y_inner = x * GPS[iGps].y[iPt+1] + (1-x) * GPS[iGps].y[iPt];
 	      gps_z_inner = x * GPS[iGps].z[iPt+1] + (1-x) * GPS[iGps].z[iPt];
+	      int8_t tmp_which_ant;
 	      if ( debug_cbv == 1){
+	      tmp_which_ant = SpecularPointsAllGps[iGps].which_ant;
+	      fwrite(&tmp_which_ant,sizeof(tmp_which_ant),1,fpOutput);
+		
 	      tmp =  (float) gps_x_inner/1000; fwrite(&tmp,sizeof(tmp),1,fpOutput);
 	      tmp =  (float) gps_y_inner/1000; fwrite(&tmp,sizeof(tmp),1,fpOutput);
 	      tmp =  (float) gps_z_inner/1000; fwrite(&tmp,sizeof(tmp),1,fpOutput);
