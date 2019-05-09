@@ -76,17 +76,27 @@ def cygnss_beacon_package(start_time, end_time):
     satbop_simu_dir = other_simu_dir + 'sat-bop/'
     if (os.path.isdir(satbop_simu_dir) == False):
         os.system('mkdir ' + satbop_simu_dir)
-    fm_dir = []
+    satbop_fm_dir = []
     for cygfm in range(1,9):
-        fm_dir.append( satbop_simu_dir + 'fm0' + str(cygfm) + '/' )
-        if (os.path.isdir(fm_dir[-1]) == False):
-            os.system('mkdir ' + fm_dir[-1])
-        
+        satbop_fm_dir.append( satbop_simu_dir + 'fm0' + str(cygfm) + '/' )
+        if (os.path.isdir(satbop_fm_dir[-1]) == False):
+            os.system('mkdir ' + satbop_fm_dir[-1])
+            
     # main_simu_dir/other/waveform_gen directory
     waveform_gen_simu_dir = other_simu_dir + 'waveform_gen/'
     if (os.path.isdir(waveform_gen_simu_dir) == False):
         os.system('mkdir ' + waveform_gen_simu_dir)
+    waveform_gen_fm_dir = []
+    for cygfm in range(1,9):
+        waveform_gen_fm_dir.append( waveform_gen_simu_dir + 'fm0' + str(cygfm) + '/' )
+        if (os.path.isdir(waveform_gen_fm_dir[-1]) == False):
+            os.system('mkdir ' + waveform_gen_fm_dir[-1])
+        if (os.path.isdir(waveform_gen_fm_dir[-1] + 'prn_i' ) == False):
+            os.system('mkdir ' + waveform_gen_fm_dir[-1] + 'prn_i' )
+        if (os.path.isdir(waveform_gen_fm_dir[-1] + 'prn_ii' ) == False):
+            os.system('mkdir ' + waveform_gen_fm_dir[-1] + 'prn_ii' )
 
+        
     # main_simu_dir/other/waveform_combiner directory
     waveform_combiner_simu_dir = other_simu_dir + 'waveform_combiner/'
     if (os.path.isdir(waveform_combiner_simu_dir) == False):
@@ -97,4 +107,4 @@ def cygnss_beacon_package(start_time, end_time):
     if (os.path.isdir(waveform_verification_simu_dir) == False):
         os.system('mkdir ' + waveform_verification_simu_dir)
         
-    return satbop_package_dir, satbop_simu_dir, fm_dir
+    return satbop_package_dir, satbop_simu_dir, satbop_fm_dir, waveform_gen_fm_dir

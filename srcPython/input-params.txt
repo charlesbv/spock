@@ -1,39 +1,63 @@
-; Satellite Beacon Overpass Planner Input Parameters
+; TDS Beacon Signal Generator Input Parameters
 
-; Start of planning period, UTC
-start_date=2019/04/24
-start_time=00:00:00
+; Operation Mode
+; Determines the way in which the paths between receiver,
+; transmitter and specular point are used to affect the
+; total delay and Doppler
+; 1 = standard operation mode
+; 2 = bench top mode: ignore path between beacon and receiver
+; 3 = static mode: ignore all delay and Doppler due to geometry
+operation_mode=2
 
-; End of planning period, UTC
-end_date=2019/04/24
-end_time=23:59:59
+; Center frequency, MHz
+center_freq=1575.42
 
-; Beacon latitude, +/-deg N, 0-90
-beacon_lat=32.86843
+; Waveform output file signal strength scale factor (0.0 to 1.0)
+wave_output_scale_factor=0.5
 
-; Beacon longitude, +/-deg E, 0-180
-beacon_long=-106.12885
+; Waveform output sample rate (MHz)
+sample_rate=5.0
 
-; Beacon altitude, WGS-84, km
-beacon_alt=1.21559
+; Big endian output file byte order
+; True for big endian, false for little endian
+; (This switch currently doesn't control anything. Maybe later.))
+big_endian=false
 
- Minimum rx satellite elevation, degrees
- Overpasses must achieve at least this elevation
- angle to be considered acceptable.
-min_elev_angle=60.0
-
-; GPS TLE file path. May be relative to the current directory or
+; Overpass CSV file path. This file is created by the TDS-1 Beacon
+;  Overpass Planner (tds-bop) application and is named pass_N.csv, where
+;  N is the tds-bop pass number.
+; The file path may be relative to the currrent directory or
 ;  absolute. Always use / as directory delimiter (even on Windows).
 ;  Defaults to the current working directory.
-gps_tle_file_path=gps_2019-04-24.txt
+pass_csv_file_path=PRN_20_eeeeetruncated.csv
 
-; Rx satellite TLE file path. May be relative to the current directory or
+; DDM test pattern file path. May be relative to the current directory or
 ;  absolute. Always use / as directory delimiter (even on Windows).
 ;  Defaults to the current working directory.
-rx_sat_tle_file_path=CYGFM01_2019-04-24.txt
+ddm_pattern_file_path=pattern_goodvibes_v2.bin
 
-; Output directory. May be relative to the current directory or
+; SP3 file path. This is the most recent SP3 file available from the IGS
+;  FTP server at ftp://igscb.jpl.nasa.gov/pub/product/
+;  Note that the SP3 files on the ftp server are compressed and must
+;  be decompressed (unzipped) for beacon-sig-gen usage.
+; May be relative to the currrent directory or
 ;  absolute. Always use / as directory delimiter (even on Windows).
 ;  Defaults to the current working directory.
-output_directory=testttt
+sp3_file_path=ieeeeeegs20254.sp3
+
+; Output file directory. All the files created by beacon-sig-gen are
+;  written to this directory.
+;  May be relative to the currrent directory or
+;  absolute. Always use / as directory delimiter (even on Windows).
+;  Defaults to the current working directory.
+output_directory=PRN_20_eeeeetruncated_ieeeeeegs20254.bin
+
+; Fiducial delay (seconds)
+;  The fiducial is an absence of reflected GPS power in the waveform.
+;  The fiducial delay is the number of seconds between the start of
+;  transmission and the start of the fiducial.
+fiducial_delay=0
+
+; Fiducial duration (seconds)
+fiducial_duration=0
 

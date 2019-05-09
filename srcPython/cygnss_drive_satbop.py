@@ -13,19 +13,19 @@ from cygnss_beacon_package import *
 from pathlib import Path
 from shutil import copyfile, move
 from distutils.dir_util import copy_tree
-
+import ipdb
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-start_time = '2019-04-21T00:00:00'
-end_time = '2019-04-21T23:59:59'
+start_time = '2018-10-31T00:00:00' #'2019-04-21T00:00:00'
+end_time = '2018-11-01T00:00:00'#'2019-04-21T23:59:59'
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 current_dir = str(Path().absolute()) + '/'
 #os.chdir(current_dir) if script crases afet chanding dir, can go back to initial dir
 
 # Create the package and run structure for these dates
-satbop_package_dir, satbop_simu_dir, satbop_fm_dir = cygnss_beacon_package(start_time, end_time)
-
+satbop_package_dir, satbop_simu_dir, satbop_fm_dir, waveform_gen_fm_dir = cygnss_beacon_package(start_time, end_time)
+ipdb.set_trace()
 # For each FM, set up the sat-bop simulation and run it
 os.system('gps_tle_beacon.py ' + start_time[0:10])
 os.system('cygnss_tle_beacon.py ' + start_time[0:10])
