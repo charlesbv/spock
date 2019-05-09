@@ -3382,6 +3382,14 @@ duration_first_or_second_score_wrong_conc = np.array(duration_first_or_second_sc
 # plot on a time diagram the prn selected by SpOCK and the prn selected by the on-board algorithm
 ## Either select idate, itime_diff, duration_diagram OR select start_date_interval and stop_date_interval in the next block (that starts with "look at particular interval")
 ## if select idate, itime_diff, duration_diagram  the comment the block that start with "look at particular interval"
+import matplotlib.patches as mpatches
+color_gain = ['grey', 'blue', 'limegreen', 'red']
+label_gain = ['0', '2-5', '6-10', '11-15']
+handles_arr = []
+for icat in range(len(label_gain)):
+    handles_arr.append(mpatches.Patch(color=color_gain[icat], label=label_gain[icat]))
+
+
 idate = 1
 itime_diff = 20
 duration_diagram = 10. # in minutes
@@ -3400,8 +3408,8 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     ## !!!!!!! assumes:
     ## nb_date = 1 (ie date_start_val_array =  np.array([date_start_val_start + timedelta(days=i) for i in np.arange(1,2,1)])) 
     idate = 0
-    start_date_interval = '2018-10-31T18:15:10'
-    stop_date_interval = '2018-10-31T18:27:34'
+    start_date_interval = '2018-10-31T18:43:05' # fm01 2018-10-31T18:15:10, fm04 2018-10-31T18:30:53, fm03 2018-10-31T18:43:05
+    stop_date_interval = '2018-10-31T18:55:32' # fm01 2018-10-31T18:27:34, fm04 2018-10-31T18:41:08, fm03 2018-10-31T18:55:32
     start_date_interval_date = datetime.strptime(start_date_interval, "%Y-%m-%dT%H:%M:%S")
     stop_date_interval_date = datetime.strptime(stop_date_interval, "%Y-%m-%dT%H:%M:%S")
     itime_start = np.where(date_spock_same_time_as_netcdf >= start_date_interval_date)[0][0]
@@ -3459,17 +3467,28 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
             prn_netcdf_value = np.where(prn_list_sort == prn_netcdf)[0][0]
             gps_netcdf_value_sub.append(prn_netcdf_value)
             #colorVal = scalarMap.to_rgba(prn_spock_value)
-            if (ispec == gain_sort_index[0]): # top PRN gain
-                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                           prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 90)
-            elif (ispec == gain_sort_index[1]): # second to top PRN gain
-                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                           prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
+            # if (ispec == gain_sort_index[0]): # top PRN gain
+            #     ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+            #                prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 90)
+            # elif (ispec == gain_sort_index[1]): # second to top PRN gain
+            #     ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+            #                prn_spock_value + 0.95,  marker = '.', color = 'blue',s = 20)
+            # else:
+            #     ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
+            #                prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
+            if fom_spock_all_date[idate][itime][ispec] == 0: # !!!!!!!!!!! if change gain limmits then need to change also label_gain
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60., prn_spock_value + 0.95,  marker = '.', color = color_gain[0], s = 20)   
+            elif ((fom_spock_all_date[idate][itime][ispec] >= 1) & (fom_spock_all_date[idate][itime][ispec] <= 5)):
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60., prn_spock_value + 0.95,  marker = '.', color = color_gain[1], s = 20)   
+            elif ((fom_spock_all_date[idate][itime][ispec] >= 6) & (fom_spock_all_date[idate][itime][ispec] <= 10)):
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60., prn_spock_value + 0.95,  marker = '.', color = color_gain[2], s = 20)   
+            elif ((fom_spock_all_date[idate][itime][ispec] >= 11) & (fom_spock_all_date[idate][itime][ispec] <= 15)):
+                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60., prn_spock_value + 0.95,  marker = '.', color = color_gain[3], s = 20)   
             else:
-                ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                           prn_spock_value + 0.95,  marker = '.', color = 'blue', alpha = 0.06, s=20)            
+                print "***! Error: the gain is not between 0 and 15. !***"; sys.exit()
+
             ax.scatter((nb_seconds_since_initial_epoch_spock_all_date[idate][itime]-nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start])/60.,
-                       prn_netcdf_value + 1.05,  marker = '.', color = 'red', s=20)
+                       prn_netcdf_value + 1.05,  marker = '.', color = 'black', s=20)
 
         gps_spock_value.append(gps_spock_value_sub)
         gps_netcdf_value.append(gps_netcdf_value_sub)
@@ -3508,6 +3527,9 @@ for itime_in in range(0,len(np.where(duration_second_score_wrong_idate[idate] > 
     ax.yaxis.set_ticklabels(prn_list_sort, fontsize = fontsize_plot)#, rotation='vertical')
     ax.margins(0,0)
     ax.set_ylim([-0.6, nprn+0.5])
+    legend = ax.legend( loc='center left',  bbox_to_anchor=(1, 0.5), fontsize = fontsize_plot, handles=handles_arr, ncol=1, frameon=False, title = 'PRN gain')
+    legend.get_title().set_fontsize(str(fontsize_plot)) 
+        
     fig_save_name = '/Users/cbv/testfm0' + str(cygfm)+ '.pdf'#+str(itime_in) + '_score_3d_binom.pdf'#time_diagram_prn_spock_onboard_iday' + str(idate) + '_itimeStart' + str(itime_start) + '_itimeStop' + +str(itime_stop) + '.pdf'
     fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
