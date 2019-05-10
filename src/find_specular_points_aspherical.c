@@ -37,7 +37,7 @@
 #define EARTH_RADIUS 6378.137 // equatorial raidus
 #define EARTH_FLATENNING 1/298.257223560
 #define EARTH_ECCENTRICITY 0.081819221456
-int debug_cbv = 0;// set this variable to 1 to print in the binary more variables than with debug_cbv = 0. It's different from the option iMin, it was added by cbv later (06-02-18)
+int debug_cbv = 1;// set this variable to 1 to print in the binary more variables than with debug_cbv = 0. It's different from the option iMin, it was added by cbv later (06-02-18)
 
 int iDebug;
 
@@ -117,7 +117,7 @@ struct specular_point_info {
 
   //  double gain;
   int8_t gain;
-    int8_t which_ant; // 0 is port, 1 is starboard
+    int8_t which_ant; // 2 is starboard, 3 is port (to follow the conventions made onboard)
     double power;
   //int power;
   //  double NormPower;
@@ -3651,7 +3651,7 @@ return 0;
 
   //  float GainHighest=-1.0e32;
   int8_t GainHighest=-99;
-  info->which_ant = 0;
+  info->which_ant = 0; 
 
   for (iAnt=0; iAnt < AntennaInfo.nAnt; iAnt++) {
 
@@ -3824,6 +3824,15 @@ return 0;
 
     
   }
+
+  // 2 is starboard, 3 is port (to follow the conventions made onboard). However iAnt is 0 for port and 1 for starboard
+  if (info->which_ant == 0){ // antenna is port
+    info->which_ant = 3;
+  }
+  else{ // antenna is starboard
+    info->which_ant = 2;
+  }
+  
   //  printf("\n\n") ;
 
   //	MPI_Finalize(); exit(0);
