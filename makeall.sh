@@ -116,7 +116,7 @@ if [ $py_only -ne 1 ];then
 	#echo sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev
 	#sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev
 	# # Specular points binary files
-	echo $path_compiler -o "$path_spock_abso"/spec_asph_which_ant ./src/find_specular_points_aspherical.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here
+	echo $path_compiler -o "$path_spock_abso"/spec_asph_which_ant_debug ./src/find_specular_points_aspherical.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here
 	#$path_compiler -o "$path_spock_abso"/spec_asph ./src/find_specular_points_aspherical.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here  	
 #   	$path_compiler -o "$path_spock_abso"/spec_gnss ./src/find_specular_points_gnssAll.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here  	
 # 	sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spec_gnss

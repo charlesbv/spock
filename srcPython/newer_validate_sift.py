@@ -62,10 +62,15 @@ from numpy import unravel_index
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 1 #1 # which CYGNSS to look at
+cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-10-30T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'FM01_roll10deg_2018-10-31_spock.txt'# oct31: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg) # 90-yaw: 'newfm02SepYaw_1s_out.txt' # -90-yaw: 'newfm02SepYaw_minus90_1s_out.txt'# 'newfm02SepYaw.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
+spock_input_filename = 'newfm02SepYaw_1s_out_which_ant.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+# oct31 with spec_asph_debug: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg)
+# 90-yaw iwth with spec_asph_which_ant_debug: 'newfm02SepYaw_1s_out_which_ant.txt'
+# 90-yaw with spec_asph_debug: 'newfm02SepYaw_1s_out.txt'
+# -90-yaw witg spec_asph_debug: 'newfm02SepYaw_minus90_1s_out.txt'
+# 'newfm02SepYaw.txt' 
 if islin == 1:
     dir_run_spock = '/Users/cbv/cygnss/sift_temp' # '.' # no slash
 else:
@@ -152,8 +157,8 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
 #         os.system("cp -p " + spec_spock_filename + " " + spec_spock_filename.replace(".txt", "_6SPs.txt"))
 #        date_spock, lon_spock, lat_spock, gain_spock, gps_spock, normpower_spock, x_cyg_spock, y_cyg_spock, z_cyg_spock, x_gps_spock, y_gps_spock, z_gps_spock,  x_spec_spock, y_spec_spock, z_spec_spock, nb_spec_spock,  el_spec_spock, az_spec_spock, el_gps_from_cyg_spock,  el_spec_not_int_spock, az_spec_not_int_spock = cygnss_read_spock_spec(spec_spock_filename)
         data_spec = cygnss_read_spock_spec_bin(spec_spock_filename.replace('.txt','.bin'), gps_name_list_spock, dt_spock_output, 1) 
-        date_spock = data_spec[0]; lon_spock = data_spec[1]; lat_spock = data_spec[2]; gain_spock = data_spec[3]; gps_spock = data_spec[4]; normpower_spock = data_spec[5]; x_cyg_spock = data_spec[6]; y_cyg_spock = data_spec[7]; z_cyg_spock = data_spec[8]; x_gps_spock = data_spec[9]; y_gps_spock = data_spec[10]; z_gps_spock = data_spec[11];  x_spec_spock = data_spec[12]; y_spec_spock = data_spec[13]; z_spec_spock = data_spec[14]; nb_spec_spock = data_spec[15];  el_spec_spock = data_spec[16]; az_spec_spock = data_spec[17]; el_gps_from_cyg_spock = data_spec[18];  el_spec_not_int_spock = data_spec[19]; az_spec_not_int_spock = data_spec[20]
-
+        date_spock = data_spec[0]; lon_spock = data_spec[1]; lat_spock = data_spec[2]; gain_spock = data_spec[3]; gps_spock = data_spec[4]; normpower_spock = data_spec[5]; x_cyg_spock = data_spec[6]; y_cyg_spock = data_spec[7]; z_cyg_spock = data_spec[8]; x_gps_spock = data_spec[9]; y_gps_spock = data_spec[10]; z_gps_spock = data_spec[11];  x_spec_spock = data_spec[12]; y_spec_spock = data_spec[13]; z_spec_spock = data_spec[14]; nb_spec_spock = data_spec[15];  el_spec_spock = data_spec[16]; az_spec_spock = data_spec[17]; el_gps_from_cyg_spock = data_spec[18];  el_spec_not_int_spock = data_spec[19]; az_spec_not_int_spock = data_spec[20]; which_ant_spock = data_spec[24];
+        
         print "Done reading SpOCK specular files..."
         ###############
         ###############
@@ -259,6 +264,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
 
 
         gain_netcdf = []
+        which_ant_netcdf = []
         az_spec_netcdf = []
         el_spec_netcdf = []
         az_orbit_spec_netcdf = []
@@ -284,6 +290,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             iday_here = day_list[iday_count]
             filename_spec_flight = path_netcdf + yy  + np.str(doy_array[iday_here]).zfill(3) + "/" + [x for x in os.listdir(path_netcdf + yy  + np.str(doy_array[iday_here]).zfill(3)) if x.endswith(".nc") and x.startswith("cyg0" + np.str(cygfm))][0]
             fh = Dataset(filename_spec_flight, mode='r')
+            
             # nc_attrs = fh.ncattrs()
             # nc_dims = [dim for dim in fh.dimensions]  # list of nc dimensions
             # nc_vars = [var for var in fh.variables]  # list of nc variables
@@ -292,6 +299,8 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             y_spec_netcdf_temp = fh.variables['sp_pos_y'][:]
             z_spec_netcdf_temp = fh.variables['sp_pos_z'][:]
 
+            #ddm_ant  # The antenna that received the reflected GPS signal associated with the DDM. 0 = none, 1 = zenith (never used), 2 = nadir_starboard, 3 = nadir_port
+            which_ant_netcdf_temp = fh.variables['ddm_ant'][:]
             lat_spec_netcdf_temp = fh.variables['sp_lat'][:]
             lon_spec_netcdf_temp = fh.variables['sp_lon'][:]
 
@@ -339,6 +348,9 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                 list_are_masked_array.append(z_spec_netcdf_temp)
             if type(gain_netcdf_temp) == ma.core.MaskedArray:
                 list_are_masked_array.append(gain_netcdf_temp)
+            if type(which_ant_netcdf_temp) == ma.core.MaskedArray:
+                list_are_masked_array.append(which_ant_netcdf_temp)
+                
             if type(az_spec_netcdf_temp) == ma.core.MaskedArray:
                 list_are_masked_array.append(az_spec_netcdf_temp)
             if type(el_spec_netcdf_temp) == ma.core.MaskedArray:
@@ -504,6 +516,11 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                         gain_netcdf.append(gain_netcdf_temp.data[itime])
                     else:
                         gain_netcdf.append(gain_netcdf_temp[itime])
+                    if type(which_ant_netcdf_temp) == ma.core.MaskedArray:
+                        which_ant_netcdf.append(which_ant_netcdf_temp.data[itime])
+                    else:
+                        which_ant_netcdf.append(which_ant_netcdf_temp[itime])
+
                     if type(az_spec_netcdf_temp) == ma.core.MaskedArray:
                         az_spec_netcdf.append(az_spec_netcdf_temp.data[itime])
                     else:
@@ -534,6 +551,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     else:
                         gps_netcdf.append(gps_netcdf_temp[itime])
 
+                        
                     if type(rx_to_sp_range_netcdf_temp) == ma.core.MaskedArray:
                         rx_to_sp_range_netcdf.append(rx_to_sp_range_netcdf_temp.data[itime])
                     else:
@@ -602,6 +620,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             x_spec_spock = np.array(x_spec_spock); y_spec_spock = np.array(y_spec_spock); z_spec_spock = np.array(z_spec_spock); el_spec_spock = np.array(el_spec_spock); az_spec_spock = np.array(az_spec_spock); el_gps_from_cyg_spock = np.array(el_gps_from_cyg_spock); el_spec_not_int_spock = np.array(el_spec_not_int_spock); az_spec_not_int_spock = np.array(az_spec_not_int_spock)
             lat_spock = np.array(lat_spock); lon_spock = np.array(lon_spock)
             gain_spock = np.array(gain_spock)
+            which_ant_spock = np.array(which_ant_spock)
             gps_spock = np.array(gps_spock)
             normpower_spock = np.array(normpower_spock)
             x_gps_spock_same_time_as_netcdf = x_gps_spock[index_in_spock_date_netcdf_same]
@@ -620,6 +639,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             el_spec_not_int_spock_same_time_as_netcdf = el_spec_not_int_spock[index_in_spock_date_netcdf_same]
             az_spec_not_int_spock_same_time_as_netcdf = az_spec_not_int_spock[index_in_spock_date_netcdf_same]
             gain_spock_same_time_as_netcdf = gain_spock[index_in_spock_date_netcdf_same]
+            which_ant_spock_same_time_as_netcdf = which_ant_spock[index_in_spock_date_netcdf_same]
             gps_spock_same_time_as_netcdf = gps_spock[index_in_spock_date_netcdf_same]
             normpower_spock_same_time_as_netcdf = normpower_spock[index_in_spock_date_netcdf_same]
             lon_spock_same_time_as_netcdf = lon_spock[index_in_spock_date_netcdf_same]
