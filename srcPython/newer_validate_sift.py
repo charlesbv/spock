@@ -64,10 +64,12 @@ plt.ion()
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 cygfm = 2 #1 # which CYGNSS to look at
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00'
-spock_input_filename = 'newfm02SepYaw_1s_out_which_ant.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
+date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
+spock_input_filename = 'newfm02SepYaw_minus90_1s_out_which_ant.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 # oct31 with spec_asph_debug: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg)
+# oct31 with spec_asph_which_ant_debug: FM03_2018-10-31_spock_which_ant.txt
 # 90-yaw iwth with spec_asph_which_ant_debug: 'newfm02SepYaw_1s_out_which_ant.txt'
+# -90-yaw witg spec_asph_which_ant_debug: 'newfm02SepYaw_minus90_1s_out_which_ant.txt'
 # 90-yaw with spec_asph_debug: 'newfm02SepYaw_1s_out.txt'
 # -90-yaw witg spec_asph_debug: 'newfm02SepYaw_minus90_1s_out.txt'
 # 'newfm02SepYaw.txt' 
@@ -94,8 +96,10 @@ time_diff_prn_all_date= []
 time_same_prn_all_date= []
 which_spec_diff_all_date= []
 gps_spock_all_date= []
+which_ant_spock_all_date= []
 fom_spock_all_date= []
 gps_netcdf_all_date= []
+which_ant_netcdf_all_date= []
 fom_netcdf_all_date= []
 index_netcdf_all_date= []
 fom_netcdf_diff_prn_all_all_date= []
@@ -917,7 +921,8 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
 
             time_diff_prn_arr = np.array(time_diff_prn)
             time_same_prn_arr = np.array(time_same_prn)
-            gps_spock = gps_spock_same_time_as_netcdf 
+            gps_spock = gps_spock_same_time_as_netcdf
+            which_ant_spock = which_ant_spock_same_time_as_netcdf 
             fom_spock = gain_spock_same_time_as_netcdf
             which_spec_diff_time_diff_prn = which_spec_diff[time_diff_prn, :]
             fom_netcdf_arr = np.array(fom_netcdf)
@@ -957,8 +962,10 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             pickle.dump(time_same_prn, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_time_same_prn_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
             pickle.dump(which_spec_diff, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_spec_diff_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
             pickle.dump(gps_spock, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_gps_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
+            pickle.dump(which_ant_spock, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_ant_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
             pickle.dump(fom_spock, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
             pickle.dump(gps_netcdf, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_gps_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
+            pickle.dump(which_ant_netcdf, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_ant_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
             pickle.dump(fom_netcdf, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
 
             pickle.dump(fom_netcdf_diff_prn_all, open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_netcdf_diff_prn_all_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle", "w"))
@@ -983,8 +990,10 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             time_same_prn_all_date.append(  time_same_prn)
             which_spec_diff_all_date.append(  which_spec_diff)
             gps_spock_all_date.append(  gps_spock)
+            which_ant_spock_all_date.append(  which_ant_spock)
             fom_spock_all_date.append(  fom_spock)
             gps_netcdf_all_date.append(  gps_netcdf)
+            which_ant_netcdf_all_date.append(  which_ant_netcdf)
             fom_netcdf_all_date.append(  fom_netcdf)
             fom_netcdf_diff_prn_all_all_date.append( fom_netcdf_diff_prn_all   )
             nb_spec_diff_all_date.append(  nb_spec_diff )
@@ -1036,8 +1045,10 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             time_same_prn = pickle.load( open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_time_same_prn_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
             which_spec_diff = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_spec_diff_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
             gps_spock = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_gps_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
+            which_ant_spock = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_ant_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
             fom_spock = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_spock_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
             gps_netcdf = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_gps_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
+            which_ant_netcdf = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_which_ant_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
             fom_netcdf = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_netcdf_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
 
             fom_netcdf_diff_prn_all = pickle.load(open(path_pickle + spock_input_filename.split('/')[-1].replace(".txt", "")  + "_fom_netcdf_diff_prn_all_nSP_" + str(nb_spec_spock) + "FM" + str(cygfm) + ".pickle"))
@@ -1065,8 +1076,10 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             time_same_prn_all_date.append(  time_same_prn)
             which_spec_diff_all_date.append(  which_spec_diff)
             gps_spock_all_date.append(  gps_spock)
+            which_ant_spock_all_date.append(  which_ant_spock)
             fom_spock_all_date.append(  fom_spock)
             gps_netcdf_all_date.append(  gps_netcdf)
+            which_ant_netcdf_all_date.append(  which_ant_netcdf)
             fom_netcdf_all_date.append(  fom_netcdf)
             fom_netcdf_diff_prn_all_all_date.append( fom_netcdf_diff_prn_all   )
             nb_spec_diff_all_date.append(  nb_spec_diff )
@@ -3695,6 +3708,53 @@ fig.set_figheight(height_fig)
 fig.set_figwidth(height_fig*ratio_fig_size)
 fig_save_name = '/Users/cbv/beacon_hist_or_and_3d_yaw-90.pdf'#
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+
+
+# PLOT WHICH ANTENNA WAS SELECTED FOR EACH PRN VS TIME. SpOCK AND ONBOARD
+# 2: starboard; 3: port
+same_ant = []
+diff_ant = []
+diff_prn = []
+diff_prn_star = []
+diff_prn_port = []
+same_prn = []
+for idate in range(nb_date):
+    ntime = len(which_ant_netcdf_all_date[idate])
+    same_ant_idate = []
+    diff_ant_idate = []
+    diff_prn_idate = []
+    same_prn_idate = []
+    diff_prn_star_idate = []
+    diff_prn_port_idate = []
+    for itime in range(ntime):
+        for ispec_spock in range(4):
+            if ( gps_spock_all_date[idate][itime][ispec_spock] in  gps_netcdf_all_date[idate][itime]) == True:
+                ispec_netcdf = np.where(gps_netcdf_all_date[idate][itime] == gps_spock_all_date[idate][itime][ispec_spock])[0][0]
+                which_ant_netcdf_here = which_ant_netcdf_all_date[idate][itime][ispec_netcdf]
+                which_and_spock_here = which_ant_spock_all_date[idate][itime][ispec_spock]
+                same_prn_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf]])
+                if which_and_spock_here == which_ant_netcdf_here:
+                    same_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+                else:
+                    diff_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+                    if which_and_spock_here == 2: # SpOCK predicts starboard but onboard is port
+                        diff_prn_star_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+                    else: # SpOCK predicts port but onboard is starboard
+                        diff_prn_port_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+            else:
+                diff_prn_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock]])
+    same_ant.append(same_ant_idate)
+    diff_ant.append(diff_ant_idate)
+    diff_prn.append(diff_prn_idate)
+    same_prn.append(same_prn_idate)
+    diff_prn_star.append(diff_prn_star_idate)
+    diff_prn_port.append(diff_prn_port_idate)
+
+
+#np.mod(az_spec_not_int_spock_same_time_as_netcdf[itime][ispec_spock] + 180, 360) should be equal (or similar) to az_spec_netcdf[itime][ispec_netcdf]
+# end of PLOT WHICH ANTENNA WAS SELECTED FOR EACH PRN VS TIME. SpOCK AND ONBOARD
 
 
 # PLOT THE PRN VS TIME FOR SPOCK
