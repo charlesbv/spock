@@ -62,14 +62,16 @@ from numpy import unravel_index
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 2 #1 # which CYGNSS to look at
+cygfm = 2 #1 # which CYGNSS to look at. 2 if spe 25--27, 3 if oct31
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
 date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
 spock_input_filename = 'newfm02SepYaw_minus90_1s_out_which_ant.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is. 
 # oct31 with spec_asph_debug: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg)
-# oct31 with spec_asph_which_ant_debug: FM03_2018-10-31_spock_which_ant.txt
+# oct31 with spec_asph_which_ant_debug: FM03_2018-10-31_spock_which_ant.txt, fm03oct31debug.txt
 # 90-yaw iwth with spec_asph_which_ant_debug: 'newfm02SepYaw_1s_out_which_ant.txt'
 # -90-yaw witg spec_asph_which_ant_debug: 'newfm02SepYaw_minus90_1s_out_which_ant.txt'
+# 90 way with spec_dev: newfm02SepYaw_1s_out_which_ant_debug.txt
+# -90 yaw with spec_dev: newfm02SepYaw_minus90_1s_out_which_ant_debug.txt
 # 90-yaw with spec_asph_debug: 'newfm02SepYaw_1s_out.txt'
 # -90-yaw witg spec_asph_debug: 'newfm02SepYaw_minus90_1s_out.txt'
 # 'newfm02SepYaw.txt' 
@@ -298,7 +300,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             # nc_attrs = fh.ncattrs()
             # nc_dims = [dim for dim in fh.dimensions]  # list of nc dimensions
             # nc_vars = [var for var in fh.variables]  # list of nc variables
-
+ 
             x_spec_netcdf_temp = fh.variables['sp_pos_x'][:] # X component of the specular point position in the ECEF coordinate system, in meters, at ddm_timestamp_utc, as calculated on the ground.
             y_spec_netcdf_temp = fh.variables['sp_pos_y'][:]
             z_spec_netcdf_temp = fh.variables['sp_pos_z'][:]
@@ -3717,17 +3719,22 @@ fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bb
 same_ant = []
 diff_ant = []
 diff_prn = []
-diff_prn_star = []
-diff_prn_port = []
+diff_ant_star = []
+diff_ant_port = []
+same_ant_star = []
+same_ant_port = []
 same_prn = []
+bla = [] 
 for idate in range(nb_date):
     ntime = len(which_ant_netcdf_all_date[idate])
     same_ant_idate = []
     diff_ant_idate = []
     diff_prn_idate = []
     same_prn_idate = []
-    diff_prn_star_idate = []
-    diff_prn_port_idate = []
+    diff_ant_star_idate = []
+    diff_ant_port_idate = []
+    same_ant_star_idate = []
+    same_ant_port_idate = []
     for itime in range(ntime):
         for ispec_spock in range(4):
             if ( gps_spock_all_date[idate][itime][ispec_spock] in  gps_netcdf_all_date[idate][itime]) == True:
@@ -3736,23 +3743,344 @@ for idate in range(nb_date):
                 which_and_spock_here = which_ant_spock_all_date[idate][itime][ispec_spock]
                 same_prn_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf]])
                 if which_and_spock_here == which_ant_netcdf_here:
-                    same_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+                    same_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    if which_and_spock_here == 2: # both selected starboard
+                        same_ant_star_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    elif (which_and_spock_here == 3): # both selected port
+                        same_ant_port_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    else:
+                        bla.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
                 else:
-                    diff_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
-                    if which_and_spock_here == 2: # SpOCK predicts starboard but onboard is port
-                        diff_prn_star_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
-                    else: # SpOCK predicts port but onboard is starboard
-                        diff_prn_port_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], which_and_spock_here, which_ant_netcdf_here])
+                    diff_ant_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    if ((which_and_spock_here == 2) & (which_ant_netcdf_here == 3)): # SpOCK predicts starboard but onboard is port
+                        diff_ant_star_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    elif ((which_and_spock_here == 3) & (which_ant_netcdf_here == 2)): # SpOCK predicts port but onboard is starboard
+                        diff_ant_port_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
+                    else: 
+                        bla.append([itime, gps_spock_all_date[idate][itime][ispec_spock], gps_netcdf_all_date[idate][itime][ispec_netcdf], ispec_spock, ispec_netcdf, which_and_spock_here, which_ant_netcdf_here])
             else:
                 diff_prn_idate.append([itime, gps_spock_all_date[idate][itime][ispec_spock]])
+
     same_ant.append(same_ant_idate)
     diff_ant.append(diff_ant_idate)
     diff_prn.append(diff_prn_idate)
     same_prn.append(same_prn_idate)
-    diff_prn_star.append(diff_prn_star_idate)
-    diff_prn_port.append(diff_prn_port_idate)
+    diff_ant_star.append(diff_ant_star_idate)
+    diff_ant_port.append(diff_ant_port_idate)
+    same_ant_star.append(same_ant_star_idate)
+    same_ant_port.append(same_ant_port_idate)
 
 
+idate = 0
+ndiff_port  = len(diff_ant_port[idate])
+az_diff_port = np.zeros([ndiff_port])
+el_diff_port = np.zeros([ndiff_port])
+time_diff_port = []
+for idiff_port in range(ndiff_port):
+    ispec_netcdf = diff_ant_port[idate][idiff_port][4]
+    itime = diff_ant_port       [idate][idiff_port][0]
+    az_diff_port[idiff_port] = az_spec_netcdf[itime][ispec_netcdf]
+    el_diff_port[idiff_port] = el_spec_netcdf[itime][ispec_netcdf]
+    time_diff_port.append(itime)
+
+nsame_port  = len(same_ant_port[idate])
+az_same_port = np.zeros([nsame_port])
+el_same_port = np.zeros([nsame_port])
+time_same_port = []
+for isame_port in range(nsame_port):
+    ispec_netcdf = same_ant_port[idate][isame_port][4]
+    itime = same_ant_port[idate][isame_port][0]
+    az_same_port[isame_port] = az_spec_netcdf[itime][ispec_netcdf]
+    el_same_port[isame_port] = el_spec_netcdf[itime][ispec_netcdf]
+    time_same_port.append(itime)
+
+
+ndiff_star  = len(diff_ant_star[idate])
+az_diff_star = np.zeros([ndiff_star])
+el_diff_star = np.zeros([ndiff_star])
+time_diff_star = []
+for idiff_star in range(ndiff_star):
+    ispec_netcdf = diff_ant_star[idate][idiff_star][4]
+    itime = diff_ant_star[idate][idiff_star][0]
+    az_diff_star[idiff_star] = az_spec_netcdf[itime][ispec_netcdf]
+    el_diff_star[idiff_star] = el_spec_netcdf[itime][ispec_netcdf]
+    time_diff_star.append(itime)
+
+nsame_star  = len(same_ant_star[idate])
+az_same_star = np.zeros([nsame_star])
+el_same_star = np.zeros([nsame_star])
+time_same_star = []
+for isame_star in range(nsame_star):
+    ispec_netcdf = same_ant_star[idate][isame_star][4]
+    itime = same_ant_star[idate][isame_star][0]
+    az_same_star[isame_star] = az_spec_netcdf[itime][ispec_netcdf]
+    el_same_star[isame_star] = el_spec_netcdf[itime][ispec_netcdf]
+    time_same_star.append(itime)
+
+
+
+deg2rad = np.pi/180
+width_fig = 15.
+height_fig = width_fig * 3 /4
+fontsize_plot = 20 # 9
+
+# DIFF PORT: SpOCK SLECTS PORT BUT ONBOARD SELECTS STARBOARD
+fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
+gs = gridspec.GridSpec(1, 1)
+gs.update(left=0.12, right=0.97, top = 0.90,bottom = 0.06)
+fig.suptitle('', fontsize = fontsize_plot)
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+ax = fig.add_subplot(gs[0, 0], projection = 'polar')
+ax.scatter(az_diff_port[:10000]*deg2rad, el_diff_port[:10000])
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+ax.set_ylim([0,91])
+
+# ADD THE ANTENNA MAPS
+## read the antenna map
+filename_gain = '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/Bruce/tds-bop V1.2.3/CygnssAntenna/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test_elevOpposite.bin'
+extension = filename_gain.split('.')[-1]
+file_gain = open(filename_gain, "rb")
+x1 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+x2 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+numAz = unpack('i', file_gain.read(4))[0]
+numEl = unpack('i', file_gain.read(4))[0]
+az_start_deg = unpack('d', file_gain.read(8))[0]
+el_start_deg = unpack('d', file_gain.read(8))[0]
+az_inc_deg = unpack('d', file_gain.read(8))[0]
+el_inc_deg = unpack('d', file_gain.read(8))[0]
+#!!!! for some reason, a negative sign is needed for this file
+el_inc_deg = -el_inc_deg
+az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+az_deg = np.linspace(az_start_deg, az_stop_deg, numAz)
+el_stop_deg = el_start_deg + el_inc_deg * (numEl-1)
+el_deg = np.linspace(el_start_deg, el_stop_deg, numEl)
+gain = np.zeros([numEl,numAz])
+for iaz in range(numAz):
+    for iel in range(numEl):
+        gain[iel, iaz] = unpack('d', file_gain.read(8))[0]
+file_gain.close()
+
+## ADD THE MAP TO THE POLAR COORD PLOT
+x = np.append(az_deg, 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+y = 90 - np.append(el_deg, 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+X, Y = np.meshgrid(x, y)
+extension = filename_gain.split('.')[-1]
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+
+if el_start_deg < el_stop_deg: # file from low to high elevation
+    Z = np.zeros([numEl, numAz])
+    for iel in range(numEl):
+        Z[iel, :] =  gain[numEl-1-iel, :]
+else: # first row of gain is highest elevation
+    Z = gain
+nr, nc = Z.shape
+
+Z = np.ma.array(Z)
+max_gain = 15
+CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                    vmin = 0, vmax = max_gain, alpha = 0.3)                    
+cbar = plt.colorbar(CS1, ax = ax, pad = 0.075)
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'normal')
+
+fig_save_name = '/Users/cbv/' + spock_input_filename.replace('.txt', '_') + 'diff_port_polar.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+# SAME PORT: BOTH SpOCK AND ONBOARD SLECT PORT 
+fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
+gs = gridspec.GridSpec(1, 1)
+gs.update(left=0.12, right=0.97, top = 0.90,bottom = 0.06)
+fig.suptitle('', fontsize = fontsize_plot)
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+ax = fig.add_subplot(gs[0, 0], projection = 'polar')
+ax.scatter(az_same_port[:]*deg2rad, el_same_port[:], s = 5, zorder = 5)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+ax.set_ylim([0,91])
+
+# ADD THE ANTENNA MAPS
+## read the antenna map
+filename_gain = '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/Bruce/tds-bop V1.2.3/CygnssAntenna/merged_ant_1_starboard_ddmi_v1_with_ant_1_port_ddmi_v1_test_elevOpposite.bin'
+extension = filename_gain.split('.')[-1]
+file_gain = open(filename_gain, "rb")
+x1 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+x2 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+numAz = unpack('i', file_gain.read(4))[0]
+numEl = unpack('i', file_gain.read(4))[0]
+az_start_deg = unpack('d', file_gain.read(8))[0]
+el_start_deg = unpack('d', file_gain.read(8))[0]
+az_inc_deg = unpack('d', file_gain.read(8))[0]
+el_inc_deg = unpack('d', file_gain.read(8))[0]
+#!!!! for some reason, a negative sign is needed for this file
+el_inc_deg = -el_inc_deg
+az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+az_deg = np.linspace(az_start_deg, az_stop_deg, numAz)
+el_stop_deg = el_start_deg + el_inc_deg * (numEl-1)
+el_deg = np.linspace(el_start_deg, el_stop_deg, numEl)
+gain = np.zeros([numEl,numAz])
+for iaz in range(numAz):
+    for iel in range(numEl):
+        gain[iel, iaz] = unpack('d', file_gain.read(8))[0]
+file_gain.close()
+
+## ADD THE MAP TO THE POLAR COORD PLOT
+x = np.append(az_deg, 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+y = 90 - np.append(el_deg, 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+X, Y = np.meshgrid(x, y)
+extension = filename_gain.split('.')[-1]
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+
+if el_start_deg < el_stop_deg: # file from low to high elevation
+    Z = np.zeros([numEl, numAz])
+    for iel in range(numEl):
+        Z[iel, :] =  gain[numEl-1-iel, :]
+else: # first row of gain is highest elevation
+    Z = gain
+nr, nc = Z.shape
+
+Z = np.ma.array(Z)
+max_gain = 15
+CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                    vmin = 0, vmax = max_gain, alpha = 0.3)                    
+cbar = plt.colorbar(CS1, ax = ax, pad = 0.075)
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'normal')
+
+fig_save_name = '/Users/cbv/' + spock_input_filename.replace('.txt', '_') + 'same_port_polar.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+# DIFF STAR: SpOCK SLECTS STARBOARD BUT ONBOARD SELECTS PORT
+fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
+gs = gridspec.GridSpec(1, 1)
+gs.update(left=0.12, right=0.97, top = 0.90,bottom = 0.06)
+fig.suptitle('', fontsize = fontsize_plot)
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+ax = fig.add_subplot(gs[0, 0], projection = 'polar')
+ax.scatter(az_diff_star[:10000]*deg2rad, el_diff_star[:10000])
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+ax.set_ylim([0,91])
+
+# ADD THE ANTENNA MAPS
+## read the antenna map
+filename_gain = '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/Bruce/tds-bop V1.2.3/CygnssAntenna/merged_ant_1_starboard_ddmi_v1_with_ant_1_star_ddmi_v1_test_elevOpposite.bin'
+extension = filename_gain.split('.')[-1]
+file_gain = open(filename_gain, "rb")
+x1 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+x2 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+numAz = unpack('i', file_gain.read(4))[0]
+numEl = unpack('i', file_gain.read(4))[0]
+az_start_deg = unpack('d', file_gain.read(8))[0]
+el_start_deg = unpack('d', file_gain.read(8))[0]
+az_inc_deg = unpack('d', file_gain.read(8))[0]
+el_inc_deg = unpack('d', file_gain.read(8))[0]
+#!!!! for some reason, a negative sign is needed for this file
+el_inc_deg = -el_inc_deg
+az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+az_deg = np.linspace(az_start_deg, az_stop_deg, numAz)
+el_stop_deg = el_start_deg + el_inc_deg * (numEl-1)
+el_deg = np.linspace(el_start_deg, el_stop_deg, numEl)
+gain = np.zeros([numEl,numAz])
+for iaz in range(numAz):
+    for iel in range(numEl):
+        gain[iel, iaz] = unpack('d', file_gain.read(8))[0]
+file_gain.close()
+
+## ADD THE MAP TO THE POLAR COORD PLOT
+x = np.append(az_deg, 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+y = 90 - np.append(el_deg, 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+X, Y = np.meshgrid(x, y)
+extension = filename_gain.split('.')[-1]
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+
+if el_start_deg < el_stop_deg: # file from low to high elevation
+    Z = np.zeros([numEl, numAz])
+    for iel in range(numEl):
+        Z[iel, :] =  gain[numEl-1-iel, :]
+else: # first row of gain is highest elevation
+    Z = gain
+nr, nc = Z.shape
+
+Z = np.ma.array(Z)
+max_gain = 15
+CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                    vmin = 0, vmax = max_gain, alpha = 0.3)                    
+cbar = plt.colorbar(CS1, ax = ax, pad = 0.075)
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'normal')
+
+fig_save_name = '/Users/cbv/' + spock_input_filename.replace('.txt', '_') + 'diff_star_polar.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+# SAME STAR: BOTH SpOCK AND ONBOARD SLECT STAR 
+fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
+gs = gridspec.GridSpec(1, 1)
+gs.update(left=0.12, right=0.97, top = 0.90,bottom = 0.06)
+fig.suptitle('', fontsize = fontsize_plot)
+plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+ax = fig.add_subplot(gs[0, 0], projection = 'polar')
+ax.scatter(az_same_star[:10000]*deg2rad, el_same_star[:10000], s = 5, zorder = 5)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+ax.set_ylim([0,91])
+
+# ADD THE ANTENNA MAPS
+## read the antenna map
+filename_gain = '/Users/cbv/Google Drive/Work/PhD/Research/Code/cygnss/beacon/Bruce/tds-bop V1.2.3/CygnssAntenna/merged_ant_1_starboard_ddmi_v1_with_ant_1_star_ddmi_v1_test_elevOpposite.bin'
+extension = filename_gain.split('.')[-1]
+file_gain = open(filename_gain, "rb")
+x1 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+x2 = unpack('i', file_gain.read(4))[0] # don t know what this is ....
+numAz = unpack('i', file_gain.read(4))[0]
+numEl = unpack('i', file_gain.read(4))[0]
+az_start_deg = unpack('d', file_gain.read(8))[0]
+el_start_deg = unpack('d', file_gain.read(8))[0]
+az_inc_deg = unpack('d', file_gain.read(8))[0]
+el_inc_deg = unpack('d', file_gain.read(8))[0]
+#!!!! for some reason, a negative sign is needed for this file
+el_inc_deg = -el_inc_deg
+az_stop_deg = az_start_deg + az_inc_deg * (numAz-1)
+az_deg = np.linspace(az_start_deg, az_stop_deg, numAz)
+el_stop_deg = el_start_deg + el_inc_deg * (numEl-1)
+el_deg = np.linspace(el_start_deg, el_stop_deg, numEl)
+gain = np.zeros([numEl,numAz])
+for iaz in range(numAz):
+    for iel in range(numEl):
+        gain[iel, iaz] = unpack('d', file_gain.read(8))[0]
+file_gain.close()
+
+## ADD THE MAP TO THE POLAR COORD PLOT
+x = np.append(az_deg, 360)*deg2rad # need to add 360 so that X is one more dimension than  Z (otherwise the last value of Z is ignored)
+y = 90 - np.append(el_deg, 0) # need to add 0 so that Y is one more dimension than  Z (otherwise the last value of Z is ignored)
+X, Y = np.meshgrid(x, y)
+extension = filename_gain.split('.')[-1]
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+
+if el_start_deg < el_stop_deg: # file from low to high elevation
+    Z = np.zeros([numEl, numAz])
+    for iel in range(numEl):
+        Z[iel, :] =  gain[numEl-1-iel, :]
+else: # first row of gain is highest elevation
+    Z = gain
+nr, nc = Z.shape
+
+Z = np.ma.array(Z)
+max_gain = 15
+CS1 = ax.pcolormesh(X, Y, Z, cmap = 'jet',
+                    vmin = 0, vmax = max_gain, alpha = 0.3)                    
+cbar = plt.colorbar(CS1, ax = ax, pad = 0.075)
+cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'normal')
+
+fig_save_name = '/Users/cbv/' + spock_input_filename.replace('.txt', '_') + 'same_star_polar.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+
+
+np.where((az_port > 220) & (az_port < 250))
 #np.mod(az_spec_not_int_spock_same_time_as_netcdf[itime][ispec_spock] + 180, 360) should be equal (or similar) to az_spec_netcdf[itime][ispec_netcdf]
 # end of PLOT WHICH ANTENNA WAS SELECTED FOR EACH PRN VS TIME. SpOCK AND ONBOARD
 
