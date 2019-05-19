@@ -4024,10 +4024,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
   int iOrder[nGps];
   int record_prn[nSpecularPointsMax];
   int record_prn_previous_step[nSpecularPointsMax];
-  int keep_port;
-  int which_prn_it_was;
-  int record_ant_previous_step[nSpecularPointsMax];
-  int record_ant[nSpecularPointsMax];
+
   int iprn_selected;
   int iii_prev;
   int prn_was_selected_previous_step;
@@ -4341,20 +4338,7 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 
 /* 	  printf("\n"); */
 /* 	  } */
-	  keep_port = 1;
-
-	  for (iii_prev = 0; iii_prev < nSpecularPointsMax; iii_prev ++){
-	    if (record_ant_previous_step[iii_prev] == 3){
-	      which_prn_it_was = record_prn_previous_step[iii_prev];
-	      for (iGps=0; iGps<nGps_prop; iGps++) { // among all gps at this current step
-		if (iOrder[iGps] < nSpecularPointsMax) { // look at the ones selected at this current step
-		  if (which_prn_it_was == iGps){ // the gps at the previous step that was assigned the starboard antenna is still selected at this step
-		    keep_port = 0;
-		  }
-		}
-	      }
-	    }
-	  }
+	  
 	  iprn_selected = -1;	  
 	  for (iGps=0; iGps<nGps_prop; iGps++) {
 	    prn_was_selected_previous_step = 0;
@@ -4372,11 +4356,9 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 	      }
 	      if ((prn_was_selected_previous_step == 1) && (SpecularPointsAllGps[iGps].which_ant == 3) && (SpecularPointsAllGps[iGps].which_ant_previous == 2)){ // if the GPS was selected in the previous step and that for the current step it is assigned to the port antenna while it was assigned the starboard antenna in the previous step, then change the assigned antenna to the starboard antenna (ie, same as previous step. This is to reproduce the bug in the CYGNSS onboard algorithm
 		  SpecularPointsAllGps[iGps].which_ant = 2;
-		  // if there was a PRN in the previous step that was assigned the port antenna but that is not selected as a PRN at this current step anymore, then keep the antenna to be port for the current PRN we're looking at
 	      }
 	      }
 	      }
-	      record_ant[iprn_selected] = SpecularPointsAllGps[iGps].which_ant;
 						       
 	      if (iCygnss == iCygnss_temp){
 		if (iPtInner == 0){
@@ -4564,7 +4546,6 @@ int find_specular_points( struct SatelliteDetails GPS[nGps],
 
 	  for (ii = 0; ii < nSpecularPointsMax; ii++){ // store the list of GPS that were just selected at this step
 	    record_prn_previous_step[ii] = record_prn[ii];
-	    record_ant_previous_step[ii] = record_ant[ii];
 	  }
 	  //	  MPI_Finalize();exit(0);
 
