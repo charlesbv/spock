@@ -3828,12 +3828,12 @@ return 0;
     // end of cbv new antenna onboard. before: block below
 
 
-    if  ((iAnt == 1 ) && ((90 - asin(C2S_body_norm[2])/dtor) > 28) && (atan2(C2S_body[1], C2S_body[0])/dtor > 0 )) {// any elevation greater than 28 deg and on the starboard side cannot be seen by the port antenna so is asigned a gain of -100 (that's what the onboard algoirthm does). Be caareful: this means antenna 0 is starboard and antenna 1 is port
+	if  ((iAnt == 1 ) && ((90 - asin(C2S_body_norm[2])/dtor) > ( 90 - 28 )) && (atan2(C2S_body[1], C2S_body[0])/dtor > 0 )) {// any elevation greater than 28 deg and on the starboard side cannot be seen by the port antenna so is asigned a gain of -100 (that's what the onboard algoirthm does). Be caareful: this means antenna 0 is starboard and antenna 1 is port. !!!!! before may 19 2019, sued to be ((90 - asin(C2S_body_norm[2])/dtor) > 28) (not > (90 - 28)) 
       gainR = -100;
 
     }
 
-    if  ((iAnt == 0 ) && ((90 - asin(C2S_body_norm[2])/dtor) > 28) && (atan2(C2S_body[1], C2S_body[0])/dtor < 0 )) {// any elevation greater than 28 deg and on the port side cannot be seen by the starboard antenna so is asigned a gain of -100 (that's what the onboard algoirthm does). Be caareful: this means antenna 0 is starboard and antenna 1 is port
+	if  ((iAnt == 0 ) && ((90 - asin(C2S_body_norm[2])/dtor) > ( 90 - 28)) && (atan2(C2S_body[1], C2S_body[0])/dtor < 0 )) {// any elevation greater than 28 deg and on the port side cannot be seen by the starboard antenna so is asigned a gain of -100 (that's what the onboard algoirthm does). Be caareful: this means antenna 0 is starboard and antenna 1 is port !!!!! before may 19 2019, sued to be ((90 - asin(C2S_body_norm[2])/dtor) > 28) (not > (90 - 28)) 
       gainR = -100;
 
     }

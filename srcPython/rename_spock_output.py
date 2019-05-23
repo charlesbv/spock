@@ -5,8 +5,8 @@ import os
 
 
 # PARAMETERS TO SET UP BEFORE RUNNNING THIS SCRIPT
-root_old = '/Users/cbv/work/spockOut/beacon/spockMerged/out/new-30m+1h'#newfm02SepYaw_minus90_1s_out_which_ant_debug' # without last '/'
-root_new = '/Users/cbv/work/spockOut/beacon/spockMerged/out/new30m1h' # without last '/'
+root_old = '/Users/cbv/work/spockOut/beacon/spockMerged/out/newlong'#newfm02SepYaw_minus90_1s_out_which_ant_debug' # without last '/'
+root_new = '/Users/cbv/work/spockOut/beacon/spockMerged/out/newlong_62degfilter' # without last '/'
 # end of PARAMETERS TO SET UP BEFORE RUNNNING THIS SCRIPT
 
 os.system('cp -Rp ' + root_old + ' ' + root_new)
