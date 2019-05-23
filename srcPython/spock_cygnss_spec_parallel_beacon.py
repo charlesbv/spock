@@ -129,7 +129,7 @@ spock_main_input(
     name_output,
     dt_output,
     # for ATTITUDE section
-    "(0;0;90) (0;0;0)", #"nadir",
+    "(0;0;-90) (0;0;0)", #"nadir",
     # for GROUNDS_STATIONS section
     "beacon_station.txt",#"my_ground_stations.txt"
      # for SPICE section
@@ -152,8 +152,11 @@ os.system(path_mpirun + " -np 4 spock_grav_read_bin_earth_map " + main_input_fil
 if predict_spec == 1:
     ## Specular points positions -> binary files
     print "Predicting specular points positions (output in binary files)..."
-    print path_mpirun + " -np 4 spec_asph_debug " + main_input_filename + " -lon=0 -rot=0 -min"
-    os.system(path_mpirun + " -np 4 spec_asph_debug " + main_input_filename + " -lon=0 -rot=0 -min")
+    print path_mpirun + " -np 4 spec_debug " + main_input_filename + " -lon=0 -rot=0 -min"
+    os.system(path_mpirun + " -np 4 spec_debug " + main_input_filename + " -lon=0 -rot=0 -min")
+    
+    # print path_mpirun + " -np 4 spec_asph_debug " + main_input_filename + " -lon=0 -rot=0 -min"
+    # os.system(path_mpirun + " -np 4 spec_asph_debug " + main_input_filename + " -lon=0 -rot=0 -min")
     #used to be (11-30-17): os.system(path_mpirun + " -np 4 spec_dev_parallel_kalman_save " + main_input_filename + " -lon=0 -rot=0 -min >> " + log_filename)
 #     ## Specular points positions -> txt files
 #     print "Converting binary files into txt files and interpolating CYGNSS and GPS positions every second..."

@@ -2,13 +2,12 @@
 # Inputs:
 # - start_time_const: UTC start time of the full constellation overpass (midnight MT -> 6 am UTC) (YYYY-MM-DDTHH:MM:SS)
 # - end_time_const: UTC end time of the full constellation overpass (6 am MT -> 12 pm UTC) (YYYY-MM-DDTHH:MM:SS)
-# - start_time_fm: array of UTC start time of each FM overpass (YYYY-MM-DDTHH:MM:SS). 1st element is for fm01, 2nd for fm02 and so on
-# - end_time_fm: array of UTC end time of each FM overpass (6 am MT -> 12 pm UTC) (YYYY-MM-DDTHH:MM:SS)
 # - dir_run_spock: path where the SpOCK outputs file should go
 # Outputs:
 # - the two PRNs that should be selected for the csv files inputs of the waveform generator
 # Assumptions:
-# -
+# - cygnss_main_satbop.py has been run on Windows first and the overpass schedule copied to srbwks2014-0008 in work/spockOut/beacon/overpassSchedule
+# - the overpass schedule must include all 8 overpasses (one per FM)
 
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')
@@ -31,26 +30,9 @@ try:
 except IndexError:
     print "***! The argument should be 'predict' or 'select'. !***\n***! The program will stop. !***"; sys.exit();
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-start_time_const = '2018-10-31T18:00:00'
-end_time_const = '2018-10-31T19:00:00'
+start_time_const = '2019-05-20T17:00:00'
+end_time_const = '2019-05-20T22:00:00'
 dir_run_spock = '/Users/cbv/work/spockOut/beacon/'
-start_time_fm = ['2018-10-31T18:15:10', # FM01
-                 '', # FM02
-                 '2018-10-31T18:43:05', # FM03
-                 '2018-10-31T18:30:53', # FM04
-                 '', # FM05
-                 '', # FM06
-                 '', # FM07
-                 ''] # FM08
-end_time_fm = ['2018-10-31T18:27:34',
-               '', # FM02
-               '2018-10-31T18:55:32', # FM03
-               '2018-10-31T18:41:08', # FM04
-               '', # FM05
-               '', # FM06
-               '', # FM07
-               ''] # FM08
-
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 color_gain = ['grey', 'blue', 'limegreen', 'red']
@@ -73,6 +55,30 @@ if operation == 'predict':
     
 
 print 'For each FM, selecting the two PRNs...'
+# Read the schedule of overpasses generated using sat-bop.py on Windows
+filename_schedule = 'schedule_overpass_' + start_time_const[:10] + '.txt'
+#os.system('scp -p desk:work/spockOut/beacon/overpassSchedule/' + filename_schedule + ' overpassSchedule/')
+try:
+    file_schedule = open(filename_schedule, 'r')
+except IOError:
+    print 'The overpass schedule file "' + filename_schedule + '" could not be found.'; sys.exit()
+    
+read_file_schedule = file_schedule.readlines()
+nheader = 0
+while read_file_schedule[nheader][:2] != '20':
+    nheader = nheader + 1
+start_time_fm_temp = []
+end_time_fm_temp = []
+cygfm_temp = []
+for isc in range(8):
+    start_time_fm_temp.append(read_file_schedule[isc+nheader].split()[0])
+    end_time_fm_temp.append(read_file_schedule[isc+nheader].split()[1])
+    cygfm_temp.append((int)(read_file_schedule[isc+nheader].split()[4]))
+cygfm_temp = np.array(cygfm_temp)
+index_sort_cygfm_temp = np.argsort(cygfm_temp)
+start_time_fm = np.array(start_time_fm_temp)[index_sort_cygfm_temp]
+end_time_fm = np.array(end_time_fm_temp)[index_sort_cygfm_temp]
+
 # Properties of figures
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25      
@@ -89,10 +95,10 @@ for cygfm in range(1, 9):
     ## Read the specular point output files from SpOCK
     if start_time_fm[cygfm-1] != '':
         print "   Reading SpOCK specular file for FM0" + str(cygfm) + "..."
-        if cygfm == 1: # !!!!!!!! remove this if condition. It was pu here at some point because FM01 was rolled by 10 deg on Oct 31 2018, but it should not be here anymore
-            spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + "_roll10deg.txt"
-        else:
-            spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + ".txt" 
+        # if cygfm == 1: # !!!!!!!! remove this if condition. It was pu here at some point because FM01 was rolled by 10 deg on Oct 31 2018, but it should not be here anymore
+        #     spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + "_roll10deg.txt"
+        # else:
+        spock_input_filename = "spock_spec_start_" + start_time_const.replace(":", "_") + "_end_" + end_time_const.replace(":", "_") + ".txt" 
         var_in, var_in_order = read_input_file(spock_input_filename)
         dt_spock_output = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
         output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
