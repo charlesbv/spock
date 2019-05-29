@@ -1,0 +1,10 @@
+# This script has a similar purpose as find_specular_points.c: at a given time for a given FM, it attempts to select the same 4 specular points as the onboard algo. The main difference is that the orbit predictions (CYGNSS and GPS), as well as the specular point positions, are made with sat-bop.exe, not SpOCK.
+# Basically sat-bop.exe outputs the information (SP positions, etc) for ALL existing SPs (not only the top 4. This script selects the top 4 at every second of a pass (a pass is an interval of time for which sat-bop.exe created these output files)
+# As such, for a given FM, this script:
+# 1. considers all csv files for a given pass, output by sat-bop.exe
+# 2. reads each csv file, which contains the SP and CYGNSS position -> store the SP and CYGNSS positions
+# 3. once all files are read, compute the elevation and azimuth angles of each SP with respect to the FM in the FM body frame of reference
+# 4. read the CYGNSS port and starboard antenna FOM maps
+# 5. based on these body elevation and azimuths and the antenna FOM maps, determine the FOM for each SP
+# 6. selects the SPs that have the 4 highest FOMs (with a few other small tricks that the onboard algo does)
+# Steps 5. and 6. are perfored with the function select_highest_foms.py

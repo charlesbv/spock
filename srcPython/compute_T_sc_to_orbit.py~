@@ -1,0 +1,116 @@
+import numpy as np
+#def compute_T_sc_to_orbit(v_angle, order_rotation):
+    
+  /* Declarations */
+T_sc_to_ntw = np.zeros([3,3])
+  int row;
+  double x[6]; 
+  double lt;
+  double r_earth2sun_J2000[3]; 
+  double r_cg2sun_J2000[3];
+  double r_cg2sun_J2000_normalized[3]; 
+  double e_z_body_in_inrtl[3];
+  double T_inrtl_2_ntw[3][3];
+  double e_z_body_in_ntw[3];
+  /* double random_vect_not_colinear_to_z[3];  */
+  /* double e_y_body_in_ntw[3];  */
+  /* double e_x_body_in_ntw[3];  */
+  double e_z_body_in_ntw_normalized[3]; 
+  /* double e_y_body_in_ntw_normalized[3]; */
+  /* double e_x_body_in_ntw_normalized[3]; */
+  int i;
+  double theta, phi, psi;
+  double pitch_mat[3][3], roll_mat[3][3], yaw_mat[3][3];
+  double first_mat[3][3], second_mat[3][3], third_mat[3][3];
+  double T_sc_to_ntw_temp[3][3];
+  //  double T_sc_intermediary_to_ntw[3][3];
+  double v_angle_rad[3];
+
+
+/*   double *p=malloc(sizeof(double)), *r=malloc(sizeof(double)), *y=malloc(sizeof(double)); */
+/*   if (file_is_quaternion == 1){ // if attitude is set using quaternions      */
+/*     q2m_c(quaternion,T_sc_to_ntw); */
+/* /\*             m_print(T_sc_to_ntw, "quat T_sc_to_ntw"); *\/ */
+/* /\* 	    m2eul_c ( T_sc_to_ntw, 2, 1, 3, p, r, y ); *\/ */
+/* /\* 	    	    printf("%f %f %f\n",p[0]*180./M_PI, r[0]*180./M_PI, y[0]*180./M_PI ); *\/ */
+	      
+/*   } */
+
+/*   ////////////////////////////////////////////////////////////////////////////// */
+/*   ////////////////////////////////////////////////////////////////////////////// */
+/*   ///////////////////// NOT QUATERNION ///////////////////////////////////////////// */
+/*   else{ //no quaternion */
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  ///////////////////// ANY ATTITUDE EXCEPT SUN POINTED ////////////////////////
+  //  if (  strcmp( attitude_profile, "sun_pointed"  ) != 0 )  { // if the attitude profile is anything except sun pointed
+  for (i = 0; i < 3; i++){
+    v_angle_rad[i] = v_angle[i] *  dtor;
+  }
+  
+  theta = v_angle_rad[0];// pitch
+  phi = v_angle_rad[1]; // roll
+  psi = v_angle_rad[2]; // yaw
+
+  // Pitch rotation
+  pitch_mat[0][0] = cos(theta);   pitch_mat[0][1] = 0;   pitch_mat[0][2] = sin(theta);
+  pitch_mat[1][0] = 0;   pitch_mat[1][1] = 1;   pitch_mat[1][2] = 0;
+  pitch_mat[2][0] = -sin(theta);   pitch_mat[2][1] = 0;   pitch_mat[2][2] = cos(theta);
+
+  // Roll rotation
+  roll_mat[0][0] = 1;   roll_mat[0][1] = 0;   roll_mat[0][2] = 0;
+  roll_mat[1][0] = 0;   roll_mat[1][1] = cos(phi);   roll_mat[1][2] = -sin(phi);
+  roll_mat[2][0] = 0;   roll_mat[2][1] = sin(phi);   roll_mat[2][2] = cos(phi);
+
+  // Yaw rotation
+  yaw_mat[0][0] = cos(psi);   yaw_mat[0][1] = -sin(psi);   yaw_mat[0][2] = 0;
+  yaw_mat[1][0] = sin(psi);   yaw_mat[1][1] = cos(psi);   yaw_mat[1][2] = 0;
+  yaw_mat[2][0] = 0;   yaw_mat[2][1] = 0;   yaw_mat[2][2] = 1;
+
+  // Order of rotation
+  // // First matrix
+/*     etprint(et[0], ""); */
+/*     printf("%d %d %d\n", order_rotation[0], order_rotation[1], order_rotation[2]); */
+
+//  printf("%d %d %d\n", order_rotation[0], order_rotation[1], order_rotation[2]);
+
+  if (order_rotation[0] == 1)
+    m_copy(first_mat, pitch_mat);
+  else if (order_rotation[1] == 1)
+    m_copy(first_mat, roll_mat);
+  else if (order_rotation[2] == 1)
+    m_copy(first_mat, yaw_mat);
+  else{
+    printf("***! (compute_T_sc_to_ntw) You did not correctly choose the first rotation. The program will stop. !***\n"); MPI_Finalize(); 
+    exit(0);
+  }
+  // // Second matrix
+  if (order_rotation[0] == 2)
+    m_copy(second_mat, pitch_mat);
+  else if (order_rotation[1] == 2)
+    m_copy(second_mat, roll_mat);
+  else if (order_rotation[2] == 2)
+    m_copy(second_mat, yaw_mat);
+  else{
+    printf("***! (compute_T_sc_to_ntw) You did not correctly choose the second rotation. The program will stop. !***\n"); MPI_Finalize(); 
+    exit(0);
+  }
+  // // Third matrix
+  if (order_rotation[0] == 3)
+    m_copy(third_mat, pitch_mat);
+  else if (order_rotation[1] == 3)
+    m_copy(third_mat, roll_mat);
+  else if (order_rotation[2] == 3)
+    m_copy(third_mat, yaw_mat);
+  else{
+    printf("***! (compute_T_sc_to_ntw) You did not correctly choose the third rotation. The program will stop. !***\n"); MPI_Finalize(); 
+    exit(0);
+  }
+  // // Final matrix: T_sc_to_ntw
+  m_x_m(T_sc_to_ntw_temp, second_mat, first_mat);
+  m_x_m(T_sc_to_ntw, third_mat, T_sc_to_ntw_temp);
+  //            m_print(T_sc_to_ntw, "euler T_sc_to_ntw");
+  //  }
+           
+ return T_sc_to_ntw

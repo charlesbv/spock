@@ -1,0 +1,2 @@
+# Based on the body elevation and azimuths and the antenna FOM maps, determine the FOM for each SP
+# 6. selects the SPs that have the 4 highest FOMs (with a few other small tricks that the onboard algo does)
