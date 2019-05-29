@@ -1,22 +1,29 @@
+time_first_score_wrong_itime = []
+time_second_score_wrong_itime = []
+time_first_and_second_score_wrong_itime = []
+time_first_or_second_score_wrong_itime = []
+port_ant_for_prn_itime = []
+port_ant_prn_list = []
+
 score_prn = np.zeros([33,33])
 score_first_half_prn = np.zeros([33,33])
 gap_prn = np.zeros([33, 33]) + 1e6 # set to 1e6 so that prns that are not selected have a very big gap
 gap_first_half_prn = np.zeros([33, 33]) + 1e6 # set to 1e6 so that prns that are not selected have a very big gap
-single_gap_prn_port_second_half = np.zeros([33]) + 1e6 # record the gap of the PRN taht are port starting at the second half  + 160s
+single_gap_prn_port_second_half = np.zeros([33]) + 1e6 # record the gap of the PRN taht are port starting at the second half  + 130s
 prn_list = [] # record all PRNs during the entire time
-prn_port_second_half_list =  [] # record the PRN taht are port starting at the second half  + 160s 
+prn_port_second_half_list =  [] # record the PRN taht are port starting at the second half  + 130s 
 for iin in range(inter_dur_sec):
     for ispec in range(4):
         if ( gps_spock_all_date[idate][itime+iin][ispec] in prn_list ) == False:
             prn_list.append(gps_spock_all_date[idate][itime+iin][ispec])
-        if ((iin >= (inter_dur_sec/2 + 130 + 30)) & (which_ant_spock_all_date[idate][itime+iin][ispec] == 3) & (( gps_spock_all_date[idate][itime+iin][ispec] in prn_port_second_half_list ) == False)):
+        if ((iin >= (inter_dur_sec/2 + 130)) & (which_ant_spock_all_date[idate][itime+iin][ispec] == 3) & (( gps_spock_all_date[idate][itime+iin][ispec] in prn_port_second_half_list ) == False)):
             prn_port_second_half_list.append(gps_spock_all_date[idate][itime+iin][ispec])
 prn_list = np.array(prn_list)
 nprn = len(prn_list)
 prn_list_sort = prn_list[np.argsort(prn_list)]
 #  for the prns that are selected, innitialize the gap to 0 
 for iii in range(nprn):
-    if prn_list_sort[iii] in prn_port_second_half_list: # if this PRN is port starting at the second half  + 160s 
+    if prn_list_sort[iii] in prn_port_second_half_list: # if this PRN is port starting at the second half  + 130s 
         single_gap_prn_port_second_half[prn_list_sort[iii]] = 0
     for jjj in range(nprn):
         if iii != jjj:
@@ -29,29 +36,29 @@ seconds_sampling_stop_idate.append(nb_seconds_since_initial_epoch_spock_all_date
 for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
     iout = -1
     port_ant_for_prn_iprn = []
-    # first, determine if,  starting at the second hald of the overpass + 160 s, the port antenna is assigned to a PRN
-    if iin >= (inter_dur_sec/2 + 130 + 30): # starting at the second hald of the overpass + 160 s, look if the port antenna is assigned to a PRN
+    # first, determine if,  starting at the second hald of the overpass + 130 s, the port antenna is assigned to a PRN
+    if iin >= (inter_dur_sec/2 + 130): # starting at the second hald of the overpass + 130 s, look if the port antenna is assigned to a PRN
         for prn_out in prn_list_sort:
-            prn_out_is_gap = 0 # used only to figure out the gap for PRN that are port starting at the second hald of the overpass + 160 s  
+            prn_out_is_gap = 0 # used only to figure out the gap for PRN that are port starting at the second hald of the overpass + 130 s  
             if len(np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time            
                 iprn_out = np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0][0]
                 if which_ant_spock_all_date[idate][itime+iin][iprn_out] == 3: # the port antenna is assigned to a PRN
                     port_ant_for_prn_iprn.append([itime, itime+iin, gps_spock_all_date[idate][itime+iin][iprn_out]])
                     if ((gps_spock_all_date[idate][itime+iin][iprn_out] in port_ant_prn_list) == False): # record only once the PRN that's assigned to port
                         port_ant_prn_list.append(gps_spock_all_date[idate][itime+iin][iprn_out]) # actually this is probably the same list as prn_port_second_half_list. oh well
-            if (prn_out in prn_port_second_half_list):  # if the PRN is port at some point starting at the second hald of the overpass + 160 s
+            if (prn_out in prn_port_second_half_list):  # if the PRN is port at some point starting at the second hald of the overpass + 130 s
                 if (len(np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0]) == 0 ): # if there is a gap for this prn
                     prn_out_is_gap = 1
                 else:
                     iprn_out = np.where(gps_spock_all_date[idate][itime+iin] == prn_out)[0][0]
                     if ( fom_spock_all_date[idate][itime+iin][iprn_out] == 0): # or if its FOM is 0 (count it as a gap)
                         prn_out_is_gap = 1
-                    elif (which_ant_spock_all_date[idate][itime+iin][iprn_out] == 2): # or at this time the antenna is starboard  (this prn is port at some point starting at the second hald of the overpass + 160 s but not neceessarily at all times starting at the second hald of the overpass + 160 s)
+                    elif (which_ant_spock_all_date[idate][itime+iin][iprn_out] == 2): # or at this time the antenna is starboard  (this prn is port at some point starting at the second hald of the overpass + 130 s but not neceessarily at all times starting at the second hald of the overpass + 130 s)
                         prn_out_is_gap = 1
                 if prn_out_is_gap == 1:
                     single_gap_prn_port_second_half[prn_out] = single_gap_prn_port_second_half[prn_out] + 1
 
-                        
+
     # now compute the score and gap for every combination
     for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
         prn_out_is_gap = 0
@@ -66,8 +73,7 @@ for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
                 prn_out_is_gap = 1
             elif ((iin <= inter_dur_sec/2) & (ant_out == 3)): # if the antenna is port during the first half of the overpass, count it as a gap since the beacon will only transmit to the starboard antenna
                 prn_out_is_gap = 1
-                
-                # TOTO # if one of the two PRNs is assigned to port during the first hallf of the overpass then count it as a gap
+
         else:
             gain_out = 0 # !!!!!! used ot be -1 to penalize non selected prn
             prn_out_is_gap = 1
@@ -106,7 +112,8 @@ port_ant_for_prn_idate.append(port_ant_for_prn_itime)
 ncomb = len(np.where(gap_first_half_prn != 1e6)[0]) # should be equal to (nprn*(nprn-1))/2# total number of combinaiton. /2 because combinaiton [X,Y] is the same as [Y,X].
 gap_first_half_prn_symm = gap_first_half_prn + np.transpose(gap_first_half_prn)
 score_first_half_prn_symm = score_first_half_prn + np.transpose(score_first_half_prn)
-if len(port_ant_prn_list) != 0: # This means that one of the PRN was assigneed to the port antenna starting at the second hald of the overpass + 160 s
+if len(port_ant_prn_list) != 0: # This means that one of the PRN was assigneed to the port antenna starting at the second hald of the overpass + 130 s !!!!!!!!! should be of len(port_ant_prn_list) != 0:
+    ipdb.set_trace()
     if len(port_ant_prn_list) == 1: # exactly onr PRN was assigned to port
         prn_that_is_port = port_ant_prn_list[0]
         second_score_temp = prn_that_is_port
@@ -137,8 +144,8 @@ if len(port_ant_prn_list) != 0: # This means that one of the PRN was assigneed t
             prn_min_gap_with_this_port_prn = list_min_gap[0]
         first_score_temp = prn_min_gap_with_this_port_prn
         first_ant_temp = 2
-    elif len(port_ant_prn_list) >= 2: # two or more PRNs were assigned to port. Select the PRN port that has the min gap start at the scond half + 160s. For the second PRN, select so that the combinatino minimizes the gap with this port prn
-        prn_port_min_gap_second_half = np.where(single_gap_prn_port_second_half == np.min(single_gap_prn_port_second_half))[0][0] # Select the PRN port that has the min gap start at the scond half + 160s
+    elif len(port_ant_prn_list) >= 2: # two or more PRNs were assigned to port. Select the PRN port that has the min gap start at the scond half + 130s. For the second PRN, select so that the combinatino minimizes the gap with this port prn
+        prn_port_min_gap_second_half = np.where(single_gap_prn_port_second_half == np.min(single_gap_prn_port_second_half))[0][0] # Select the PRN port that has the min gap start at the scond half + 130s
         second_score_temp = prn_port_min_gap_second_half
         second_ant_temp = 3
         list_gap = np.argsort(gap_first_half_prn_symm[:, prn_port_min_gap_second_half])
@@ -164,9 +171,9 @@ if len(port_ant_prn_list) != 0: # This means that one of the PRN was assigneed t
         else:
             prn_min_gap_with_this_port_prn = list_min_gap[0]
         first_score_temp = prn_min_gap_with_this_port_prn
-        first_ant_temp = 2
+        first_ant_temp = 2 # actually this could also be a port antenna 
 
-else: # this means that the port antenna was never assigned to any PRN starting at the second hald of the overpass + 160 s
+else: # this means that the port antenna was never assigned to any PRN starting at the second hald of the overpass + 130 s
     score_index_sort_temp = np.dstack(np.unravel_index(np.argsort(score_first_half_prn.ravel()), score_first_half_prn.shape))
     score_index_sort = score_index_sort_temp[0, :, :] # sorted array of combinations that give the ghihest score (ascending order)
     icomb = -1

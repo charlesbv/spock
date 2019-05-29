@@ -18,6 +18,14 @@ port_ant_for_prn = []
 
 time_first_score_1st_half_wrong = []
 duration_first_score_1st_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+duration_first_score_1st_half_wrong_list_conc = []
+time_first_score_1st_half_wrong_or_port = []
+duration_first_score_1st_half_wrong_or_port_idate = [] # not really a duration in seconds but a numebr of steps
+duration_first_score_1st_half_wrong_or_port_list_conc = []
+time_second_score_1st_half_wrong_or_port = []
+duration_second_score_1st_half_wrong_or_port_idate = [] # not really a duration in seconds but a numebr of steps
+duration_second_score_1st_half_wrong_or_port_list_conc = []
+
 # -> for each interval iinterv_dur, duration_first_score_1st_half_wrong_idate[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
 # be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
 time_second_score_1st_half_wrong = []
@@ -26,7 +34,7 @@ time_first_and_second_score_1st_half_wrong = []
 duration_first_and_second_score_1st_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
 time_first_or_second_score_1st_half_wrong = []
 duration_first_or_second_score_1st_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
-duration_first_score_1st_half_wrong_list_conc = []
+
 duration_second_score_1st_half_wrong_list_conc = []
 duration_first_and_second_score_1st_half_wrong_list_conc = []
 duration_first_or_second_score_1st_half_wrong_list_conc = []
@@ -55,6 +63,14 @@ duration_netcdf_one_star_2nd_half_list_conc = []
 
 time_first_score_2nd_half_wrong = []
 duration_first_score_2nd_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
+duration_first_score_2nd_half_wrong_list_conc = []
+time_first_score_2nd_half_wrong_or_star = []
+duration_first_score_2nd_half_wrong_or_star_idate = [] # not really a duration in seconds but a numebr of steps
+duration_first_score_2nd_half_wrong_or_star_list_conc = []
+time_second_score_2nd_half_wrong_or_star = []
+duration_second_score_2nd_half_wrong_or_star_idate = [] # not really a duration in seconds but a numebr of steps
+duration_second_score_2nd_half_wrong_or_star_list_conc = []
+
 # -> for each interval iinterv_dur, duration_first_score_2nd_half_wrong_idate[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
 # be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
 time_second_score_2nd_half_wrong = []
@@ -63,7 +79,6 @@ time_first_and_second_score_2nd_half_wrong = []
 duration_first_and_second_score_2nd_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
 time_first_or_second_score_2nd_half_wrong = []
 duration_first_or_second_score_2nd_half_wrong_idate = [] # not really a duration in seconds but a numebr of steps
-duration_first_score_2nd_half_wrong_list_conc = []
 duration_second_score_2nd_half_wrong_list_conc = []
 duration_first_and_second_score_2nd_half_wrong_list_conc = []
 duration_first_or_second_score_2nd_half_wrong_list_conc = []
@@ -83,6 +98,11 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
 
     time_first_score_1st_half_wrong_idate = []
     duration_first_score_1st_half_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    time_first_score_1st_half_wrong_or_port_idate = []
+    duration_first_score_1st_half_wrong_or_port_list_idate = [] # not really a duration in seconds but a numebr of steps
+    time_second_score_1st_half_wrong_or_port_idate = []
+    duration_second_score_1st_half_wrong_or_port_list_idate = [] # not really a duration in seconds but a numebr of steps
+    
     # -> for each interval iinterv_dur, duration_first_score_1st_half_wrong_list[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
     # be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
     time_second_score_1st_half_wrong_idate = []
@@ -109,6 +129,11 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     
     time_first_score_2nd_half_wrong_idate = []
     duration_first_score_2nd_half_wrong_list_idate = [] # not really a duration in seconds but a numebr of steps
+    time_first_score_2nd_half_wrong_or_star_idate = []
+    duration_first_score_2nd_half_wrong_or_star_list_idate = [] # not really a duration in seconds but a numebr of steps
+    time_second_score_2nd_half_wrong_or_star_idate = []
+    duration_second_score_2nd_half_wrong_or_star_list_idate = [] # not really a duration in seconds but a numebr of steps
+    
     # -> for each interval iinterv_dur, duration_first_score_2nd_half_wrong_list[iinter_dur] is the number of steps for which the PRN predicted by SpOCK to
     # be highest at the first step of iinterv_dur is actually not selected by the onboard algorithm
     time_second_score_2nd_half_wrong_idate = []
@@ -125,10 +150,14 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
         port_ant_prn_list = []
 
         time_first_score_1st_half_wrong_itime = []
+        time_first_score_1st_half_wrong_or_port_itime = []
+        time_second_score_1st_half_wrong_or_port_itime = []
         time_second_score_1st_half_wrong_itime = []
         time_first_and_second_score_1st_half_wrong_itime = []
         time_first_or_second_score_1st_half_wrong_itime = []
         time_first_score_2nd_half_wrong_itime = []
+        time_first_score_2nd_half_wrong_or_star_itime = []
+        time_second_score_2nd_half_wrong_or_star_itime = []
         time_second_score_2nd_half_wrong_itime = []
         time_first_and_second_score_2nd_half_wrong_itime = []
         time_first_or_second_score_2nd_half_wrong_itime = []
@@ -174,11 +203,15 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
             else:
                 second_score_selected_onboard = 0
 
-            if iin <= inter_dur_sec / 2: # first half of the overpass                    
+            if (iin <= (inter_dur_sec / 2)): # first half of the overpass                    
                 if (first_score_selected_onboard == 0):
                     time_first_score_1st_half_wrong_itime.append(iin+itime)
+                if ((first_score_selected_onboard == 0) | (first_score_netcdf_port == 1)):
+                    time_first_score_1st_half_wrong_or_port_itime.append(iin+itime)
                 if (second_score_selected_onboard == 0):
                     time_second_score_1st_half_wrong_itime.append(iin+itime)
+                if ((second_score_selected_onboard == 0) | (second_score_netcdf_port == 1)):
+                    time_second_score_1st_half_wrong_or_port_itime.append(iin+itime)
                 if ((first_score_selected_onboard == 0) & (second_score_selected_onboard == 0)):
                     time_first_and_second_score_1st_half_wrong_itime.append(iin+itime)
                 if ((first_score_selected_onboard == 0) | (second_score_selected_onboard == 0)):
@@ -187,12 +220,15 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
                     time_first_and_second_score_1st_half_wrong_or_port_itime.append(iin+itime)
                 if ( (first_score_selected_onboard == 0) | (first_score_netcdf_port == 1) | (second_score_selected_onboard == 0) | (second_score_netcdf_port == 1)): # if one of the 2 PRNs was not selected onboard or was selected onboard but assigned to the port antenna
                     time_first_or_second_score_1st_half_wrong_or_port_itime.append(iin+itime)
-                    
-            elif iin >= inter_dur_sec / 2 + 160: # 160 s after the start of the second half of the overpass
+            elif (iin >= (inter_dur_sec / 2 + 130)): # 130 s after the start of the second half of the overpass
                 if (first_score_selected_onboard == 0):
                     time_first_score_2nd_half_wrong_itime.append(iin+itime)
+                if ((first_score_selected_onboard == 0) | (first_score_netcdf_star == 1)):
+                    time_first_score_2nd_half_wrong_or_star_itime.append(iin+itime)
                 if (second_score_selected_onboard == 0):
                     time_second_score_2nd_half_wrong_itime.append(iin+itime)
+                if ((second_score_selected_onboard == 0) | (second_score_netcdf_star == 1)):
+                    time_second_score_2nd_half_wrong_or_star_itime.append(iin+itime)
                 if ((first_score_selected_onboard == 0) & (second_score_selected_onboard == 0)):
                     time_first_and_second_score_2nd_half_wrong_itime.append(iin+itime)
                 if ((first_score_selected_onboard == 0) | (second_score_selected_onboard == 0)):
@@ -201,7 +237,7 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
                     time_first_and_second_score_2nd_half_wrong_or_star_itime.append(iin+itime)
                 if ( (first_score_selected_onboard == 0) | (first_score_netcdf_star == 1) | (second_score_selected_onboard == 0) | (second_score_netcdf_star == 1)): # if one of the 2 PRNs was not selected onboard or was selected onboard but assigned to the star antenna
                     time_first_or_second_score_2nd_half_wrong_or_star_itime.append(iin+itime)
-                # figure out the number of PRNs assigned to the port antenna 160 s after the start of the second half of the overpass 
+                # figure out the number of PRNs assigned to the port antenna 130 s after the start of the second half of the overpass 
                 nb_netcdf_star = 0
                 for ispec_netcdf in range(4):
                     if (which_ant_netcdf_all_date[idate][itime+iin][ispec_netcdf] == 3):
@@ -211,11 +247,16 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
                 elif nb_netcdf_star == 1:
                     time_netcdf_one_star_2nd_half_itime.append(iin+itime)
 
-        if len(time_first_or_second_score_2nd_half_wrong_or_star_itime) == 0:
-            print first_score_idate_temp, second_score_idate_temp,  first_ant_idate_temp, second_ant_idate_temp
-            ipdb.set_trace()
+        # if len(time_first_or_second_score_2nd_half_wrong_or_star_itime) == 0:
+        #     print first_score_idate_temp, second_score_idate_temp,  first_ant_idate_temp, second_ant_idate_temp
+        #     ipdb.set_trace()
         time_first_score_1st_half_wrong_idate.append(time_first_score_1st_half_wrong_itime)
         duration_first_score_1st_half_wrong_list_idate.append(np.float(len(time_first_score_1st_half_wrong_itime)))
+        time_first_score_1st_half_wrong_or_port_idate.append(time_first_score_1st_half_wrong_or_port_itime)
+        duration_first_score_1st_half_wrong_or_port_list_idate.append(np.float(len(time_first_score_1st_half_wrong_or_port_itime)))
+        time_second_score_1st_half_wrong_or_port_idate.append(time_second_score_1st_half_wrong_or_port_itime)
+        duration_second_score_1st_half_wrong_or_port_list_idate.append(np.float(len(time_second_score_1st_half_wrong_or_port_itime)))
+
         time_second_score_1st_half_wrong_idate.append(time_second_score_1st_half_wrong_itime)
         duration_second_score_1st_half_wrong_list_idate.append(np.float(len(time_second_score_1st_half_wrong_itime)))
         time_first_and_second_score_1st_half_wrong_idate.append(time_first_and_second_score_1st_half_wrong_itime)
@@ -224,6 +265,8 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
         duration_first_or_second_score_1st_half_wrong_list_idate.append(np.float(len(time_first_or_second_score_1st_half_wrong_itime)))
 
         duration_first_score_1st_half_wrong_list_conc.append(np.float(len(time_first_score_1st_half_wrong_itime)))
+        duration_first_score_1st_half_wrong_or_port_list_conc.append(np.float(len(time_first_score_1st_half_wrong_or_port_itime)))
+        duration_second_score_1st_half_wrong_or_port_list_conc.append(np.float(len(time_second_score_1st_half_wrong_or_port_itime)))
         duration_second_score_1st_half_wrong_list_conc.append(np.float(len(time_second_score_1st_half_wrong_itime)))
         duration_first_and_second_score_1st_half_wrong_list_conc.append(np.float(len(time_first_and_second_score_1st_half_wrong_itime)))
         duration_first_or_second_score_1st_half_wrong_list_conc.append(np.float(len(time_first_or_second_score_1st_half_wrong_itime)))
@@ -231,6 +274,10 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
 
         time_first_score_2nd_half_wrong_idate.append(time_first_score_2nd_half_wrong_itime)
         duration_first_score_2nd_half_wrong_list_idate.append(np.float(len(time_first_score_2nd_half_wrong_itime)))
+        time_first_score_2nd_half_wrong_or_star_idate.append(time_first_score_2nd_half_wrong_or_star_itime)
+        duration_first_score_2nd_half_wrong_or_star_list_idate.append(np.float(len(time_first_score_2nd_half_wrong_or_star_itime)))
+        time_second_score_2nd_half_wrong_or_star_idate.append(time_second_score_2nd_half_wrong_or_star_itime)
+        duration_second_score_2nd_half_wrong_or_star_list_idate.append(np.float(len(time_second_score_2nd_half_wrong_or_star_itime)))
         time_second_score_2nd_half_wrong_idate.append(time_second_score_2nd_half_wrong_itime)
         duration_second_score_2nd_half_wrong_list_idate.append(np.float(len(time_second_score_2nd_half_wrong_itime)))
         time_first_and_second_score_2nd_half_wrong_idate.append(time_first_and_second_score_2nd_half_wrong_itime)
@@ -239,6 +286,8 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
         duration_first_or_second_score_2nd_half_wrong_list_idate.append(np.float(len(time_first_or_second_score_2nd_half_wrong_itime)))
 
         duration_first_score_2nd_half_wrong_list_conc.append(np.float(len(time_first_score_2nd_half_wrong_itime)))
+        duration_first_score_2nd_half_wrong_or_star_list_conc.append(np.float(len(time_first_score_2nd_half_wrong_or_star_itime)))
+        duration_second_score_2nd_half_wrong_or_star_list_conc.append(np.float(len(time_second_score_2nd_half_wrong_or_star_itime)))
         duration_second_score_2nd_half_wrong_list_conc.append(np.float(len(time_second_score_2nd_half_wrong_itime)))
         duration_first_and_second_score_2nd_half_wrong_list_conc.append(np.float(len(time_first_and_second_score_2nd_half_wrong_itime)))
         duration_first_or_second_score_2nd_half_wrong_list_conc.append(np.float(len(time_first_or_second_score_2nd_half_wrong_itime)))
@@ -275,7 +324,11 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     gap_prn_save.append(gap_prn_save_idate)
     
     time_first_score_1st_half_wrong.append( time_first_score_1st_half_wrong_idate )
-    duration_first_score_1st_half_wrong_idate.append( np.array(duration_first_score_1st_half_wrong_list_idate) ) 
+    duration_first_score_1st_half_wrong_idate.append( np.array(duration_first_score_1st_half_wrong_list_idate) )
+    time_first_score_1st_half_wrong_or_port.append( time_first_score_1st_half_wrong_or_port_idate )
+    duration_first_score_1st_half_wrong_or_port_idate.append( np.array(duration_first_score_1st_half_wrong_or_port_list_idate) ) 
+    time_second_score_1st_half_wrong_or_port.append( time_second_score_1st_half_wrong_or_port_idate )
+    duration_second_score_1st_half_wrong_or_port_idate.append( np.array(duration_second_score_1st_half_wrong_or_port_list_idate) ) 
     time_second_score_1st_half_wrong.append( time_second_score_1st_half_wrong_idate )
     duration_second_score_1st_half_wrong_idate.append( np.array(duration_second_score_1st_half_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
     time_first_and_second_score_1st_half_wrong.append( time_first_and_second_score_1st_half_wrong_idate )
@@ -299,7 +352,11 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     duration_netcdf_one_star_2nd_half_idate.append( np.array(duration_netcdf_one_star_2nd_half_list_idate) ) # not really a duration in seconds but a numebr of steps
     
     time_first_score_2nd_half_wrong.append( time_first_score_2nd_half_wrong_idate )
-    duration_first_score_2nd_half_wrong_idate.append( np.array(duration_first_score_2nd_half_wrong_list_idate) ) 
+    duration_first_score_2nd_half_wrong_idate.append( np.array(duration_first_score_2nd_half_wrong_list_idate) )
+    time_first_score_2nd_half_wrong_or_star.append( time_first_score_2nd_half_wrong_or_star_idate )
+    duration_first_score_2nd_half_wrong_or_star_idate.append( np.array(duration_first_score_2nd_half_wrong_or_star_list_idate) )
+    time_second_score_2nd_half_wrong_or_star.append( time_second_score_2nd_half_wrong_or_star_idate )
+    duration_second_score_2nd_half_wrong_or_star_idate.append( np.array(duration_second_score_2nd_half_wrong_or_star_list_idate) ) 
     time_second_score_2nd_half_wrong.append( time_second_score_2nd_half_wrong_idate )
     duration_second_score_2nd_half_wrong_idate.append( np.array(duration_second_score_2nd_half_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
     time_first_and_second_score_2nd_half_wrong.append( time_first_and_second_score_2nd_half_wrong_idate )
@@ -308,6 +365,8 @@ for idate in range(nb_date):#(1,2):#!!!!!nb_date):
     duration_first_or_second_score_2nd_half_wrong_idate.append( np.array(duration_first_or_second_score_2nd_half_wrong_list_idate) ) # not really a duration in seconds but a numebr of steps
 
 duration_first_score_1st_half_wrong_conc = np.array(duration_first_score_1st_half_wrong_list_conc)
+duration_first_score_1st_half_wrong_or_port_conc = np.array(duration_first_score_1st_half_wrong_or_port_list_conc)
+duration_second_score_1st_half_wrong_or_port_conc = np.array(duration_second_score_1st_half_wrong_or_port_list_conc)
 duration_second_score_1st_half_wrong_conc = np.array(duration_second_score_1st_half_wrong_list_conc)
 duration_first_and_second_score_1st_half_wrong_conc = np.array(duration_first_and_second_score_1st_half_wrong_list_conc)
 duration_first_or_second_score_1st_half_wrong_conc = np.array(duration_first_or_second_score_1st_half_wrong_list_conc)
@@ -322,6 +381,8 @@ duration_netcdf_two_star_2nd_half_conc = np.array(duration_netcdf_two_star_2nd_h
 duration_netcdf_one_star_2nd_half_conc = np.array(duration_netcdf_one_star_2nd_half_list_conc)
 
 duration_first_score_2nd_half_wrong_conc = np.array(duration_first_score_2nd_half_wrong_list_conc)
+duration_first_score_2nd_half_wrong_or_star_conc = np.array(duration_first_score_2nd_half_wrong_or_star_list_conc)
+duration_second_score_2nd_half_wrong_or_star_conc = np.array(duration_second_score_2nd_half_wrong_or_star_list_conc)
 duration_second_score_2nd_half_wrong_conc = np.array(duration_second_score_2nd_half_wrong_list_conc)
 duration_first_and_second_score_2nd_half_wrong_conc = np.array(duration_first_and_second_score_2nd_half_wrong_list_conc)
 duration_first_or_second_score_2nd_half_wrong_conc = np.array(duration_first_or_second_score_2nd_half_wrong_list_conc)

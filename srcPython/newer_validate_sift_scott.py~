@@ -1,0 +1,2 @@
+# Compares netcdf prn/antenna selection as read in newer_validate_sift.py and the netcdf prn/antenna reported in Scott's CYGNSS_yaw_test_DMR_satselection.dat
+## First you need to run (in the same terminal where you run newer_validate_sift.py: run -i cygnss_read_scott_prn_ant.py -> fill out variables nb_seconds_since_start_scott, gps_scott and which_ant_scott
