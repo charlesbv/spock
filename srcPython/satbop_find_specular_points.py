@@ -19,9 +19,9 @@
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 satbop_output_dir = './' # directory where the csv output files are
 satbop_pass = 1 # pass to look at (integer or string)
-attitude = [0, 0, -90] # attitude of the FM: [pitch, roll, yaw] (in deg) 
+attitude = [0, 0, 0] # attitude of the FM: [pitch, roll, yaw] (in deg) 
 order_rotation = [3,2,1] # rder_rotation order 1 means firt you do this rotation. for example: [2,1,3] -> first you roll then pitch then yaw
-
+reproduce_onboard_bug_antenna_selection = 1 # if set to 1 then the PRN and antenna selection algorithm reproduces the onboard bug which doesn't properly switch from fore and aft antenna when the FM is yawed by +-90 deg
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 import sys
@@ -103,14 +103,18 @@ for iprn in range(nprn):
     date.append(date_here); azim_not_int.append(azim_not_int_here); azim.append(azim_here.astype(int)); elev_not_int.append(elev_not_int_here); elev.append(elev_here.astype(int)); elev_gps_from_cyg_body.append(elev_gps_from_cyg_body_here)
     
 # date of the entire overpass. first_date is the oldest date among all csv files, last_date is the most recent date
-date_entire = []
+date_entire = []; date_datetime_entire = []
 nseconds = (int)((last_date - first_date).total_seconds()) + 1
 for isecond in range(nseconds):
-    date_entire.append(datetime.strftime(first_date + timedelta(seconds = isecond), "%Y-%m-%dT%H:%M:%S"))
+    date_datetime_entire.append(first_date + timedelta(seconds = isecond))
+    date_entire.append(datetime.strftime(date_datetime_entire[-1], "%Y-%m-%dT%H:%M:%S"))
 date_entire = np.array(date_entire)
+date_datetime_entire = np.array(date_datetime_entire)
 
+prn_selected = []; fom_selected = []; which_ant_selected = []; elev_selected = []; azim_selected = []; elev_not_int_selected = []; azim_not_int_selected = []
 for isecond in range(nseconds):
     date_now = date_entire[isecond]
+    date_now_date = datetime.strptime(date_now, "%Y-%m-%dT%H:%M:%S")
     elev_this_time = []; azim_this_time = []; prn_this_time = []
     elev_not_int_this_time = []; azim_not_int_this_time = [];
     elev_gps_from_cyg_body_this_time = [];
@@ -125,4 +129,12 @@ for isecond in range(nseconds):
             elev_gps_from_cyg_body_this_time.append(elev_gps_from_cyg_body[iprn][itime])
             prn_this_time.append(prn[iprn])
     # in this list, select the PRNs with 4 highest FOM (with a few other small tricks that the onboard algo does)
-    select_highest_foms(elev_this_time, azim_this_time, elev_not_int_this_time, azim_not_int_this_time, elev_gps_from_cyg_body_this_time, prn_this_time, fom_map)
+    if isecond == 0:
+        prn_selected_here, fom_selected_here, which_ant_selected_here, elev_selected_here, azim_selected_here, elev_not_int_selected_here, azim_not_int_selected_here = \
+            select_highest_foms(elev_this_time, azim_this_time, elev_not_int_this_time, azim_not_int_this_time, elev_gps_from_cyg_body_this_time, prn_this_time, fom_map, [], [], 0) # since this is the first step, we don't reproduce the bug onbaord (that necessarily needs the previous step to be reproduced) to prn_previous_step is set to [].Same for which_ant_previous_step
+    else:
+        prn_selected_here, fom_selected_here, which_ant_selected_here, elev_selected_here, azim_selected_here, elev_not_int_selected_here, azim_not_int_selected_here = \
+            select_highest_foms(elev_this_time, azim_this_time, elev_not_int_this_time, azim_not_int_this_time, elev_gps_from_cyg_body_this_time, prn_this_time, fom_map, prn_selected[-1], which_ant_selected[-1], reproduce_onboard_bug_antenna_selection)
+
+    prn_selected.append(prn_selected_here); fom_selected.append(fom_selected_here); which_ant_selected.append(which_ant_selected_here); elev_selected.append(elev_selected_here); azim_selected.append(azim_selected_here); elev_not_int_selected.append(elev_not_int_selected_here); azim_not_int_selected.append(azim_not_int_selected_here);     
+
