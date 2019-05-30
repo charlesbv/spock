@@ -24,17 +24,238 @@ import matplotlib.gridspec as gridspec
 import matplotlib.patches as mpatches
 
 
-
 try:
     operation = sys.argv[1] # 'predict', 'select'. If 'predict' then run SpOCK to predict SP locations. If 'select' then run the algorithm to select the 2 PRNs for each FM overpass (meaning that 'predict' should have been run at some point before)
 except IndexError:
     print "***! The argument should be 'predict' or 'select'. !***\n***! The program will stop. !***"; sys.exit();
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-start_time_const = '2019-05-20T17:00:00'
-end_time_const = '2019-05-20T22:00:00'
+start_time_const = '2018-09-26T00:00:00'
+end_time_const = '2018-09-26T23:59:50'
 dir_run_spock = '/Users/cbv/work/spockOut/beacon/'
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
+
+
+
+def select_two_prns():
+    port_ant_for_prn_itime = []
+    port_ant_prn_list = []
+    
+    score_prn = np.zeros([33,33])
+    score_first_half_prn = np.zeros([33,33])
+    gap_prn = np.zeros([33, 33]) + 1e6 # set to 1e6 so that prns that are not selected have a very big gap
+    gap_first_half_prn = np.zeros([33, 33]) + 1e6 # set to 1e6 so that prns that are not selected have a very big gap
+    single_gap_prn_port_second_half = np.zeros([33]) + 1e6 # record the gap of the PRN taht are port starting at the second half  + 130s
+    prn_list = [] # record all PRNs during the entire time
+    prn_port_second_half_list =  [] # record the PRN taht are port starting at the second half  + 130s 
+    for iin in range(inter_dur_sec):
+        for ispec in range(4):
+            if ( gps_spock[itime+iin][ispec] in prn_list ) == False:
+                prn_list.append(gps_spock[itime+iin][ispec])
+            if ((iin >= (inter_dur_sec/2 + 130)) & (which_ant_spock[itime+iin][ispec] == 3) & (( gps_spock[itime+iin][ispec] in prn_port_second_half_list ) == False)):
+                prn_port_second_half_list.append(gps_spock[itime+iin][ispec])
+    prn_list = np.array(prn_list)
+    nprn = len(prn_list)
+    prn_list_sort = prn_list[np.argsort(prn_list)]
+    #  for the prns that are selected, innitialize the gap to 0 
+    for iii in range(nprn):
+        if prn_list_sort[iii] in prn_port_second_half_list: # if this PRN is port starting at the second half  + 130s 
+            single_gap_prn_port_second_half[prn_list_sort[iii]] = 0
+        for jjj in range(nprn):
+            if iii != jjj:
+                gap_prn[prn_list_sort[iii], prn_list_sort[jjj]] = 0
+                gap_first_half_prn[prn_list_sort[iii], prn_list_sort[jjj]] = 0 
+
+
+    # seconds_sampling_start_idate.append(nb_seconds_since_initial_epoch_spock[itime])
+    # seconds_sampling_stop_idate.append(nb_seconds_since_initial_epoch_spock[itime+inter_dur_sec-1])
+    for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
+        iout = -1
+        port_ant_for_prn_iprn = []
+        # first, determine if,  starting at the second hald of the overpass + 130 s, the port antenna is assigned to a PRN
+        if iin >= (inter_dur_sec/2 + 130): # starting at the second hald of the overpass + 130 s, look if the port antenna is assigned to a PRN
+            for prn_out in prn_list_sort:
+                prn_out_is_gap = 0 # used only to figure out the gap for PRN that are port starting at the second hald of the overpass + 130 s  
+                if len(np.where(gps_spock[itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time            
+                    iprn_out = np.where(gps_spock[itime+iin] == prn_out)[0][0]
+                    if which_ant_spock[itime+iin][iprn_out] == 3: # the port antenna is assigned to a PRN
+                        port_ant_for_prn_iprn.append([itime, itime+iin, gps_spock[itime+iin][iprn_out]])
+                        if ((gps_spock[itime+iin][iprn_out] in port_ant_prn_list) == False): # record only once the PRN that's assigned to port
+                            port_ant_prn_list.append(gps_spock[itime+iin][iprn_out]) # actually this is probably the same list as prn_port_second_half_list. oh well
+                if (prn_out in prn_port_second_half_list):  # if the PRN is port at some point starting at the second hald of the overpass + 130 s
+                    if (len(np.where(gps_spock[itime+iin] == prn_out)[0]) == 0 ): # if there is a gap for this prn
+                        prn_out_is_gap = 1
+                    else:
+                        iprn_out = np.where(gps_spock[itime+iin] == prn_out)[0][0]
+                        if ( fom_spock[itime+iin][iprn_out] == 0): # or if its FOM is 0 (count it as a gap)
+                            prn_out_is_gap = 1
+                        elif (which_ant_spock[itime+iin][iprn_out] == 2): # or at this time the antenna is starboard  (this prn is port at some point starting at the second hald of the overpass + 130 s but not neceessarily at all times starting at the second hald of the overpass + 130 s)
+                            prn_out_is_gap = 1
+                    if prn_out_is_gap == 1:
+                        single_gap_prn_port_second_half[prn_out] = single_gap_prn_port_second_half[prn_out] + 1
+
+
+        # now compute the score and gap for every combination
+        for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
+            prn_out_is_gap = 0
+            #ipdb.set_trace()
+            iout = iout + 1
+            ant_out = -1
+            if len(np.where(gps_spock[itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time            
+                iprn_out = np.where(gps_spock[itime+iin] == prn_out)[0][0]            
+                gain_out = fom_spock[itime+iin][iprn_out]
+                ant_out = which_ant_spock[itime+iin][iprn_out]
+                if gain_out == 0:# if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0) 
+                    prn_out_is_gap = 1
+                elif ((iin <= inter_dur_sec/2) & (ant_out == 3)): # if the antenna is port during the first half of the overpass, count it as a gap since the beacon will only transmit to the starboard antenna
+                    prn_out_is_gap = 1
+
+            else:
+                gain_out = 0 
+                prn_out_is_gap = 1
+
+            for prn_in in prn_list_sort[iout+1:]:
+                prn_in_is_gap = 0
+                ant_in = -1
+                if len(np.where(gps_spock[itime+iin] == prn_in)[0]) > 0: #the prn is selected by SpOCK at this particular time
+                    iprn_in = np.where(gps_spock[itime+iin] == prn_in)[0][0]
+                    gain_in = fom_spock[itime+iin][iprn_in]
+                    ant_in = which_ant_spock[itime+iin][iprn_in]
+                    max_gain_out_in = np.max([gain_out, gain_in])
+                    if gain_in == 0: # if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0)
+                        prn_in_is_gap = 1
+                    elif ((iin <= inter_dur_sec/2) & (ant_in == 3)): # if the antenna is port during the first half of the overpass, count it as a gap since the beacon will only transmit to the starboard antenna
+                        prn_in_is_gap = 1
+                else:
+                    gain_in = 0
+                    max_gain_out_in = np.max([gain_out, gain_in])
+                    prn_in_is_gap = 1
+                score_prn[prn_out, prn_in] = score_prn[prn_out, prn_in] + max_gain_out_in
+                if iin <= inter_dur_sec / 2:
+                    score_first_half_prn[prn_out, prn_in] = score_first_half_prn[prn_out, prn_in] + max_gain_out_in
+                if ((prn_out_is_gap == 1) | (prn_in_is_gap == 1)):
+                    gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 1
+                    if (iin <= inter_dur_sec / 2):
+                        gap_first_half_prn[prn_out, prn_in] = gap_first_half_prn[prn_out, prn_in] + 1
+                if ((prn_out_is_gap == 1) & (prn_in_is_gap == 1)):
+                    gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 10000 # we won't to exclude the possiblity of choosing this combination since both prn have the gap at the same time
+                    if iin <= inter_dur_sec	/ 2:
+                        gap_first_half_prn[prn_out, prn_in] = gap_first_half_prn[prn_out, prn_in] + 10000 # we won't to exclude the possiblity of choosing this combination since both prn have the gap at the same time
+        if len(port_ant_prn_list) > 0:
+            port_ant_for_prn_itime.append(port_ant_for_prn_iprn)
+
+
+    ncomb = len(np.where(gap_first_half_prn != 1e6)[0]) # should be equal to (nprn*(nprn-1))/2# total number of combinaiton. /2 because combinaiton [X,Y] is the same as [Y,X].
+    gap_first_half_prn_symm = gap_first_half_prn + np.transpose(gap_first_half_prn)
+    score_first_half_prn_symm = score_first_half_prn + np.transpose(score_first_half_prn)
+    if len(port_ant_prn_list) != 0: # This means that one of the PRN was assigneed to the port antenna starting at the second hald of the overpass + 130 s !!!!!!!!! should be of len(port_ant_prn_list) != 0:
+        if len(port_ant_prn_list) == 1: # exactly onr PRN was assigned to port
+            prn_that_is_port = port_ant_prn_list[0]
+            second_score_temp = prn_that_is_port
+            second_ant_temp = 3
+            # determine which other PRN monimized the gap with this PRN during the firsrt half of the overpass
+            ## there cuold be more than one combination that minmizes the gap, in which case choose the combination that has the highest score_prn
+            list_gap = np.argsort(gap_first_half_prn_symm[:, prn_that_is_port])
+            nmin = len(list_gap)
+            imin = 0
+            found_imin = 0
+            min_gap = gap_first_half_prn_symm[list_gap[imin], prn_that_is_port]
+            list_min_gap = []
+            score_prn_list_min_gap = []
+            list_min_gap.append(list_gap[imin])
+            score_prn_list_min_gap.append(score_first_half_prn_symm[list_gap[imin], prn_that_is_port])
+            while ((imin < nmin) & (found_imin == 0)):
+                imin = imin + 1
+                if gap_first_half_prn_symm[list_gap[imin], prn_that_is_port] == min_gap: # more than one combination minimze the gap
+                    list_min_gap.append(list_gap[imin])
+                    score_prn_list_min_gap.append(score_first_half_prn_symm[list_gap[imin], prn_that_is_port])
+                else:
+                    found_imin = 1
+            score_prn_list_min_gap = np.array(score_prn_list_min_gap)
+            if len(list_min_gap) > 1: # there are more than one combination that minmizes the gap, in which case choose the combination that has the highest score_first_half_prn
+                iprn_min_gap_with_this_port_prn = np.where(score_prn_list_min_gap == np.max(score_prn_list_min_gap))[0][0]
+                prn_min_gap_with_this_port_prn = list_min_gap[iprn_min_gap_with_this_port_prn]
+            else:
+                prn_min_gap_with_this_port_prn = list_min_gap[0]
+            first_score_temp = prn_min_gap_with_this_port_prn
+            first_ant_temp = 2
+        elif len(port_ant_prn_list) >= 2: # two or more PRNs were assigned to port. Select the PRN port that has the min gap start at the scond half + 130s. For the second PRN, select so that the combinatino minimizes the gap with this port prn
+            prn_port_min_gap_second_half = np.where(single_gap_prn_port_second_half == np.min(single_gap_prn_port_second_half))[0][0] # Select the PRN port that has the min gap start at the scond half + 130s
+            second_score_temp = prn_port_min_gap_second_half
+            second_ant_temp = 3
+            list_gap = np.argsort(gap_first_half_prn_symm[:, prn_port_min_gap_second_half])
+            nmin = len(list_gap)
+            imin = 0
+            found_imin = 0
+            min_gap = gap_first_half_prn_symm[list_gap[imin], prn_port_min_gap_second_half]
+            list_min_gap = []
+            score_prn_list_min_gap = []
+            list_min_gap.append(list_gap[imin])
+            score_prn_list_min_gap.append(score_first_half_prn_symm[list_gap[imin], prn_port_min_gap_second_half])
+            while ((imin < nmin) & (found_imin == 0)):
+                imin = imin + 1
+                if gap_first_half_prn_symm[list_gap[imin], prn_port_min_gap_second_half] == min_gap: # more than one combination minimze the gap
+                    list_min_gap.append(list_gap[imin])
+                    score_prn_list_min_gap.append(score_first_half_prn_symm[list_gap[imin], prn_port_min_gap_second_half])
+                else:
+                    found_imin = 1
+            score_prn_list_min_gap = np.array(score_prn_list_min_gap)
+            if len(list_min_gap) > 1: # there are more than one combination that minmizes the gap, in which case choose the combination that has the highest score_first_half_prn
+                iprn_min_gap_with_this_port_prn = np.where(score_prn_list_min_gap == np.max(score_prn_list_min_gap))[0][0]
+                prn_min_gap_with_this_port_prn = list_min_gap[iprn_min_gap_with_this_port_prn]
+            else:
+                prn_min_gap_with_this_port_prn = list_min_gap[0]
+            first_score_temp = prn_min_gap_with_this_port_prn
+            first_ant_temp = 2 # actually this could also be a port antenna 
+
+    else: # this means that the port antenna was never assigned to any PRN starting at the second hald of the overpass + 130 s
+        score_index_sort_temp = np.dstack(np.unravel_index(np.argsort(score_first_half_prn.ravel()), score_first_half_prn.shape))
+        score_index_sort = score_index_sort_temp[0, :, :] # sorted array of combinations that give the ghihest score (ascending order)
+        icomb = -1
+        #found_comb_without_gap = 0
+        gap_prn_here = np.zeros([ncomb])
+        while icomb >= -ncomb: # go through score_index_sort from the combination that gives the higeshest score (score_index_sort[-1,:]) to the combination that gives the lowest score (score_index_sort[-ncomb, :])
+            comb_now = score_index_sort[icomb, :]
+            prn_out_here = comb_now[0]
+            prn_in_here = comb_now[1]
+            gap_prn_here[icomb] = gap_first_half_prn_symm[prn_out_here, prn_in_here]
+            icomb = icomb-1
+        #if found_comb_without_gap == 0: # if none of the combinations had no gap (ie if all combinations had at least one second gap) then take the combination with the smallest amount of gap
+        list_gap = np.where(gap_prn_here == np.min(gap_prn_here))[0] # score_index_sort[-ncomb + list_gap, :] is the list of combinations that minimize the gap
+        min_gap = np.min(gap_prn_here)
+        nmin = len(list_gap)
+        imin = 0
+        found_imin = 0
+        list_min_gap = []
+        score_prn_list_min_gap = []
+        combi_now = score_index_sort[-ncomb + list_gap[imin]]
+        list_min_gap.append(combi_now)
+        score_prn_list_min_gap.append(score_first_half_prn_symm[combi_now[0], combi_now[1]])
+        imin = imin + 1
+        while ((imin < nmin) & (found_imin == 0)): # more than one combination minimze the gap
+            combi_now =	score_index_sort[-ncomb + list_gap[imin]]
+            if gap_first_half_prn_symm[combi_now[0], combi_now[1]] == min_gap: # more than one combination minimze the gap
+                list_min_gap.append(combi_now)
+                score_prn_list_min_gap.append(score_first_half_prn_symm[combi_now[0], combi_now[1]])
+            else:
+                found_imin = 1
+            imin = imin + 1
+        score_prn_list_min_gap = np.array(score_prn_list_min_gap)
+        iprn_min_gap_with_this_port_prn = np.where(score_prn_list_min_gap == np.max(score_prn_list_min_gap))[0][0]
+        optim_comb = list_min_gap[iprn_min_gap_with_this_port_prn]
+
+        first_score_temp = optim_comb[0]
+        second_score_temp = optim_comb[1]
+        first_ant_temp = 2
+        second_ant_temp = 2
+
+    return first_score_temp, second_score_temp, first_ant_temp, second_ant_temp, prn_list_sort
+   
+
+
+
+
+dant_spock = [0, -0.25]
 color_gain = ['grey', 'blue', 'limegreen', 'red']
 label_gain = ['0', '2-5', '6-10', '11-15']
 handles_arr = []
@@ -56,7 +277,7 @@ if operation == 'predict':
 
 print 'For each FM, selecting the two PRNs...'
 # Read the schedule of overpasses generated using sat-bop.py on Windows
-filename_schedule = 'schedule_overpass_' + start_time_const[:10] + '.txt'
+filename_schedule = dir_run_spock + 'overpassSchedule/schedule_overpass_' + start_time_const[:10] + '.txt'
 #os.system('scp -p desk:work/spockOut/beacon/overpassSchedule/' + filename_schedule + ' overpassSchedule/')
 try:
     file_schedule = open(filename_schedule, 'r')
@@ -107,85 +328,19 @@ for cygfm in range(1, 9):
         isc =  cygfm_to_spock_nb[cygfm-1] - 1
         spec_spock_filename = output_file_path_list[isc] + "specular_" + output_file_name_list[isc] # !!!!! before 01/24/2019
         data_spec = cygnss_read_spock_spec_bin(spec_spock_filename.replace('.txt','.bin'), gps_name_list_spock, dt_spock_output, 1) 
-        date_spock = data_spec[0]; lon_spock = data_spec[1]; lat_spock = data_spec[2]; fom_spock = data_spec[3]; gps_spock = data_spec[4]; normpower_spock = data_spec[5]; x_cyg_spock = data_spec[6]; y_cyg_spock = data_spec[7]; z_cyg_spock = data_spec[8]; x_gps_spock = data_spec[9]; y_gps_spock = data_spec[10]; z_gps_spock = data_spec[11];  x_spec_spock = data_spec[12]; y_spec_spock = data_spec[13]; z_spec_spock = data_spec[14]; nb_spec_spock = data_spec[15];  el_spec_spock = data_spec[16]; az_spec_spock = data_spec[17]; el_gps_from_cyg_spock = data_spec[18];  el_spec_not_int_spock = data_spec[19]; az_spec_not_int_spock = data_spec[20]
-        date_spock = np.array(date_spock); gps_spock = np.array(gps_spock); fom_spock = np.array(fom_spock)
+        date_spock = data_spec[0]; lon_spock = data_spec[1]; lat_spock = data_spec[2]; fom_spock = data_spec[3]; gps_spock = data_spec[4]; normpower_spock = data_spec[5]; x_cyg_spock = data_spec[6]; y_cyg_spock = data_spec[7]; z_cyg_spock = data_spec[8]; x_gps_spock = data_spec[9]; y_gps_spock = data_spec[10]; z_gps_spock = data_spec[11];  x_spec_spock = data_spec[12]; y_spec_spock = data_spec[13]; z_spec_spock = data_spec[14]; nb_spec_spock = data_spec[15];  el_spec_spock = data_spec[16]; az_spec_spock = data_spec[17]; el_gps_from_cyg_spock = data_spec[18];  el_spec_not_int_spock = data_spec[19]; az_spec_not_int_spock = data_spec[20]; which_ant_spock = data_spec[24];
+        date_spock = np.array(date_spock); gps_spock = np.array(gps_spock); fom_spock = np.array(fom_spock); which_ant_spock = np.array(which_ant_spock)
         ## Generate a time diagram showing all PRNs selected between start_time_fm and end_time_fm
 
         start_time_fm_date = datetime.strptime(start_time_fm[cygfm-1], "%Y-%m-%dT%H:%M:%S")
         end_time_fm_date = datetime.strptime(end_time_fm[cygfm-1], "%Y-%m-%dT%H:%M:%S")
         inter_dur_sec = (int)((end_time_fm_date-start_time_fm_date).total_seconds())
         itime = np.where(date_spock == start_time_fm_date)[0][0]
-                # BLOCK BELOW IF LOOKING AT BINOMIAL SCORE METRIC
-        score_prn = np.zeros([33,33])
-        gap_prn = np.zeros([33, 33])
-        prn_list = []
-        for iin in range(inter_dur_sec):
-            for ispec in range(4):
-                if ( gps_spock[itime+iin][ispec] in prn_list ) == False:
-                    prn_list.append(gps_spock[itime+iin][ispec])
-        prn_list = np.array(prn_list)
-        nprn = len(prn_list)
-        prn_list_sort = prn_list[np.argsort(prn_list)]
-        for iin in range(inter_dur_sec): #array([ 7,  8, 11, 16, 18, 27])
-            iout = -1
-            for prn_out in prn_list_sort[:-1]: # no need to look at the last element since all combinations ahve already been considered #array([ 7,  8, 11, 16, 18, 27])
-                prn_out_is_gap = 0
-                #ipdb.set_trace()
-                iout = iout + 1
-                if len(np.where(gps_spock[itime+iin] == prn_out)[0]) > 0: #the prn is selected by SpOCK at this particular time
-                    iprn_out = np.where(gps_spock[itime+iin] == prn_out)[0][0]
-                    gain_out = fom_spock[itime+iin][iprn_out]
-                    if gain_out == 0:# if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0) 
-                        prn_out_is_gap = 1
-                else:
-                    gain_out = 0 # !!!!!! used ot be -1 to penalize non selected prn
-                    prn_out_is_gap = 1
-                for prn_in in prn_list_sort[iout+1:]:
-                    prn_in_is_gap = 0
-                    if len(np.where(gps_spock[itime+iin] == prn_in)[0]) > 0: #the prn is selected by SpOCK at this particular time
-                        iprn_in = np.where(gps_spock[itime+iin] == prn_in)[0][0]
-                        gain_in = fom_spock[itime+iin][iprn_in]
-                        max_gain_out_in = np.max([gain_out, gain_in])
-                        if gain_in == 0: # if the gain is 0, count it as a gap (since SpOCK is very different from onboard for gains of 0)
-                            prn_in_is_gap = 1
-                    else:
-                        gain_in = 0 # !!!!!! used ot be -1 to penalize non selected prn
-                        max_gain_out_in = np.max([gain_out, gain_in])
-                        prn_in_is_gap = 1
-                    score_prn[prn_out, prn_in] = score_prn[prn_out, prn_in] + max_gain_out_in
-                    if ((prn_out_is_gap == 1) | (prn_in_is_gap == 1)):
-                        gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 1
-                    if ((prn_out_is_gap == 1) & (prn_in_is_gap == 1)):
-                        gap_prn[prn_out, prn_in] = gap_prn[prn_out, prn_in] + 10000 # we won't to exclude the possiblity of choosing this combination since both prn have the gap at the same time
-                    
-        # comb =  unravel_index(score_prn.argmax(), score_prn.shape)
-        # first_score_idate.append(comb[0])
-        # second_score_idate.append(comb[1])
-        score_index_sort_temp = np.dstack(np.unravel_index(np.argsort(score_prn.ravel()), score_prn.shape))
-        score_index_sort = score_index_sort_temp[0, :, :] # sorted array of combinations that give the ghihest score (ascending order)
-        ncomb = (nprn*(nprn-1))/2/2# total number of combinaiton. /2 because combinaiton [X,Y] is the same as [Y,X]. another/2 because we want to look only at the laf top scores
-        icomb = -1
-        found_comb_without_gap = 0
-        gap_prn_here = np.zeros([ncomb])
-        while icomb >= -ncomb: # go through score_index_sort from the combination that gives the higeshest score (score_index_sort[-1,:]) to the combination that gives the lowest score (score_index_sort[-ncomb, :])
-            comb_now = score_index_sort[icomb, :]
-            prn_out_here = comb_now[0]
-            prn_in_here = comb_now[1]
-            gap_prn_here[icomb] = gap_prn[prn_out_here, prn_in_here]
-            if gap_prn_here[icomb] == 0: # found a combination with no gap at all during the time interval so that's the optimum combination
-                found_comb_without_gap = 1
-                optim_comb = score_index_sort[icomb, :]
-                icomb = -10000 # to get out of the while
-            else:
-                icomb = icomb-1
-        if found_comb_without_gap == 0: # if none of the combinations had no gap (ie if all combinations had at least one second gap) then take the combination with the smallest amount of gap
-            imin_gap = np.where(gap_prn_here == np.min(gap_prn_here))[0][0]
-            optim_comb = score_index_sort[-ncomb + imin_gap]
 
-        first_score_fm[cygfm-1] = optim_comb[0]
-        second_score_fm[cygfm-1] = optim_comb[1]
-
-
+        first_score_idate_temp, second_score_idate_temp,  first_ant_idate_temp, second_ant_idate_temp, prn_list_sort = select_two_prns()
+        first_score_fm[cygfm-1] = first_score_idate_temp
+        second_score_fm[cygfm-1] = second_score_idate_temp
+        nprn = len(prn_list_sort)
 
     ## Time diagram PRNs selected by SpOCK vs time
         itime_start = itime
@@ -212,7 +367,7 @@ for cygfm in range(1, 9):
         ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
         ax.set_title(ax_title, weight = 'normal', fontsize  = fontsize_plot)
         [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                       
-        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7,bottom=1,  left=1, right=1)
         plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
         for iin in range(itime_start, itime_stop):
             gain_spock_now = fom_spock[iin, :]
@@ -220,21 +375,21 @@ for cygfm in range(1, 9):
             xaxis = ((date_spock[iin] - date_spock[itime_start]).total_seconds()) / 60.
             for ispec in range(4):
                 prn_spock = gps_spock[iin, ispec]
+                if which_ant_spock[iin, ispec] == 2: # starboard
+                    iant_spock = 0
+                elif which_ant_spock[iin, ispec] == 3: # starboard
+                    iant_spock = 1
+                
                 prn_spock_value = np.where(prn_list_sort == prn_spock)[0][0]
-                # if (ispec == gain_sort_index[0]): # top PRN gain
-                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 90)
-                # elif (ispec == gain_sort_index[1]): # second to top PRN gain
-                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue',s = 20)
-                # else:
-                #     ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = 'blue', alpha = 0.06, s=20)
+
                 if fom_spock[iin, ispec] == 0: # !!!!!!!!!!! if change gain limmits then need to change also label_gain
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[0], s = 90)   
+                    ax.scatter(xaxis, prn_spock_value + dant_spock[iant_spock] + 1.0,  marker = '.', color = color_gain[0], s = 90)   
                 elif ((fom_spock[iin, ispec] >= 1) & (fom_spock[iin, ispec] <= 5)):
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[1], s = 90)   
+                    ax.scatter(xaxis, prn_spock_value + dant_spock[iant_spock] + 1.0,  marker = '.', color = color_gain[1], s = 90)   
                 elif ((fom_spock[iin, ispec] >= 6) & (fom_spock[iin, ispec] <= 10)):
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[2], s = 90)   
+                    ax.scatter(xaxis, prn_spock_value + dant_spock[iant_spock] + 1.0,  marker = '.', color = color_gain[2], s = 90)   
                 elif ((fom_spock[iin, ispec] >= 11) & (fom_spock[iin, ispec] <= 15)):
-                    ax.scatter(xaxis, prn_spock_value + 1.0,  marker = '.', color = color_gain[3], s = 90)   
+                    ax.scatter(xaxis, prn_spock_value + dant_spock[iant_spock] + 1.0,  marker = '.', color = color_gain[3], s = 90)   
                 else:
                     print "***! Error: the gain is not between 0 and 15. !***"; sys.exit()
                 
@@ -260,7 +415,7 @@ for cygfm in range(1, 9):
         legend.get_title().set_fontsize(str(fontsize_plot)) 
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
-
+    
         
 raise Exception
 # download CYGNSS and GPS TLEs in the format required by sat-bop.py
@@ -286,3 +441,5 @@ itime_start = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] == (
 print (nb_seconds_since_initial_epoch_spock_all_date[idate][itime_start] - nb_seconds_since_initial_epoch_spock_all_date[idate][0])/3600. # should be the number of hours of date_start
 # (example if date_start is datetime(2018, 9, 26, 12, 4, 58) then should print 12.0825)
 itime_stop = np.where(nb_seconds_since_initial_epoch_spock_all_date[idate] == (date_stop - date_spock[0]).total_seconds())[0][0]
+
+
