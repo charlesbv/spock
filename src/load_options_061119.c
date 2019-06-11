@@ -2031,9 +2031,9 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
       
       getline(&line,&len,fp);
       sscanf(line, "%s",OPTIONS->test_omniweb_or_external_file);
-
       if (strcmp(OPTIONS->test_omniweb_or_external_file, "omniweb") == 0){ // if the user chose to automatically download F10.7 and Ap from omniweb
-      //	str2et_c(OPTIONS->initial_epoch, &et_initial_epoch);
+
+	//	str2et_c(OPTIONS->initial_epoch, &et_initial_epoch);
 	//	et2utc_c(et_initial_epoch, "ISOC" ,0 ,11 , initial_epoch_wget_temp);
 	et2utc_c(OPTIONS->et_oldest_tle_epoch, "ISOC" ,0 ,11 , initial_epoch_wget_temp); // tle
 	strcpy(initial_epoch_wget, "");
@@ -3593,7 +3593,6 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 
       // if the user chose to input external files (that he/she wrote him/herself) for F10.7, Ap, and F10.7A
       else{
-
 	sscanf(line, "%s",filename_f107);
 	//newstructure
 /* 	strcpy(density_file_temp, OPTIONS->dir_input_density_msis); */
@@ -3613,7 +3612,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strcpy(filename_ap, density_file_temp);
 
 	OPTIONS->use_ap_hist = 0;
-	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107, filename_ap, "dynamic_manual", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch,OPTIONS->et_oldest_tle_epoch, OPTIONS->final_epoch, OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method	// used to be (it all depends on the format of the files the user want to use (see the function lin_interpolate for more detail)):	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107, filename_ap, "dynamic_manual", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch, OPTIONS->final_epoch, OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method
+	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107, filename_ap, "omniweb", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch,OPTIONS->et_oldest_tle_epoch, OPTIONS->final_epoch, OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method	// used to be (it all depends on the format of the files the user want to use (see the function lin_interpolate for more detail)):	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107, filename_ap, "dynamic_manual", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch, OPTIONS->final_epoch, OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method
 
 
       }
@@ -5590,10 +5589,8 @@ int lin_interpolate(double *f107_after_interpo,
       }
     }
 
-
     for (line_num = 0; line_num<nb_elements_in_file_f107; line_num++){
       getline(&line, &len, fp);
-
       sscanf(line, "%s %s %s %lf", yy, doy, hh,&driver_temp);
       strcpy(text,yy);
       strcat(text,"-");
@@ -5908,6 +5905,7 @@ int lin_interpolate(double *f107_after_interpo,
 	if (ap_after_interpo[ddd] > 990){ // this happens for example in omniweb if the value of ap is unknonw they put 999
 	  ap_after_interpo[ddd] = ap_after_interpo[ddd-1];
 	}
+
       }
       if ((iProc == 0) & ( iDebugLevel >= 4 ) ){
 	printf("----- (load_options) (lin_interpolate) Done linear interpolating historical Ap.\n");
@@ -8762,7 +8760,6 @@ int lin_interpolate_ap_hist(double **y_after_interpo,
 	found_eoh = 1;
       }
     }
-
     if (strcmp( "YEAR", text  ) == 0){
       /* Calculates the x and y arrays to interpolate */
       if ( strcmp(src_file, "dynamic_manual") == 0 ){
@@ -8832,7 +8829,7 @@ int lin_interpolate_ap_hist(double **y_after_interpo,
 	// this assumes the file is one-hour time step AND that the first element of the file starts at hour 0 of the day AND the last element of the file ends at hour 23 of the day AND must be a 3-hour average 
 
 	if ( fmod( count_day, 24.) == 0 ){
-	  //  printf("%d, %f\n",nb_elements_in_file,nb_elements_in_file/24.);
+
 	  daily_ap[count_day / 24] = driver_temp;
 	  count_day = count_day + 1;
 	  //	  printf("XXXXXXXXXXX = %s | %f | %d\n", text, driver_temp, count_day / 24);
@@ -9041,7 +9038,6 @@ int lin_interpolate_ap_hist(double **y_after_interpo,
   free(b); 
   free(x_before_interpo);
   free(y_before_interpo);
-
 
   if ((iProc == 0) & ( iDebugLevel >= 4 ) ){
     printf("----- (load_options) (lin_interpolate_ap_hist) (lin_interpolate_ap_hist) Ended lin_interpolate_ap_hist.\n");
@@ -9563,9 +9559,10 @@ int nb_elements_file(int *nb_element_in_file,
     if (  strcmp( text, file_end  ) == 0 )  {
       found_eoh = 1;
     }
-        *nb_element_in_file = *nb_element_in_file+1;
+    *nb_element_in_file = *nb_element_in_file+1;
   }
   rewind(fp);
+  
   found_eoh = 0;
   while ( found_eoh == 0 && !feof(fp)) {
     getline(&line, &len, fp);
