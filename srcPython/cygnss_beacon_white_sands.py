@@ -1,6 +1,6 @@
 # This script was made for the beacon test campaing in White Sands, NM, in November 2018. The results were discussesd with Darren McKague.
 # First need to run input_filename with spock
-# then create the ground statino reports: python report_coverage_ground_station_for_sift_parallel_sftp.py beaconmiddle.txt
+# then create the ground statino reports: python report_coverage_ground_station_for_sift_parallel_sftp.py input.txt (replace input.txt with the name of input_filename)
 # then run this script
 
 
@@ -35,8 +35,8 @@ def radius_for_tissot(dist_km):
     return np.rad2deg(dist_km/6378.) # this is calculating using the Haversine formula
 
 
-timezone = 'est' # est or mst
-input_filename = 'beacon_0201.txt'
+timezone = 'mst' # est or mst
+input_filename = 'beacon_0529.txt'
 min_max_elev = 60. # all sc with a max elev wrt to gs that's lower than min_max_elev are excluded
 
 
@@ -178,7 +178,7 @@ fontsize_plot = 20 # 9
 color_arr = ['k','b','r','g','m', 'y']
 
 iday = 0
-new_date_start = datetime.strptime('2019-03-01T00:00:00', "%Y-%m-%dT%H:%M:%S" ) # i did that so we can manually change the dtgart date of the animation
+new_date_start = datetime.strptime('2019-05-29T00:00:00', "%Y-%m-%dT%H:%M:%S" ) # i did that so we can manually change the dtgart date of the animation
 nb_day = (int)( np.ceil((date_stop - new_date_start).total_seconds() / 3600./24) )
 date_day_arr = np.array([new_date_start + timedelta(days=i) for i in np.arange(0, nb_day +1, 1)])# !!!!!! used to be np.array([date_start + timedelta(days=i) for i in np.arange(0, nb_day +1, 1)])
 
@@ -508,7 +508,7 @@ else:
 ax.plot([x_cov[0] / 3600./24, x_cov[-1] / 3600./24], [6,6], linewidth = 1, linestyle = 'dashed', color = 'black')
 ax.plot([x_cov[0] / 3600./24, x_cov[-1] / 3600./24], [0,0], linewidth = 1, linestyle = 'dashed', color = 'black')
 
-day_time_step_xticks = 4
+day_time_step_xticks = 15
 max_xaxis = np.max(x_cov) / 3600/24
 
 xticks = np.arange(0, max_xaxis+day_time_step_xticks, day_time_step_xticks)
@@ -542,10 +542,10 @@ ax.yaxis.set_ticks(ytick)
 ax.yaxis.set_ticklabels(ytick_label, fontsize = fontsize_plot)
 
 legend = ax.legend(loc='lower left', bbox_to_anchor=(0, 0), numpoints = 1,  title="", fontsize = fontsize_plot)
-ax.set_xlim([0,100])
+ax.set_xlim([xticks[15],xticks[30]])
 fig.set_size_inches(10, 20)
 if corrected == 1:
-    fig_save_name = 'overpass_corrected'  + '_' + timezone + '.pdf'
+    fig_save_name = 'overpass_corrected'  + '_' + timezone + '_' + input_filename.replace('.txt', '_2020.pdf')
 else:
     fig_save_name = 'overpass' + '_' + timezone + '.pdf'
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
