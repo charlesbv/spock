@@ -36,13 +36,13 @@ LDFLAGS=-L$(GSL_DIR)/lib
 %.o: %.c $(DEPS)
 	$(CC)  -c -o $@ $<  $(CFLAGS) $(LIBS) $(LDFLAGS)
 
-all: spock_dan 
+all: spock 
 
-spock_dan: $(OBJ)
+spock: $(OBJ)
 	$(CC) -o ${PATH_EXECUTABLE}/$@ $^ $(CFLAGS) $(LIBS) $(LDFLAGS) 
 
 clean:
-	find  ${PATH_EXECUTABLE} -type f -maxdepth 1 -name spock_dan -delete #rm -f  ${PATH_EXECUTABLE}/spock_dan_again # ignore the warning with maxdepth (it does work)
+	find  ${PATH_EXECUTABLE} -type f -maxdepth 1 -name spock -delete #rm -f  ${PATH_EXECUTABLE}/spock_again # ignore the warning with maxdepth (it does work)
 	rm -f ./src/*.o
 	rm -f ./src/mpi_fake/*.o
 
