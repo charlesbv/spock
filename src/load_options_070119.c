@@ -5635,7 +5635,6 @@ int lin_interpolate(double *f107_after_interpo,
     }
 
     if (index_to_stop_in_before_interpo == 0){ // this means that the last date in the F10.7 file is older than et_final. This can happen only when dynamic_manual is chosen 
-
       last_date_input_file_older_final_epoch = 1;
       index_to_stop_in_before_interpo = nb_elements_in_file_f107 - 1;
 
@@ -5692,8 +5691,6 @@ int lin_interpolate(double *f107_after_interpo,
   /* Compute y_after_interpo */
   a = malloc( nb_time_steps_simu * sizeof(double) );
   b = malloc( nb_time_steps_simu * sizeof(double) );
-
-
   //  char times[256], times2[256];
 
   /* Linear interpolate F10.7 */
@@ -5785,7 +5782,6 @@ int lin_interpolate(double *f107_after_interpo,
       }
 
       nb_elements_in_file_ap = 0;
-
       if ( ( strcmp(src_file, "omniweb") == 0 ) || ( strcmp(src_file, "dynamic_manual") == 0 ) ){
 	/* Calculates the x and y arrays to interpolate */
 	if ( strcmp(src_file, "dynamic_manual") == 0 ){
@@ -5905,7 +5901,7 @@ int lin_interpolate(double *f107_after_interpo,
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       ////////////////////// Ap (if time step of Ap file is one hour and not one day or one month /////////////////////////////
 
-             lin_interpolate_ap_hist(ap_hist_after_interpo,x_after_interpo, ap_filename, src_file, nb_time_steps_simu, initial_epoch,et_oldest_tle_epoch, dt, missing_data_value, iDebugLevel, iProc);     
+      lin_interpolate_ap_hist(ap_hist_after_interpo,x_after_interpo, ap_filename, src_file, nb_time_steps_simu, initial_epoch,et_oldest_tle_epoch, dt, missing_data_value, iDebugLevel, iProc);     
       for (ddd = 0; ddd<nb_time_steps_simu; ddd++){
 	ap_after_interpo[ddd] = ap_hist_after_interpo[0][ddd];
 
@@ -5948,7 +5944,6 @@ int lin_interpolate(double *f107_after_interpo,
     /* Initialize sum_81_days as the sum of all F10.7 values from the initial epoch - 40.5 days to the initial epoch + 40.5 days */
     //    char current_time[256];
 
-
     int start_index_in_f107_before_interpo_to_calculate_f107_average = save_first_index_in_f107_before_interpo;
     int stop_index_in_f107_before_interpo_to_calculate_f107_average = save_first_index_in_f107_before_interpo + 1;
     int current_index_in_f107_average = 0; //save_first_index_in_f107_before_interpo;
@@ -5970,7 +5965,6 @@ int lin_interpolate(double *f107_after_interpo,
 
     f107A_before_interpo[current_index_in_f107_average] = sum_81_days / ( stop_index_in_f107_before_interpo_to_calculate_f107_average - start_index_in_f107_before_interpo_to_calculate_f107_average - 1 ); // here: current_index_in_f107_average = 0
     x_f107A_before_interpo[current_index_in_f107_average] = x_f107_before_interpo[current_index_in_f107_before_interpo];
-
     while (current_index_in_f107_average < (index_to_stop_in_before_interpo - save_first_index_in_f107_before_interpo   ) ){
       current_index_in_f107_before_interpo = current_index_in_f107_before_interpo + 1;
       if ( ( start_index_in_f107_before_interpo_to_calculate_f107_average >= 0 ) && ( ( current_index_in_f107_before_interpo - start_index_in_f107_before_interpo_to_calculate_f107_average - 1 ) * time_step_before_interpo >= 40.5 * 24 * 3600. ) ){ // we get in here if there is at least 40.5 days before the current index
@@ -6007,13 +6001,9 @@ int lin_interpolate(double *f107_after_interpo,
       
 
     }
-
-
-
     if (last_date_input_file_older_final_epoch == 1){ // // this means that the last date in the F10.7 file is older than et_final. This can happen only when dynamic_manual is chosen -> f107A_before_interpo for the index after the last date in the file is constant, equal to the last value calcuilated in the loop previously
        ggg = current_index_in_f107_average;
-      while ( x_f107A_before_interpo[ggg]  <= et_final - 3600 ){
-
+      while ( x_f107A_before_interpo[ggg]  <= et_final ){
 	f107A_before_interpo[ggg] = f107A_before_interpo[current_index_in_f107_average];
 	ggg = ggg + 1;
       }
@@ -6072,7 +6062,7 @@ int lin_interpolate(double *f107_after_interpo,
       printf("----- (load_options) (lin_interpolate) Done calculating and interpolating F10.7 81 days average.\n");
     }
     //    printf("%f %f %f  %d\n",f107A_before_interpo[0], f107A_before_interpo[1], f107A_before_interpo[2], x_min_index);    
-     
+
 
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -6091,18 +6081,13 @@ int lin_interpolate(double *f107_after_interpo,
 /* 	etprint(x_after_interpo[i], ""); */
 /* 	printf("wwq%f %f %f %d\n", f107_after_interpo[i], f107A_after_interpo[i], ap_after_interpo[i], i); */
 /*       } */
-//     	MPI_Finalize();exit(0);
-
+/*      	MPI_Finalize();exit(0);   */
   free(a);
-    free(b);
-    free(x_f107_before_interpo);
-  //free(x_raid3_before_interpo);
+  free(b);
+  free(x_f107_before_interpo);  free(x_ap_before_interpo);  free(x_raid3_before_interpo);
+  free(ap_before_interpo);
+  free(f107_before_interpo);
 
-    free(f107_before_interpo);
-    if (*use_ap_hist == 0){
-      free(ap_before_interpo);
-      free(x_ap_before_interpo);  
-    }
   free(line);
   if ((iProc == 0) & ( iDebugLevel >= 3 ) ){
     printf("---- (load_options) (lin_interpolate) Done linear interpolating F10.7 and Ap.\n");
