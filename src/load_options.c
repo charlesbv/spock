@@ -11336,6 +11336,10 @@ int read_thrust(OPTIONS_T *OPTIONS){ // if section #THRUST exists in the main in
      strcpy(OPTIONS->thrust_stop, text );
      getline(&line, &len, thrust_file);
      sscanf(line, "%lf %lf %lf", &OPTIONS->thrust_accel_lvlh[0], &OPTIONS->thrust_accel_lvlh[1], &OPTIONS->thrust_accel_lvlh[2]);
+     OPTIONS->thrust_accel_lvlh[0] = OPTIONS->thrust_accel_lvlh[0] / 1000.;// m/s2 to km/s2
+     OPTIONS->thrust_accel_lvlh[1] = OPTIONS->thrust_accel_lvlh[1] / 1000.;// m/s2 to km/s2
+     OPTIONS->thrust_accel_lvlh[2] = OPTIONS->thrust_accel_lvlh[2] / 1000.;// m/s2 to km/s2
+     
      str2et_c(OPTIONS->thrust_start, &OPTIONS->et_thrust_start);
      str2et_c(OPTIONS->thrust_stop, &OPTIONS->et_thrust_stop); 
 
