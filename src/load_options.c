@@ -954,6 +954,41 @@
   }
 
 
+    if ((iProc == 0) & ( iDebugLevel >= 2 )){
+    printf("--- (load_options) Beginning of section #THRUST.\n");
+  }
+  rewind(fp);
+  found_eoh = 0;
+  while ( found_eoh == 0 && !feof(fp)) {
+    getline(&line, &len, fp);
+    sscanf(line, "%s", text);
+    if (  strcmp( "#THRUST", text  ) == 0 )  {
+      found_eoh = 1;
+    }
+  }
+  if (feof(fp)){
+    OPTIONS->thrust = 0;
+  }
+
+  else{
+        OPTIONS->thrust = 1;
+
+	strcpy(OPTIONS->thrust_filename, "");
+  getline(&line,&len,fp);
+  sscanf(line,"%s", OPTIONS->thrust_filename);
+  read_thrust(OPTIONS);
+
+  //  etprint(OPTIONS->et_thrust_start, "start");
+  //etprint(OPTIONS->et_thrust_stop, "stop");  
+    //       printf("<%f %f %f>\n", OPTIONS->thrust_accel_lvlh[0], OPTIONS->thrust_accel_lvlh[1], OPTIONS->thrust_accel_lvlh[2]);
+      
+  }
+
+  if ((iProc == 0) & ( iDebugLevel >= 2 )){
+    printf("--- (load_options) End of section #THRUST.\n");
+  }
+
+
 
   /* ORBIT just to determine if collision_vcm optoin is on, nin which case don't look at geometry file. ORBIT sseciton will be read again in details later*/
   if ((iProc == 0) & ( iDebugLevel >= 2 )){
@@ -11279,4 +11314,37 @@ int read_vcm(char filename[1000], OPTIONS_T *OPTIONS, int isc){
 
   return 0;
 }
-						      
+
+
+int read_thrust(OPTIONS_T *OPTIONS){ // if section #THRUST exists in the main input file, this functions reads the file that contains information about the external thrust applied to the sc
+  FILE *thrust_file = NULL;
+  thrust_file = fopen(OPTIONS->thrust_filename, "r");
+  if (thrust_file == NULL){
+    printf("!***!\nThe thrust file:\n%s\ncould not be found. The program will stop.\n!***!\n", OPTIONS->thrust_filename); MPI_Finalize(); exit(0);
+  }
+
+     char *line = NULL;
+
+
+     char text[256];
+     size_t len = 0;
+     getline(&line, &len, thrust_file);
+     sscanf(line, "%s", text);
+     strcpy(OPTIONS->thrust_start, text );
+     getline(&line, &len, thrust_file);
+     sscanf(line, "%s", text);
+     strcpy(OPTIONS->thrust_stop, text );
+     getline(&line, &len, thrust_file);
+     sscanf(line, "%lf %lf %lf", &OPTIONS->thrust_accel_lvlh[0], &OPTIONS->thrust_accel_lvlh[1], &OPTIONS->thrust_accel_lvlh[2]);
+     str2et_c(OPTIONS->thrust_start, &OPTIONS->et_thrust_start);
+     str2et_c(OPTIONS->thrust_stop, &OPTIONS->et_thrust_stop); 
+
+  
+
+  fclose(thrust_file);
+  
+
+
+  return 0;
+
+}

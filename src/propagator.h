@@ -293,6 +293,7 @@ typedef struct {
   double srp_vcm; // if computing the probability of collision and the input file has the fomat of a VCM, this is the value of the solar radiation pressure coefficient reported in the VCM
   double et_vcm;// if computing the probability of collision and the input file has the format of a VCM, et_vcm is the epoch of the VCM
   double              a_i2cg_INRTL_ir_earth[3];
+  int thrust; // 1 is section #THRUST exists in the main input file. 0 otherwise
 }   INTEGRATOR_T;
 
 typedef struct {

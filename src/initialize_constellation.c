@@ -1629,6 +1629,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.degree        = OPTIONS->degree;       // Gravity degree
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.order         = OPTIONS->order;        // Gravity order
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag  = OPTIONS->include_drag; // include drag (CBV)
+	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.thrust  = OPTIONS->thrust;
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure  = OPTIONS->include_solar_pressure; // include drag (CBV)
 		CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure  = OPTIONS->include_earth_pressure; // include drag (CBV)
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_sun   = OPTIONS->include_sun;  // include Sun perturbations (CBV)

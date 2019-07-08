@@ -7,6 +7,13 @@
 #define N_STEPS 100
 
 typedef struct {
+  int thrust; // 1 is section #THRUST exists in the main input file. 0 otherwise
+  char thrust_filename[1000]; // if section #THRUST exists in the main input file, this is the name of the file that contains information about the external thrust applied to the sc
+  char thrust_start[256];
+  char thrust_stop[256];
+  double thrust_accel_lvlh[3];
+  double et_thrust_start;
+  double et_thrust_stop;
   int gravity_map; // 1 if the user has indicated "map" after the order of the gravity model (1st line of section #FORCES) -> will use a 3D map of the gravitational potential to calcualte the acceleration due to the Earth gravity. 0 otherwise.
   double bc_vcm_std[2]; // if computing the probability of collision and the input file has the fomat of a VCM, this is the standard deviation of Bcfrom the covariance matrix in the VCM (element 28). size of 2 because two objects that collide
   double srp_vcm_std[2]; // if computing the probability of collision and the input file has the fomat of a VCM, this is the standard deviation of the solar radiation pressure coeff from the covariance matrix in the VCM (element 45). size of 2 because two objects that collide
@@ -424,5 +431,10 @@ int read_vcm(char filename[1000], OPTIONS_T *OPTIONS, int isc);
 
 int read_cdm(char filename[1000], OPTIONS_T *OPTIONS);
 
+int read_thrust(OPTIONS_T *OPTIONS);
 
-
+int compute_thrust(double athrust_i2cg_INRTL[3], // if section #THRUST exists in the main input file, this function computes the thrust acceleration in the ECI reference frame;
+		   double r_i2cg_INRTL[3],
+		   double v_i2cg_INRTL[3],
+		   OPTIONS_T       *OPTIONS
+		   ) ;

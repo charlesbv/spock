@@ -5992,3 +5992,10 @@ int polynomial_interpo(int printVar, double *val, int n, double *x, double *y, d
   return 0;
 
 }
+
+
+
+int compute_thrust(double athrust_i2cg_INRTL[3], ) { // if section #THRUST exists in the main input file, this function computes the thrust acceleration in the ECI reference frame;
+
+  return 0;
+}

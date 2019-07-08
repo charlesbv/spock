@@ -1399,6 +1399,7 @@ int compute_dxdt(   double          drdt[3],
   double r_earth2sun_J2000[3];
   double a_solar_pressure_INRTL[3];
   double adrag_i2cg_INRTL[3];
+      double athrust_i2cg_INRTL[3];
   double a_earth_pressure_INRTL[3];
 
 
@@ -1492,6 +1493,19 @@ int compute_dxdt(   double          drdt[3],
     compute_drag( adrag_i2cg_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, et[0], PARAMS, INTEGRATOR, et_initial_epoch, et_sc_initial, density, index_in_attitude_interpolated, index_in_driver_interpolated, CONSTELLATION, OPTIONS, iProc, iDebugLevel, SC);
     v_add( dvdt, dvdt, adrag_i2cg_INRTL);
   }
+
+
+
+  if (INTEGRATOR->thrust == 1){
+
+    if ((et[0] >= OPTIONS->et_thrust_start) && (et[0] <= OPTIONS->et_thrust_stop)){
+      compute_thrust(athrust_i2cg_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, OPTIONS);
+      //      etprint(et[0], "et");
+      /* v_add( dvdt, dvdt, athrust_i2cg_INRTL); */
+    }
+    
+  }
+
   //  printf("\n");
   return 0;
 }
@@ -6730,5 +6744,25 @@ int gravity_map_xinter(double *xinter_lon, double *xinter_lat, double *xinter_ra
           xinter_radius[0] = Gravity->radius_map[iradius0];   xinter_radius[1] = Gravity->radius_map[iradius1]; xinter_radius[2] = Gravity->radius_map[iradius2]; xinter_radius[3] = Gravity->radius_map[iradius3];
     }
 
+  return 0;
+}
+
+
+
+int compute_thrust(double athrust_i2cg_INRTL[3], // if section #THRUST exists in the main input file, this function computes the thrust acceleration in the ECI reference frame;
+		   double r_i2cg_INRTL[3],
+		   double v_i2cg_INRTL[3],
+		   OPTIONS_T       *OPTIONS
+		   ) {
+  double T_lvlh_2_inrtl[3][3];
+  double T_inrtl_2_lvlh[3][3];
+    compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
+  m_trans(T_lvlh_2_inrtl, T_inrtl_2_lvlh);
+
+  m_x_v(athrust_i2cg_INRTL, T_lvlh_2_inrtl, OPTIONS->thrust_accel_lvlh);
+
+  //  v_print(athrust_i2cg_INRTL, "athrust_i2cg_INRTL");
+
+  
   return 0;
 }
