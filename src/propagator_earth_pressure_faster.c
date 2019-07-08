@@ -38,7 +38,7 @@ int orbit_ave(  SPACECRAFT_T *SC,
       jump360 = 1;
     }
   
-  
+
   if ( ( ( (SC->OE.an_to_sc >= SC->OE.initial_an_to_sc) && ( previous_an_to_sc < SC->OE.initial_an_to_sc) ) || ((SC->OE.an_to_sc <= SC->OE.initial_an_to_sc) && ( previous_an_to_sc > SC->OE.initial_an_to_sc))) && (jump360 == 0) ) { // the sc has traveled a multiple of one orbit around the Earth since the start of the simu
 
 
@@ -1501,7 +1501,7 @@ int compute_dxdt(   double          drdt[3],
     if ((et[0] >= OPTIONS->et_thrust_start) && (et[0] <= OPTIONS->et_thrust_stop)){
       compute_thrust(athrust_i2cg_INRTL, r_i2cg_INRTL, v_i2cg_INRTL, OPTIONS);
       //      etprint(et[0], "et");
-      /* v_add( dvdt, dvdt, athrust_i2cg_INRTL); */
+      v_add( dvdt, dvdt, athrust_i2cg_INRTL);
     }
     
   }

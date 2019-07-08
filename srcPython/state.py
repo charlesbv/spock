@@ -169,7 +169,9 @@ for irun in range(nb_run):
 
     dt = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
     nb_steps = var_in[find_in_read_input_order_variables(var_in_order, 'nb_steps')]; 
-    nb_sc = var_in[find_in_read_input_order_variables(var_in_order, 'nb_sc')]; 
+    nb_sc = var_in[find_in_read_input_order_variables(var_in_order, 'nb_sc')];
+    thrust_start = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_start')];
+    thrust_stop = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_stop')]; 
 
     # Convert SC # to CYGNSS name if cygnss is set to 1
     if cygnss == 1:
@@ -434,18 +436,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_radius = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_radius.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_radius.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_radius = fig_radius.add_subplot(gs[0, 0])
 
-                    ax_radius.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_radius.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_radius.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_radius.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_radius.spines.itervalues()] # change the width of the frame of the figure
                     ax_radius.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = radius[isc,:nb_steps_new] - earth_radius
@@ -487,18 +489,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_speed = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_speed.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_speed.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_speed = fig_speed.add_subplot(gs[0, 0])
 
-                    ax_speed.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_speed.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_speed.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_speed.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_speed.spines.itervalues()] # change the width of the frame of the figure
                     ax_speed.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = speed[isc,:nb_steps_new]
@@ -540,18 +542,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_altitude = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_altitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_altitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_altitude = fig_altitude.add_subplot(gs[0, 0])
 
-                    ax_altitude.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_altitude.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_altitude.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_altitude.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_altitude.spines.itervalues()] # change the width of the frame of the figure
                     ax_altitude.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = altitude[isc,:nb_steps_new]
@@ -593,18 +595,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_acceleration_lvlh_drag_mag = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_acceleration_lvlh_drag_mag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_acceleration_lvlh_drag_mag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_acceleration_lvlh_drag_mag = fig_acceleration_lvlh_drag_mag.add_subplot(gs[0, 0])
 
-                    ax_acceleration_lvlh_drag_mag.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_acceleration_lvlh_drag_mag.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_acceleration_lvlh_drag_mag.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_acceleration_lvlh_drag_mag.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_acceleration_lvlh_drag_mag.spines.itervalues()] # change the width of the frame of the figure
                     ax_acceleration_lvlh_drag_mag.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = acceleration_lvlh_drag_mag[isc,:nb_steps_new]
@@ -645,18 +647,18 @@ for irun in range(nb_run):
                     x_label = 'Longitude ' + u'(\N{DEGREE SIGN})' #'Real time'
                     fig_acceleration = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_acceleration.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_acceleration.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_acceleration = fig_acceleration.add_subplot(gs[0, 0])
 
-                    ax_acceleration.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_acceleration.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_acceleration.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_acceleration.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_acceleration.spines.itervalues()] # change the width of the frame of the figure
                     ax_acceleration.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = acceleration[isc,:nb_steps_new] * 1000. # km/s2 to m/s2
@@ -702,18 +704,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_latitude = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_latitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_latitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_latitude = fig_latitude.add_subplot(gs[0, 0])
 
-                    ax_latitude.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_latitude.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_latitude.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_latitude.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_latitude.spines.itervalues()] # change the width of the frame of the figure
                     ax_latitude.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = latitude[isc,:nb_steps_new]
@@ -754,18 +756,18 @@ for irun in range(nb_run):
             #         x_label = 'Real time'
             #         fig_longitude = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-            #         fig_longitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-            #         plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+            #         fig_longitude.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+            #         plt.rc('font', weight='normal') ## make the labels of the ticks in bold
             #         gs = gridspec.GridSpec(1, 1)
             #         gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
             #         ax_longitude = fig_longitude.add_subplot(gs[0, 0])
 
-            #         ax_longitude.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-            #         ax_longitude.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+            #         ax_longitude.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+            #         ax_longitude.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
             #         [i.set_linewidth(2) for i in ax_longitude.spines.itervalues()] # change the width of the frame of the figure
             #         ax_longitude.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-            #         plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+            #         plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
             #     colorVal = scalarMap.to_rgba(isc_irun)
             #     y_axis = longitude[isc,:nb_steps_new]
@@ -808,18 +810,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_phase_angle = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_phase_angle.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_phase_angle.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_phase_angle = fig_phase_angle.add_subplot(gs[0, 0])
 
-                    ax_phase_angle.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_phase_angle.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_phase_angle.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_phase_angle.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_phase_angle.spines.itervalues()] # change the width of the frame of the figure
                     ax_phase_angle.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = phase_angle[isc,:nb_steps_new]
@@ -861,18 +863,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_eccentricity = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_eccentricity.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_eccentricity.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_eccentricity = fig_eccentricity.add_subplot(gs[0, 0])
 
-                    ax_eccentricity.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_eccentricity.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_eccentricity.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_eccentricity.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_eccentricity.spines.itervalues()] # change the width of the frame of the figure
                     ax_eccentricity.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = eccentricity[isc,:nb_steps_new]
@@ -914,18 +916,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_solar_zenith = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_solar_zenith.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_solar_zenith.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_solar_zenith = fig_solar_zenith.add_subplot(gs[0, 0])
 
-                    ax_solar_zenith.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_solar_zenith.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_solar_zenith.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_solar_zenith.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_solar_zenith.spines.itervalues()] # change the width of the frame of the figure
                     ax_solar_zenith.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = solar_zenith[isc,:nb_steps_new]
@@ -963,30 +965,32 @@ for irun in range(nb_run):
                 if ( isc_count == 0 ) & (irun == 0) :
                     # Plot
                     fig_title = 'SMA as a function of time'
-                    y_label = 'SMA (km)'
+                    y_label = 'SMA - Re (km)'
                     x_label = 'Real time'
                     fig_sma = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_sma.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_sma.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_sma = fig_sma.add_subplot(gs[0, 0])
 
-                    ax_sma.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_sma.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_sma.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_sma.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_sma.spines.itervalues()] # change the width of the frame of the figure
                     ax_sma.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
-                y_axis = sma[isc,:nb_steps_new] -earth_radius
+                y_axis = sma[isc,:nb_steps_new] -earth_radius #sma_ave[isc,:nb_steps_new]-earth_radius#sma[isc,:nb_steps_new] -earth_radius
+                y_axis = y_axis[1:] # !!!!!! for some rason the first value is nan so skip it
+                x_axis = x_axis[1:]
                 if isc_count == 0:
                     min_y = np.min(y_axis)
                     max_y = np.max(y_axis)
-                ax_sma.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc])
-                ax_sma.plot(x_axis, sma_ave[isc,:nb_steps_new]-earth_radius, linewidth = 2, color = colorVal, linestyle = 'dashed')
+                ax_sma.plot(x_axis, y_axis, linewidth = 2, color = 'blue', label = label_arr[isc]) # color = colorVal
+                #ax_sma.plot(x_axis, sma_ave[isc,:nb_steps_new]-earth_radius, linewidth = 2, color = colorVal, linestyle = 'dashed')
                 if np.min(y_axis) < min_y:
                     min_y = np.min(y_axis)
                 if np.max(y_axis) > max_y:
@@ -1015,11 +1019,15 @@ for irun in range(nb_run):
                             date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
                     ax_sma.xaxis.set_ticks(xticks)
                     ax_sma.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
-                    ax_sma.margins(0,0); ax_sma.set_xlim([min(xticks), max(xticks)]); ax_sma.set_ylim([min_y, max_y])
+                    thrust_start_sec = (thrust_start - date_ref).total_seconds()
+                    ax_sma.plot([thrust_start_sec, thrust_start_sec], [min_y*0.9,  max_y*1.1], linewidth = 2, color = 'red', linestyle = 'dashed')
+                    thrust_stop_sec = (thrust_stop - date_ref).total_seconds()
+                    ax_sma.plot([thrust_stop_sec, thrust_stop_sec], [min_y*0.9,  max_y*1.1], linewidth = 2, color = 'red', linestyle = 'dashed')
+                    ax_sma.margins(0,0); ax_sma.set_xlim([min(xticks), max(xticks)]); ax_sma.set_ylim([min_y*0.9, max_y*1.1])
             #        ax_sma.set_xlim([ax_sma.get_xlim()[0], most_recent_tle_among_all_sc])
 
-                    legend = ax_sma.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
-                    legend.get_title().set_fontsize(str(fontsize_plot))
+                    # legend = ax_sma.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    # legend.get_title().set_fontsize(str(fontsize_plot))
 
                     if save_plots == 1:
                         fig_save_name = 'sma'
@@ -1035,18 +1043,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_sma_average = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_sma_average.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_sma_average.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_sma_average = fig_sma_average.add_subplot(gs[0, 0])
 
-                    ax_sma_average.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_sma_average.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_sma_average.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_sma_average.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_sma_average.spines.itervalues()] # change the width of the frame of the figure
                     ax_sma_average.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 # y_axis = np.zeros(len(sma_average[isc])*2)
@@ -1154,18 +1162,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_radius_perigee = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_radius_perigee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_radius_perigee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_radius_perigee = fig_radius_perigee.add_subplot(gs[0, 0])
 
-                    ax_radius_perigee.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_radius_perigee.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_radius_perigee.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_radius_perigee.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_radius_perigee.spines.itervalues()] # change the width of the frame of the figure
                     ax_radius_perigee.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = radius_perigee[isc,:nb_steps_new] - earth_radius
@@ -1206,18 +1214,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_radius_apogee = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_radius_apogee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_radius_apogee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_radius_apogee = fig_radius_apogee.add_subplot(gs[0, 0])
 
-                    ax_radius_apogee.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_radius_apogee.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_radius_apogee.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_radius_apogee.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_radius_apogee.spines.itervalues()] # change the width of the frame of the figure
                     ax_radius_apogee.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = radius_apogee[isc,:nb_steps_new] - earth_radius
@@ -1260,18 +1268,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_argument_perigee = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_argument_perigee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_argument_perigee.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_argument_perigee = fig_argument_perigee.add_subplot(gs[0, 0])
 
-                    ax_argument_perigee.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_argument_perigee.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_argument_perigee.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_argument_perigee.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_argument_perigee.spines.itervalues()] # change the width of the frame of the figure
                     ax_argument_perigee.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = argument_perigee[isc,:nb_steps_new] 
@@ -1315,18 +1323,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_local_time = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_local_time.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_local_time.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_local_time = fig_local_time.add_subplot(gs[0, 0])
 
-                    ax_local_time.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_local_time.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_local_time.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_local_time.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_local_time.spines.itervalues()] # change the width of the frame of the figure
                     ax_local_time.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = local_time[isc,:nb_steps_new] 
@@ -1369,18 +1377,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_raan = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_raan.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_raan.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_raan = fig_raan.add_subplot(gs[0, 0])
 
-                    ax_raan.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_raan.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_raan.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_raan.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_raan.spines.itervalues()] # change the width of the frame of the figure
                     ax_raan.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = raan[isc,:nb_steps_new] 
@@ -1479,18 +1487,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_power = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_power.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_power.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_power = fig_power.add_subplot(gs[0, 0])
 
-                    ax_power.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_power.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_power.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_power.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_power.spines.itervalues()] # change the width of the frame of the figure
                     ax_power.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = power[isc]
@@ -1532,18 +1540,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_given_output = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_given_output.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_given_output.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_given_output = fig_given_output.add_subplot(gs[0, 0])
 
-                    ax_given_output.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_given_output.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_given_output.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_given_output.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_given_output.spines.itervalues()] # change the width of the frame of the figure
                     ax_given_output.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 given_output_sc = np.array(given_output[isc])
@@ -1586,18 +1594,18 @@ for irun in range(nb_run):
 #                     x_label = 'Solar zenith angle ' + u'(\N{DEGREE SIGN})'#Local time  'Phase angle ' + u'(\N{DEGREE SIGN})'#Real time'
 #                     fig_density = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-#                     fig_density.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-#                     plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+#                     fig_density.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+#                     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 #                     gs = gridspec.GridSpec(1, 1)
 #                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
 #                     ax_density = fig_density.add_subplot(gs[0, 0])
 
-#                     ax_density.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-#                     ax_density.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+#                     ax_density.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+#                     ax_density.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
 #                     [i.set_linewidth(2) for i in ax_density.spines.itervalues()] # change the width of the frame of the figure
 #                     ax_density.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-#                     plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+#                     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
 #                 colorVal = scalarMap.to_rgba(isc_irun)
 
@@ -1682,18 +1690,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_temperature = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_temperature.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_temperature.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_temperature = fig_temperature.add_subplot(gs[0, 0])
 
-                    ax_temperature.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_temperature.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_temperature.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_temperature.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_temperature.spines.itervalues()] # change the width of the frame of the figure
                     ax_temperature.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)
                 y_axis = temperature[isc]
@@ -1734,18 +1742,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_cd = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_cd.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_cd.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_cd = fig_cd.add_subplot(gs[0, 0])
 
-                    ax_cd.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_cd.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_cd.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_cd.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_cd.spines.itervalues()] # change the width of the frame of the figure
                     ax_cd.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)        
                 y_axis = cd[isc]
@@ -1787,18 +1795,18 @@ for irun in range(nb_run):
                     x_label = 'Real time'
                     fig_tot_area_drag = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
-                    fig_tot_area_drag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    fig_tot_area_drag.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
                     gs = gridspec.GridSpec(1, 1)
                     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
                     ax_tot_area_drag = fig_tot_area_drag.add_subplot(gs[0, 0])
 
-                    ax_tot_area_drag.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
-                    ax_tot_area_drag.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+                    ax_tot_area_drag.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+                    ax_tot_area_drag.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
                     [i.set_linewidth(2) for i in ax_tot_area_drag.spines.itervalues()] # change the width of the frame of the figure
                     ax_tot_area_drag.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-                    plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+                    plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)        
                 y_axis = tot_area_drag[isc]

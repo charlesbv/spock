@@ -371,6 +371,9 @@ def read_output_file(filename, list_variable):
             orb_number_temp = (int)(read_file_to_read[i+nb_lines_header].split('ORB')[1].split()[0])
             orb_number.append([i, orb_number_temp]) #[index when new orbit, orbit number]
             previous_orb = i
+            # to finish up: from the last orbit until the last time step of the simulation
+            argument_perigee_ave[previous_orb:] = np.float(read_file_to_read[i+nb_lines_header].split()[39]) # same value as previous orbit average value
+            sma_ave[previous_orb:] = np.float(read_file_to_read[i+nb_lines_header].split()[40]) # same value as previous orbit average value
         if (calculate_solar_zenith == 1):
             solar_zenith[i] = np.float(read_file_to_read[i+nb_lines_header].split()[42])
 

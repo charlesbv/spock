@@ -2444,11 +2444,11 @@ int write_output(   SPACECRAFT_T    *SC,
     char orbnumber[10];
     strcpy(orbnumber, "");
     //if (SC->OE.ave_increm == 1){ // means one full orbit has been travelled
+
     if  ( ( (SC[0].et - SC[0].et_last_orbit ) < OPTIONS->dt_output ) ){
     fprintf(SC[0].fp, " %f", SC[0].OE.w_ave*RAD2DEG);
     fprintf(SC[0].fp, " %f", SC[0].OE.sma_ave);
     fprintf(SC[0].fp, " %f", SC[0].OE.ecc_ave);
-
     }
     else{
     fprintf(SC[0].fp, " 9999.999999"); // w_ave

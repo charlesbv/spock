@@ -544,7 +544,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    CONSTELLATION->spacecraft[ii][eee].OE.long_an        = OPTIONS->long_an[ii] * DEG2RAD;                          // RAAN (CBV)
 	    CONSTELLATION->spacecraft[ii][eee].OE.f              = OPTIONS->f[ii] * DEG2RAD;                                // true anomaly (CBV)
 	    CONSTELLATION->spacecraft[ii][eee].OE.eccentricity   = OPTIONS->eccentricity[ii];
-
+	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc =  fmod(CONSTELLATION->spacecraft[ii][eee].OE.w + CONSTELLATION->spacecraft[ii][eee].OE.f, 2*M_PI);
 
 	    // Initialize the inertial state
 	    kep2cart(   CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL,
@@ -700,6 +700,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
 
 	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc = CONSTELLATION->spacecraft[ii][eee].OE.an_to_sc;
+	    
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.w;
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave = 9999.999999/RAD2DEG;
 	    CONSTELLATION->spacecraft[ii][eee].OE.sma_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.sma;
@@ -765,6 +766,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
 
 	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc = CONSTELLATION->spacecraft[ii][eee].OE.an_to_sc;
+	    
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.w;
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave = 9999.999999/RAD2DEG;
 	    CONSTELLATION->spacecraft[ii][eee].OE.sma_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.sma;
@@ -849,6 +851,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
 
 	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc = CONSTELLATION->spacecraft[ii][eee].OE.an_to_sc;
+	    
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.w;
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave = 9999.999999/RAD2DEG;
 	    CONSTELLATION->spacecraft[ii][eee].OE.sma_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.sma;
@@ -1030,6 +1033,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
 
 	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc = CONSTELLATION->spacecraft[ii][eee].OE.an_to_sc;
+	   
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.w;
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave = 9999.999999/RAD2DEG;
 	    CONSTELLATION->spacecraft[ii][eee].OE.sma_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.sma;
@@ -1172,6 +1176,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    // Orbital elements
 	    cart2kep( &CONSTELLATION->spacecraft[ii][eee].OE, CONSTELLATION->spacecraft[ii][eee].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][eee].et,  PARAMS->EARTH.GRAVITY.mu);
 	    CONSTELLATION->spacecraft[ii][eee].OE.initial_an_to_sc = CONSTELLATION->spacecraft[ii][eee].OE.an_to_sc;
+	    
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.w;
 	    CONSTELLATION->spacecraft[ii][eee].OE.w_ave = 9999.999999/RAD2DEG;
 	    CONSTELLATION->spacecraft[ii][eee].OE.sma_ave_temp = CONSTELLATION->spacecraft[ii][eee].OE.sma;
