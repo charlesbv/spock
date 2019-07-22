@@ -102,7 +102,10 @@ def read_input_file(filename):
     line_start_section_thrust = 0
     while ( ( line_start_section_thrust < len(read_file_input) -1 ) & ( ( name_section in read_file_input[line_start_section_thrust] ) == 0 ) ):
         line_start_section_thrust = line_start_section_thrust + 1
-        
+    if ( name_section in read_file_input[line_start_section_thrust] ) == 1:
+        found_thrust = 1
+    else:
+        found_thrust = 0
     name_section = '##ENSEMBLES_ATTITUDE'
     found_section = 0
     line_start_section_ensembles_attitude = 0
@@ -392,13 +395,14 @@ def read_input_file(filename):
         nb_ensembles_attitude = (int)(read_file_input[1+line_start_section_ensembles_attitude].split()[0])
 
     # THRUST
-    thrust_filename = read_file_input[1+line_start_section_thrust].split()[0]
-    thrust_file = open(thrust_filename, "r")
-    read_thrust_file = thrust_file.readlines()
-    thrust_start = datetime.strptime(read_thrust_file[0].split()[0], "%Y-%m-%dT%H:%M:%S")
-    thrust_stop = datetime.strptime(read_thrust_file[1].split()[0], "%Y-%m-%dT%H:%M:%S")
-    thrust_accel = np.array([read_thrust_file[2].split()[0], read_thrust_file[2].split()[1], read_thrust_file[2].split()[2]])
-    thrust_file.close()
+    if found_thrust == 1:
+        thrust_filename = read_file_input[1+line_start_section_thrust].split()[0]
+        thrust_file = open(thrust_filename, "r")
+        read_thrust_file = thrust_file.readlines()
+        thrust_start = datetime.strptime(read_thrust_file[0].split()[0], "%Y-%m-%dT%H:%M:%S")
+        thrust_stop = datetime.strptime(read_thrust_file[1].split()[0], "%Y-%m-%dT%H:%M:%S")
+        thrust_accel = np.array([read_thrust_file[2].split()[0], read_thrust_file[2].split()[1], read_thrust_file[2].split()[2]])
+        thrust_file.close()
     
     # # ENSEMBLES TO OUTPUT
     ensembles_to_output = []
@@ -441,12 +445,13 @@ def read_input_file(filename):
     order_variables.append("nb_steps | " + str(len(order_variables)))
     variables.append(nb_sc)
     order_variables.append("nb_sc | " + str(len(order_variables)))
-    variables.append(thrust_start)
-    order_variables.append("thrust_start | " + str(len(order_variables)))
-    variables.append(thrust_stop)
-    order_variables.append("thrust_stop | " + str(len(order_variables)))
-    variables.append(thrust_accel)
-    order_variables.append("thrust_accel | " + str(len(order_variables)))
+    if found_thrust == 1:
+        variables.append(thrust_start)
+        order_variables.append("thrust_start | " + str(len(order_variables)))
+        variables.append(thrust_stop)
+        order_variables.append("thrust_stop | " + str(len(order_variables)))
+        variables.append(thrust_accel)
+        order_variables.append("thrust_accel | " + str(len(order_variables)))
     variables.append(gps_name)
     order_variables.append("gps_name | " + str(len(order_variables)))
     variables.append(output_file_path_list)
