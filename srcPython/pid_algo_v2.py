@@ -21,7 +21,7 @@ rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the i
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
+no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho_coarse = 0.1 # the rho control will vary by this amount to find the optimum rho_coarse over an interval
@@ -629,6 +629,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             # start and end dates of next interval
             if (len(nb_seconds_interval) == 0):
                 nb_seconds_interval.append(step_move_sec)
+                date_start_save = date_start
             else:
                 nb_seconds_interval.append(nb_seconds_interval[-1] + step_move_sec)
             date_start = date_start + timedelta(seconds = step_move_sec)
@@ -1025,7 +1026,7 @@ pickle.dump([duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                  index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval], open(pickle_root + ".pickle", "w"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save], open(pickle_root + ".pickle", "w"))
 
 
 raise Exception

@@ -98,7 +98,7 @@ for ipickle in range(nb_pickle):
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                      index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval]= pickle.load(open(pickle_root + ".pickle"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save]= pickle.load(open(pickle_root + ".pickle"))
 
 
 
@@ -147,10 +147,24 @@ for ipickle in range(nb_pickle):
         pickle_root_concatenate = pickle_root_list[ipickle]
     else:
         pickle_root_concatenate = pickle_root_concatenate + '_+_' +  pickle_root_list[ipickle]
-ax.margins(0,0)
+
+    date_ref = date_start_save
+    nb_ticks_xlabel = 10
+    xticks_temp = np.array(nb_seconds_interval)/3600.
+    nticks_temp = len(xticks_temp)
+    xticks = []
+    for itick in range(nticks_temp):
+        if np.mod(itick, nticks_temp / nb_ticks_xlabel ) == 0:
+            xticks.append(xticks_temp[itick])
+    date_list_str = []
+    date_list = [date_ref + timedelta(hours=x) for x in xticks]
+    for i in range(len(xticks)):
+        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+    ax.xaxis.set_ticks(xticks)
+    ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 
 # ax.plot([0, duration_simu], [0,0], linestyle = 'dashed', linewidth = 2, color = 'black')
-ax.set_xlim([0, 198.]); #ax.set_ylim([-20, 20])
+#ax.set_xlim([0, 198.]); #ax.set_ylim([-20, 20])
 # ax.text(duration_simu/2., -200, 'SpOCK in front -> need rho_control < 0', horizontalalignment = 'center', verticalalignment = 'bottom', fontsize = fontsize_plot, weight = 'bold')
 # ax.text(duration_simu/2., 1200, 'SpOCK behind -> need rho_control > 0', horizontalalignment = 'center', verticalalignment = 'top', fontsize = fontsize_plot, weight = 'bold')
 ax.margins(0,0)
