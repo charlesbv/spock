@@ -966,7 +966,7 @@ for irun in range(nb_run):
                     # Plot
                     fig_title = 'SMA as a function of time'
                     y_label = 'SMA - Re (km)'
-                    x_label = 'Real time'
+                    x_label = 'Time (days)'#'Real time'
                     fig_sma = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
                     fig_sma.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
@@ -989,7 +989,7 @@ for irun in range(nb_run):
                 if isc_count == 0:
                     min_y = np.min(y_axis)
                     max_y = np.max(y_axis)
-                ax_sma.plot(x_axis, y_axis, linewidth = 2, color = 'blue', label = label_arr[isc]) # color = colorVal
+                ax_sma.plot(x_axis/3600./24, y_axis, linewidth = 2, color = 'blue', label = label_arr[isc]) # color = colorVal
                 #ax_sma.plot(x_axis, sma_ave[isc,:nb_steps_new]-earth_radius, linewidth = 2, color = colorVal, linestyle = 'dashed')
                 if np.min(y_axis) < min_y:
                     min_y = np.min(y_axis)
@@ -1007,23 +1007,27 @@ for irun in range(nb_run):
                 if isc == nb_sc - 1:
                     # x axis label is in real time
                     ## all output files of one simulation have the same number of steps, and start at the same date
-                    nb_ticks_xlabel = 8
-                    dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
-                    xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel); 
-                    date_list_str = []
-                    date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
-                    for i in range(len(xticks)):
-                        if dt_xlabel >= 3*24*3600:
-                            date_list_str.append( str(date_list[i])[5:10] )
-                        else:
-                            date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
-                    ax_sma.xaxis.set_ticks(xticks)
-                    ax_sma.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
-                    thrust_start_sec = (thrust_start - date_ref).total_seconds()
+                    
+                    # ## X AXIS REAL TIME
+                    # nb_ticks_xlabel = 8
+                    # dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+                    # xticks = np.arange(start_xaxis_label, start_xaxis_label+nb_seconds_in_simu+1, dt_xlabel); 
+                    # date_list_str = []
+                    # date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+                    # for i in range(len(xticks)):
+                    #     if dt_xlabel >= 3*24*3600:
+                    #         date_list_str.append( str(date_list[i])[5:10] )
+                    #     else:
+                    #         date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+                    # ax_sma.xaxis.set_ticks(xticks)
+                    # ax_sma.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+                    thrust_start_sec = (thrust_start - date_ref).total_seconds() / 3600. / 24
                     ax_sma.plot([thrust_start_sec, thrust_start_sec], [min_y*0.9,  max_y*1.1], linewidth = 2, color = 'red', linestyle = 'dashed')
-                    thrust_stop_sec = (thrust_stop - date_ref).total_seconds()
+                    thrust_stop_sec = (thrust_stop - date_ref).total_seconds()  / 3600. / 24
                     ax_sma.plot([thrust_stop_sec, thrust_stop_sec], [min_y*0.9,  max_y*1.1], linewidth = 2, color = 'red', linestyle = 'dashed')
-                    ax_sma.margins(0,0); ax_sma.set_xlim([min(xticks), max(xticks)]); ax_sma.set_ylim([min_y*0.9, max_y*1.1])
+                    ax_sma.margins(0,0);
+                    #ax_sma.set_xlim([min(xticks), max(xticks)]);
+                    ax_sma.set_ylim([min_y*0.9, max_y*1.1])
             #        ax_sma.set_xlim([ax_sma.get_xlim()[0], most_recent_tle_among_all_sc])
 
                     # legend = ax_sma.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
