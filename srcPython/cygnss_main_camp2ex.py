@@ -31,7 +31,7 @@ date_stop_with_time = date_stop + 'T00:00:00'
 dt_simu = 1.
 order_gravity = 20 # !!!!!!! put 20
 forces = 'drag moon_gravity sun_gravity'
-main_input_filename = 'camp2exTest.txt'
+main_input_filename = 'camp2ex.txt'
 spock_main_input(
     main_input_filename,
     # for TIME section
