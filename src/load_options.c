@@ -62,7 +62,7 @@
    char text_spice[256];
    //newstructure
 
-   int do_not_download_file_swpc_or_wget = 1; // set this variable to 1 to prevent from downloading F10.7 and Ap files from SWPC or Omniweb
+   int do_not_download_file_swpc_or_wget = 0; // set this variable to 1 to prevent from downloading F10.7 and Ap files from SWPC or Omniweb
    /* Declarations */
 	     double et_most_recent_tle_epoch;
 	     char most_recent_tle_epoch[256];
@@ -6515,6 +6515,7 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 	  found_eoh = 1;
 	}
       }
+      
 
 
       // // // Read file
@@ -6524,20 +6525,30 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 
       while (!feof(file_obs)){
 	getline(&line, &len, file_obs);
+	
 	if (feof(file_obs)){
 	  break;
 	}
 
 	//	printf("\n<%s>\n", line);
-	sscanf(line, "%s %s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", year_obs, month_obs, day_obs, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &ap_obs);
-	//		printf("%s %s %s %f\n", year_obs, month_obs, day_obs, ap_obs);
-	if ( strcmp(year_obs, ":Product:") == 0 ){ // the end of the quarter of the year file is reached so skip header of new quarter
+	sscanf(line, "%s %s", text, text2);
+	//	
+	  while (text[0] == '#'){ // sometimes the file has extra lines of comments - can't anticipate, it changes...
 
+	    getline(&line, &len, file_obs);
+	    sscanf(line, "%s %s", text, text2);
+
+
+	  }
+	  sscanf(line, "%s %s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", year_obs, month_obs, day_obs, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &float_trash, &ap_obs);
+	  /* printf("ddddd <%s> %s %s %f\n", year_obs, month_obs, day_obs, ap_obs); */
+
+	if ( strcmp(year_obs, ":Product:") == 0 ){ // the end of the quarter of the year file is reached so skip header of new quarter
 	  found_eoh = 0;
 	  while ( found_eoh == 0 && !feof(file_obs)) {
 	    getline(&line, &len, file_obs);
 	    sscanf(line, "%s %s", text, text2);
-	    //	      printf("<%s>\n", text2);
+	    //	    	      printf("<%s>\n", text2);
 	    if (  strcmp( "Date", text2  ) == 0 )  {
 	      found_eoh = 1;
 	      getline(&line, &len, file_obs);
@@ -6554,7 +6565,6 @@ int lin_interpolate_swpc(double *f107_after_interpo, // !!!!!!!!! here the 81 d 
 	strcat(time_obs, day_obs);
 	strcat(time_obs, "T00:00:00.000");
 	str2et_c(time_obs, &et_time_obs);
-
 	if (fabs(et_time_obs - et_initial_epoch_midnight) < 0.01){// 0.01 for numerical reasons
 	  start_saving_data = 1;
 	}
