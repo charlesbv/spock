@@ -23,8 +23,8 @@
 import os
 from datetime import datetime, timedelta
 
-date_start = '2018-09-25' #'2018-10-26'
-date_stop = '2018-09-27'#'2018-10-29'
+date_start = '2017-09-01' #'2018-10-26'
+date_stop = '2017-09-10'#'2018-10-29'
 podaac_path = "ftp://podaac.jpl.nasa.gov/allData/cygnss/L1/v2.1/"
 save_dir = '/Users/cbv/cygnss/netcdfPodaac/'#'/Volumes/Seagate_Expansion_Drive/netcdf/' 
 
@@ -44,8 +44,10 @@ while date_here <= date_stop_date:
 
     if (os.path.isdir(save_dir + yy + '/' + str(doy).zfill(3)) == False):
         os.system("mkdir " + save_dir + yy + '/' + str(doy).zfill(3))
-    for cygfm in range(1, 9):
-        if cygfm == 1:
+    icygfm = -1
+    for cygfm in range(7, 8):
+        icygfm = icygfm + 1
+        if icygfm == 0:
             name_netcdf_podaac = []
             name_netcdf_local = []
             list_netcdf = []

@@ -253,6 +253,7 @@ ecc_obs_orbit_average_interval_all_inter = []
 ecc_obs_orbit_mid_average_interval_all_inter = []
 ecc_obs_same_spock_all_inter = []
 ecc_spock_ok_pid_all_inter = []
+rho_spock_ok_pid_all_inter = []
 
 phase_spock_ok_pid_all_inter = []
 localtime_spock_ok_pid_all_inter = []
@@ -438,13 +439,14 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
 
         output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
         output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')]; 
-        var_to_read = ["position", "velocity", "eccentricity", "argument_perigee", "phase_angle", "local_time", "latitude", "longitude"]
+        var_to_read = ["position", "velocity", "eccentricity", "argument_perigee", "phase_angle", "local_time", "latitude", "longitude", "density"]
         var_out, var_out_order = read_output_file( output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
         date_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'date')])
         date_datetime_round_sec_spock = np.array(var_out[find_in_read_input_order_variables(var_out_order, 'date_datetime_round_sec')])
         r_spock = var_out[find_in_read_input_order_variables(var_out_order, 'position')]
         v_spock = var_out[find_in_read_input_order_variables(var_out_order, 'velocity')]
         ecc_spock = var_out[find_in_read_input_order_variables(var_out_order, 'eccentricity')]
+        rho_spock = var_out[find_in_read_input_order_variables(var_out_order, 'density')]
         phase_spock = var_out[find_in_read_input_order_variables(var_out_order, 'phase_angle')]
         localtime_spock = var_out[find_in_read_input_order_variables(var_out_order, 'local_time')]
         latitude_spock = var_out[find_in_read_input_order_variables(var_out_order, 'latitude')]
@@ -496,6 +498,8 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         v_spock_ok_pid[:, 2] = v_spock[index_spock_same_date_as_obs_pid, 2]
         ecc_spock_ok_pid = np.zeros([n])
         ecc_spock_ok_pid = ecc_spock[index_spock_same_date_as_obs_pid]
+        rho_spock_ok_pid = np.zeros([n])
+        rho_spock_ok_pid = rho_spock[index_spock_same_date_as_obs_pid]
         phase_spock_ok_pid = np.zeros([n])
         phase_spock_ok_pid = phase_spock[index_spock_same_date_as_obs_pid]
         localtime_spock_ok_pid = np.zeros([n])
@@ -660,6 +664,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             ecc_obs_orbit_average_interval_all_inter.append(ecc_obs_orbit_average_interval_sub)
             ecc_obs_orbit_mid_average_interval_all_inter.append(ecc_obs_orbit_mid_average_interval_sub)
             ecc_spock_ok_pid_all_inter.append(ecc_spock_ok_pid)
+            rho_spock_ok_pid_all_inter.append(rho_spock_ok_pid)
             phase_spock_ok_pid_all_inter.append(phase_spock_ok_pid) # 1st: nb inter; 2nd: for this interval, phase for run with optimum rho
             localtime_spock_ok_pid_all_inter.append(localtime_spock_ok_pid)
             latitude_spock_ok_pid_all_inter.append(latitude_spock_ok_pid)
@@ -858,6 +863,7 @@ latitude_spock_ok_pid_concatenate = []
 longitude_spock_ok_pid_concatenate = []
 phase_spock_ok_pid_concatenate = []
 ecc_spock_ok_pid_concatenate = []
+rho_spock_ok_pid_concatenate = []
 ecc_obs_same_spock_concatenate = []
 argper_average_mid_concantenate = []
 index_period_spock_concatenate = []
@@ -907,11 +913,12 @@ for iinter_loop in range(nb_interval):
     longitude_spock_ok_pid_concatenate = longitude_spock_ok_pid_concatenate + list(np.array(longitude_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     phase_spock_ok_pid_concatenate = phase_spock_ok_pid_concatenate + list(np.array(phase_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     ecc_spock_ok_pid_concatenate = ecc_spock_ok_pid_concatenate + list(np.array(ecc_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
+    rho_spock_ok_pid_concatenate = rho_spock_ok_pid_concatenate + list(np.array(rho_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     ecc_obs_same_spock_concatenate = ecc_obs_same_spock_concatenate + list(np.array(ecc_obs_same_spock_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
 
 
 nb_seconds_since_start_pid_concatenate_arr = np.array(nb_seconds_since_start_pid_concatenate)
-distance_lvlh_pid_concantenate_arr = np.array(distance_lvlh_pid_concantenate)
+distance_lvlh_pid_concantenate_arr = np.array(distance_lvlh_pid_concantenate) #######
 
 nb_seconds_since_start_pid_average_concatenate_arr = np.array(nb_seconds_since_start_pid_average_concatenate)
 distance_lvlh_pid_average_concantenate_arr = np.array(distance_lvlh_pid_average_concantenate)
@@ -930,7 +937,8 @@ latitude_spock_ok_pid_concatenate_arr = np.array(latitude_spock_ok_pid_concatena
 longitude_spock_ok_pid_concatenate_arr = np.array(longitude_spock_ok_pid_concatenate)
 phase_spock_ok_pid_concatenate_arr = np.array(phase_spock_ok_pid_concatenate)
 ecc_spock_ok_pid_concatenate_arr = np.array(ecc_spock_ok_pid_concatenate)
-ecc_obs_same_spock_concatenate_arr = np.array(ecc_obs_same_spock_concatenate)
+rho_spock_ok_pid_concatenate_arr = np.array(rho_spock_ok_pid_concatenate)
+ecc_obs_same_spock_concatenate_arr = np.array(ecc_obs_same_spock_concatenate) #########
 
 index_period_spock_concatenate_arr = np.array(index_period_spock_concatenate)
 
@@ -976,6 +984,7 @@ for iorbit in range(nb_orbit_conc):
     argper_orbit = argper_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     phase_orbit = phase_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     ecc_orbit = ecc_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
+    rho_orbit = rho_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     ecc_obs_orbit = ecc_obs_same_spock_concatenate_arr[iorbit_start:iorbit_stop]
     argper_ave_conc[iorbit] = np.mean(argper_orbit)
     ecc_ave_conc[iorbit] = np.mean(ecc_orbit)
