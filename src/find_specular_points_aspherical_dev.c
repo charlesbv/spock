@@ -37,8 +37,8 @@
 #define EARTH_RADIUS 6378.137 // equatorial raidus
 #define EARTH_FLATENNING 1/298.257223560
 #define EARTH_ECCENTRICITY 0.081819221456
-int debug_cbv = 1;// set this variable to 1 to print in the binary more variables than with debug_cbv = 0. It's different from the option iMin, it was added by cbv later (06-02-18)
-int reproduce_bug_onboard = 1;
+int debug_cbv = 0;// set this variable to 1 to print in the binary more variables than with debug_cbv = 0. It's different from the option iMin, it was added by cbv later (06-02-18)
+int reproduce_bug_onboard = 0;
 
 int iDebug;
 
