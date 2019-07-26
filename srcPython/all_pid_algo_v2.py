@@ -16,7 +16,7 @@ pickle_root_list = ['FM4_20180112_fine_mid']
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho_control' # raw, amplitude, rho_control
+toplot = 'rho' # raw, amplitude, rho_control, rho
 color_arr = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -98,7 +98,7 @@ for ipickle in range(nb_pickle):
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                      index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save]= pickle.load(open(pickle_root + ".pickle"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save, rho_ave_conc, rho_msis_ave_conc]= pickle.load(open(pickle_root + ".pickle"))
 
 
 
@@ -143,10 +143,15 @@ for ipickle in range(nb_pickle):
     elif toplot == 'rho_control':
         ax.plot(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
+    elif toplot == 'rho':
+        ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
+        ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
+
     if ipickle == 0:
         pickle_root_concatenate = pickle_root_list[ipickle]
     else:
         pickle_root_concatenate = pickle_root_concatenate + '_+_' +  pickle_root_list[ipickle]
+
 
     date_ref = date_start_save
     nb_ticks_xlabel = 10
@@ -177,7 +182,10 @@ if toplot == 'amplitude':
 if toplot == 'rho_control':
     fig_save_name = 'fig/all_rho_control_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'rho_control'
-    ax.set_ylim([-1, 1])   
+    ax.set_ylim([-1, 1])
+if toplot == 'rho':
+    fig_save_name = 'fig/all_rho_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    y_label = 'rho'    
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'Distance (m)'

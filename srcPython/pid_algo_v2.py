@@ -254,6 +254,7 @@ ecc_obs_orbit_mid_average_interval_all_inter = []
 ecc_obs_same_spock_all_inter = []
 ecc_spock_ok_pid_all_inter = []
 rho_spock_ok_pid_all_inter = []
+rho_msis_ok_pid_all_inter = []
 
 phase_spock_ok_pid_all_inter = []
 localtime_spock_ok_pid_all_inter = []
@@ -665,6 +666,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             ecc_obs_orbit_mid_average_interval_all_inter.append(ecc_obs_orbit_mid_average_interval_sub)
             ecc_spock_ok_pid_all_inter.append(ecc_spock_ok_pid)
             rho_spock_ok_pid_all_inter.append(rho_spock_ok_pid)
+            rho_msis_ok_pid_all_inter.append(rho_spock_ok_pid/(1+previous_rho_control))
             phase_spock_ok_pid_all_inter.append(phase_spock_ok_pid) # 1st: nb inter; 2nd: for this interval, phase for run with optimum rho
             localtime_spock_ok_pid_all_inter.append(localtime_spock_ok_pid)
             latitude_spock_ok_pid_all_inter.append(latitude_spock_ok_pid)
@@ -864,6 +866,7 @@ longitude_spock_ok_pid_concatenate = []
 phase_spock_ok_pid_concatenate = []
 ecc_spock_ok_pid_concatenate = []
 rho_spock_ok_pid_concatenate = []
+rho_msis_ok_pid_concatenate = []
 ecc_obs_same_spock_concatenate = []
 argper_average_mid_concantenate = []
 index_period_spock_concatenate = []
@@ -914,6 +917,7 @@ for iinter_loop in range(nb_interval):
     phase_spock_ok_pid_concatenate = phase_spock_ok_pid_concatenate + list(np.array(phase_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     ecc_spock_ok_pid_concatenate = ecc_spock_ok_pid_concatenate + list(np.array(ecc_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     rho_spock_ok_pid_concatenate = rho_spock_ok_pid_concatenate + list(np.array(rho_spock_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
+    rho_msis_ok_pid_concatenate = rho_msis_ok_pid_concatenate + list(np.array(rho_msis_ok_pid_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
     ecc_obs_same_spock_concatenate = ecc_obs_same_spock_concatenate + list(np.array(ecc_obs_same_spock_all_inter[iinter_loop])[:index_step_move_save[iinter_loop]+0])
 
 
@@ -938,6 +942,7 @@ longitude_spock_ok_pid_concatenate_arr = np.array(longitude_spock_ok_pid_concate
 phase_spock_ok_pid_concatenate_arr = np.array(phase_spock_ok_pid_concatenate)
 ecc_spock_ok_pid_concatenate_arr = np.array(ecc_spock_ok_pid_concatenate)
 rho_spock_ok_pid_concatenate_arr = np.array(rho_spock_ok_pid_concatenate)
+rho_msis_ok_pid_concatenate_arr = np.array(rho_msis_ok_pid_concatenate)
 ecc_obs_same_spock_concatenate_arr = np.array(ecc_obs_same_spock_concatenate) #########
 
 index_period_spock_concatenate_arr = np.array(index_period_spock_concatenate)
@@ -970,6 +975,8 @@ nb_seconds_ave_conc_arr = np.array(nb_seconds_ave_conc)
 nb_orbit_conc = len(nb_seconds_ave_conc_arr) -1
 argper_ave_conc = np.zeros([nb_orbit_conc])
 ecc_ave_conc = np.zeros([nb_orbit_conc])
+rho_ave_conc = np.zeros([nb_orbit_conc])
+rho_msis_ave_conc = np.zeros([nb_orbit_conc])
 ecc_obs_ave_conc = np.zeros([nb_orbit_conc])
 phase_argper = np.zeros([nb_orbit_conc])
 localtime_per = np.zeros([nb_orbit_conc])
@@ -985,9 +992,12 @@ for iorbit in range(nb_orbit_conc):
     phase_orbit = phase_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     ecc_orbit = ecc_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     rho_orbit = rho_spock_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
+    rho_msis_orbit = rho_msis_ok_pid_concatenate_arr[iorbit_start:iorbit_stop]
     ecc_obs_orbit = ecc_obs_same_spock_concatenate_arr[iorbit_start:iorbit_stop]
     argper_ave_conc[iorbit] = np.mean(argper_orbit)
     ecc_ave_conc[iorbit] = np.mean(ecc_orbit)
+    rho_ave_conc[iorbit] = np.mean(rho_orbit)
+    rho_msis_ave_conc[iorbit] = np.mean(rho_msis_orbit)
     ecc_obs_ave_conc[iorbit] = np.mean(ecc_obs_orbit)
     dphase = np.abs(phase_orbit[1] - phase_orbit[0]) # get an estimate of variation of phase between two time steps
     nhere = len(phase_orbit)
@@ -1035,7 +1045,7 @@ pickle.dump([duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_
                  distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
                  ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
                  index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
-                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save], open(pickle_root + ".pickle", "w"))
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save, rho_ave_conc, rho_msis_ave_conc], open(pickle_root + ".pickle", "w"))
 
 
 raise Exception

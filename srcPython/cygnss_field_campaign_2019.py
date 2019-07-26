@@ -29,8 +29,8 @@
 # - date_range is a list. Each element corresponds to a range of time (so each element of date_range is a list of two elements: start and end date of range). Each date must be a time HH:MM:SS. Example: date_range = [["10:00:00", "14:00:00"], ["22:00:00", "02:00:00"]]
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-date_start = "2019-08-18T00:00:00" # !!!!!!! UTC
-date_end = "2019-08-24T23:59:59" # !!!!!!! UTC
+date_start = "2019-08-25T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
+date_end = "2019-09-08T23:59:59" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
 
 date_range = [["00:00:00", "23:59:59"]] # !!!!!!! UTC
 min_lat_range = 36.75
@@ -71,7 +71,7 @@ end_date_str =  date_end
 start_date = datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S")
 end_date = datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S")
 
-os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
+#os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
 #ipdb.set_trace()
 ## Read specular point locations
 ### Read SpOCK main input file to figure out stuff to then read the output
@@ -90,7 +90,9 @@ label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
 lon_spec = []; lat_spec = []; gain_spec = []; gps_spec = []; date_spec = []
 filename_spec_spock = []
 nb_time_this_sc = []
+print "Reading the SP positions..."
 for isc in range(nb_sc):
+    print isc, nb_sc-1
     which_sc = isc
     cyg = format(isc + 1, "02")
     filename_spec_spock.append( spock_dir + "/" + output_file_path_list[which_sc] + "specular_" + output_file_name_list[which_sc].replace(".txt",".bin") )
@@ -104,7 +106,7 @@ for isc in range(nb_sc):
     gps_spec.append(gps_spec_this_sc)
     date_spec.append(date_spec_this_sc) # should be the same for all sc
     nb_time_this_sc.append(len(date_spec_this_sc))
-
+print "Done reading the SP positions"
 # From the position files created by SpOCK, create new specular point location files with only the times when specular points are between a certain range of dates (set by date_range) and a certain range of latitudes [min_lat_range, max_lat_range]
 nb_date_range = len(date_range)
 ## Make an array of ranges of dates
@@ -143,32 +145,34 @@ label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
 lon_save = []
 nb_visit_per_cell = np.zeros([ncell_lon, ncell_lat])
 for itime in range(nb_time):
+    if np.mod(itime, nb_time/10) == 0:
+        print itime, nb_time - 1
     at_leat_one_spec_this_time = 0
     line_out = datetime.strftime(date_spec[0][itime], "%Y-%m-%dT%H:%M:%S") + " "
     for isc in range(nb_sc):
         date_current = date_spec[isc][itime]
-        for irange in range(nb_date_range): 
-            if ( ( date_current >= range_start_this_day[irange] ) & ( date_current <= range_end_this_day[irange] ) ): # current date is in range of dates
-                #print date_current
-                nb_spec = len(lat_spec[isc][itime])
-                already_put_sc_name = 0
-                for ispec in range(nb_spec):
-                    if ( ( lat_spec[isc][itime][ispec] >= min_lat_range ) & ( lat_spec[isc][itime][ispec] <= max_lat_range ) & ( lon_spec[isc][itime][ispec] >= min_lon_range ) & ( lon_spec[isc][itime][ispec] <= max_lon_range ) ): # spec location in range of latitudes and longitudes
-                        # Two lines below to uncomment if you want to show which CYGNSS the spec correspond to
-                        if already_put_sc_name != 1: 
-                            line_out = line_out + label_arr[isc] + " "
-                        lon_to_print = lon_spec[isc][itime][ispec]
-                        if lon_to_print > 180:
-                            lon_to_print = lon_to_print - 360
-                        #line_out = line_out + "[" + "{0:.2f}".format(lon_to_print) + ", " + "{0:.2f}".format(lat_spec[isc][itime][ispec])  + "] "
-                        line_out = line_out + "{0:.2f}".format(lon_to_print) + " " + "{0:.2f}".format(lat_spec[isc][itime][ispec])  + " " + format(gain_spec[isc][itime][ispec], ".0f") + " "# + ' PRN' + str(gps_spec[isc][itime][ispec])
-                        already_put_sc_name = 1
-                        at_leat_one_spec_this_time = 1
+        # for irange in range(nb_date_range): 
+        #     if ( ( date_current >= range_start_this_day[irange] ) & ( date_current <= range_end_this_day[irange] ) ): # current date is in range of dates
+        #print date_current
+        nb_spec = len(lat_spec[isc][itime])
+        already_put_sc_name = 0
+        for ispec in range(nb_spec):
+            if ( ( lat_spec[isc][itime][ispec] >= min_lat_range ) & ( lat_spec[isc][itime][ispec] <= max_lat_range ) & ( lon_spec[isc][itime][ispec] >= min_lon_range ) & ( lon_spec[isc][itime][ispec] <= max_lon_range ) ): # spec location in range of latitudes and longitudes
+                # Two lines below to uncomment if you want to show which CYGNSS the spec correspond to
+                if already_put_sc_name != 1: 
+                    line_out = line_out + label_arr[isc] + " "
+                lon_to_print = lon_spec[isc][itime][ispec]
+                if lon_to_print > 180:
+                    lon_to_print = lon_to_print - 360
+                #line_out = line_out + "[" + "{0:.2f}".format(lon_to_print) + ", " + "{0:.2f}".format(lat_spec[isc][itime][ispec])  + "] "
+                line_out = line_out + "{0:.2f}".format(lon_to_print) + " " + "{0:.2f}".format(lat_spec[isc][itime][ispec])  + " " + format(gain_spec[isc][itime][ispec], ".0f") + " "# + ' PRN' + str(gps_spec[isc][itime][ispec])
+                already_put_sc_name = 1
+                at_leat_one_spec_this_time = 1
 
-                        # determine which cell the sp is in
-                        icell_lat =  (int)((lat_spec[isc][itime][ispec] - min_lat_range) / dcell_lat)
-                        icell_lon =  (int)((lon_spec[isc][itime][ispec] - min_lon_range) / dcell_lon)
-                        nb_visit_per_cell[icell_lon, icell_lat] = nb_visit_per_cell[icell_lon, icell_lat] + 1
+                # determine which cell the sp is in
+                icell_lat =  (int)((lat_spec[isc][itime][ispec] - min_lat_range) / dcell_lat)
+                icell_lon =  (int)((lon_spec[isc][itime][ispec] - min_lon_range) / dcell_lon)
+                nb_visit_per_cell[icell_lon, icell_lat] = nb_visit_per_cell[icell_lon, icell_lat] + 1
     if at_leat_one_spec_this_time == 1:
         print >> file_out, line_out
 
@@ -183,8 +187,8 @@ ratio_fig_size = 4./3
 color_arr = ['b', 'r','cornflowerblue','g', 'm', 'gold', 'cyan', 'fuchsia', 'lawngreen', 'darkgray', 'green', 'chocolate']
 
 fig_title = ''
-y_label = 'Theta '  + u'(\N{DEGREE SIGN})'
-x_label = 'Phi '  + u'(\N{DEGREE SIGN})'
+y_label = 'Latitude '  + u'(\N{DEGREE SIGN})'
+x_label = 'Longitude '  + u'(\N{DEGREE SIGN})'
 
 
 # rectangular coordinates: x-axis azimuth, y-axis elevation
@@ -196,7 +200,7 @@ gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
 
 ax = fig.add_subplot(gs[0, 0])
 
-#ax.set_title(filename_gain_list[ifile].split('/')[-1], weight = 'bold', fontsize  = fontsize_plot)
+ax.set_title(date_start + ' to ' + date_end, weight = 'bold', fontsize  = fontsize_plot)
 ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
 ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
 
@@ -222,6 +226,6 @@ Z = np.ma.array(Z)
 CS1 = ax.imshow(Z, extent=[min_lon_range, max_lon_range, min_lat_range, max_lat_range], cmap = 'jet', aspect = 'auto')#,
 #                vmin = 0, vmax = max_gain, origin='upper')
 cbar = plt.colorbar(CS1, ax = ax)
-cbar.ax.set_ylabel('RCG', fontsize = fontsize_plot, weight = 'bold')
-fig_save_name = 'test3.pdf'
+cbar.ax.set_ylabel('# visits', fontsize = fontsize_plot, weight = 'bold')
+fig_save_name = filename_out.replace('txt', 'pdf')
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
