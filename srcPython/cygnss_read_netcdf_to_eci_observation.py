@@ -348,11 +348,12 @@ def cygnss_read_netcdf_to_eci_observation(filename_list):
                 date_flight_rounded_date.append(date_flight_date_rounded)
                 print >> file_eci, date_flight_rounded[-1], r_eci_temp[0], r_eci_temp[1], r_eci_temp[2], v_eci_temp[0], v_eci_temp[1], v_eci_temp[2]
     file_eci.close()
+    ipdb.set_trace(); plt.ion(); fig, ax = plt.subplots(); ax.plot(np.abs(pitch_cyg_temp) * 180. / np.pi); fig, ax = plt.subplots(); ax.plot(np.abs(roll_cyg_temp) * 180. / np.pi); fig, ax = plt.subplots(); ax.plot(np.abs(yaw_cyg_temp) * 180. / np.pi);plt.show(); plt.show()
     return date_flight_rounded, lon_cyg, lat_cyg, lon_spec, lat_spec, fom, gps,\
         x_cyg, y_cyg, z_cyg, vx_cyg, vy_cyg, vz_cyg,date_flight_rounded_date,\
         r_eci_cyg, v_eci_cyg, sma, eccentricity, inclination, long_an, w, \
         f, period, phase_angle
 
-# fig, ax = plt.subplots(); ax.plot(np.abs(pitch_cyg_temp) * 180. / np.pi)
+# 
 # fig, ax = plt.subplots(); ax.plot(np.abs(roll_cyg_temp) * 180. / np.pi)
 # fig, ax = plt.subplots(); ax.plot(np.abs(yaw_cyg_temp) * 180. / np.pi)
