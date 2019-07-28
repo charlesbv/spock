@@ -1,7 +1,18 @@
 import sys
 sys.path.append("/Users/cbv/work/spock/srcPython")
 from cygnss_read_netcdf_to_eci_observation import *
-filename_list = ['244/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.nc']
+filename_list = ['244/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.nc',
+                 '245/cyg08.ddmi.s20170902-000000-e20170902-235959.l1.power-brcs.a21.d21.nc',
+                 '246/cyg08.ddmi.s20170903-000000-e20170903-235959.l1.power-brcs.a21.d21.nc',
+                 '247/cyg08.ddmi.s20170904-000000-e20170904-235959.l1.power-brcs.a21.d21.nc',
+                 '248/cyg08.ddmi.s20170905-000000-e20170905-235959.l1.power-brcs.a21.d21.nc',
+                 '249/cyg08.ddmi.s20170906-000000-e20170906-235959.l1.power-brcs.a21.d21.nc',
+                 '250/cyg08.ddmi.s20170907-000000-e20170907-235959.l1.power-brcs.a21.d21.nc',
+                 '251/cyg08.ddmi.s20170908-000000-e20170908-235959.l1.power-brcs.a21.d21.nc',
+                 '252/cyg08.ddmi.s20170909-000000-e20170909-235959.l1.power-brcs.a21.d21.nc',
+                 '253/cyg08.ddmi.s20170910-000000-e20170910-235959.l1.power-brcs.a21.d21.nc',
+                 '254/cyg08.ddmi.s20170911-000000-e20170911-235959.l1.power-brcs.a21.d21.nc'
+]
 
 
 # ['229/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.nc',

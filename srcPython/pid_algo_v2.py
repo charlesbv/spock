@@ -15,13 +15,13 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
-nadir = 0
+nadir = 1
 plot_var = 'ecc' # dist, ecc, argper
 rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the ighhes tlatitude of the orbit)
 isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
-no_prop = 1 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
+no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
 interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho_coarse = 0.1 # the rho control will vary by this amount to find the optimum rho_coarse over an interval
@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM4_20180112_fine'
+prefix_name = 'FM8_20170901'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -93,8 +93,10 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_pvt_query-13841_start20180113T170000_end20180126T170000.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 
+# FM08 20170901 nadir
+# nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21_10h.txt                             
 # FM01 20170817 nadir:
 # nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt
 # FM03 20180113 nadir:
