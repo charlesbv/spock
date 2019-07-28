@@ -29,8 +29,8 @@
 # - date_range is a list. Each element corresponds to a range of time (so each element of date_range is a list of two elements: start and end date of range). Each date must be a time HH:MM:SS. Example: date_range = [["10:00:00", "14:00:00"], ["22:00:00", "02:00:00"]]
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-date_start = "2019-07-25T11:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
-date_end = "2019-07-25T12:00:00" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
+date_start = "2019-08-18T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
+date_end = "2019-08-24T23:59:59" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
 
 date_range = [["00:00:00", "23:59:59"]] # !!!!!!! UTC
 min_lat_range = 36.75
@@ -54,6 +54,11 @@ import matplotlib.gridspec as gridspec
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
+
+min_lat_range = np.float(min_lat_range)
+max_lat_range = np.float(max_lat_range)
+min_lon_range = np.float(min_lon_range)
+max_lon_range = np.float(max_lon_range)
 
 if max_lon_range < 0:
     max_lon_range = max_lon_range + 360
@@ -159,8 +164,8 @@ for itime in range(nb_time):
         for ispec in range(nb_spec):
             if ( ( lat_spec[isc][itime][ispec] >= min_lat_range ) & ( lat_spec[isc][itime][ispec] <= max_lat_range ) & ( lon_spec[isc][itime][ispec] >= min_lon_range ) & ( lon_spec[isc][itime][ispec] <= max_lon_range ) ): # spec location in range of latitudes and longitudes
                 # Two lines below to uncomment if you want to show which CYGNSS the spec correspond to
-                if already_put_sc_name != 1: 
-                    line_out = line_out + label_arr[isc] + " "
+                # if already_put_sc_name != 1: 
+                #     line_out = line_out + label_arr[isc] + " "
                 lon_to_print = lon_spec[isc][itime][ispec]
                 if lon_to_print > 180:
                     lon_to_print = lon_to_print - 360
