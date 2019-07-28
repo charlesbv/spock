@@ -75,7 +75,7 @@ os.system('tar -zcvf ' + filename_out + ' ' +  output_dir_no_path)
 
 os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "me5 CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" cbv@umich.edu')
 
-#os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
+os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
 
 #os.system('scp -p /Users/cbv/cygnss/camp2ex/' + filename_out.replace(".txt", ".tgz") + ' cygnss-sftp-1.engin.umich.edu:/data/temp/piston')
 

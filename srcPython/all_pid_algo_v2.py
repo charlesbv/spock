@@ -144,9 +144,12 @@ for ipickle in range(nb_pickle):
         ax.plot(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
     elif toplot == 'rho':
-        ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
-        ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
+        ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'red', label = 'MSIS')
+        ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'red')
+        ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = 'blue', label = 'Corrected')
+        ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = 'blue')
 
+        
     if ipickle == 0:
         pickle_root_concatenate = pickle_root_list[ipickle]
     else:
@@ -185,7 +188,7 @@ if toplot == 'rho_control':
     ax.set_ylim([-1, 1])
 if toplot == 'rho':
     fig_save_name = 'fig/all_rho_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
-    y_label = 'rho'    
+    y_label = 'Density (kg/m$^3$)'    
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'Distance (m)'
