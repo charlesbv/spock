@@ -23,8 +23,8 @@
 import os
 from datetime import datetime, timedelta
 
-date_start = '2017-09-01' #'2018-10-26'
-date_stop = '2017-09-10'#'2018-10-29'
+date_start = '2019-07-01' #'2018-10-26'
+date_stop = '2019-09-10'#'2018-10-29'
 podaac_path = "https://podaac-tools.jpl.nasa.gov/drive/files/allData/cygnss/L1/v2.1/"#!!!!!! before 072919 used to be "ftp://podaac.jpl.nasa.gov/allData/cygnss/L1/v2.1/" but then podaac stopped the ftp option
 save_dir = '/Users/cbv/cygnss/netcdfPodaac/'#'/Volumes/Seagate_Expansion_Drive/netcdf/' 
 
