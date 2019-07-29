@@ -1,7 +1,7 @@
 import sys
 sys.path.append("/Users/cbv/work/spock/srcPython")
 from cygnss_read_netcdf_to_eci_observation import *
-<<<<<<< HEAD
+
 filename_list = ['244/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.nc',
                  '245/cyg08.ddmi.s20170902-000000-e20170902-235959.l1.power-brcs.a21.d21.nc',
                  '246/cyg08.ddmi.s20170903-000000-e20170903-235959.l1.power-brcs.a21.d21.nc',
@@ -14,10 +14,7 @@ filename_list = ['244/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs
                  '253/cyg08.ddmi.s20170910-000000-e20170910-235959.l1.power-brcs.a21.d21.nc',
                  '254/cyg08.ddmi.s20170911-000000-e20170911-235959.l1.power-brcs.a21.d21.nc'
 ]
-=======
-import ipdb
-filename_list = ['244/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.nc']
->>>>>>> b85f21d3ac71e35cdfaf355470dee7eaea97494e
+
 
 
 # ['229/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.nc',
