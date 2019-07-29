@@ -2,8 +2,8 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM4_20180112_fine_mid']
-#['FM4_20180112_mid']
+pickle_root_list = ['FM8_20170901_mid']
+#['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
 #["fm01_20170817_mid"] 
 # ["fm4_mid", "test_mid", "2018jan12_mid", "nadir"]
 #["rv0_error16m_mid", "test_mid"]
