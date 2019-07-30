@@ -37,7 +37,7 @@ from matplotlib.ticker import FixedLocator
 from datetime import datetime, timedelta
 from mpl_toolkits.basemap import Basemap, shiftgrid
 
-filename = '20190803T000000_to_20190817T235959.txt'#'20190818T000000_to_20190824T235959.txt'#'20190803T000000_to_20190817T235959.txt' #'20190818T000000_to_20190824T235959.txt'
+filename = '20190818T000000_to_20190824T235959.txt'#'20190825T000000_to_20190908T235959.txt'#'20190818T000000_to_20190824T235959.txt'#'20190803T000000_to_20190817T235959.txt' #'20190818T000000_to_20190824T235959.txt'
 
 
 min_lat_range = 36.75
@@ -231,79 +231,79 @@ for iii in np.arange(0,n,1):#np.arange(index_n_first_hours[0], index_n_first_hou
             icell_lat = ncell_lat - 1
 
         nb_visit_per_cell_dynamic[icell_lon, icell_lat] = nb_visit_per_cell_dynamic[icell_lon, icell_lat] + 1
-    if iii > 1731:    
-        #print date[iii]
-        fig_title = ''#Probability per $P_C$ bin'
-        fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
-        fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
-        plt.rc('font', weight='normal') ## make the labels of the ticks in normal
-        gs = gridspec.GridSpec(1, 2)
-        gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
 
-        ax = fig.add_subplot(gs[0, 0])
+    #print date[iii]
+    fig_title = ''#Probability per $P_C$ bin'
+    fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
+    fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+    plt.rc('font', weight='normal') ## make the labels of the ticks in normal
+    gs = gridspec.GridSpec(1, 2)
+    gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
 
-
-        ax.xaxis.set_major_locator(FixedLocator(np.arange(min_lon_range, max_lon_range+1, dcell_lon)))
-        ax.yaxis.set_major_locator(FixedLocator(np.arange(min_lat_range, max_lat_range+1, dcell_lat)))
-
-        ax.set_xticklabels(array_lon, color = 'k', fontsize = fontsize_plot, rotation = 'vertical')
-        ax.set_yticklabels(array_lat, color = 'k', fontsize = fontsize_plot)
+    ax = fig.add_subplot(gs[0, 0])
 
 
+    ax.xaxis.set_major_locator(FixedLocator(np.arange(min_lon_range, max_lon_range+1, dcell_lon)))
+    ax.yaxis.set_major_locator(FixedLocator(np.arange(min_lat_range, max_lat_range+1, dcell_lat)))
 
-        plotMap = Basemap( projection       = 'cyl',
-                                llcrnrlon        = min_lon_range,#-180,#min_lon , #Lower Left  CoRNeR Longitude
-                                urcrnrlon        = max_lon_range  ,#180,#max_lon  , #Upper Right CoRNeR Longitude
-                                llcrnrlat        = min_lat_range,#-40,#,min_lat  , #Lower Left  CoRNeR Latitude
-                                urcrnrlat        = max_lat_range,#40,#max_lat,   #Upper Right CoRNeR Latitude
-                 resolution       = 'l'  ,
-                 suppress_ticks   = False,
-                 ax = ax,
-                 )
+    ax.set_xticklabels(array_lon, color = 'k', fontsize = fontsize_plot, rotation = 'vertical')
+    ax.set_yticklabels(array_lat, color = 'k', fontsize = fontsize_plot)
 
-        alpha = 0#0.5
-        color_continents = [65,105,225,alpha*256]
-        color_continents = np.array(color_continents) / 256.
-        color_water  = [100,149,237,alpha*256]
-        color_water = np.array(color_water) / 256.
 
-        plotMap.fillcontinents(color=tuple(color_continents),lake_color=tuple(color_water))
-        plotMap.drawmapboundary(fill_color=tuple(color_water))
 
-        meridians = plotMap.drawmeridians(np.arange(min_lon_range, max_lon_range,dcell_lon))
-        parallels = plotMap.drawparallels(np.arange(min_lat_range, max_lat_range,dcell_lat))
+    plotMap = Basemap( projection       = 'cyl',
+                            llcrnrlon        = min_lon_range,#-180,#min_lon , #Lower Left  CoRNeR Longitude
+                            urcrnrlon        = max_lon_range  ,#180,#max_lon  , #Upper Right CoRNeR Longitude
+                            llcrnrlat        = min_lat_range,#-40,#,min_lat  , #Lower Left  CoRNeR Latitude
+                            urcrnrlat        = max_lat_range,#40,#max_lat,   #Upper Right CoRNeR Latitude
+             resolution       = 'l'  ,
+             suppress_ticks   = False,
+             ax = ax,
+             )
 
-        #mapRef = plotMap.drawcoastlines(linewidth=0.7, color='darkblue')
+    alpha = 0#0.5
+    color_continents = [65,105,225,alpha*256]
+    color_continents = np.array(color_continents) / 256.
+    color_water  = [100,149,237,alpha*256]
+    color_water = np.array(color_water) / 256.
 
-        y_label = 'Latitude '+ u'(\N{DEGREE SIGN})'
-        x_label = 'Longitude '+ u'(\N{DEGREE SIGN})'        
-        ax_title = str(date[iii]) + ' UTC'
-        ax.set_title(ax_title, weight = 'normal', fontsize  = (int)(fontsize_plot*1.1), y = 1.001)
-        ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
-        ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+    plotMap.fillcontinents(color=tuple(color_continents),lake_color=tuple(color_water))
+    plotMap.drawmapboundary(fill_color=tuple(color_water))
 
-        [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
-        ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-        plt.rc('font', weight='normal') ## make the labels of the ticks in normal   
+    meridians = plotMap.drawmeridians(np.arange(min_lon_range, max_lon_range,dcell_lon))
+    parallels = plotMap.drawparallels(np.arange(min_lat_range, max_lat_range,dcell_lat))
 
-        nb_spec_now = len(lon[iii])
-        for ispec in range(nb_spec_now):
-            x, y =  plotMap(lon[iii][ispec], lat[iii][ispec])
-            #print lon[iii][ispec], lat[iii][ispec]
-            point_plot = plotMap.scatter(x, y,  color = 'white', s = 70, zorder = 5, edgecolor = 'black', linewidth = 2)
+    #mapRef = plotMap.drawcoastlines(linewidth=0.7, color='darkblue')
 
-        fig_save_name = 'ani/' + filename.split('/')[-1].replace(".txt", '_lon_lat_' + str(icount) + '.png')
-        fig.set_figheight(height_fig)
-        fig.set_figwidth(width_fig)
+    y_label = 'Latitude '+ u'(\N{DEGREE SIGN})'
+    x_label = 'Longitude '+ u'(\N{DEGREE SIGN})'        
+    ax_title = str(date[iii]) + ' UTC'
+    ax.set_title(ax_title, weight = 'normal', fontsize  = (int)(fontsize_plot*1.1), y = 1.001)
+    ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+    ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
-        # add the grid filled
-        for ilat in range(ncell_lat):
-            Z[ilat, :] =  nb_visit_per_cell_dynamic[:,ncell_lat-1-ilat]
-        Z = np.ma.array(Z)
-        CS1 = ax.imshow(Z, extent=[min_lon_range, max_lon_range, min_lat_range, max_lat_range], cmap = 'jet', aspect = 'auto',
-                        vmin = 0, vmax = np.max(nb_visit_per_cell), origin='upper')
-        cbar = plt.colorbar(CS1, ax = ax)
-        cbar.ax.set_ylabel('# visits', fontsize = fontsize_plot, weight = 'bold')
-        fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+    [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+    ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+    plt.rc('font', weight='normal') ## make the labels of the ticks in normal   
+
+    nb_spec_now = len(lon[iii])
+    for ispec in range(nb_spec_now):
+        x, y =  plotMap(lon[iii][ispec], lat[iii][ispec])
+        #print lon[iii][ispec], lat[iii][ispec]
+        point_plot = plotMap.scatter(x, y,  color = 'white', s = 70, zorder = 5, edgecolor = 'black', linewidth = 2)
+
+    fig_save_name = 'ani/' + filename.split('/')[-1].replace(".txt", '_lon_lat_' + str(icount) + '.png')
+    fig.set_figheight(height_fig)
+    fig.set_figwidth(width_fig)
+
+    # add the grid filled
+    for ilat in range(ncell_lat):
+        Z[ilat, :] =  nb_visit_per_cell_dynamic[:,ncell_lat-1-ilat]
+    Z = np.ma.array(Z)
+    CS1 = ax.imshow(Z, extent=[min_lon_range, max_lon_range, min_lat_range, max_lat_range], cmap = 'jet', aspect = 'auto',
+                    vmin = 0, vmax = np.max(nb_visit_per_cell), origin='upper')
+    cbar = plt.colorbar(CS1, ax = ax)
+    cbar.ax.set_ylabel('# visits', fontsize = fontsize_plot, weight = 'bold')
+    fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
     
 os.system('ffmpeg -y -r 10 -i ani/' + filename.split('/')[-1].replace(".txt", '_lon_lat_%d.png') + ' -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ani/' +  filename.split('/')[-1].replace(".txt", '_lon_lat.mp4'))
