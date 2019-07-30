@@ -62,10 +62,10 @@ from numpy import unravel_index
 plt.ion()
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-cygfm = 2 #1 # which CYGNSS to look at. 2 if spe 25--27, 3 if oct31
+cygfm = 1 #1 # which CYGNSS to look at. 2 if spe 25--27, 3 if oct31
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
-date_start_val_start = '2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
-spock_input_filename = 'newlong_62degfilter.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is.
+date_start_val_start = '2019-07-24T00:00:00'#'2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
+spock_input_filename = 'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_debug.txt' #'newlong_62degfilter.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is.
 #'newlong.txt'
 
 # oct31 with spec_asph_debug: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg)
@@ -202,6 +202,9 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
             yy = '2018/'
         elif  datetime.strptime( date_stop_val, "%Y-%m-%dT%H:%M:%S" ).strftime('%Y') == '2017':
             yy = '2017/'
+        elif  datetime.strptime( date_stop_val, "%Y-%m-%dT%H:%M:%S" ).strftime('%Y') == '2019':
+            yy = '2019/'
+
         else:
             yy = ''
         if islin == 1:

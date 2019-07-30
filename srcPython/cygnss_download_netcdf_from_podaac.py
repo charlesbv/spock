@@ -23,8 +23,8 @@
 import os
 from datetime import datetime, timedelta
 
-date_start = '2019-07-01' #'2018-10-26'
-date_stop = '2019-09-10'#'2018-10-29'
+date_start = '2019-07-25' #'2018-10-26'
+date_stop = '2019-07-25'#'2018-10-29'
 podaac_path = "https://podaac-tools.jpl.nasa.gov/drive/files/allData/cygnss/L1/v2.1/"#!!!!!! before 072919 used to be "ftp://podaac.jpl.nasa.gov/allData/cygnss/L1/v2.1/" but then podaac stopped the ftp option
 save_dir = '/Users/cbv/cygnss/netcdfPodaac/'#'/Volumes/Seagate_Expansion_Drive/netcdf/' 
 
@@ -45,7 +45,7 @@ while date_here <= date_stop_date:
     if (os.path.isdir(save_dir + yy + '/' + str(doy).zfill(3)) == False):
         os.system("mkdir " + save_dir + yy + '/' + str(doy).zfill(3))
     icygfm = -1
-    for cygfm in range(7, 8):
+    for cygfm in range(0, 8):
         icygfm = icygfm + 1
         if icygfm == 0:
             name_netcdf_podaac = []
@@ -54,8 +54,9 @@ while date_here <= date_stop_date:
             list_cyg = []
             filename_list =  save_dir + yy + '/'  + str(doy).zfill(3) +\
             '/index.html'
-            os.system("wget " + podaac_path +
-                      yy + '/'  + str(doy).zfill(3) + "/ -O " + filename_list)
+            os.system("wget --user=charlesbv --password=OfTUKtBGYkZLdIeC2@m " + podaac_path +yy + '/'  + str(doy).zfill(3) + "/ -O " + filename_list)
+            #os.system("wget " + podaac_path +
+                      #yy + '/'  + str(doy).zfill(3) + "/ -O " + filename_list)
             file_list = open(filename_list)
             r_file_list = file_list.readlines()
             n = len(r_file_list)
@@ -73,6 +74,6 @@ while date_here <= date_stop_date:
             index_list = list_cyg.index(str(cygfm))
             # print "wget " + name_netcdf_podaac[index_list] +\
             #     " -O " + name_netcdf_local[index_list] 
-            os.system( "wget " + name_netcdf_podaac[index_list] + \
+            os.system( "wget --user=charlesbv --password=OfTUKtBGYkZLdIeC2@m https://podaac-tools.jpl.nasa.gov/" + name_netcdf_podaac[index_list] + \
                 " -O " + name_netcdf_local[index_list] )
     date_here = date_here + timedelta(days = 1)
