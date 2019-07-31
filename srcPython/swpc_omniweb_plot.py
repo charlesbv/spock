@@ -1,13 +1,21 @@
-# This script plots a variable (var) from SWPC or Omniweb  between date_start and date_stop
+# This script plots a variable (var) from SWPC or Omniweb or user's own file between date_start and date_stop
 # Assumptions:
 # - see section PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-
+# - the user's own filename must have the following format (example):
+#BEGINNINGOFHEADER
+#ENDOFHEADER
+#YEAR DOY HR  1
+#2017 239  0   9
+#2017 239  1   9
+#ENDOFFILE
+#  -> this format matches the one used in SpOCK whwen inputing our own f107 or ap files
+# - If the users input their own file then this file must contain only one varilable (f107 or ap). Explicitely tell this script which variable it is by setting the varilable var_name to ['f107'] or ['ap']
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-source = 'omniweb' # omniweb, swpc
+source = '20170827_to_20170910_omniweb_ap_no_storm.txt' # omniweb, swpc, [filename]
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-09T00:00:00' # YYYY-mm-ddTHH:MM:SS
-var_name = ['f107', 'ap'] # list: f107, ap, dst
+var_name = ['f107'] # list: f107, ap, dst
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_h, fig_save_name_h):
@@ -25,7 +33,7 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
     ax.plot(nb_seconds_since_start_h, var_h, linewidth = 2, color = 'k')
     ax.margins(0,0)
-    ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
+    ax.set_ylim([0, 252])#[np.min(var_h)*0.9, np.max(var_h)*1.1])
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 from datetime import datetime, timedelta
@@ -49,19 +57,26 @@ height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25
 ratio_fig_size = 4./3
 
-if source == 'omniweb':
+if ((source != 'omniweb') & (source != 'swpc')):
+    source_ok = 'user_file'
+else:
+    source_ok = source
+
+if ((source_ok == 'omniweb') | (source_ok == 'user_file')):
     var_omni = []
     for ivar in range(nvar):
-        # Download file
         if var_name[ivar] == 'f107':
             var_omni = '50'
             var_name_plot = 'F10.7'
         elif var_name[ivar] == 'ap':
             var_omni = '49'
             var_name_plot = 'Ap'
-        filename_out = date_start_omni + '_to_' + date_stop_omni + '_' + source + '_' + var_name[ivar] + '.txt'
-        os.system( 'wget --no-check-certificate --post-data "activity=retrieve&res=hour&spacecraft=omni2&start_date=' + date_start_omni + '&end_date=' + date_stop_omni + '&vars=' + var_omni + '&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=" https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ' + filename_out )
-
+        # Download file
+        if source == 'omniweb':
+            filename_out = date_start_omni + '_to_' + date_stop_omni + '_' + source + '_' + var_name[ivar] + '.txt'
+            os.system( 'wget --no-check-certificate --post-data "activity=retrieve&res=hour&spacecraft=omni2&start_date=' + date_start_omni + '&end_date=' + date_stop_omni + '&vars=' + var_omni + '&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=" https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ' + filename_out )
+        else:
+            filename_out = source
         # Read file
         file_out = open(filename_out)
         read_file_out = file_out.readlines()
@@ -91,12 +106,13 @@ if source == 'omniweb':
         date_date = np.array(date_date)
         var = np.array(var)
         nb_seconds_since_start = np.array(nb_seconds_since_start)
-        
-        # Plot
-        istart = np.where(date_date == date_start_date)[0][0]
-        istop = np.where(date_date == date_stop_date)[0][0]
-        
-            
-        fig_title = var_name_plot + ' as a function of time'
-        fig_save_name = filename_out.replace('.txt', '.pdf')
-        plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
+
+
+# Plot
+istart = np.where(date_date == date_start_date)[0][0]
+istop = np.where(date_date == date_stop_date)[0][0]
+
+
+fig_title = var_name_plot + ' as a function of time'
+fig_save_name = filename_out.replace('.txt', '.pdf')
+plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
