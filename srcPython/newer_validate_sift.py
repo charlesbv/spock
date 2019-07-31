@@ -407,6 +407,7 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                 date_flight_temp_date = time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6))
 
                 date_flight_temp = datetime.strftime(date_flight_temp_date, "%Y-%m-%dT%H:%M:%S.%f" )
+                #print date_flight_temp
                 # round to neared second but only if the actual time is less than 100 ms from the nearest second, otherwise ignore this time (don't compare to SpOCK)
                 # .This is because SpOCK propagates with 1 s time step. So to compare to the netcdf file, we assume that the netcdf is also exactly at each second (so no millisecond). 
                 #100 ms wrong is not too bad because the satellite movesby less than 1 km.
@@ -423,27 +424,29 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     #print np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ), date_flight_date_rounded, date_flight_temp_date
                 #dt_spock_output = 1.; date_spock_not_interpolated = date_spock # !!!!!!!!!!!!!!!! remove line
                 date_flight_raw_every_second.append(date_flight_temp)
-                while ( np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ) != 0 ):
-                    itime = itime + 1
-                    date_flight_temp_date = time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6))
-                    date_flight_temp = datetime.strftime(date_flight_temp_date, "%Y-%m-%dT%H:%M:%S.%f" )
-                    date_flight_raw_every_second.append(date_flight_temp)
-                    # round to neared second but only if the actual time is less than 100 ms from the nearest second, otherwise ignore this time (don't compare to SpOCK)
-                    # .This is because SpOCK propagates with 1 s time step. So to compare to the netcdf file, we assume that the netcdf is also exactly at each second (so no millisecond). 
-                    #100 ms wrong is not too bad because the satellite movesby less than 1 km.
-                    if ( date_flight_temp.split('.')[1][0] == '9' ): # round to next second
-                        date_flight_temp_date = datetime.strptime(date_flight_temp, "%Y-%m-%dT%H:%M:%S.%f")
-                        date_flight_date = date_flight_temp_date + timedelta(seconds = 1)
-                        date_flight_date_rounded_temp = datetime.strftime(date_flight_date, "%Y-%m-%dT%H:%M:%S.%f").split('.')[0]
-                        date_flight_date_rounded = datetime.strptime(date_flight_date_rounded_temp, "%Y-%m-%dT%H:%M:%S")
-                    elif ( date_flight_temp.split('.')[1][0] == '0' ): # round to next second
-                        date_flight_date_rounded = datetime.strptime(date_flight_temp.split('.')[0], "%Y-%m-%dT%H:%M:%S" )
-                    else: #if time can't be rounded by less than 100 ms
-                        time_remove = 1
-                    #print itime, date_flight_date_rounded
+                if time_remove != 1:
+                    while ( np.mod( (date_flight_date_rounded - date_spock_not_interpolated[0]).total_seconds(), dt_spock_output ) != 0 ):
+                        itime = itime + 1
+                        time_remove = 0                        
+                        date_flight_temp_date = time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6))
+                        date_flight_temp = datetime.strftime(date_flight_temp_date, "%Y-%m-%dT%H:%M:%S.%f" )
+                        date_flight_raw_every_second.append(date_flight_temp)
+                        # round to neared second but only if the actual time is less than 100 ms from the nearest second, otherwise ignore this time (don't compare to SpOCK)
+                        # .This is because SpOCK propagates with 1 s time step. So to compare to the netcdf file, we assume that the netcdf is also exactly at each second (so no millisecond). 
+                        #100 ms wrong is not too bad because the satellite movesby less than 1 km.
+                        if ( date_flight_temp.split('.')[1][0] == '9' ): # round to next second
+                            date_flight_temp_date = datetime.strptime(date_flight_temp, "%Y-%m-%dT%H:%M:%S.%f")
+                            date_flight_date = date_flight_temp_date + timedelta(seconds = 1)
+                            date_flight_date_rounded_temp = datetime.strftime(date_flight_date, "%Y-%m-%dT%H:%M:%S.%f").split('.')[0]
+                            date_flight_date_rounded = datetime.strptime(date_flight_date_rounded_temp, "%Y-%m-%dT%H:%M:%S")
+                        elif ( date_flight_temp.split('.')[1][0] == '0' ): # round to next second
+                            date_flight_date_rounded = datetime.strptime(date_flight_temp.split('.')[0], "%Y-%m-%dT%H:%M:%S" )
+                        else: #if time can't be rounded by less than 100 ms
+                            time_remove = 1
+                        #print itime, date_flight_date_rounded
 
 
-                        #print itime, time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6)), x_cyg_netcdf_temp[itime]/1000.
+                            #print itime, time_coverage_start_datetime + timedelta(microseconds = round(time_flight[itime]*10**6)), x_cyg_netcdf_temp[itime]/1000.
                 #print 'XXXXXXXXXXXXX', date_flight_temp
 
                 if ( ( np.abs( pitch_cyg_netcdf_temp[itime] * 180. /np.pi ) > pitch_max ) | ( np.abs( roll_cyg_netcdf_temp[itime] * 180. /np.pi ) > roll_max ) | ( np.abs( yaw_cyg_netcdf_temp[itime] * 180. /np.pi ) > yaw_max ) ):
@@ -476,37 +479,39 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     else:
                         if (  True in list_are_masked_array[imask_arr].mask[itime] ):
                             time_remove = 1
-                    imask_arr = imask_arr + 1     
-                if ( (time_remove == 0) & (date_flight_date_rounded in date_spock)): # if this time is not in date_spock
-                    index_in_spock_date_netcdf_same.append(date_spock.index(date_flight_date_rounded))
-                else:
-                    time_remove = 1
-                if ( (time_remove == 0) & (date_flight_date_rounded in date_spock_not_interpolated)): # if this time is in date_spock_not_interpolated. If it's not, don't remove the time though. the time should be removed if it's not a time when the spec position 
+                    imask_arr = imask_arr + 1
+                if (time_remove == 0):
+                    if (date_flight_date_rounded in date_spock): # if this time is not in date_spock
+                        index_in_spock_date_netcdf_same.append(date_spock.index(date_flight_date_rounded))
+                    else:
+                        time_remove = 1
+                if (time_remove == 0):
+                    if (date_flight_date_rounded in date_spock_not_interpolated): # if this time is in date_spock_not_interpolated. If it's not, don't remove the time though. the time should be removed if it's not a time when the spec position 
                     #were predicted by spock. here we're looking at the sc position (every output time step chosen in the main input file).
-                    index_in_spock_not_interpolated_date_netcdf_same.append(date_spock_not_interpolated.index(date_flight_date_rounded)) # save the index in date_spock_not_interpolated (ECEF_ file)
-                    x_cyg_netcdf_dt_output.append(x_cyg_netcdf_temp[itime]/1000.)
-                    y_cyg_netcdf_dt_output.append(y_cyg_netcdf_temp[itime]/1000.)
-                    z_cyg_netcdf_dt_output.append(z_cyg_netcdf_temp[itime]/1000.)
+                        index_in_spock_not_interpolated_date_netcdf_same.append(date_spock_not_interpolated.index(date_flight_date_rounded)) # save the index in date_spock_not_interpolated (ECEF_ file)
+                        x_cyg_netcdf_dt_output.append(x_cyg_netcdf_temp[itime]/1000.)
+                        y_cyg_netcdf_dt_output.append(y_cyg_netcdf_temp[itime]/1000.)
+                        z_cyg_netcdf_dt_output.append(z_cyg_netcdf_temp[itime]/1000.)
 
-                    pitch_cyg_netcdf_dt_output.append(pitch_cyg_netcdf_temp[itime] * 180. /np.pi)
-                    roll_cyg_netcdf_dt_output.append(roll_cyg_netcdf_temp[itime] * 180. /np.pi)
-                    yaw_cyg_netcdf_dt_output.append(yaw_cyg_netcdf_temp[itime] * 180. /np.pi)
+                        pitch_cyg_netcdf_dt_output.append(pitch_cyg_netcdf_temp[itime] * 180. /np.pi)
+                        roll_cyg_netcdf_dt_output.append(roll_cyg_netcdf_temp[itime] * 180. /np.pi)
+                        yaw_cyg_netcdf_dt_output.append(yaw_cyg_netcdf_temp[itime] * 180. /np.pi)
 
-                    x_gps_netcdf_dt_output.append(x_gps_netcdf_temp[itime]/1000.)
-                    y_gps_netcdf_dt_output.append(y_gps_netcdf_temp[itime]/1000.)
-                    z_gps_netcdf_dt_output.append(z_gps_netcdf_temp[itime]/1000.)
+                        x_gps_netcdf_dt_output.append(x_gps_netcdf_temp[itime]/1000.)
+                        y_gps_netcdf_dt_output.append(y_gps_netcdf_temp[itime]/1000.)
+                        z_gps_netcdf_dt_output.append(z_gps_netcdf_temp[itime]/1000.)
 
-                    vx_cyg_netcdf_dt_output.append(vx_cyg_netcdf_temp[itime]/1000.)
-                    vy_cyg_netcdf_dt_output.append(vy_cyg_netcdf_temp[itime]/1000.)
-                    vz_cyg_netcdf_dt_output.append(vz_cyg_netcdf_temp[itime]/1000.)
-                    x_spec_netcdf_dt_output.append(x_spec_netcdf_temp[itime]/1000.)
-                    y_spec_netcdf_dt_output.append(y_spec_netcdf_temp[itime]/1000.)
-                    z_spec_netcdf_dt_output.append(z_spec_netcdf_temp[itime]/1000.)
-                    lon_spec_netcdf_dt_output.append(lon_spec_netcdf_temp[itime:itime+20]) # save 20 time steps here
-                    lat_spec_netcdf_dt_output.append(lat_spec_netcdf_temp[itime:itime+20])
-                    index_in_spock_date_netcdf_same_dt_output.append(date_spock.index(date_flight_date_rounded)) # save the index in date_spock (spec file)
-                    date_flight_rounded_dt_output.append(date_flight_date_rounded)
-                    nb_seconds_since_initial_epoch_spock_dt_output.append( ( date_flight_date_rounded - date_spock_not_interpolated[0] ).total_seconds() )
+                        vx_cyg_netcdf_dt_output.append(vx_cyg_netcdf_temp[itime]/1000.)
+                        vy_cyg_netcdf_dt_output.append(vy_cyg_netcdf_temp[itime]/1000.)
+                        vz_cyg_netcdf_dt_output.append(vz_cyg_netcdf_temp[itime]/1000.)
+                        x_spec_netcdf_dt_output.append(x_spec_netcdf_temp[itime]/1000.)
+                        y_spec_netcdf_dt_output.append(y_spec_netcdf_temp[itime]/1000.)
+                        z_spec_netcdf_dt_output.append(z_spec_netcdf_temp[itime]/1000.)
+                        lon_spec_netcdf_dt_output.append(lon_spec_netcdf_temp[itime:itime+20]) # save 20 time steps here
+                        lat_spec_netcdf_dt_output.append(lat_spec_netcdf_temp[itime:itime+20])
+                        index_in_spock_date_netcdf_same_dt_output.append(date_spock.index(date_flight_date_rounded)) # save the index in date_spock (spec file)
+                        date_flight_rounded_dt_output.append(date_flight_date_rounded)
+                        nb_seconds_since_initial_epoch_spock_dt_output.append( ( date_flight_date_rounded - date_spock_not_interpolated[0] ).total_seconds() )
 
                 if ( time_remove == 1 ): # remove time if can't be rounded by ess than 100 ms or if is not in date_spock or if masked or if attitude greater than roll_max, pitch_max, yaw_max
                     time_remove_list.append(itime)
@@ -601,7 +606,6 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     x_gps_netcdf.append(x_gps_netcdf_temp[itime]/1000.)
                     y_gps_netcdf.append(y_gps_netcdf_temp[itime]/1000.)
                     z_gps_netcdf.append(z_gps_netcdf_temp[itime]/1000.)
-
                     date_flight_rounded.append(date_flight_date_rounded)
                     date_flight.append(date_flight_temp)
                     nb_seconds_since_initial_epoch_spock.append( ( date_flight_date_rounded - date_spock[0] ).total_seconds() )
@@ -610,9 +614,9 @@ for idate in range(0,nb_date):# !!!!!!! should be: nb_date):
                     vy_cyg_netcdf.append(vy_cyg_netcdf_temp[itime]/1000.)
                     vz_cyg_netcdf.append(vz_cyg_netcdf_temp[itime]/1000.)
 
-                if date_flight_date_rounded > date_spock[-1]:
-                    iday_count = nb_day + 1
-                    break #######################################################################################################################################
+                    if date_flight_date_rounded > date_spock[-1]:
+                        iday_count = nb_day + 1
+                        break #######################################################################################################################################
 
 
         if len(date_flight_rounded) != 0: # if no data in the netcdf went trhough our different filters (attitude, masks, etc) then go to next date
@@ -2632,7 +2636,7 @@ fontsize_plot = 25
 ratio_fig_size = 4./3
 fig_title = ''#VLLH distribution specular points for a particular ispec at a particular time
 y_label = 'Samples (%)'
-itime_day = 2 # which day to look at the distirbution over (distibution oof all spec over this day). from 1 (not 0) to nb_day (not nb_day-1). ex: if itime_day = 2 then it'll show the distribution from day 1 to day 2
+itime_day = 1 # which day to look at the distirbution over (distibution oof all spec over this day). from 1 (not 0) to nb_day (not nb_day-1). ex: if itime_day = 2 then it'll show the distribution from day 1 to day 2
 coordtype = ['Along-track', 'Cross-track']
 #for itime_day in range(nb_day):
 for idate in range(nb_date_ok):

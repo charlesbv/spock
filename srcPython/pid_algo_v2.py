@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM8_20170901_again'
+prefix_name = 'FM8_20170901_omniweb'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -417,7 +417,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for FORCES section
                 gravity_order, # !!!!!!!!!!! put back 20
                 "drag solar_pressure sun_gravity moon_gravity earth_pressure", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
-                'swpc',#,!!!!!before 072919 used to be 'swpc',
+                'omniweb',#,!!!!!before 072919 used to be 'swpc',
                 # for OUTPUT section
                         dir_simu + "out",
                 dt_output, 
