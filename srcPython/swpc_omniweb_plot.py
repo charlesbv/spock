@@ -5,7 +5,7 @@
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 source = 'omniweb' # omniweb, swpc
-date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
+date_start = '2017-08-27T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-09T00:00:00' # YYYY-mm-ddTHH:MM:SS
 var_name = ['f107', 'ap'] # list: f107, ap, dst
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT

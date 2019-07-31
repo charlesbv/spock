@@ -1073,7 +1073,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
 /*   /\*************************************************************************************\/ */
 /*   /\*************************************************************************************\/ */
 
-  SC->INTEGRATOR.write_given_output = 0;
+//  SC->INTEGRATOR.write_given_output = 0; commented on 073119
 
   // Compute k
   v_copy(sc_ecef_previous_time_step, SC->r_ecef2cg_ECEF);
@@ -1257,10 +1257,11 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   double dvdt[3], drdt[3];
 	    if ( ( fmod( SC->et - starttime, OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( fabs( fmod( SC->et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( SC->et > min_end_time - 0.01)  )  {
 
-  SC->INTEGRATOR.write_given_output = 0;
+	      //  SC->INTEGRATOR.write_given_output = 0; commented on 073119  
 	    }
 	    //	    printf("\n\n");
 	    SC->INTEGRATOR.last_compute_dxdt = 1;
+
 	    compute_dxdt( drdt, dvdt, &SC->et,  SC->r_i2cg_INRTL, SC->v_i2cg_INRTL, PARAMS, &SC->INTEGRATOR, et_initial_epoch, et_sc_initial, density, SC->INTEGRATOR.index_in_attitude_interpolated, SC->INTEGRATOR.index_in_driver_interpolated, CONSTELLATION, OPTIONS, iProc, iDebugLevel, SC);
 	    SC->INTEGRATOR.last_compute_dxdt = 0;
   v_copy( SC->a_i2cg_INRTL,  dvdt);
@@ -3340,6 +3341,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
       input.f107A = INTEGRATOR->f107A[index_in_driver_interpolated];
       input.f107  = INTEGRATOR->f107[index_in_driver_interpolated];
+
       //      printf(" %f | %f || ", input.f107, input.f107A);
       if (PARAMS->ATMOSPHERE.flags.switches[9] != -1){ // if daily ap
 	if (INTEGRATOR->Ap[index_in_driver_interpolated] < 0){ // this can happen when running ensembles on Ap
@@ -3347,6 +3349,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	}
 
 	input.ap    = INTEGRATOR->Ap[index_in_driver_interpolated];
+
 /* 	if (INTEGRATOR->sc_ensemble_nb == 0){ */
 /* 	etprint(et, "time"); */
 /* 	printf("%d %d %f\n", INTEGRATOR->sc_main_nb, index_in_driver_interpolated,  INTEGRATOR->Ap[index_in_driver_interpolated]); */
@@ -3357,7 +3360,6 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	    if (iDebugLevel >= 5){
 	      printf("------ (compute_drag) Writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
 	    }
-
 	    fprintf(INTEGRATOR->file_given_output, "%s: %f %f %f\n", timestamp_isoc, input.f107,input.f107A, input.ap);
 	    if (iDebugLevel >= 5){
 	      printf("------ (compute_drag) Done writing in file_given_output...(iProc %d | iii = %d, eee = %d)\n", iProc, INTEGRATOR->sc_main_nb, INTEGRATOR->sc_ensemble_nb);
@@ -3374,6 +3376,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	if ( INTEGRATOR->sc_ensemble_nb == 0 ){
 	  if (SC->INTEGRATOR.write_given_output == 1){
 	    if (INTEGRATOR->last_compute_dxdt == 1){
+
 	      fprintf(INTEGRATOR->file_given_output, "%s: %f %f", timestamp_isoc, input.f107,input.f107A);
 		    
 	      //  printf("%s %d %d %f\n", timestamp_isoc,SC->INTEGRATOR.sc_main_nb,index_in_driver_interpolated, input.f107,input.f107A);
@@ -3381,6 +3384,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 	  }
 	}
 	//	printf("%s %d %d %d %f | ", timestamp_isoc,SC->INTEGRATOR.sc_main_nb, INTEGRATOR->sc_ensemble_nb,index_in_driver_interpolated, input.f107,input.f107A);
+	//	printf("%d\n",  SC->INTEGRATOR.write_given_output );
 	for (ppp = 0; ppp < 7 ; ppp ++){
 	  if (INTEGRATOR->Ap_hist[ppp][index_in_driver_interpolated] < 0){ // this can happen when running ensembles on Ap
 	    INTEGRATOR->Ap_hist[ppp][index_in_driver_interpolated] = 0;
