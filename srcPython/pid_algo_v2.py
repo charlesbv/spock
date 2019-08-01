@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM8_20170901_no_storm'
+prefix_name = 'FM7_20170901'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -93,8 +93,10 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 
+# FM07 20170901 nadir                                                                         
+# nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 # FM08 20170901 nadir
 # nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 # shorter: nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21_3d.txt'
@@ -323,13 +325,21 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v1 = '6.32291335300000'
         # v2 = '-4.20713750600000'
 
-        # with FM08 20170901 nadir
-        r0 = '-2.28682220600000e+01'
-        r1 = '6.89905045228000e+03'
-        r2 = '3.40348034492000e+02'
-        v0 = '-6.24118211000000e+00'
-        v1 = '1.87039196000000e-01'
-        v2 = '-4.32796299000000e+00'
+        # with FM07 20170901 nadir
+        r0 = '-4.97292234112000e+03'
+        r1 = '-3.16561591680000e+03'
+        r2 = '-3.57222390526000e+03'
+        v0 = '2.98685859600000e+00'
+        v1 = '-6.75525474700000e+00'
+        v2 = '1.83111749000000e+00'
+        
+        # # with FM08 20170901 nadir
+        # r0 = '-2.28682220600000e+01'
+        # r1 = '6.89905045228000e+03'
+        # r2 = '3.40348034492000e+02'
+        # v0 = '-6.24118211000000e+00'
+        # v1 = '1.87039196000000e-01'
+        # v2 = '-4.32796299000000e+00'
 
         
         # # # with FM4_20180112 start 20180113T170000
@@ -417,7 +427,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for FORCES section
                 gravity_order, # !!!!!!!!!!! put back 20
                 "drag solar_pressure sun_gravity moon_gravity earth_pressure", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
-                ['/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt','/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'],#,!!!!!before 072919 used to be 'swpc',
+                'omniweb',#['/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt','/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'],#,!!!!!before 072919 used to be 'swpc',
                 # for OUTPUT section
                         dir_simu + "out",
                 dt_output, 
