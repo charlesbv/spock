@@ -764,8 +764,8 @@
 
   if ( strcmp(text_spice, "default") == 0 ){ // if 'default' chosen in section #SPICE. So that means that either the line below the path was empty or that the user put 'default' in this line
     strcpy(earth_binary_pck_path,OPTIONS->path_to_spice);
-    strcpy(earth_binary_pck_path_temp, "earth_000101_190820_190529.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
-    strcat(earth_binary_pck_path, "earth_000101_190820_190529.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
+    strcpy(earth_binary_pck_path_temp, "earth_000101_191026_190804.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
+    strcat(earth_binary_pck_path, "earth_000101_191026_190804.bpc");// !!!!! used to be "earth_000101_180418_180125.bpc");
   }
   else { // if the user wants to use a particular earth_binary_pck file, then this file needs to be put in path_to_spice  (with the other spice files). IMPORTANT: the name of the file must have the format string1_string2_YYMMDD_string3.bpc where YYMMDD is the date of the last available information on the frame (so we don't know anything for the rotating frame any time after this date). Example: earth_000101_180418_180125.bpc (after 160830 we can't use ITRF93)
     strcpy(earth_binary_pck_path,OPTIONS->path_to_spice);

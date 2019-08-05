@@ -65,7 +65,8 @@ plt.ion()
 cygfm = 1 #1 # which CYGNSS to look at. 2 if spe 25--27, 3 if oct31
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
 date_start_val_start = '2019-07-24T00:00:00'#'2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
-spock_input_filename = 'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_debug.txt' #'newlong_62degfilter.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is.
+spock_input_filename = 'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_three_weeks_old_debug.txt' #'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_two_weeks_old_debug.txt'#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_debug.txt'
+#'newlong_62degfilter.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is.
 #'newlong.txt'
 
 # oct31 with spec_asph_debug: 'FM03_2018-10-31_spock.txt' (FM3 and 4 nadir) or 'FM01_roll10deg_2018-10-31_spock.txt' (FM1 roll +10 deg)
@@ -2687,7 +2688,7 @@ for idate in range(nb_date_ok):
         ax.text(ax.get_xlim()[1]*0.98, y_max*0.98, 'Day ' + str(itime_day), fontsize = fontsize_plot, verticalalignment = 'top', horizontalalignment = 'right')
         fig.set_figheight(height_fig)
         fig.set_figwidth(height_fig*ratio_fig_size)
-        fig_save_name = 'concatenate_distribution_specular_lvlh_error_ispec_' + coordtype[icoord].replace("-","").lower() + '_day_' + str(itime_day) +'_idate_' + str(idate) +  '_aspherical.pdf'#
+        fig_save_name = 'concatenate_distribution_specular_lvlh_error_ispec_' + coordtype[icoord].replace("-","").lower() + '_day_' + str(itime_day) +'_idate_' + str(idate) +  '_aspherical_'+ spock_input_filename.replace('.txt', '.pdf')#
 
         fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 # end of PRESENTATION 051518
