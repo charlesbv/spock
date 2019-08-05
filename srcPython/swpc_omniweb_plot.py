@@ -13,7 +13,7 @@
 # - the SWPC option is incomplete because it doesn't treat the case when date start and date stop are for two different swpc files (example:if date_start is in 2018 and date_stop in 2019)
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-source = 'swpc'#'20170827_to_20170910_omniweb_ap_no_storm.txt' # omniweb, swpc, [filename]
+source = 'omniweb'#'20170901_to_20170910_omniweb_f107_no_storm.txt'#'20170827_to_20170910_omniweb_ap_no_storm.txt' # omniweb, swpc, [filename]
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-09T00:00:00' # YYYY-mm-ddTHH:MM:SS
 var_name = ['f107'] # list: f107, ap, dst
@@ -34,7 +34,9 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
     ax.plot(nb_seconds_since_start_h, var_h, linewidth = 2, color = 'k')
     ax.margins(0,0)
-    ax.set_ylim([0, 252])#[np.min(var_h)*0.9, np.max(var_h)*1.1])
+    #ax.set_ylim([0, 252])
+    ax.set_ylim([80, 200])
+    #ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
 
     nb_ticks_xlabel = 8
     nb_seconds_in_simu = nb_seconds_since_start_h[-1] - nb_seconds_since_start_h[0]
@@ -121,6 +123,18 @@ if ((source_ok == 'omniweb') | (source_ok == 'user_file')):
         date_date = np.array(date_date)
         var = np.array(var)
         nb_seconds_since_start = np.array(nb_seconds_since_start)
+
+        # Plot
+        istart = np.where(date_date == date_start_date)[0][0]
+        istop = np.where(date_date == date_stop_date)[0][0]
+
+        if source_ok == 'omniweb':
+            fig_title = var_name_plot + ' as a function of time - Omniweb'
+        else:
+            fig_title = var_name_plot + ' as a function of time - No storm'
+        fig_save_name = filename_out.replace('.txt', '.pdf')
+        plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
+        
         
 else: # swpc !!!!!!!! incomplete because doesn't treat the case when date start and date stop are for two different swpc files
     var_swpc = []
@@ -145,7 +159,7 @@ else: # swpc !!!!!!!! incomplete because doesn't treat the case when date start 
             var_swpc = quarter + var_swpc
         # Download file
         filename_out = date_start_source + '_to_' + date_stop_source + '_' + source + '_' + var_name[ivar] + '.txt'
-        os.system('wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/' + date_start[0:4] + var_swpc + '.txt -O ' + filename_out )
+        #os.system('wget --no-check-certificate ftp://ftp.swpc.noaa.gov/pub/indices/old_indices/' + date_start[0:4] + var_swpc + '.txt -O ' + filename_out )
         # Read file
         file_out = open(filename_out)
         read_file_out = file_out.readlines()
@@ -162,17 +176,18 @@ else: # swpc !!!!!!!! incomplete because doesn't treat the case when date start 
         nb_seconds_since_start = []
         while (read_file_out[nheader + i][0] == '2'):
             date_temp = read_file_out[nheader + i].split()[0] + '-' + read_file_out[nheader + i].split()[1] + '-' + read_file_out[nheader + i].split()[2]
-            date_date.append(datetime.strptime(date_temp, '%Y-%m-%d'))
-            date.append(datetime.strftime(date_date[-1], '%Y-%m-%dT%H:%M:%S'))
-            if var_name[ivar] == 'ap':
-                var.append(np.float(read_file_out[nheader + i][59:62]))
-            elif var_name[ivar] == 'f107':
-                var.append(np.float(read_file_out[nheader + i].split()[3]))
-            if date_date[-1] == date_start_date:
-                istart = i
-            if date_date[-1] == date_stop_date:
-                istop = i+1
-            nb_seconds_since_start.append((date_date[-1] - date_start_date).total_seconds())
+            for ihour in range(24):
+                date_date.append(datetime.strptime(date_temp, '%Y-%m-%d') + timedelta(hours = ihour))
+                date.append(datetime.strftime(date_date[-1], '%Y-%m-%dT%H:%M:%S'))
+                if var_name[ivar] == 'ap':
+                    var.append(np.float(read_file_out[nheader + i][59:62]))
+                elif var_name[ivar] == 'f107':
+                    var.append(np.float(read_file_out[nheader + i].split()[3]))
+                if date_date[-1] == date_start_date:
+                    istart = i
+                if date_date[-1] == date_stop_date:
+                    istop = i+1
+                nb_seconds_since_start.append((date_date[-1] - date_start_date).total_seconds())
             i = i + 1
             if i == ntemp -1 :
                 break
@@ -182,11 +197,11 @@ else: # swpc !!!!!!!! incomplete because doesn't treat the case when date start 
         var = np.array(var)
         nb_seconds_since_start = np.array(nb_seconds_since_start)
 
-# Plot
-istart = np.where(date_date == date_start_date)[0][0]
-istop = np.where(date_date == date_stop_date)[0][0]
+        # Plot
+        istart = np.where(date_date == date_start_date)[0][0]
+        istop = np.where(date_date == date_stop_date)[0][0]
 
 
-fig_title = var_name_plot + ' as a function of time'
-fig_save_name = filename_out.replace('.txt', '.pdf')
-plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
+        fig_title = var_name_plot + ' as a function of time - SWPC'
+        fig_save_name = filename_out.replace('.txt', '.pdf')
+        plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
