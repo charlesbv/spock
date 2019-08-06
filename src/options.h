@@ -7,6 +7,7 @@
 #define N_STEPS 100
 
 typedef struct {
+  int use_sgp4; // 1 if "tle_sgp4" is chosen as the first line of section #ORBIT. That means the orbit propagation is performed using SGP4 equations
   int thrust; // 1 is section #THRUST exists in the main input file. 0 otherwise
   char thrust_filename[1000]; // if section #THRUST exists in the main input file, this is the name of the file that contains information about the external thrust applied to the sc
   char thrust_start[256];

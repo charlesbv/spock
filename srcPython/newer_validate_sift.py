@@ -65,7 +65,8 @@ plt.ion()
 cygfm = 1 #1 # which CYGNSS to look at. 2 if spe 25--27, 3 if oct31
 download_netcdf = 0 # set this variable to 1 if the entcdf files have not been download yet for the interval of time specified by [date_start_val, date_stop_val]
 date_start_val_start = '2019-07-24T00:00:00'#'2018-09-25T00:00:00'# oct31: '2018-10-30T00:00:00' # 90-yaw: '2018-09-24T00:00:00' (sep 26 only 1 day: 2018-09-25T00:00:00)
-spock_input_filename = 'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_three_weeks_old_debug.txt' #'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_two_weeks_old_debug.txt'#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_debug.txt'
+spock_input_filename = 'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_one_week_old_sgp4_debug.txt'#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_three_weeks_old_sgp4_debug.txt' 
+#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_one_week_old_debug.txt'#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_three_weeks_old_debug.txt' #'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_tle_two_weeks_old_debug.txt'#'spock_spec_start_2019-07-25T00_00_00_end_2019-07-26T00_00_00_debug.txt'
 #'newlong_62degfilter.txt' # this line wasnt here bore 01/24/2019. Before, spock_input_filename was calcualted further in the script (around line 125). Here don't put the path, just the name. Need to run this script from the directory where spock_input_filename is.
 #'newlong.txt'
 
@@ -2319,7 +2320,7 @@ ax.yaxis.set_ticks(np.arange(0,110,10))
 ax.xaxis.set_ticks(np.arange(0,16))
 
 ax.margins(0,0)
-fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_") + '_accuracy_vs_rcg.pdf'
+fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_") + '_accuracy_vs_rcg_' + spock_input_filename.replace('.txt', '.pdf')
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 # end of PRESENTATION 051518
 
@@ -2406,7 +2407,7 @@ fontsize_plot = 25
 ratio_fig_size = 4./3
 fig_title = ''#Difference in specular point position SpOCK vs L1' # L1 is netcdf                                                                            
 x_label = 'Prediction time (days)'
-for ispec in range(2,3):
+for ispec in range(4):
 
     fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
     fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
@@ -2437,7 +2438,7 @@ for ispec in range(2,3):
         #ax.plot(x_axis_day, q90_r_spec_diff_lvlh_all_date[idate][:,ispec,0], linewidth = 3, color = 'r', label = '', linestyle = 'dashed')
 
     ax.margins(0,0)
-    ax.xaxis.set_ticks(np.arange(0,5))
+    #ax.xaxis.set_ticks(np.arange(0,5))
     #ax.set_ylim([np.min(q25_r_spec_diff_lvlh[:,ispec,0]), np.max(q75_r_spec_diff_lvlh[:,ispec,0])])
     #ax.set_ylim([np.min(q10_r_spec_diff_lvlh[:,ispec,0]), np.max(q90_r_spec_diff_lvlh[:,ispec,0])])
 
@@ -2467,12 +2468,12 @@ for ispec in range(2,3):
 
     ax.margins(0,0)
     ax.set_ylim([-20,20])
-    ax.xaxis.set_ticks(np.arange(0,5))
+    #ax.xaxis.set_ticks(np.arange(0,5))
 #     ax.set_ylim([np.min(q10_r_spec_diff_lvlh[:,ispec,1]), np.max(q90_r_spec_diff_lvlh[:,ispec,1])])
 #     # legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
 #     # legend.get_title().set_fontsize(str(fontsize_plot))
 
-    fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_") +  'specular_lvlh_error_ispec_' + str(ispec) + '.pdf'
+    fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_") +  'specular_lvlh_error_ispec_' + str(ispec) + '_' + spock_input_filename.replace('.txt', '.pdf')
     fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 #end of PRESENTATION 051518
 
@@ -2514,7 +2515,7 @@ ax.margins(0,0)
 legend = ax.legend(loc='upper left', bbox_to_anchor=(0, 1), numpoints = 1,  title="", fontsize = fontsize_plot)
 #legend.get_title().set_fontsize(str(fontsize_plot))
 
-fig_save_name = 'satellite_lvlh_error_new_bpc2.pdf'
+fig_save_name = 'satellite_lvlh_error_new_bpc2_' + spock_input_filename.replace('.txt', '.pdf')
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 
@@ -2641,7 +2642,7 @@ itime_day = 1 # which day to look at the distirbution over (distibution oof all 
 coordtype = ['Along-track', 'Cross-track']
 #for itime_day in range(nb_day):
 for idate in range(nb_date_ok):
-    for icoord in range(1,2):
+    for icoord in range(0,2):
         #icoord = 0 # 0 for along-track, 1 for cross-track
         x_label = coordtype[icoord] + ' error (km)'
         fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
@@ -2683,7 +2684,8 @@ for idate in range(nb_date_ok):
         ax.text(ninety_percentile / 2., y_max*0.98, '90% of SPs with\nerror < ' + format(ninety_percentile, ".1f") + ' km', fontsize = fontsize_plot, verticalalignment = 'top', horizontalalignment = 'center', color = 'red' )
         # ax.plot([1, 1], [0, y_max], linewidth = 2, linestyle = 'dashed', color = 'red', )
         # ax.plot([2, 2], [0, y_max], linewidth = 2, linestyle = 'dashed', color = 'blue')
-        ax.set_xlim([0, 13])
+        if icoord == 1:
+            ax.set_xlim([0, 13])
         ax.margins(0,0)
         ax.text(ax.get_xlim()[1]*0.98, y_max*0.98, 'Day ' + str(itime_day), fontsize = fontsize_plot, verticalalignment = 'top', horizontalalignment = 'right')
         fig.set_figheight(height_fig)
@@ -3032,12 +3034,12 @@ plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 x_axis = nb_seconds_since_initial_epoch_spock / 3600. / 24
 ax.plot(x_axis, r_cyg_diff_mag, linewidth = 2, color = 'b', label = '1')
 ax.margins(0,0)
-ax.set_ylim([0,80])
+#ax.set_ylim([0,80])
 
 # legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
 # legend.get_title().set_fontsize(str(fontsize_plot))
 
-fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_")	 + '_difference_sat_position_spock_vs_netcdf_new.pdf'
+fig_save_name = date_start_val.replace(":","_") + '_to_' + date_stop_val.replace(":","_")	 + '_difference_sat_position_spock_vs_netcdf_new_' + spock_input_filename.replace('.txt', '.pdf')
 fig.savefig(fig_save_name, facecolor=fig  .get_facecolor(), edgecolor='none', bbox_inches='tight')
 
 

@@ -1506,8 +1506,11 @@
   }
 
 
-
-  if ( strcmp(OPTIONS->type_orbit_initialisation, "tle" ) == 0 ){
+  OPTIONS->use_sgp4 = 0;
+  if ( (strcmp(OPTIONS->type_orbit_initialisation, "tle" ) == 0 ) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
+    if (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ){
+      OPTIONS->use_sgp4 = 1;
+    }
     //    if (iProc == 0){
     sss = 0;
     while (sss<OPTIONS->nb_satellites_not_including_gps){
@@ -2972,7 +2975,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 /*     strcpy(filename_f107_ap_mod, OPTIONS->dir_input_density_msis); */
 /*     strcat(filename_f107_ap_mod, "/"); */
 
-    if ( strcmp(OPTIONS->type_orbit_initialisation, "tle" ) == 0 ){
+    if ( (strcmp(OPTIONS->type_orbit_initialisation, "tle" ) == 0 ) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
       print_error_any_iproc(iProc, "You chose the initialize the orbits with a TLE and you chose the option swpc_mod for the modeling of the density. However, there is a bug in SpOCK that needs to be fixed and prevents running it in this configuration (TLE + spwc_mod)"); // all the other lin_interpolate functions don't have this bug (lin_interpolate, lin_interpolate_swpc, lin_interpolate_ap_hist, lin_interpolate_attitude) but I was too lazy to fix lin_interpolate_swpc_mod too. The bug is basically die to the fact that SpOCK use to propagate the sc from the TLE epoch until the initial epoch (set in section #TIME) with NO drag. But then I changed it os that drag is also computed for this time lapse. I had to fix a lot of things and I didn't so it for lin_interpolate_swpc_mod
     }
 

@@ -339,7 +339,7 @@ int generate_ephemerides(   CONSTELLATION_T  *CONSTELLATION,
 
     // Check the TLE epochs of the satellites are older than the simulation epoch (if the user chose to initilaize the orbits with TLEs)
     // // If running TLE (GPS or other satellites), the epochs of the last TLEs have be older than the epoch of the start time of the constellation (the current version does not allow for propagating satellite going back in time)
-    if ( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0 ){
+  if ( (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0 ) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ) ){
       for (ii = 0; ii < OPTIONS->n_satellites - OPTIONS->nb_gps; ii++){
 	if ( start_ensemble[ii] == 0 ){ // if main sc ii is run by this iProc
 	if (CONSTELLATION->spacecraft[ii][0].et > CONSTELLATION->et){
@@ -425,7 +425,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	  }
 	}
       }
-      if ( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+      if (( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
 	if ( CONSTELLATION->spacecraft[ii][0].INTEGRATOR.isGPS == 0 ){
 	CONSTELLATION->spacecraft[ii][0].fptle = fopen( CONSTELLATION->spacecraft[ii][0].filenametle, "w+");      // (longer format) (CBV)
 	}
@@ -606,7 +606,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
   // end of Write header in SpOCK's output files
 
   // If the orbit initialization of the satellites was done with TLEs, then propagate each satellite until their epoch reaches the same as the constellation's epoch start time
-  if ( (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp( OPTIONS->type_orbit_initialisation, "collision_vcm" ) == 0)){
+  if ( (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ) || (strcmp( OPTIONS->type_orbit_initialisation, "collision_vcm" ) == 0)){
     if (iProc == 0){
       //    printf("Propagating the satellites until the epoch start time of the constellation (with no drag)...\n");
     printf("Propagating the satellites until the epoch start time of the constellation...\n");
@@ -615,7 +615,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       //      if (iProc == 0){
 
 // write the initial position (at the TLE epoch start)
-      if (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+      if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
       write_output( CONSTELLATION->spacecraft[ii] , 2, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1,( CONSTELLATION->et ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       }
       if ( start_ensemble[ii] == 0){ // if this iProc runs main sc ii
@@ -656,7 +656,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 			    	  }
 
 	  propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel,  start_ensemble, array_sc ); // don't care about starttime here because this is used for linear interpolation with the density drivers (F10.7, Ap, ...) and the attitude, which we do not care for the satellites from their TLE epoch time to the constellation epoch start time (for now!) (this is for interpolation of the thermospheric drivers reasons)
-      if (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+	  if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ) ){
 	  write_output( CONSTELLATION->spacecraft[ii] , 2, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       }
 	} // end while propagation
@@ -697,7 +697,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	  } // end of go over all ensemble sc
 	} // end of if running ensembles
       } // end of if main sc is not a gps
-      if (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+      if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
       write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       }
       // END OF PROPAGATE ONE LAST TIME UNTIL THE SATELLITE EPOCH IS THE SAME AS THE CONSTELLATION EPOCH
@@ -727,7 +727,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       //      if (iProc == 0){
       if (start_ensemble[ii] == 0){ // if this iProc runs main sc ii
 	if ( CONSTELLATION->spacecraft[ii][0].INTEGRATOR.isGPS == 0 ){
-	  if (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+	  if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ) ){
 	fclose(CONSTELLATION->spacecraft[ii][0].fptle);
 	  }
 	}
@@ -1336,7 +1336,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 
     // Print progress to screen
     if (iProc == 0){
-      //                                                                   print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
+                                                                         print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
     }
 
     if ( ( compute_collisions == 1 )  ){       // start collision assessment when the secondary sc time enters the span of time around TCA. !!!!!!!!! CONSTELLATION->et  is temporary and assumes the reference sc have the same epoch start. If it's not the case then this needs to be changed (below and at other locations in the code)

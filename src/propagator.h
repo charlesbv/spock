@@ -134,7 +134,7 @@ typedef struct {
   PLANET_T        MOON;
   PLANET_T        SUN;
   ATMOSPHERE_T    ATMOSPHERE;
-
+  SpiceDouble geophs[8];
 } PARAMS_T;
 
 
@@ -294,6 +294,7 @@ typedef struct {
   double et_vcm;// if computing the probability of collision and the input file has the format of a VCM, et_vcm is the epoch of the VCM
   double              a_i2cg_INRTL_ir_earth[3];
   int thrust; // 1 is section #THRUST exists in the main input file. 0 otherwise
+  SpiceDouble elems[10];
 }   INTEGRATOR_T;
 
 typedef struct {

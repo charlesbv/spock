@@ -368,7 +368,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	  /*************************************************************************************/
 	  /*************************************************************************************/
 
-	  if ( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0 ){
+	  if ( (strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0 ) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
 	    if (iDebugLevel >= 1){
 	      if (iProc == 0) printf("-- (initialize_constellation) Initializing et, r_i2cg_INRTL, v_i2cg_INRTL, orbital elements from TLE.\n");
 	    }
@@ -376,12 +376,12 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    /*** Convert the TLEs into inertial state (postion, velocity) ***/
 	    // Initialize TLE parameters
 	    SpiceInt frstyr = 1961; // do not really care about this line (as long as the spacecrafts are not flying after 2060)
-	    SpiceDouble geophs[8];
+	    //	    SpiceDouble geophs[8];
 	    int pp;
 	    int lineln=0;
 	    size_t len = 0;
 	    char *line_temp = NULL;
-	    SpiceDouble elems[10];
+	    //	    SpiceDouble elems[10];
 	    SpiceDouble state[6];
 	    SpiceDouble epoch_sat; // epoch of TLE of the sat
 	    char sat_tle_file_temp[256];
@@ -389,14 +389,14 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    ORBITAL_ELEMENTS_T OE_temp;
 
 	    /* Set up the geophysical quantities.  At last check these were the values used by Space Command and SGP4 */
-	    geophs[ 0 ] =    1.082616e-3;   // J2
-	    geophs[ 1 ] =   -2.53881e-6;    // J3
-	    geophs[ 2 ] =   -1.65597e-6;    // J4
-	    geophs[ 3 ] =    7.43669161e-2; // KE
-	    geophs[ 4 ] =    120.0;         // QO
-	    geophs[ 5 ] =    78.0;          // SO
-	    geophs[ 6 ] =    6378.135;      // ER
-	    geophs[ 7 ] =    1.0;           // AE
+	    /* PARAMS->geophs[ 0 ] =    1.082616e-3;   // J2 */
+	    /* PARAMS->geophs[ 1 ] =   -2.53881e-6;    // J3 */
+	    /* PARAMS->geophs[ 2 ] =   -1.65597e-6;    // J4 */
+	    /* PARAMS->geophs[ 3 ] =    7.43669161e-2; // KE */
+	    /* PARAMS->geophs[ 4 ] =    120.0;         // QO */
+	    /* PARAMS->geophs[ 5 ] =    78.0;          // SO */
+	    /* PARAMS->geophs[ 6 ] =    6378.135;      // ER */
+	    /* PARAMS->geophs[ 7 ] =    1.0;           // AE */
 
 	    /* Read in the next two lines from the text file that contains the TLEs. */
 	  //newstructure
@@ -434,18 +434,21 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	    fclose(sat_tle_file);
 	    // Convert the elements of the TLE into "elems" and "epoch" that can be then read by the SPICE routine ev2lin_ to convert into the inertial state
 	    //	    zzgetelm(frstyr, line, &epoch_sat,elems);
-	      	    getelm_c( frstyr, lineln, line, &epoch_sat, elems );
+	      	    getelm_c( frstyr, lineln, line, &epoch_sat, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.elems );
 
-	    CONSTELLATION->spacecraft[ii][0].INTEGRATOR.bstar = elems[2];
+	    CONSTELLATION->spacecraft[ii][0].INTEGRATOR.bstar = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.elems[2];
 
 
 	    // Now propagate the state using ev2lin_ to the epoch of interest
 	    extern /* Subroutine */ int ev2lin_(SpiceDouble *, SpiceDouble *,
 						SpiceDouble *, SpiceDouble *);
-	    ev2lin_( &epoch_sat, geophs, elems, state );
+
+	    ev2lin_( &epoch_sat, PARAMS->geophs, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.elems, state );
 	    CONSTELLATION->spacecraft[ii][eee].et = epoch_sat;
 	    CONSTELLATION->spacecraft[ii][eee].et_sc_initial = epoch_sat;
 	    
+
+			      
 
 	    static doublereal  precm[36];
 	        static doublereal invprc[36]	/* was [6][6] */;
@@ -1477,7 +1480,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	  strcat(CONSTELLATION->spacecraft[ii][0].filename, "/");
 	  strcat(CONSTELLATION->spacecraft[ii][0].filename, OPTIONS->filename_output[ii]);
 
-	  if ( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0){
+	  if (( strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
 	    strcpy(CONSTELLATION->spacecraft[ii][0].filenametle, OPTIONS->dir_output_run_name_sat_name[ii]);
 	    strcat(CONSTELLATION->spacecraft[ii][0].filenametle, "/");
 	    strcat(CONSTELLATION->spacecraft[ii][0].filenametle, "TLE_");
@@ -2794,12 +2797,12 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
       /*** Convert the TLEs into inertial state (postion, velocity) ***/
       SpiceInt frstyr = 1961; // do not really care about this line (as long as the spacecrafts are not flying after 2060)
-      SpiceDouble geophs[8];
+      //      SpiceDouble geophs[8];
       int pp;
       int lineln=0;
       size_t len = 0;
       char *line_temp = NULL;
-      SpiceDouble elems[10];
+      //      SpiceDouble elems[10];
       SpiceDouble state[6];      
 
 
@@ -2811,15 +2814,15 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 	}
       }
 
-      /* Set up the geophysical quantities.  At last check these were the values used by Space Command and SGP4 */
-      geophs[ 0 ] =    1.082616e-3;   // J2
-      geophs[ 1 ] =   -2.53881e-6;    // J3
-      geophs[ 2 ] =   -1.65597e-6;    // J4
-      geophs[ 3 ] =    7.43669161e-2; // KE
-      geophs[ 4 ] =    120.0;         // QO
-      geophs[ 5 ] =    78.0;          // SO
-      geophs[ 6 ] =    6378.135;      // ER
-      geophs[ 7 ] =    1.0;           // AE
+      /* /\* Set up the geophysical quantities.  At last check these were the values used by Space Command and SGP4 *\/ */
+      /* PARAMS->geophs[ 0 ] =    1.082616e-3;   // J2 */
+      /* PARAMS->geophs[ 1 ] =   -2.53881e-6;    // J3 */
+      /* PARAMS->geophs[ 2 ] =   -1.65597e-6;    // J4 */
+      /* PARAMS->geophs[ 3 ] =    7.43669161e-2; // KE */
+      /* PARAMS->geophs[ 4 ] =    120.0;         // QO */
+      /* PARAMS->geophs[ 5 ] =    78.0;          // SO */
+      /* PARAMS->geophs[ 6 ] =    6378.135;      // ER */
+      /* PARAMS->geophs[ 7 ] =    1.0;           // AE */
 
       /* Read in the next two lines from the text file that contains the TLEs. */
 
@@ -2841,12 +2844,12 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
       line[1][ lineln-1 ] = '\0';
 
       // Convert the elements of the TLE into "elems" and "epoch" that can be then read by the SPICE routine ev2lin_ to convert into the inertial state
-      getelm_c( frstyr, lineln, line, &OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )], elems );
+      getelm_c( frstyr, lineln, line, &OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )], CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.elems );
       // Now propagate the state using ev2lin_ to the epoch of interest
       extern /* Subroutine */ int ev2lin_(SpiceDouble *, SpiceDouble *,
 					  SpiceDouble *, SpiceDouble *);
 
-      ev2lin_( &OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )], geophs, elems, state );
+      ev2lin_( &OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )], PARAMS->geophs, CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.elems, state );
 
             CONSTELLATION->spacecraft[ii][0].et = OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )];
       CONSTELLATION->spacecraft[ii][eee].et_sc_initial = OPTIONS->epoch_gps[ii-(OPTIONS->n_satellites - OPTIONS->nb_gps )];

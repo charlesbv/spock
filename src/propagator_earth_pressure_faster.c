@@ -20,7 +20,7 @@
 #include "options.h"
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_sf_legendre.h"
-
+#include "f2c.h"
 
 // computes orbit average of parameters. so far: arg perigee.
 // in the main output file, the average is reported as 9999.999999 unless eaxctly one full orbit has been travelled, in which case the average fo the parameter over this orbit is reported and the string "ORB" is indluced at the end of the output file
@@ -985,6 +985,8 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
 
 {
   //    etprint(SC->et, "before propagate");
+
+
   
   //      printf("\n");
   // Declarations
@@ -1075,6 +1077,8 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
 
 //  SC->INTEGRATOR.write_given_output = 0; commented on 073119
 
+
+  if  (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) != 0 ){ // if sgp4 equations are not used for the orbit propagation
   // Compute k
   v_copy(sc_ecef_previous_time_step, SC->r_ecef2cg_ECEF);
   v_copy(sc_eci_previous_time_step, SC->r_i2cg_INRTL);
@@ -1274,7 +1278,47 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   m_x_v(SC->a_i2cg_LVLH_gravity, T_inrtl_2_lvlh, SC->a_i2cg_INRTL_gravity);
   m_x_v(SC->a_i2cg_LVLH_drag, T_inrtl_2_lvlh, SC->a_i2cg_INRTL_drag);
 
+} // end of if sgp4 eqautions are not used for the orbit propagation
+  else{ // if sgp4 eqautions are not used for the orbit propagation
+    	    // !!!!!!!!!!!!! TEMP remove 080619
+    SpiceDouble state[6];
+    SC->et = SC->et + SC->INTEGRATOR.dt;
+    	    extern /* Subroutine */ int ev2lin_(SpiceDouble *, SpiceDouble *,
+	    					SpiceDouble *, SpiceDouble *);
 
+    ev2lin_( &SC->et, PARAMS->geophs, SC->INTEGRATOR.elems, state );
+    /* etprint(SC->et, ""); */
+    /* 			    int lll; */
+    /* 			    for (lll = 0; lll < 6; lll++){ */
+    /* 			      printf("state[%d]: %.8f\n", lll, state[lll]); */
+    /* 			    } */
+    /* 			    //			    exitf(); */
+    /* 			    // end of TEMP remove 080619 */
+	    static doublereal  precm[36];
+	        static doublereal invprc[36]	/* was [6][6] */;
+	    			    extern /* Subroutine */ int zzteme_(doublereal *, doublereal *);
+	    	        extern /* Subroutine */ int invstm_(doublereal *, doublereal *);
+	    		    extern /* Subroutine */ int  mxvg_(
+	    doublereal *, doublereal *, integer *, integer *, doublereal *);
+
+	        zzteme_(&SC->et, precm);
+
+/*     ...now convert STATE to J2000. Invert the state transformation */
+/*     operator (important to correctly do this). */
+
+    invstm_(precm, invprc);
+    static integer c__6 = 6;
+        static doublereal tmpsta[6];
+	int pp;
+	    mxvg_(invprc, state, &c__6, &c__6, tmpsta);
+    moved_(tmpsta, &c__6, state);
+	    for (pp = 0; pp<3; pp++){
+	      //	      	      	      printf("%f ", state[pp]);
+	      SC->r_i2cg_INRTL[pp] = state[pp];
+	      SC->v_i2cg_INRTL[pp] = state[pp+3];
+	    }
+
+  } // enf of if sgp4 eqautions are not used for the orbit propagation
  
   // Update ECEF state
   estate[0] = SC->r_i2cg_INRTL[0];estate[1] = SC->r_i2cg_INRTL[1];estate[2] = SC->r_i2cg_INRTL[2];
@@ -4295,6 +4339,17 @@ spkez_c(10, et, "J2000", "NONE", 399, x_earth, &lt_earth); //   Return the state
 int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100],   double use_ap_hist, int iProc, char path_to_spice[256], int degree, int gravity_map_use, int earth_pressure) {
 //newstructure
 
+
+      /* Set up the geophysical quantities.  At last check these were the values used by Space Command and SGP4 */
+      PARAMS->geophs[ 0 ] =    1.082616e-3;   // J2
+      PARAMS->geophs[ 1 ] =   -2.53881e-6;    // J3
+      PARAMS->geophs[ 2 ] =   -1.65597e-6;    // J4
+      PARAMS->geophs[ 3 ] =    7.43669161e-2; // KE
+      PARAMS->geophs[ 4 ] =    120.0;         // QO
+      PARAMS->geophs[ 5 ] =    78.0;          // SO
+      PARAMS->geophs[ 6 ] =    6378.135;      // ER
+      PARAMS->geophs[ 7 ] =    1.0;           // AE
+  
   int ii;
 
   PARAMS->EARTH.flattening    = 1/298.257223560;
