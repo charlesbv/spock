@@ -306,4 +306,4 @@ for iii in np.arange(0,n,1):#np.arange(index_n_first_hours[0], index_n_first_hou
     cbar.ax.set_ylabel('# visits', fontsize = fontsize_plot, weight = 'bold')
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
     
-os.system('ffmpeg -y -r 10 -i ani/' + filename.split('/')[-1].replace(".txt", '_lon_lat_%d.png') + ' -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ani/' +  filename.split('/')[-1].replace(".txt", '_lon_lat.mp4'))
+os.system('ffmpeg -y -r 10 -i ani/' + filename.split('/')[-1].replace(".txt", '_lon_lat_%d.png') + ' -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ani/' +  filename.split('/')[-1].replace(".txt", '_lon_lat_sgp4.mp4'))

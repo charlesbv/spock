@@ -82,7 +82,7 @@ os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str
 ## Read specular point locations
 ### Read SpOCK main input file to figure out stuff to then read the output
 spock_dir = "."
-input_filename = spock_dir + '/spock_spec_start_' + start_date_str.replace(":", "_") + '_end_' + end_date_str.replace(":", "_") + '.txt'
+input_filename = spock_dir + '/spock_spec_start_' + start_date_str.replace(":", "_") + '_end_' + end_date_str.replace(":", "_") + '_sgp4_debug.txt'
 var_in, var_in_order = read_input_file(input_filename)
 output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
 output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')]; 
