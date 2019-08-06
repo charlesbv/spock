@@ -29,8 +29,8 @@
 # - date_range is a list. Each element corresponds to a range of time (so each element of date_range is a list of two elements: start and end date of range). Each date must be a time HH:MM:SS. Example: date_range = [["10:00:00", "14:00:00"], ["22:00:00", "02:00:00"]]
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-date_start = "2019-08-25T00:00:00" #"2019-07-25T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
-date_end = "2019-09-08T23:59:59" #"2019-07-26T00:00:00" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
+date_start = "2019-08-18T00:00:00" #"2019-07-25T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
+date_end = "2019-08-24T23:59:59" #"2019-07-26T00:00:00" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
 
 date_range = [["00:00:00", "23:59:59"]] # !!!!!!! UTC
 min_lat_range = 36.75
@@ -82,7 +82,7 @@ os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str
 ## Read specular point locations
 ### Read SpOCK main input file to figure out stuff to then read the output
 spock_dir = "."
-input_filename = spock_dir + '/spock_spec_start_' + start_date_str.replace(":", "_") + '_end_' + end_date_str.replace(":", "_") + '_sgp4_debug.txt'
+input_filename = spock_dir + '/spock_spec_start_' + start_date_str.replace(":", "_") + '_end_' + end_date_str.replace(":", "_") + '_sgp4.txt'
 var_in, var_in_order = read_input_file(input_filename)
 output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
 output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')]; 
@@ -145,7 +145,7 @@ if min(nb_time_this_sc) != max(nb_time_this_sc):
     
 nb_time = nb_time_this_sc[0]
 # one file for all CYGNSS and all spec. Each line is one time. It shows "FM01 [lon_spec1, lat_spec1] [lon_spec2, lat_spec2] [lon_spec3, lat_spec3] [lon_spec4, lat_spec4]" for each FM (there might not be 4 spec each time)
-filename_out = start_date_str.replace(":","").replace("-","") + "_to_" + end_date_str.replace(":","").replace("-","") + ".txt" 
+filename_out = start_date_str.replace(":","").replace("-","") + "_to_" + end_date_str.replace(":","").replace("-","") + "_sgp4.txt" 
 file_out = open(filename_out, "w")
 label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
 lon_save = []
