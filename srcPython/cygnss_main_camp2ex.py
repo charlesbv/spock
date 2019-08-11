@@ -61,7 +61,7 @@ spock_main_input(
     # for DENSITY_MOD section
     1
 )
-os.system("mpirun -np 4 spock_grav_read_bin_earth_map " + main_input_filename) # !!!!!!! make sure this is the latestest executable (spock on my laptop...)
+#os.system("mpirun -np 4 spock_grav_read_bin_earth_map " + main_input_filename) # !!!!!!! make sure this is the latestest executable (spock on my laptop...)
 
 # Run cygnss_camp2ex.py to output the lon/lat/alt and solar zenith angle
 os.system('python cygnss_camp2ex.py ' + main_input_filename)
@@ -73,9 +73,9 @@ os.chdir('out')
 filename_out = '/Users/cbv/cygnss/camp2ex/toshare/' + output_dir_no_path + '.tgz'
 os.system('tar -zcvf ' + filename_out + ' ' +  output_dir_no_path)
 
-os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "me5 CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" cbv@umich.edu')
+#os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "me5 CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" cbv@umich.edu')
 
-os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
+#os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
 
 #os.system('scp -p /Users/cbv/cygnss/camp2ex/' + filename_out.replace(".txt", ".tgz") + ' cygnss-sftp-1.engin.umich.edu:/data/temp/piston')
 

@@ -21,7 +21,7 @@
 
 import os
 
-def spock_main_input( 
+def spock_main_input_sgp4( 
     main_input_filename,
     # for TIME section
     date_start,
@@ -81,7 +81,7 @@ def spock_main_input(
 
     # ORBIT section
     if type(tle_filename) == str:
-        print >> main_input_file, "#ORBIT\ntle\n" + tle_filename + "\n"
+        print >> main_input_file, "#ORBIT\ntle_sgp4\n" + tle_filename + "\n"
     else:
         print >> main_input_file, "#ORBIT\n" + tle_filename[0] 
         if tle_filename[0] == 'collision':

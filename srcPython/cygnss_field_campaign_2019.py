@@ -29,8 +29,8 @@
 # - date_range is a list. Each element corresponds to a range of time (so each element of date_range is a list of two elements: start and end date of range). Each date must be a time HH:MM:SS. Example: date_range = [["10:00:00", "14:00:00"], ["22:00:00", "02:00:00"]]
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-date_start = "2019-08-18T00:00:00" #"2019-07-25T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
-date_end = "2019-08-24T23:59:59" #"2019-07-26T00:00:00" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
+date_start = "2019-08-25T00:00:00" #"2019-07-25T00:00:00" #"2019-08-03T00:00:00"#"2019-08-18T00:00:00"#"2019-08-25T00:00:00" # !!!!!!! UTC
+date_end = "2019-09-08T23:59:59" #"2019-07-26T00:00:00" #"2019-08-17T23:59:59"#"2019-08-24T23:59:59"#"2019-09-08T23:59:59" # !!!!!!! UTC
 
 date_range = [["00:00:00", "23:59:59"]] # !!!!!!! UTC
 min_lat_range = 36.75
@@ -76,7 +76,7 @@ end_date_str =  date_end
 start_date = datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S")
 end_date = datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S")
 
-os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
+#os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
 
 #ipdb.set_trace()
 ## Read specular point locations
