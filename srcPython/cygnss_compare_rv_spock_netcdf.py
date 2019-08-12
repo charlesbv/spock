@@ -6,11 +6,11 @@
 # - the netcdf files must previously be downloaded and located in netcdf_dir_root
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-date_start_analysis = '2017-09-08'
-date_stop_analysis = '2017-09-11'
-fm_analysis = [8]
-netcdf_dir_root = '/Users/cbv/cygnss/netcdf'
-sgp4 = 1
+date_start_analysis = '2017-03-18'
+date_stop_analysis = '2017-03-28'
+fm_analysis = [1,2,3,4,5,6,7,8]
+netcdf_dir_root = '/Volumes/Seagate_Expansion_Drive/Backups.backupdb/srblap2017-0085/2019-04-14-150952/Macintosh HD/Users/cbv/cygnss/netcdf'#'/Users/cbv/cygnss/netcdf'
+sgp4 = 0
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 from datetime import datetime, timedelta
@@ -23,6 +23,8 @@ from read_output_file import *
 from find_in_read_input_order_variables import *
 from cygnss_read_netcdf_and_convert_to_eci_and_oe import *
 from ecef_to_lvlh import *
+from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 if netcdf_dir_root[-1] != '/':
     netcdf_dir_root = netcdf_dir_root + '/'
 
@@ -34,7 +36,7 @@ nday = (date_stop_analysis_date - date_start_analysis_date).days + 1
 
 along_rms = np.zeros([nday, nfm])-1; cross_rms = np.zeros([nday, nfm])-1; radial_rms = np.zeros([nday, nfm])-1; mag_rms = np.zeros([nday, nfm])-1; npoint = np.zeros([nday, nfm])-1;
 load_spice = 1
-for iday in range(2,nday):
+for iday in range(nday):
     print iday, nday-1
     date_start_date = date_start_analysis_date + timedelta(days = iday)
     date_stop_date = date_start_date + timedelta(days = 1)
@@ -111,3 +113,39 @@ for iday in range(2,nday):
             along_error = np.array(along_error); cross_error = np.array(cross_error); radial_error = np.array(radial_error); mag_error = np.array(mag_error)
             along_rms[iday, ifm] = np.sqrt(np.mean(along_error**2)); cross_rms[iday, ifm] = np.sqrt(np.mean(cross_error**2)); radial_rms[iday, ifm] = np.sqrt(np.mean(radial_error**2)); mag_rms[iday, ifm] = np.sqrt(np.mean(mag_error**2))
             npoint[iday, ifm] = len(along_error)
+
+
+## Parameters for the figure
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 25
+ratio_fig_size = 4./3
+fig_title = 'FM 1-week along-track, cross-track and radial RMS'
+y_label = 'RMS'
+x_label = 'Sample'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+
+ax.plot(np.max(along_rms, axis = 1), linewidth = 2, color = 'blue', label = 'Along-track')
+ax.plot(np.max(cross_rms, axis = 1), linewidth = 2, color = 'red', label = 'Cross-track')
+ax.plot(np.max(radial_rms, axis = 1), linewidth = 2, color = 'black', label  = 'Radial')
+ax.plot(np.max(mag_rms, axis = 1), linewidth = 2, color = 'limegreen', label = 'Mag')
+ax.margins(0,0)
+legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1, fontsize = fontsize_plot)
+legend.get_title().set_fontsize(str(fontsize_plot))
+if sgp4 == 1:
+    fig_save_name = 'spock_sgp4_vs_netcdf.pdf'
+else:
+    fig_save_name = 'spock_classic_vs_netcdf.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
