@@ -16,6 +16,7 @@
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')
 from spock_main_input import *
+from spock_main_input_sgp4 import *
 
 date_start = sys.argv[1] #'2019-07-21'#sys.argv[1]
 date_stop = sys.argv[2] #'2019-07-22'#sys.argv[2]
@@ -32,7 +33,7 @@ dt_simu = 1.
 order_gravity = 20 # !!!!!!! put 20
 forces = 'drag moon_gravity sun_gravity'
 main_input_filename = 'camp2ex.txt'
-spock_main_input(
+spock_main_input_sgp4(
     main_input_filename,
     # for TIME section
     date_start_with_time,
@@ -62,6 +63,7 @@ spock_main_input(
     1
 )
 #os.system("mpirun -np 4 spock_grav_read_bin_earth_map " + main_input_filename) # !!!!!!! make sure this is the latestest executable (spock on my laptop...)
+os.system("mpirun -np 4 spock_sgp4 " + main_input_filename) # !!!!!!! make sure this is the latestest executable (spock on my laptop...)
 
 # Run cygnss_camp2ex.py to output the lon/lat/alt and solar zenith angle
 os.system('python cygnss_camp2ex.py ' + main_input_filename)
@@ -73,10 +75,8 @@ os.chdir('out')
 filename_out = '/Users/cbv/cygnss/camp2ex/toshare/' + output_dir_no_path + '.tgz'
 os.system('tar -zcvf ' + filename_out + ' ' +  output_dir_no_path)
 
-#os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "me5 CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" cbv@umich.edu')
+os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "me5 CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" cbv@umich.edu')
 
-#os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
-
-#os.system('scp -p /Users/cbv/cygnss/camp2ex/' + filename_out.replace(".txt", ".tgz") + ' cygnss-sftp-1.engin.umich.edu:/data/temp/piston')
+os.system('/usr/bin/uuencode ' + filename_out + ' ' + filename_out + ' | /usr/bin/mail -s "CYGNSS positions by SpOCK - Camp2Ex - ' + date_start + ' to ' + date_stop + '" roman.s.kowch@nasa.gov')
 
 os.chdir('../')

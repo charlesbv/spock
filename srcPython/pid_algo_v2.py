@@ -1,3 +1,4 @@
+
 # find rho_control that min error in 18 hours (18 = interval (variable))
 # move 3 hours aehad, find rho_control that min error in 18 hours (3 = step_move_save (variable))
 # move 3 hours ahead, min error in 18 hours
@@ -31,7 +32,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM7_20170901'
+prefix_name = 'FM1_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -93,7 +94,7 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt'
 
 # FM07 20170901 nadir                                                                         
 # nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
@@ -184,7 +185,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 60#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 
 print 'nb of intervals:', nb_interval
@@ -308,14 +309,14 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
         # FM01 20170817 nadir:
-        # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06                                              
-        # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03                                               
-        # r0 = '-2.39619629675000e+03'
-        # r1 = '-5.42660274124000e+03'
-        # r2 = '-3.52867259398000e+03'
-        # v0 = '7.09842316800000'
-        # v1 = '-1.86796667100000'
-        # v2 = '-1.97307331700000'
+        # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06
+        # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03
+        r0 = '-2.39619629675000e+03'
+        r1 = '-5.42660274124000e+03'
+        r2 = '-3.52867259398000e+03'
+        v0 = '7.09842316800000'
+        v1 = '-1.86796667100000'
+        v2 = '-1.97307331700000'
         
         # # with FM03 20180113 nadir:
         # r0 = '6.78246384534000e+03'
@@ -326,12 +327,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v2 = '-4.20713750600000'
 
         # with FM07 20170901 nadir
-        r0 = '-4.97292234112000e+03'
-        r1 = '-3.16561591680000e+03'
-        r2 = '-3.57222390526000e+03'
-        v0 = '2.98685859600000e+00'
-        v1 = '-6.75525474700000e+00'
-        v2 = '1.83111749000000e+00'
+        # r0 = '-4.97292234112000e+03'
+        # r1 = '-3.16561591680000e+03'
+        # r2 = '-3.57222390526000e+03'
+        # v0 = '2.98685859600000e+00'
+        # v1 = '-6.75525474700000e+00'
+        # v2 = '1.83111749000000e+00'
         
         # # with FM08 20170901 nadir
         # r0 = '-2.28682220600000e+01'

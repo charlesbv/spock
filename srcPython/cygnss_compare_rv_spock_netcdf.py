@@ -7,10 +7,10 @@
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 date_start_analysis = '2017-03-18'
-date_stop_analysis = '2017-03-28'
+date_stop_analysis = '2019-01-03'
 fm_analysis = [1,2,3,4,5,6,7,8]
-netcdf_dir_root = '/Volumes/Seagate_Expansion_Drive/Backups.backupdb/srblap2017-0085/2019-04-14-150952/Macintosh HD/Users/cbv/cygnss/netcdf'#'/Users/cbv/cygnss/netcdf'
-sgp4 = 0
+netcdf_dir_root = '/Users/cbv/cygnss/netcdf' #'/Volumes/Seagate_Expansion_Drive/Backups.backupdb/srblap2017-0085/2019-04-14-150952/Macintosh HD/Users/cbv/cygnss/netcdf'#'/Users/cbv/cygnss/netcdf'
+sgp4 = 1
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 from datetime import datetime, timedelta
@@ -33,16 +33,19 @@ nfm = len(fm_analysis)
 date_start_analysis_date = datetime.strptime(date_start_analysis, "%Y-%m-%d")
 date_stop_analysis_date = datetime.strptime(date_stop_analysis, "%Y-%m-%d")
 nday = (date_stop_analysis_date - date_start_analysis_date).days + 1
+day_jump = 7
+date_array = np.array([date_start_analysis_date + timedelta(days=i) for i in np.arange(0,nday,day_jump)])
+nday = len(date_array)
+
 
 along_rms = np.zeros([nday, nfm])-1; cross_rms = np.zeros([nday, nfm])-1; radial_rms = np.zeros([nday, nfm])-1; mag_rms = np.zeros([nday, nfm])-1; npoint = np.zeros([nday, nfm])-1;
 load_spice = 1
 for iday in range(nday):
-    print iday, nday-1
-    date_start_date = date_start_analysis_date + timedelta(days = iday)
+    date_start_date = date_array[iday]
     date_stop_date = date_start_date + timedelta(days = 1)
     date_start = datetime.strftime(date_start_date, "%Y-%m-%dT%H:%M:%S")
     date_stop = datetime.strftime(date_stop_date, "%Y-%m-%dT%H:%M:%S")
-
+    print iday, nday-1, date_start
     # run SpOCK
     if sgp4 == 1:
         os.system("spock_cygnss_spec_parallel_using_one_week_old_tle.py " + date_start + " " + date_stop + " 1")
@@ -113,7 +116,7 @@ for iday in range(nday):
             along_error = np.array(along_error); cross_error = np.array(cross_error); radial_error = np.array(radial_error); mag_error = np.array(mag_error)
             along_rms[iday, ifm] = np.sqrt(np.mean(along_error**2)); cross_rms[iday, ifm] = np.sqrt(np.mean(cross_error**2)); radial_rms[iday, ifm] = np.sqrt(np.mean(radial_error**2)); mag_rms[iday, ifm] = np.sqrt(np.mean(mag_error**2))
             npoint[iday, ifm] = len(along_error)
-
+            print ifm, (int)(along_rms[iday, ifm]), (int)(cross_rms[iday, ifm]), (int)(radial_rms[iday, ifm]), (int)(mag_rms[iday, ifm]), (int)(npoint[iday, ifm])
 
 ## Parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
