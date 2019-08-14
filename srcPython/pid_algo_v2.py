@@ -32,7 +32,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM1_20170817'
+prefix_name = 'FM8_20170901_omniweb'#'FM1_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -94,7 +94,7 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg01.ddmi.s20170817-000000-e20170817-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt' 
 
 # FM07 20170901 nadir                                                                         
 # nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
@@ -311,12 +311,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # FM01 20170817 nadir:
         # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06
         # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03
-        r0 = '-2.39619629675000e+03'
-        r1 = '-5.42660274124000e+03'
-        r2 = '-3.52867259398000e+03'
-        v0 = '7.09842316800000'
-        v1 = '-1.86796667100000'
-        v2 = '-1.97307331700000'
+        # r0 = '-2.39619629675000e+03'
+        # r1 = '-5.42660274124000e+03'
+        # r2 = '-3.52867259398000e+03'
+        # v0 = '7.09842316800000'
+        # v1 = '-1.86796667100000'
+        # v2 = '-1.97307331700000'
         
         # # with FM03 20180113 nadir:
         # r0 = '6.78246384534000e+03'
@@ -335,12 +335,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v2 = '1.83111749000000e+00'
         
         # # with FM08 20170901 nadir
-        # r0 = '-2.28682220600000e+01'
-        # r1 = '6.89905045228000e+03'
-        # r2 = '3.40348034492000e+02'
-        # v0 = '-6.24118211000000e+00'
-        # v1 = '1.87039196000000e-01'
-        # v2 = '-4.32796299000000e+00'
+        r0 = '-2.28682220600000e+01'
+        r1 = '6.89905045228000e+03'
+        r2 = '3.40348034492000e+02'
+        v0 = '-6.24118211000000e+00'
+        v1 = '1.87039196000000e-01'
+        v2 = '-4.32796299000000e+00'
 
         
         # # # with FM4_20180112 start 20180113T170000
@@ -445,7 +445,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if iinter >= 0:
+            if iinter >= 59:
             #if ((iinter > 0) | ((iinter== 0) & (irho >=2))):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)

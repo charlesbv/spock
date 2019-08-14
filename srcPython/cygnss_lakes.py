@@ -37,5 +37,5 @@ for isc in range(nb_sc):
     filename_spec_spock.append( output_file_path_list[which_sc] + "specular_" + output_file_name_list[which_sc].replace(".txt",".bin") )
 
     data_spec = cygnss_read_spock_spec_bin(filename_spec_spock[-1], gps_name, dt, 0) 
-    date_spec.append(data_spec[0]); lon_spec.append(data_spec[1]); lat_spec.append(data_spec[2]); gain_spec.append(data_spec[3]); gps_spec.append(data_spec[4])
+    # date_spec.append(data_spec[0]); lon_spec.append(data_spec[1]); lat_spec.append(data_spec[2]); gain_spec.append(data_spec[3]); gps_spec.append(data_spec[4])
     
