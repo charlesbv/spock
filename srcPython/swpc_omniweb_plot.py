@@ -15,8 +15,8 @@
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 source = 'omniweb'#'20170901_to_20170910_omniweb_f107_no_storm.txt'#'20170827_to_20170910_omniweb_ap_no_storm.txt' # omniweb, swpc, [filename]
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
-date_stop = '2017-09-09T00:00:00' # YYYY-mm-ddTHH:MM:SS
-var_name = ['f107'] # list: f107, ap, dst
+date_stop = '2017-09-10T12:00:00' # YYYY-mm-ddTHH:MM:SS
+var_name = ['ap'] # list: f107, ap, dst
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_h, fig_save_name_h):
@@ -34,8 +34,8 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
     ax.plot(nb_seconds_since_start_h, var_h, linewidth = 2, color = 'k')
     ax.margins(0,0)
-    #ax.set_ylim([0, 252])
-    ax.set_ylim([80, 200])
+    ax.set_ylim([0, 252])
+    #ax.set_ylim([80, 200])
     #ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
 
     nb_ticks_xlabel = 8
@@ -126,7 +126,7 @@ if ((source_ok == 'omniweb') | (source_ok == 'user_file')):
 
         # Plot
         istart = np.where(date_date == date_start_date)[0][0]
-        istop = np.where(date_date == date_stop_date)[0][0]
+        istop = np.where(date_date == date_stop_date)[0][0] + 1
 
         if source_ok == 'omniweb':
             fig_title = var_name_plot + ' as a function of time - Omniweb'
@@ -199,7 +199,7 @@ else: # swpc !!!!!!!! incomplete because doesn't treat the case when date start 
 
         # Plot
         istart = np.where(date_date == date_start_date)[0][0]
-        istop = np.where(date_date == date_stop_date)[0][0]
+        istop = np.where(date_date == date_stop_date)[0][0] + 1
 
 
         fig_title = var_name_plot + ' as a function of time - SWPC'
