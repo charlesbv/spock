@@ -1,5 +1,10 @@
 # This script answers Chris's questions in his email on 08/12/2019
 
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+input_filename = 'lakes_one_week.txt'
+load_pickle = 0
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+
 # ALGORITHM
 from datetime import datetime, timedelta
 import sys
@@ -11,11 +16,17 @@ from cygnss_read_spock_spec_bin import *
 import matplotlib.gridspec as gridspec
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+import pickle
+
+if load_pickle == 1:
+    print str(datetime.now())[0:19]
+    date_spec = pickle.load(open('pickle/' + input_filename.replace(".txt" , str(isc) + ".pickle")))
+    print str(datetime.now())[0:19]
+    raise Exception
 
 
 ## Read specular point locations
 ### Read SpOCK main input file to figure out stuff to then read the output
-input_filename = 'lakes.txt'
 var_in, var_in_order = read_input_file(input_filename)
 output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
 output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')]; 
@@ -37,5 +48,6 @@ for isc in range(nb_sc):
     filename_spec_spock.append( output_file_path_list[which_sc] + "specular_" + output_file_name_list[which_sc].replace(".txt",".bin") )
 
     data_spec = cygnss_read_spock_spec_bin(filename_spec_spock[-1], gps_name, dt, 0) 
-    # date_spec.append(data_spec[0]); lon_spec.append(data_spec[1]); lat_spec.append(data_spec[2]); gain_spec.append(data_spec[3]); gps_spec.append(data_spec[4])
-    
+    date_spec.append(data_spec[0]); lon_spec.append(data_spec[1]); lat_spec.append(data_spec[2]); gain_spec.append(data_spec[3]); gps_spec.append(data_spec[4])
+pickle.dump( [date_spec, lon_spec, lat_spec, gain_spec], open( 'pickle/' + input_filename.replace(".txt" , ".pickle"), "w" ) )
+
