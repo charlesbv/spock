@@ -37,7 +37,7 @@ from matplotlib.ticker import FixedLocator
 from datetime import datetime, timedelta
 from mpl_toolkits.basemap import Basemap, shiftgrid
 
-filename = '20190818T000000_to_20190824T235959_sgp4.txt'#'20190825T000000_to_20190908T235959.txt'#'20190818T000000_to_20190824T235959.txt'#'20190803T000000_to_20190817T235959.txt' #'20190818T000000_to_20190824T235959.txt'
+filename = '20190819T000000_to_20190823T235959_sgp4_081819.txt'#'20190825T000000_to_20190908T235959.txt'#'20190818T000000_to_20190824T235959.txt'#'20190803T000000_to_20190817T235959.txt' #'20190818T000000_to_20190824T235959.txt'
 
 
 min_lat_range = 36.75
@@ -180,7 +180,7 @@ for yticks in yticks_arr:
         yticks_label.append( format(yticks, ".2f") + 'N' )
 ax.yaxis.set_ticklabels(yticks_label)
 ax.margins(0,0)
-fig_save_name = filename.replace('.txt', '_sgp4.pdf')
+fig_save_name = filename.replace('.txt', '.pdf')
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 date = np.array(date)
@@ -231,7 +231,7 @@ for iii in np.arange(0,n,1):#np.arange(index_n_first_hours[0], index_n_first_hou
             icell_lat = ncell_lat - 1
 
         nb_visit_per_cell_dynamic[icell_lon, icell_lat] = nb_visit_per_cell_dynamic[icell_lon, icell_lat] + 1
-    if iii > 585:
+    if iii > -1:
         #print date[iii]
         fig_title = ''#Probability per $P_C$ bin'
         fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
