@@ -1,0 +1,106 @@
+# This script downloads all TLEs for CYGNSS and plot the RAAN VS time
+
+# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+download_tle = 0
+fm01_info = ['FM01', '41887', '2019-01-01', '2019-08-18', 'blue'] # important to put the dates when the sc was operational (and not just in space after being decomissionned)
+image_info = ['IMAGE', '26113', '2000-03-25', '2005-12-18', 'red']
+# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
+
+import sys
+sys.path.append('/Users/cbv/work/spock/srcPython')
+import os
+from datetime import datetime, timedelta
+import ipdb
+import numpy as np
+from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
+from convert_tle_date_to_date import *
+from matplotlib.lines import Line2D
+
+
+arr_info = [polar_info, image_info]
+nsc = len(arr_info)
+arg_apogee = []
+epoch_start = []
+epoch_stop = []
+tle_epoch = []
+handles_arr = []
+for isc in range(nsc):
+    epoch_start.append(datetime.strptime(arr_info[isc][2], "%Y-%m-%d"))
+    epoch_stop.append(datetime.strptime(arr_info[isc][3], "%Y-%m-%d"))
+    handles_arr.append(Line2D([0], [0], color =  arr_info[isc][-1], lw=4, label = arr_info[isc][0]))
+
+date_ref = np.min(epoch_start)
+nb_seconds_since_ref = []
+for isc in range(nsc):
+    if download_tle == 1:
+        os.system('python download_tle.py ' + arr_info[isc][1] + ' ' + arr_info[isc][2] + ' ' + arr_info[isc][3] )
+    tle_filename = arr_info[isc][1] + '_' + arr_info[isc][2] + '_' + arr_info[isc][3] + '.txt'
+    tle_file = open(tle_filename)
+    read_tle_file = tle_file.readlines()
+    ntle = len(read_tle_file) / 2
+    arg_apogee_sc = []
+    tle_epoch_sc = []
+    nb_seconds_since_ref_sc = []
+    for itle in range(ntle):
+        iline = itle * 2
+        arg_apogee_temp = np.mod(np.float(read_tle_file[iline + 1][34:42]) + 180., 360)
+        arg_apogee_sc.append(arg_apogee_temp)
+        tle_epoch_sc_raw = read_tle_file[iline][18:32]
+        tle_epoch_sc_temp = convert_tle_date_to_date(tle_epoch_sc_raw)
+        tle_epoch_sc.append(tle_epoch_sc_temp)
+        nb_seconds_since_ref_sc.append((tle_epoch_sc_temp - date_ref).total_seconds())
+    arg_apogee.append(arg_apogee_sc)
+    tle_epoch.append(tle_epoch_sc)
+    nb_seconds_since_ref.append(nb_seconds_since_ref_sc)
+
+### Parameters for the figure
+height_fig = 11.  # the width is calculated as height_fig * 4/3.
+fontsize_plot = 25
+ratio_fig_size = 4./3
+
+
+fig_title = 'Argument of apogee as a function of time'
+y_label = 'Argument of apogee ' + u'(\N{DEGREE SIGN})' #'Real time'
+x_label = 'Real time'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+
+for isc in range(nsc):
+    ax.scatter(nb_seconds_since_ref[isc], arg_apogee[isc], s = 5, color = arr_info[isc][-1], label = arr_info[isc][0])
+
+# x axis label is in real time
+nb_ticks_xlabel = 8
+nb_seconds_in_simu = (np.max(epoch_stop) - date_ref).total_seconds()
+dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+xticks = np.arange(0, nb_seconds_in_simu+1, dt_xlabel)
+date_list_str = []
+date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
+for i in range(len(xticks)):
+    if dt_xlabel > nb_ticks_xlabel*24*3600:
+        date_list_str.append( str(date_list[i])[5:10] )
+    else:
+        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+ax.xaxis.set_ticks(xticks)
+ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+ax.margins(0,0); ax.set_xlim([min(xticks), max(xticks)])
+legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="Satellite", fontsize = fontsize_plot,  handles=handles_arr)
+legend.get_title().set_fontsize(str(fontsize_plot))
+
+
+fig_save_name = 'arg_apog.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
