@@ -6,6 +6,11 @@ polar_info = ['Polar', '23802', '1996-02-24', '2008-04-28', 'blue'] # important 
 image_info = ['IMAGE', '26113', '2000-03-25', '2005-12-18', 'red']
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
+xaxis_start_date = '1996-01-01' # need ot have the day to be 01
+xaxis_stop_date = '2008-06-01' # need ot have the day to be 01
+xaxis_nticks = 8
+
+
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')
 import os
@@ -30,7 +35,8 @@ for isc in range(nsc):
     epoch_stop.append(datetime.strptime(arr_info[isc][3], "%Y-%m-%d"))
     handles_arr.append(Line2D([0], [0], color =  arr_info[isc][-1], lw=4, label = arr_info[isc][0]))
 
-date_ref = np.min(epoch_start)
+xaxis_start_date_date = datetime.strptime(xaxis_start_date, "%Y-%m-%d")
+date_ref = xaxis_start_date_date#np.min(epoch_start)
 nb_seconds_since_ref = []
 for isc in range(nsc):
     if download_tle == 1:
@@ -81,18 +87,40 @@ plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 for isc in range(nsc):
     ax.scatter(nb_seconds_since_ref[isc], arg_apogee[isc], s = 5, color = arr_info[isc][-1], label = arr_info[isc][0])
 
+    
 # x axis label is in real time
-nb_ticks_xlabel = 8
-nb_seconds_in_simu = (np.max(epoch_stop) - date_ref).total_seconds()
-dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
-xticks = np.arange(0, nb_seconds_in_simu+1, dt_xlabel)
+xaxis_stop_date_date = datetime.strptime(xaxis_stop_date, "%Y-%m-%d")
+delta_xaxis_start_stop = (xaxis_stop_date_date - xaxis_start_date_date).total_seconds() / 3600./ 24 / 30
+nb_month_per_tick = (int)(delta_xaxis_start_stop / xaxis_nticks) + 1
+
+
+xticks = np.zeros([xaxis_nticks+1])
 date_list_str = []
-date_list = [date_ref + timedelta(seconds=x-xticks[0]) for x in xticks]
-for i in range(len(xticks)):
-    if dt_xlabel > nb_ticks_xlabel*24*3600:
-        date_list_str.append( str(date_list[i])[5:10] )
+xprevious = xaxis_start_date_date
+date_list_str.append(datetime.strftime(xaxis_start_date_date, "%b") + '\n' + str(xaxis_start_date_date)[:4])
+print nb_month_per_tick
+for itick in range(xaxis_nticks-1):
+    #ipdb.set_trace()
+    xtick_temp = datetime.strftime(xprevious, "%Y-%m")
+    xtick_temp_year = (int)(xtick_temp[:4])
+    xtick_temp_month = (int)(xtick_temp[5:7])
+    if xtick_temp_month + nb_month_per_tick > 12:
+        xtick_temp_year_new = xtick_temp_year + (int)((xtick_temp_month + nb_month_per_tick)/12.)
+        xtick_temp_month_new = np.mod(xtick_temp_month + nb_month_per_tick, 12)
+        if xtick_temp_month_new == 0: # month 24, 36, 48, etc is Dec and the year should not be incremented by 2, 3, 4, etc but only 1, 2, 3, etc
+            xtick_temp_month_new = 12
+            xtick_temp_year_new = xtick_temp_year_new - 1
     else:
-        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+        xtick_temp_month_new = xtick_temp_month + nb_month_per_tick
+        xtick_temp_year_new = xtick_temp_year
+    xtick_temp_str = str(xtick_temp_year_new) + '-' + str(xtick_temp_month_new).zfill(2) + '-01'
+    xtick_temp_date = datetime.strptime(xtick_temp_str, "%Y-%m-%d")
+    xticks[itick+1] = (xtick_temp_date - xaxis_start_date_date).total_seconds() # xticks[0] is xaxis_start_date_date
+    date_list_str.append(datetime.strftime(xtick_temp_date, "%b") + '\n' + xtick_temp_str[:4])
+    print str(xprevious)[0:10], str(xtick_temp_date)[0:10]
+    xprevious = xtick_temp_date
+xticks[-1] = (xaxis_stop_date_date  - xaxis_start_date_date).total_seconds()
+date_list_str.append(datetime.strftime(xaxis_stop_date_date, "%b") + '\n' + str(xaxis_stop_date_date)[:4])
 ax.xaxis.set_ticks(xticks)
 ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 ax.margins(0,0); ax.set_xlim([min(xticks), max(xticks)])
