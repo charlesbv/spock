@@ -1,3 +1,4 @@
+
 # This script downloads all TLEs for CYGNSS and plot the RAAN VS time
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
@@ -13,8 +14,8 @@ fm08_info = ['FM08', '41888', '2019-01-01', '2019-08-18', 'dodgerblue'] # import
 arr_info = [fm01_info, fm02_info, fm03_info, fm04_info, fm05_info, fm06_info, fm07_info, fm08_info]
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
-
-# satColors = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['lime', 'blue', 'indigo', 'purple', 'dodgerblue', 'steelblue', 'seagreen', 'limegreen']
+spock_raan_final = [158.1, 153.8, 151.8, 152.2, 157.4, 152.6, 151.6, 155.1]
+color_spock = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['lime', 'blue', 'indigo', 'purple', 'dodgerblue', 'steelblue', 'seagreen', 'limegreen']
 # nb_sc = 8 # !!!!!!!!!
 # label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
 
@@ -28,7 +29,9 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 from convert_tle_date_to_date import *
 from matplotlib.lines import Line2D
-
+from read_input_file import *
+from read_output_file import *
+from find_in_read_input_order_variables import *
 mu_earth = 398600.4418 # km^3/s^2
 earth_radius = 6378.137 # mean equatorial radius (km)   
 j2 = 1.08262668e-3
@@ -123,6 +126,31 @@ index_sort_prec_rate = np.argsort(final_prec_rate)
 print 'Actual precession rates at tf'
 for isc in range(nsc):
     print arr_info[index_sort_prec_rate[isc]][0], final_prec_rate[index_sort_prec_rate[isc]]
+for isc in range(nsc):
+    #print arr_info[isc][0], format(actual_raan[isc][-1], ".1f"), format(actual_raan[isc][-1] - actual_raan[2][-1], ".1f"), format(spock_raan_final[isc] - spock_raan_final[2], ".0f")
+    print arr_info[isc][0], format(actual_raan[isc][-1] - actual_raan[2][-1], ".1f"), format(spock_raan_final[isc] - spock_raan_final[2], ".1f")
+
+
+# Read SpOCK predictions
+spock_input_filename = 'raan_spock.txt'
+var_in, var_in_order = read_input_file(spock_input_filename)
+output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]; 
+output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')]; 
+dt = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
+nsc_spock = var_in[find_in_read_input_order_variables(var_in_order, 'nsc_spock')];
+var_to_read = ['raan']
+label_arr_spock = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
+label_arr_conversion = [3, 2, 7, 1, 0, 5, 6, 4]
+for isc_temp in range(nsc_spock):
+    isc = label_arr_conversion[isc_temp]
+    var_out, var_out_order = read_output_file( output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
+    if isc_temp == 0: # same date for all sc
+        date_spock = var_out[find_in_read_input_order_variables(var_out_order, 'date')]
+        nb_seconds_since_start_spock = var_out[find_in_read_input_order_variables(var_out_order, 'nb_seconds_since_start')]
+        nb_steps_spock = len(date)
+        raan_spock = np.zeros([nsc_spock, nb_steps_spock])
+    raan_spock[isc, :] = var_out[find_in_read_input_order_variables(var_out_order, 'raan')]
+
 ### parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25
@@ -146,9 +174,9 @@ ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
 plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
-for isc in range(nsc):
-    ax.plot(nb_seconds_since_ref[isc], actual_raan[isc],  color = arr_info[isc][-1], label = arr_info[isc][0])
-#    ax.plot(nb_seconds_since_ref[isc], j2_raan[isc],  color = 'black', label = 'j2')
+for isc in range(1):#!!!!!! nsc):
+    ax.plot(nb_seconds_since_ref[isc], actual_raan[isc],  color = 'red', label = 'Actual')
+    ax.scatter(nb_seconds_since_ref[isc], j2_raan[isc],  color = 'blue', label = 'Theoretical (J2)', s = 5)
 
 # x axis label is in real time
 nb_ticks_xlabel = 8
@@ -167,8 +195,6 @@ ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='ver
 ax.margins(0,0); ax.set_xlim([min(xticks), max(xticks)])
 legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="Satellite", fontsize = fontsize_plot,  handles=handles_arr)
 legend.get_title().set_fontsize(str(fontsize_plot))
-
-
 fig_save_name = 'cyg_actual_raan.pdf'
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
@@ -214,6 +240,36 @@ legend.get_title().set_fontsize(str(fontsize_plot))
 
 
 fig_save_name = 'cyg_actual_prec_rate.pdf'
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+
+
+
+fig_title = 'Orbit plane angular separation wrt. FM03 VS time - SpOCK'
+y_label = 'Angular separation ' + u'(\N{DEGREE SIGN})' #'Real time'
+x_label = 'Real time'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+
+fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
+
+for isc_temp in range(nsc):
+    isc = label_arr_conversion[isc_temp]
+    ax.plot(nb_seconds_since_start_spock/3600./24/30, raan_spock[isc, :], color = color_spock[isc], label = label_arr_spock[isc])
+ax.margins(0,0); ax.set_xlim([min(xticks), max(xticks)]); #ax.set_ylim([np.min(j2_prec_rate[isc]), np.max(j2_prec_rate[isc])])
+legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="Satellite", fontsize = fontsize_plot,  handles=handles_arr)
+legend.get_title().set_fontsize(str(fontsize_plot))
+fig_save_name = 'ang_sep_spock.pdf'
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 

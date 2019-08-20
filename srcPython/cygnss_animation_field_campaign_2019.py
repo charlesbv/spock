@@ -1,3 +1,4 @@
+
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -231,7 +232,7 @@ for iii in np.arange(0,n,1):#np.arange(index_n_first_hours[0], index_n_first_hou
             icell_lat = ncell_lat - 1
 
         nb_visit_per_cell_dynamic[icell_lon, icell_lat] = nb_visit_per_cell_dynamic[icell_lon, icell_lat] + 1
-    if iii > -1:
+    if iii > 476:
         #print date[iii]
         fig_title = ''#Probability per $P_C$ bin'
         fig = plt.figure(num=None, figsize=(width_fig, height_fig), dpi=80, facecolor='w', edgecolor='k')
