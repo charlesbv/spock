@@ -886,6 +886,35 @@ int cart2kep( ORBITAL_ELEMENTS_T   *OE,
   // AN to sc
   OE->an_to_sc = fmod(OE->w + OE->f, 2*M_PI); // angle ascending node to s/c
 
+
+  // Solar zenith
+  double x[6];
+  double lt;
+  double r_earth2sun_J2000[3];
+  double r_cg2sun_J2000[3];
+  double r_cg2sun_J2000_normalized[3];
+    spkez_c(10, time, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
+
+    r_earth2sun_J2000[0] = x[0];
+    r_earth2sun_J2000[1] = x[1];
+    r_earth2sun_J2000[2] = x[2];
+    double r_i2cg_INRTL_normalized[3];
+    v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r);
+    v_norm(r_cg2sun_J2000_normalized, r_cg2sun_J2000);
+    v_norm(r_i2cg_INRTL_normalized, r);
+    double cos_earthtosc_sctosun;
+    v_dot(&cos_earthtosc_sctosun, r_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized);
+
+    double cos_v_sctosun;
+    double v_i2cg_INRTL_normalized[3];
+    v_norm(v_i2cg_INRTL_normalized, v);
+    v_dot(&cos_v_sctosun, v_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized);
+    if (cos_v_sctosun > 0){
+    OE->zenith = 2*M_PI - acos(cos_earthtosc_sctosun);
+    }
+    else{
+      OE->zenith = acos(cos_earthtosc_sctosun);
+    }
   return 0;
     
 } /* ---------- end of function cart2kep ----------*/
@@ -3588,33 +3617,33 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 //  // PHASE (ARG PER + TRUE ANO) DEPENDENT: MAX OF SINE AT SOLAR ZENITH OF 0 DEG IF INTEGRATOR.DENSITY_MOD_PHASE = 0
 
 
-  double x[6];
-  double lt;
-  double r_earth2sun_J2000[3];
-  double r_cg2sun_J2000[3];
-  double r_cg2sun_J2000_normalized[3];
-    spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration.
+  /* double x[6]; */
+  /* double lt; */
+  /* double r_earth2sun_J2000[3]; */
+  /* double r_cg2sun_J2000[3]; */
+  /* double r_cg2sun_J2000_normalized[3]; */
+  /*   spkez_c(10, et, "J2000", "NONE", 399, x, &lt); //   Return the state (position and velocity) of a target body relative to an observing body, optionally corrected for light time (planetary aberration) and stellar aberration. */
 
-    r_earth2sun_J2000[0] = x[0];
-    r_earth2sun_J2000[1] = x[1];
-    r_earth2sun_J2000[2] = x[2];
-    double r_i2cg_INRTL_normalized[3];
-    v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL);
-    v_norm(r_cg2sun_J2000_normalized, r_cg2sun_J2000);
-    v_norm(r_i2cg_INRTL_normalized, r_i2cg_INRTL);
-    double cos_earthtosc_sctosun;
-    v_dot(&cos_earthtosc_sctosun, r_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized);
+  /*   r_earth2sun_J2000[0] = x[0]; */
+  /*   r_earth2sun_J2000[1] = x[1]; */
+  /*   r_earth2sun_J2000[2] = x[2]; */
+  /*   double r_i2cg_INRTL_normalized[3]; */
+  /*   v_sub(r_cg2sun_J2000, r_earth2sun_J2000, r_i2cg_INRTL); */
+  /*   v_norm(r_cg2sun_J2000_normalized, r_cg2sun_J2000); */
+  /*   v_norm(r_i2cg_INRTL_normalized, r_i2cg_INRTL); */
+  /*   double cos_earthtosc_sctosun; */
+  /*   v_dot(&cos_earthtosc_sctosun, r_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized); */
 
-    double cos_v_sctosun;
-    double v_i2cg_INRTL_normalized[3];
-    v_norm(v_i2cg_INRTL_normalized, v_i2cg_INRTL);
-    v_dot(&cos_v_sctosun, v_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized);
-    if (cos_v_sctosun > 0){
-    SC->OE.zenith = 2*M_PI - acos(cos_earthtosc_sctosun);
-    }
-    else{
-    SC->OE.zenith = acos(cos_earthtosc_sctosun);
-    }
+  /*   double cos_v_sctosun; */
+  /*   double v_i2cg_INRTL_normalized[3]; */
+  /*   v_norm(v_i2cg_INRTL_normalized, v_i2cg_INRTL); */
+  /*   v_dot(&cos_v_sctosun, v_i2cg_INRTL_normalized, r_cg2sun_J2000_normalized); */
+  /*   if (cos_v_sctosun > 0){ */
+  /*   SC->OE.zenith = 2*M_PI - acos(cos_earthtosc_sctosun); */
+  /*   } */
+  /*   else{ */
+  /*   SC->OE.zenith = acos(cos_earthtosc_sctosun); */
+  /*   } */
     double fac_density;
     fac_density =  SC->INTEGRATOR.density_mod + SC->INTEGRATOR.density_mod_amp *  sin(SC->OE.zenith + (SC->INTEGRATOR.density_mod_phase+0.25)*2*M_PI);
 
@@ -5683,7 +5712,6 @@ int build_earth_pressure_map(GRAVITY_T  *Gravity, int iProc){
     exitf();
   return 0;
 }
-
 /* Assumptions: */
 /* - the zenith angle of the satellite is approximated to be the same as the angle between the direction "center of the Earth to satelltie" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to satelltie" and the direction "satelltie to Sun"). This approximation is valid since the distance Earth to Sun is much larger than the distance Earth to satellite */
 /* - Similarly, the zenith angle of the Earth element is approximated to be the same as the angle between the direction "center of the Earth to Earth element" and the direction "center of the Earth to Sun" (instead of the angle between the direction "center of the Earth to Earth element" and the direction "Earth element to Sun"). */

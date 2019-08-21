@@ -885,7 +885,7 @@ if (iProc == 0){
 
      OPTIONS->first_run_to_find_tca_before_collision_assessment = 1;
 
-     while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 200.0) ){ // propagate all unrpertubed orbits to determine times of close approach
+     while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 100.0) ){ // propagate all unrpertubed orbits to determine times of close approach
        already_propagated_ref_sc = 1;
 
 
@@ -1318,7 +1318,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
   double sma_ini = CONSTELLATION->spacecraft[0][0].OE.sma;
   // !!!!!!!!!! REMOVE LINE BELOW AND UNCOMMENT NEXT ONE
   // while ( ( fabs( CONSTELLATION->et - endtime ) > 0.01 ) && ( min_altitude_constellation > 200.0) && ( CONSTELLATION->spacecraft[0][0].OE.sma > sma_ini - 20 )){ 
-    while ( ( fabs( CONSTELLATION->et - endtime ) > OPTIONS->dt / 2. ) && ( min_altitude_constellation > 200.0) ){ // propagate the constellation by dt //  while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 200.0) ){ // propagate the constellation by dt
+    while ( ( fabs( CONSTELLATION->et - endtime ) > OPTIONS->dt / 2. ) && ( min_altitude_constellation > 100.0) ){ // propagate the constellation by dt //  while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 200.0) ){ // propagate the constellation by dt
     /* printf("\n"); */
     /* pti(iProc, "iProc"); */
       //                     etprint(CONSTELLATION->et, "t");
