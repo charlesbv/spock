@@ -1,4 +1,8 @@
 # This script downloads all TLEs for satellites de-1, viking, polar, and image during their lifetime an plot the argument of apogee (as read from the TLEs) as a function of tim
+# ASSUMPTIONS:
+# - in the SpOCK simulation, station names must include the character "NP" (if at the North Pole) or "SP" (if at the South Pole)
+# - for the post processing of SPOCK in looking at the coverage of both the South and North, it only works if there are two sc (not 1, not 3, not 4 etc). The initial idea of this analysis is to look at one 1 sc sees the stations at the North AND the other sc sees the stations at the South. So it makes sense that we look at 2 sc and only 2 sc
+# - see section "PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT"
 
 # PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 download_tle = 0
@@ -8,6 +12,7 @@ de1_info = ['DE-1', '12624', '1981-08-03', '1991-02-28', 'black']
 viking_info = ['Viking', '16614', '1986-02-22', '1987-05-12', 'magenta']
 arr_info = [polar_info, image_info, de1_info, viking_info]
 pole_offset = 30.
+min_nb_stations = 6 #
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 xaxis_start_date = '1981-08-03' # need ot have the day to be 01
@@ -17,6 +22,7 @@ xaxis_nticks = 8
 
 import sys
 sys.path.append('/Users/cbv/work/spock/srcPython')
+from spock_main_input_sgp4 import *
 import os
 from datetime import datetime, timedelta
 import ipdb
@@ -25,7 +31,41 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 from convert_tle_date_to_date import *
 from matplotlib.lines import Line2D
+import pickle
+from read_input_file import *
+from find_in_read_input_order_variables import *
 
+def cov_both_pole(spock_input_filename): # !!!! before calling this function, need to "python report_coverage_ground_station_for_sift_parallel_sftp.py spock_input_filename"
+    var_in, var_in_order = read_input_file(spock_input_filename)
+    date_start_spock = var_in[find_in_read_input_order_variables(var_in_order, 'date_start')];
+    date_stop_spock = var_in[find_in_read_input_order_variables(var_in_order, 'date_stop')];
+    dt_spock = var_in[find_in_read_input_order_variables(var_in_order, 'dt')];  # the coverage is output every dt, not every dt_output
+    nb_steps_spock = (int)((date_stop_spock - date_start_spock).total_seconds())#/dt_spock) # need to calcualte it here because read_input_file gives the nb of time steps output considering dt_output, not dt. Here we're interested in dt
+    cov_spock = pickle.load(open('pickle/' +spock_input_filename.replace('.txt', '.pickle')))
+    nsc_spock = len(cov_spock)
+    north_stations_spock = np.zeros([nsc_spock, nb_steps_spock])
+    south_stations_spock = np.zeros([nsc_spock, nb_steps_spock])
+    for isc in range(nsc_spock):
+        ncov = len(cov_spock[isc])
+        for icov in range(ncov):
+            cov_start = (int)((datetime.strptime(cov_spock[isc][icov][0], "%Y-%m-%dT%H:%M:%S") - date_start_spock).total_seconds())
+            cov_stop = (int)((datetime.strptime(cov_spock[isc][icov][1], "%Y-%m-%dT%H:%M:%S") - date_start_spock).total_seconds())
+            if 'NP' in cov_spock[isc][icov][2]: # North Pole station
+                north_stations_spock[isc, cov_start: cov_stop+1] = north_stations_spock[isc, cov_start: cov_stop+1] + 1
+            if 'SP' in cov_spock[isc][icov][2]: # South Pole station
+                south_stations_spock[isc, cov_start: cov_stop+1] = south_stations_spock[isc, cov_start: cov_stop+1] + 1
+
+    north_south_two_sc = np.where( ((north_stations_spock[0, :] >= min_nb_stations) & # sc 1 sees north stations AND
+                                    (south_stations_spock[1, :] >= min_nb_stations)) # sc 2 sees south stations
+                                                                                     # OR 
+                                   | ((south_stations_spock[0, :] >= min_nb_stations) & # sc 1 sees south stations AND
+                                      (north_stations_spock[1, :] >= min_nb_stations)) ) # sc 2 sees north stations
+    north_south_two_sc = north_south_two_sc[0]
+    nb_seconds_both_pole = np.float(len(north_south_two_sc))
+    nb_hours_both_pole = nb_seconds_both_pole / 3600.
+    return nb_seconds_both_pole
+
+#bla = cov_both_pole('032800.txt')
 
 
 nsc = len(arr_info)
@@ -43,20 +83,21 @@ for isc in range(nsc):
 xaxis_start_date_date = datetime.strptime(xaxis_start_date, "%Y-%m-%d")
 date_ref = xaxis_start_date_date#np.min(epoch_start)
 nb_seconds_since_ref = []
+read_tle_file = []
 for isc in range(nsc):
     if download_tle == 1:
         os.system('python download_tle.py ' + arr_info[isc][1] + ' ' + arr_info[isc][2] + ' ' + arr_info[isc][3] )
     tle_filename = arr_info[isc][1] + '_' + arr_info[isc][2] + '_' + arr_info[isc][3] + '.txt'
     tle_file = open(tle_filename)
-    read_tle_file = tle_file.readlines()
-    ntle = len(read_tle_file) / 2
+    read_tle_file.append(tle_file.readlines())
+    ntle = len(read_tle_file[-1]) / 2
     arg_apogee_sc = []
     arg_apogee_trans_sc = []
     tle_epoch_sc = []
     nb_seconds_since_ref_sc = []
     for itle in range(ntle):
         iline = itle * 2
-        arg_apogee_temp = np.mod(np.float(read_tle_file[iline + 1][34:42]) + 180., 360)
+        arg_apogee_temp = np.mod(np.float(read_tle_file[-1][iline + 1][34:42]) + 180., 360)
         arg_apogee_sc.append(arg_apogee_temp)
         if ((arg_apogee_temp >= 0) & (arg_apogee_temp < 90)):
             arg_apogee_trans_temp = arg_apogee_temp
@@ -65,15 +106,93 @@ for isc in range(nsc):
         elif ((arg_apogee_temp >= 270) & (arg_apogee_temp < 360)):
             arg_apogee_trans_temp = arg_apogee_temp - 360
         arg_apogee_trans_sc.append(arg_apogee_trans_temp)
-        tle_epoch_sc_raw = read_tle_file[iline][18:32]
+        tle_epoch_sc_raw = read_tle_file[-1][iline][18:32]
         tle_epoch_sc_temp = convert_tle_date_to_date(tle_epoch_sc_raw)
         tle_epoch_sc.append(tle_epoch_sc_temp)
         nb_seconds_since_ref_sc.append((tle_epoch_sc_temp - date_ref).total_seconds())
     arg_apogee.append(arg_apogee_sc)
     arg_apogee_trans.append(arg_apogee_trans_sc)
-    tle_epoch.append(tle_epoch_sc)
+    tle_epoch.append(np.array(tle_epoch_sc))
     nb_seconds_since_ref.append(nb_seconds_since_ref_sc)
 
+
+# FIGURING OUT WITH SPOCK WHEN POLAR AND IMAGE SEE THE NORTH AND SOUTH POLES
+isc_polar = 0
+isc_image = 1
+tle_start = tle_epoch[isc_image][0]# only select the times when the two sc were operational at the same time. In this case, these times coorespond to the times when IMAGE was operational
+tle_stop = tle_epoch[isc_image][-1]
+# for each day between tle_start and tle_stop, propagate Polar and IMAGE for this entire day, using the most recent TLEs for these two sc
+date_start_spock_ana = datetime.strftime(tle_start + timedelta(days = 1), "%Y-%m-%d")[0:10] + 'T00:00:00'
+date_stop_spock_ana = datetime.strftime(tle_stop, "%Y-%m-%d")[0:10] + 'T00:00:00'
+date_start_spock_ana_date = datetime.strptime(date_start_spock_ana, "%Y-%m-%dT%H:%M:%S")
+date_stop_spock_ana_date = datetime.strptime(date_stop_spock_ana, "%Y-%m-%dT%H:%M:%S")
+nb_day_spock_ana = (date_stop_spock_ana_date - date_start_spock_ana_date).days + 1
+date_spock_ana = np.array([date_start_spock_ana_date + timedelta(days=i) for i in np.arange(0, nb_day_spock_ana, 1)])
+nb_day_spock_ana = len(date_spock_ana)
+cov_nb_seconds_since_start = []
+cov_spock_both_pole = []
+for iday in range(nb_day_spock_ana):
+    date_start_spock_date = date_spock_ana[iday]
+    date_stop_spock_date = date_spock_ana[iday] + timedelta(days = 1)
+    date_start_spock = datetime.strftime(date_start_spock_date, "%Y-%m-%dT%H:%M:%S")
+    date_stop_spock = datetime.strftime(date_stop_spock_date, "%Y-%m-%dT%H:%M:%S")
+    cov_nb_seconds_since_start.append((date_start_spock_date - date_spock_ana[0]).total_seconds())
+    # Create TLE file for Polar and IMAGE
+    ## Polar
+    itle_polar = np.where(tle_epoch[isc_polar] <= date_start_spock_date)[0][-1]
+    tle_filename_polar = date_start_spock[0:10] + '_' + arr_info[isc_polar][0].lower() + '.txt'
+    tle_file_polar = open(tle_filename_polar, "w")
+    print >> tle_file_polar, read_tle_file[isc_polar][itle_polar*2].replace('\r','').replace('\n','')
+    print >> tle_file_polar, read_tle_file[isc_polar][itle_polar*2+1].replace('\r','').replace('\n','')
+    tle_file_polar.close()
+    ## Image
+    itle_image = np.where(tle_epoch[isc_image] <= date_start_spock_date)[0][-1]
+    tle_filename_image = date_start_spock[0:10] + '_' + arr_info[isc_image][0].lower() + '.txt'
+    tle_file_image = open(tle_filename_image, "w")
+    print >> tle_file_image, read_tle_file[isc_image][itle_image*2].replace('\r','').replace('\n','')
+    print >> tle_file_image, read_tle_file[isc_image][itle_image*2+1].replace('\r','').replace('\n','')
+    tle_file_image.close()
+    # Create SpOCK main input file
+    spock_input_filename = date_start_spock[0:10] + '.txt'
+    spock_main_input_sgp4(
+     spock_input_filename,
+    # for TIME section
+    date_start_spock,
+    date_stop_spock,
+    60.,
+    # for SPACECRAFT section
+    2,
+        '0',
+    29,
+        "cygnss_geometry_2016_acco09.txt",
+    # for ORBIT section
+    tle_filename_polar + '\n' + tle_filename_image,
+    # for FORCES section
+    8,
+    'drag sun_gravity moon_gravity',
+    'static',
+    # for OUTPUT section
+    'out/out',
+    60.,
+    # for ATTITUDE section
+    "nadir",#"(0;-22;0) (0;0;0)",#"nadir", #!!!!!
+    # for GROUNDS_STATIONS section
+    "stations.txt",#"my_ground_stations.txt"
+     # for SPICE section
+     '/Users/cbv/cspice/data',
+     # for DENSITY_MOD section
+1
+    )
+    # Run SpOCK
+    os.system('mpirun -np 2 spock_sgp4 ' + spock_input_filename)
+    # Run report_coverage_ground_station_for_sift_parallel_sftp to create the pickle of the statistic coverge
+    os.system('python report_coverage_ground_station_for_sift_parallel_sftp.py ' + spock_input_filename)
+    # Calculate the number of seconds during whcih Polar sees the North pole and IMAGE sees the South pole or vice versa
+    cov_spock_both_pole.append( cov_both_pole(spock_input_filename) )
+    print iday, nb_day_spock_ana, cov_nb_seconds_since_start[-1], cov_spock_both_pole[-1]
+    
+    
+raise Exception
 ### Parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25

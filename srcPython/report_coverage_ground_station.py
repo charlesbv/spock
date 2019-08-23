@@ -32,10 +32,11 @@ if plot_results == 1:
     import matplotlib.gridspec as gridspec
     plt.ion()
 
+import sys
+sys.path.append("/Users/cbv/work/spock/srcPython")
 from datetime import datetime, timedelta
 import numpy as np
 from read_input_file import *
-import sys
 from os import listdir
 from os.path import isfile, join
 deg_sign = u'\xb0'.encode('utf8')

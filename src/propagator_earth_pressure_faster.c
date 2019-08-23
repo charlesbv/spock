@@ -1404,10 +1404,10 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
     compute_power(&SC->INTEGRATOR, CONSTELLATION, SC->r_i2cg_INRTL, SC->v_i2cg_INRTL, &SC->et, PARAMS, et_initial_epoch, et_sc_initial,SC->INTEGRATOR.index_in_attitude_interpolated);
   }  
 
-
+  // printf("%d\n", SC->INTEGRATOR.index_in_attitude_interpolated);
   if (SC->INTEGRATOR.isGPS == 0){
     if (GROUND_STATION->nb_ground_stations > 0){
-      if (SC->INTEGRATOR.index_in_attitude_interpolated > 0){
+      if ((SC->INTEGRATOR.index_in_attitude_interpolated > 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
 	if (SC->et >= et_initial_epoch){
 	coverage_ground_station( SC, GROUND_STATION, PARAMS, SC->INTEGRATOR.index_in_attitude_interpolated, &SC->INTEGRATOR, et_initial_epoch, et_sc_initial,sc_ecef_previous_time_step, sc_eci_previous_time_step, sc_v_eci_previous_time_step, 1 ); // last argument is the time step in seconds for the linear interpolation of the sc position when computing the coverage of the ground stations by the sc
 	}

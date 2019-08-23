@@ -35,14 +35,21 @@ import ipdb
 
 # PARAMETERS TO SET
 plot_results = 0 # if you want to create a plot of the coverage
+save_results = 1 # if you want to save the coverage stats as a pickle
 path_folder_plot = '.' # if plot_results is set to 1, otherwise don't worry about it 
 # end of PARAMETERS TO SET
 
 # Algorithm
+import os
 if plot_results == 1:
     from matplotlib import pyplot as plt
     import matplotlib.gridspec as gridspec
     plt.ion()
+
+if save_results == 1:
+    import pickle
+    if (os.path.isdir("pickle") == False):
+        os.system('mkdir pickle')
 deg_sign = u'\xb0'.encode('utf8')
 
 
@@ -60,7 +67,7 @@ date_start = input_variables[find_in_read_input_order_variables(order_input_vari
 date_stop = input_variables[find_in_read_input_order_variables(order_input_variables, 'date_stop')]
 # read coverage ground station files
 overflight_all_sat_all_station = []
-
+overflight_all_stations_combined_arr_all_sat = []
 for isat in range(nb_satellites):
 
     overflight_per_sat_all_station = []
@@ -119,7 +126,6 @@ for isat in range(nb_satellites):
             new_coverage = 0
         overflight.append( overflight_per_sat )
     overflight_all_sat_all_station.append(overflight)
-    
     #     # Write report: HERE IT WIL CREATE NB_GROUND_STATIONS BLOCKS: COVERAGE OF EACH GROUND STATIONS
     #     print >> file_station_out, '#Coverage of ' + all_station_files[istation].split('/')[-1].split('_by')[0] + ' (longitude = ' + '{0:.2f}'.format(station_lon[istation]) + deg_sign + ', latitude = ' + '{0:.2f}'.format(station_lat[istation]) + deg_sign  + ', altitude = ' + '{0:.0f}'.format(station_alt[istation]) +' m)' + '\n'
     #     for icoverage in range( len(overflight_per_sat) ):
@@ -135,16 +141,27 @@ for isat in range(nb_satellites):
     nb_overflights = len(overflight_all_stations_combined)
     ## Order from older to most recent coverage
     overflight_all_stations_combined_arr = np.array(overflight_all_stations_combined)
-    overflight_all_stations_combined_sorted = [ datetime.strptime(t, '%Y-%m-%dT%H:%M:%S') for t in overflight_all_stations_combined_arr[:,0] ]
-    overflight_all_stations_combined_sorted.sort()
-    overflight_all_stations_combined_sorted = np.array(overflight_all_stations_combined_sorted)
+    overflight_all_stations_combined_sorted_temp = np.array([ datetime.strptime(t, '%Y-%m-%dT%H:%M:%S') for t in overflight_all_stations_combined_arr[:,0] ])
+    index_sort = np.argsort(overflight_all_stations_combined_sorted_temp)
+    overflight_all_stations_combined_arr_all_sat.append(overflight_all_stations_combined_arr[index_sort, :])
+    overflight_all_stations_combined_sorted = overflight_all_stations_combined_sorted_temp[index_sort]
     print >> file_station_out, "#Coverage of " + satellite_to_plot.split('.')[0] + ":\n"
     for ioverflight in range(nb_overflights):
-        duration_overflight = datetime.strptime(overflight_all_stations_combined_arr[np.where( overflight_all_stations_combined_arr[:,0] == datetime.strftime(overflight_all_stations_combined_sorted[ioverflight], "%Y-%m-%dT%H:%M:%S" ) )[0][0] ,1] , "%Y-%m-%dT%H:%M:%S" ) - overflight_all_stations_combined_sorted[ioverflight]
-        print >> file_station_out, '(' + str(ioverflight + 1) + ') ' + datetime.strftime(overflight_all_stations_combined_sorted[ioverflight], "%Y-%m-%d %H:%M:%S") + ' to ' + overflight_all_stations_combined_arr[np.where( overflight_all_stations_combined_arr[:,0] == datetime.strftime(overflight_all_stations_combined_sorted[ioverflight], "%Y-%m-%dT%H:%M:%S" ) )[0][0] ,1].replace("T", " ") + ' for ' + str(duration_overflight.days) + 'd ' + str( duration_overflight.seconds / 3600 ) + 'h' + str( duration_overflight.seconds / 60 ) + "'" + str( np.mod(duration_overflight.seconds,60) ) + '" (' + str(duration_overflight.days*24*3600 + duration_overflight.seconds) + ' s)' + ' - ' + ' - max_elev ' + format(elev_max_per_sat[ioverflight], ".1f") + ' - '  + overflight_all_stations_combined_arr[np.where( overflight_all_stations_combined_arr[:,0] == datetime.strftime(overflight_all_stations_combined_sorted[ioverflight], "%Y-%m-%dT%H:%M:%S" ) )[0][0] ,2].title() 
+        icov = index_sort[ioverflight]
+        duration_overflight = (datetime.strptime(overflight_all_stations_combined_arr[icov, 1], "%Y-%m-%dT%H:%M:%S" ) - datetime.strptime(overflight_all_stations_combined_arr[icov, 0], "%Y-%m-%dT%H:%M:%S" )).total_seconds()
+        duration_overflight_day = (int)(duration_overflight / 3600./ 24.)
+        duration_overflight_hour = (int)((duration_overflight - duration_overflight_day * 24 * 3600)/3600.)
+        duration_overflight_min = (int)((duration_overflight - (duration_overflight_day * 24. * 3600 + duration_overflight_hour * 3600.))/60.)
+        duration_overflight_sec = (int)(duration_overflight - (duration_overflight_day * 24. * 3600 + duration_overflight_hour * 3600 + duration_overflight_min * 60))
+        print >> file_station_out, '(' + str(ioverflight + 1) + ') ' + overflight_all_stations_combined_arr[icov, 0].replace("T", " ") + ' to ' + overflight_all_stations_combined_arr[icov, 1].replace("T", " ") + ' for ' + str(duration_overflight_day) + 'd ' + str(duration_overflight_hour) + 'h' + str(duration_overflight_min) + "'" + str(duration_overflight_sec) + '" (' + str(duration_overflight) + ' s)' + '- max_elev ' + format(elev_max_per_sat[icov], ".1f") + ' - '  + overflight_all_stations_combined_arr[icov, 2]
+#        raise Exception
     file_station_out.close()
     # end of Write report:  HERE IT WIL CREATE 1 BLOCK: COVERAGE OF ALL STATIONS AS A FUNCTION OF TIME
 
+
+if save_results == 1:
+    pickle.dump( overflight_all_stations_combined_arr_all_sat, open( 'pickle/' + main_input_file_name.replace('.txt', '.pickle'), "w" ) )    
+    
 # Below works for script report_coverage_ground_station.py but haven't tried it for report_coverage_ground_station_for_sift.py
 if plot_results == 1:
     # PLOT COVERAGE: 1 figure per satellite
