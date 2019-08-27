@@ -683,7 +683,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 
       // propagate ONE LAST TIME UNTIL THE SATELLITE EPOCH IS THE SAME AS THE CONSTELLATION EPOCH
       //      if (iProc == 0){
-            if (fabs(starttime-CONSTELLATION->spacecraft[ii][0].et) > OPTIONS->dt/1000.){ //// if sc.et not equal to constellation initial epoch
+            if (fabs(starttime-CONSTELLATION->spacecraft[ii][0].et) > OPTIONS->dt/1.e6){ //// if sc.et not equal to constellation initial epoch
       if (start_ensemble[ii] == 0){ // if this iProc runs main sc ii
 	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = starttime - CONSTELLATION->spacecraft[ii][0].et;
 	propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel, start_ensemble, array_sc );

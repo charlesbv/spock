@@ -1,3 +1,4 @@
+# stopped at iday = 1673 (2004-10-24.txt crashed)
 # This script downloads all TLEs for satellites de-1, viking, polar, and image during their lifetime an plot the argument of apogee (as read from the TLEs) as a function of tim
 # ASSUMPTIONS:
 # - in the SpOCK simulation, station names must include the character "NP" (if at the North Pole) or "SP" (if at the South Pole)
@@ -13,6 +14,7 @@ viking_info = ['Viking', '16614', '1986-02-22', '1987-05-12', 'magenta']
 arr_info = [polar_info, image_info, de1_info, viking_info]
 pole_offset = 30.
 min_nb_stations = 6 #
+fov = [15, 8] # first umber for Polar, second for IMAGE !!!!!! important to put Polar first then IMAGE in the SpOCK simuation (#ORBIT section)
 # end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
 
 xaxis_start_date = '1981-08-03' # need ot have the day to be 01
@@ -34,8 +36,9 @@ from matplotlib.lines import Line2D
 import pickle
 from read_input_file import *
 from find_in_read_input_order_variables import *
+from report_coverage_ground_station_amarex import *
 
-def cov_both_pole(spock_input_filename): # !!!! before calling this function, need to "python report_coverage_ground_station_for_sift_parallel_sftp.py spock_input_filename"
+def cov_both_pole(spock_input_filename): # !!!! before calling this function, need to call the function report_coverage_ground_station_amarex
     var_in, var_in_order = read_input_file(spock_input_filename)
     date_start_spock = var_in[find_in_read_input_order_variables(var_in_order, 'date_start')];
     date_stop_spock = var_in[find_in_read_input_order_variables(var_in_order, 'date_stop')];
@@ -50,6 +53,8 @@ def cov_both_pole(spock_input_filename): # !!!! before calling this function, ne
         for icov in range(ncov):
             cov_start = (int)((datetime.strptime(cov_spock[isc][icov][0], "%Y-%m-%dT%H:%M:%S") - date_start_spock).total_seconds())
             cov_stop = (int)((datetime.strptime(cov_spock[isc][icov][1], "%Y-%m-%dT%H:%M:%S") - date_start_spock).total_seconds())
+            min_aov = np.float(cov_spock[isc][icov][3])
+
             if 'NP' in cov_spock[isc][icov][2]: # North Pole station
                 north_stations_spock[isc, cov_start: cov_stop+1] = north_stations_spock[isc, cov_start: cov_stop+1] + 1
             if 'SP' in cov_spock[isc][icov][2]: # South Pole station
@@ -63,10 +68,11 @@ def cov_both_pole(spock_input_filename): # !!!! before calling this function, ne
     north_south_two_sc = north_south_two_sc[0]
     nb_seconds_both_pole = np.float(len(north_south_two_sc))
     nb_hours_both_pole = nb_seconds_both_pole / 3600.
+
     return nb_seconds_both_pole
 
 #bla = cov_both_pole('032800.txt')
-
+fov = np.array(fov)
 
 nsc = len(arr_info)
 arg_apogee = []
@@ -137,16 +143,16 @@ for iday in range(nb_day_spock_ana):
     date_start_spock = datetime.strftime(date_start_spock_date, "%Y-%m-%dT%H:%M:%S")
     date_stop_spock = datetime.strftime(date_stop_spock_date, "%Y-%m-%dT%H:%M:%S")
     cov_nb_seconds_since_start.append((date_start_spock_date - date_spock_ana[0]).total_seconds())
-    # Create TLE file for Polar and IMAGE
+    # Create TLE file for Polar and IMAGE ##!!!!!!! put Polar first, then IMAGE. Otherwise need to change the fov order
     ## Polar
-    itle_polar = np.where(tle_epoch[isc_polar] <= date_start_spock_date)[0][-1]
+    itle_polar = np.where(tle_epoch[isc_polar] < date_start_spock_date)[0][-1]
     tle_filename_polar = date_start_spock[0:10] + '_' + arr_info[isc_polar][0].lower() + '.txt'
     tle_file_polar = open(tle_filename_polar, "w")
     print >> tle_file_polar, read_tle_file[isc_polar][itle_polar*2].replace('\r','').replace('\n','')
     print >> tle_file_polar, read_tle_file[isc_polar][itle_polar*2+1].replace('\r','').replace('\n','')
     tle_file_polar.close()
     ## Image
-    itle_image = np.where(tle_epoch[isc_image] <= date_start_spock_date)[0][-1]
+    itle_image = np.where(tle_epoch[isc_image] < date_start_spock_date)[0][-1]
     tle_filename_image = date_start_spock[0:10] + '_' + arr_info[isc_image][0].lower() + '.txt'
     tle_file_image = open(tle_filename_image, "w")
     print >> tle_file_image, read_tle_file[isc_image][itle_image*2].replace('\r','').replace('\n','')
@@ -183,16 +189,57 @@ for iday in range(nb_day_spock_ana):
      # for DENSITY_MOD section
 1
     )
+    if iday > -1:
     # Run SpOCK
-    os.system('mpirun -np 2 spock_sgp4 ' + spock_input_filename)
-    # Run report_coverage_ground_station_for_sift_parallel_sftp to create the pickle of the statistic coverge
-    os.system('python report_coverage_ground_station_for_sift_parallel_sftp.py ' + spock_input_filename)
-    # Calculate the number of seconds during whcih Polar sees the North pole and IMAGE sees the South pole or vice versa
+        #os.system('mpirun -np 2 spock_amarex ' + spock_input_filename)
+        #Run report_coverage_ground_station_amarex to create the pickle of the statistic coverge
+        #os.system('python report_coverage_ground_station_amarex.py ' + spock_input_filename + ' ' + str(fov[isc]))
+        report_coverage_ground_station_amarex(spock_input_filename, fov) # !!!!!! important to put Polar first then IMAGE in the SpOCK simuation (#ORBIT section)
+    #Calculate the number of seconds during whcih Polar sees the North pole and IMAGE sees the South pole or vice versa
     cov_spock_both_pole.append( cov_both_pole(spock_input_filename) )
-    print iday, nb_day_spock_ana, cov_nb_seconds_since_start[-1], cov_spock_both_pole[-1]
+    print iday, nb_day_spock_ana, str(date_start_spock_date)[:10], cov_spock_both_pole[-1]
     
-    
+    # if iday == 456:
+    #     raise Exception
 raise Exception
+cov_spock_both_pole_arr = np.array(cov_spock_both_pole)
+height_fig = 15.  # the width is calculated as height_fig * 4/3. 
+fontsize_plot = 25
+ratio_fig_size = 4./3
+fig_title = 'Histogram of # hours/day during which Polar and IMAGE see both poles together (one pole each)'
+y_label = 'Percentage (%)'
+x_label = '% hours'
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+fig.suptitle(fig_title, y = 0.958,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold                                                                                                                                                                  
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.17)
+ax = fig.add_subplot(gs[0, 0])
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure                                                                                                                                       
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold                           
+range_min = 0
+range_max = 5
+nbins = 10
+hist_along_data = np.histogram(cov_spock_both_pole_arr/3600., range = [range_min, range_max], bins = nbins)
+bin_array_temp = hist_along_data[1]
+bin_array = ( bin_array_temp[:-1] + np.roll(bin_array_temp,-1)[:-1] ) /2.
+binsize_actual = bin_array[1] - bin_array[0]
+hist_along = hist_along_data[0] * 100. / len(cov_spock_both_pole_arr)
+ax.bar(bin_array, hist_along, binsize_actual)
+ax.set_ylim([0, np.max(hist_along)*1.1])
+ax.set_xlim([np.min(bin_array_temp), np.max(bin_array_temp)])
+
+fig.set_figheight(height_fig)
+fig.set_figwidth(height_fig*ratio_fig_size)
+fig_save_name = 'dist_nb_hours_both_poles.pdf'
+
+fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+
+raise Exception
+
 ### Parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
 fontsize_plot = 25

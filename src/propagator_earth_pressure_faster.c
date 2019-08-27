@@ -521,7 +521,9 @@ int coverage_ground_station(   SPACECRAFT_T *SC, // in: spacecraft (position and
       if (istep == step_end_interpolation-1){ // only print every dt_output
 	//	      etprint(et_interpolated, "");
 	//fprintf(SC->fp_coverage_ground_station[iground], "%s %f %f %f %f %f %f %f %f\n",time_interpolated, ecef_sc[0], ecef_sc[1], ecef_sc[2], elevation_wtr_to_ground_station_in_sc_refce*RAD2DEG, azimuth_wtr_to_ground_station_in_sc_refce*RAD2DEG, elevation_wtr_to_ground_station_in_ground_station_refce*RAD2DEG, azimuth_wtr_to_ground_station_in_ground_station_refce*RAD2DEG, range_wtr_to_ground_station); // !!!!!!!!!!!!! uncomment this line and comment line below
-	fprintf(SC->fp_coverage_ground_station[iground], "%s %f\n",time_interpolated, elevation_wtr_to_ground_station_in_ground_station_refce*RAD2DEG); // !!!!!!!!!!!!! comment this line and uncommnet line above
+	//	fprintf(SC->fp_coverage_ground_station[iground], "%s %f\n",time_interpolated, elevation_wtr_to_ground_station_in_ground_station_refce*RAD2DEG); // !!!!!!!!!!!!! comment this line and uncommnet line above
+		fprintf(SC->fp_coverage_ground_station[iground], "%s %f\n",time_interpolated,90 - (-elevation_wtr_to_ground_station_in_sc_refce*RAD2DEG)); // !!!!!!!! this is to see if the gs is in the field of view of the sc. 0 means the gs is nadir of the sc. CRAP
+
 
       }
 
