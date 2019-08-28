@@ -647,6 +647,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	} // end of if running ensembles
       } // end of if main sc is not a GPS
       //      if (iProc == 0){
+      if (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) != 0 ){ // if tle_sgp4 then we directly jump from the tle epoch to the constellation start time (ie we don't calculate the r/v at every time step between those two times)
       if ( start_ensemble[ii] == 0){ // if this iProc runs main sc ii
 	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt ) ){
 	  //	  etprint(CONSTELLATION->spacecraft[ii][0].et, "");
@@ -679,7 +680,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	  } // end if sc is not gps
 	} // end while of propagatoin
       } // end of if running ensembles
-
+      } // end of if not using tle_sgp4
 
       // propagate ONE LAST TIME UNTIL THE SATELLITE EPOCH IS THE SAME AS THE CONSTELLATION EPOCH
       //      if (iProc == 0){
