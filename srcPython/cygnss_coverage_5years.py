@@ -81,6 +81,7 @@ cov_time = np.zeros([ntime])
 cell_covered = np.zeros([ncell_lon, ncell_lat])
 ncell_covered_time = np.zeros([ntime])
 itime = 0
+#stop_recording_visit = 0
 while ((itime < ntime)):
     for isc in range(nsc):
         for ispec in range(nspec):
@@ -88,11 +89,14 @@ while ((itime < ntime)):
             if ((lat_spec[itime, isc, ispec] >= lat_min) & (lat_spec[itime, isc, ispec] <= lat_max)): # theya re SPs at latitudes > 35 deg
                 if gain_spec[itime, isc, ispec] >= 4: #!!!!!!! sure you want to keep the condition "if gain_spec[itime, isc, ispec]	> 0"
                     icell_lat = (int)((lat_spec[itime, isc, ispec] - lat_min) / cell_width)
+                    #if stop_recording_visit == 0:
                     time_visit[icell_lon, icell_lat, isc*nspec + ispec] = (date_spock[itime] - date_ref).total_seconds()
                     cell_covered[icell_lon, icell_lat] = cell_covered[icell_lon, icell_lat] + 1
     ncell_covered_time[itime] = len(np.where(cell_covered != 0)[0])
     cov_time[itime] = ncell_covered_time[itime] * 100./ncell
-    if cov_time[itime]  >= 70.:
+    #if cov_time[itime]  >= 70.:
+    if itime >= 30*3600 + 1:
+        #stop_recording_visit = 1
         break
     if np.mod(itime, print_hour*3600) == 0:
         print itime, ntime, str(itime/3600) + 'h', format(cov_time[itime], ".0f") + '%'    

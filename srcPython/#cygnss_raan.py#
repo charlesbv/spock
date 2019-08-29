@@ -152,11 +152,11 @@ for isc_temp in range(nsc_spock):
         raan_spock = np.zeros([nsc_spock, nb_steps_spock])
     raan_spock[isc, :] = var_out[find_in_read_input_order_variables(var_out_order, 'raan')]
 isc_ref = label_arr_conversion[2]
-itime = 9
-print date_spock[itime],
+itime = 135+366+365*3
+print date_spock[itime]
 for isc_temp in range(nsc):
     isc = label_arr_conversion[isc_temp]
-    print  label_arr_spock[isc], raan_spock[isc, itime] - raan_spock[isc_ref, itime]
+    print  label_arr_spock[isc], format(raan_spock[isc, itime] - raan_spock[isc_ref, itime], ".1f")
 
 ### parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
