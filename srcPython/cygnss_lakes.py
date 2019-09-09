@@ -31,42 +31,43 @@ def cygnss_lakes(input_filename):
     label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
     filename_spec_spock = []
     nb_time_this_sc = []
-    min_lat_lon = [[32.992112, -107.335678], [13.900429, -89.585032], [13.713906, -89.107452], [37.157854, 99.701568]]
-    max_lat_lon = [[32.890515, -107.241349], [13.831710, -89.515894], [13.629988, -88.986665], [36.548034, 100.745112]]
+    upper_left = [[32.992112, -107.335678], [13.900429, -89.585032], [13.713906, -89.107452], [37.157854, 99.701568]]
+    lower_right = [[32.890515, -107.241349], [13.831710, -89.515894], [13.629988, -88.986665], [36.548034, 100.745112]]
     name = ['Caballo', 'Coatepeque', 'LLopango', 'Qinghai']
     min_gain = 3
 
     nlake = len(name)
-    min_lat_lon0_360 = []
-    max_lat_lon0_360 = []
+    upper_left0_360 = []
+    lower_right0_360 = []
     for ilake in range(nlake):
-        min_lat = min_lat_lon[ilake][0]
-        min_lon = min_lat_lon[ilake][1]
+        min_lat = upper_left[ilake][0]
+        min_lon = upper_left[ilake][1]
         min_lon_corr = min_lon
         if min_lon < 0:
             min_lon_corr = 360 + min_lon
-        min_lat_lon0_360.append([min_lat, min_lon_corr])
-        max_lat = max_lat_lon[ilake][0]
-        max_lon = max_lat_lon[ilake][1]
+        upper_left0_360.append([min_lat, min_lon_corr])
+        max_lat = lower_right[ilake][0]
+        max_lon = lower_right[ilake][1]
         max_lon_corr = max_lon
         if max_lon < 0:
             max_lon_corr = 360 + max_lon
-        max_lat_lon0_360.append([max_lat, max_lon_corr])
+        lower_right0_360.append([max_lat, max_lon_corr])
 
     lon_spec = []; lat_spec = []; gain_spec = []
     visit_time = []
     visit_which_sp = [] # whcih sp
     visit_which_sc = [] # whcih sp
     for ilake in range(nlake):
-        min_lat = min_lat_lon0_360[ilake][0]
-        min_lon = min_lat_lon0_360[ilake][1]
-        max_lat = max_lat_lon0_360[ilake][0]
-        max_lon = max_lat_lon0_360[ilake][1]
-        #print min_lat, min_lon, max_lat, max_lon
+        max_lat = upper_left0_360[ilake][0]
+        min_lon = upper_left0_360[ilake][1]
+        min_lat = lower_right0_360[ilake][0]
+        max_lon = lower_right0_360[ilake][1]
+        print min_lat, min_lon, max_lat, max_lon
+        #ipdb.set_trace()
         if ilake == 0: # only read the sp position once (for the first lake)
             print "Reading the SP positions..."
             for isc in range(nb_sc):
-                #print isc, nb_sc-1, str(datetime.now())[0:19]
+                #print isc#, nb_sc-1, str(datetime.now())[0:19]
                 which_sc = isc
                 cyg = format(isc + 1, "02")
                 filename_spec_spock.append( output_file_path_list[which_sc] + "specular_" + output_file_name_list[which_sc].replace(".txt",".bin") )

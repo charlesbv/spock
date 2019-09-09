@@ -23,8 +23,20 @@
 import os
 from datetime import datetime, timedelta
 
-date_start = '2019-07-25' #'2018-10-26'
-date_stop = '2019-07-25'#'2018-10-29'
+date_start = '2018-10-16' # 
+date_stop = '2018-10-24'
+#'2018-10-16' '2018-10-24' Oct 16-25 2018
+#'2018-11-22' '2018-11-30' Nov 22-Dec 1 2018
+#'2018-12-18' '2018-12-25' Dec 18-25 2018
+#'2019-01-10' '2019-01-18' Jan 10-19 2019
+#'2019-02-17' '2019-02-25' Feb 17-26 2019
+#'2019-03-20' '2019-03-28' Mar 20-29 2019
+#'2019-04-15' '2019-04-23' Apr 15-24 2019
+#'2019-05-15' '2019-05-23' May 15-24 2019
+#'2019-06-15' '2019-06-23' JJun 15-24 2019
+#'2019-07-15' '2019-07-23' Jul 15-24 2019
+#'2019-08-15' '2019-08-23' Aug 15-24 2019
+
 podaac_path = "https://podaac-tools.jpl.nasa.gov/drive/files/allData/cygnss/L1/v2.1/"#!!!!!! before 072919 used to be "ftp://podaac.jpl.nasa.gov/allData/cygnss/L1/v2.1/" but then podaac stopped the ftp option
 save_dir = '/Users/cbv/cygnss/netcdfPodaac/'#'/Volumes/Seagate_Expansion_Drive/netcdf/' 
 
@@ -45,7 +57,7 @@ while date_here <= date_stop_date:
     if (os.path.isdir(save_dir + yy + '/' + str(doy).zfill(3)) == False):
         os.system("mkdir " + save_dir + yy + '/' + str(doy).zfill(3))
     icygfm = -1
-    for cygfm in range(0, 8):
+    for cygfm in range(3, 4):
         icygfm = icygfm + 1
         if icygfm == 0:
             name_netcdf_podaac = []
