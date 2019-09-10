@@ -32,7 +32,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM8_20170901_omniweb'#'FM1_20170817'
+prefix_name = 'FM03_20180901'#'FM1_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -94,8 +94,12 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt' 
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20180901-000000-e20180901-235959.l1.power-brcs.a21.d21.txt'
 
+# FM03 20181016 nadir 
+# nadir/cyg03.ddmi.s20181016-000000-e20181016-235959.l1.power-brcs.a21.d21.txt
+# FM03 20180901 nadir
+# nadir/cyg03.ddmi.s20180901-000000-e20180901-235959.l1.power-brcs.a21.d21.txt 
 # FM07 20170901 nadir                                                                         
 # nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 # FM08 20170901 nadir
@@ -185,8 +189,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
-
+nb_interval = (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
@@ -308,6 +311,34 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
     print 'NEW INTERVAL', iinter, nb_interval-1,
     if iinter == 0:
         # This calcualted in first aprt of 071318_spock_odtk_ensemble_new_iteration_on_rv
+
+        # r0 = ''
+        # r1 = ''
+        # r2 = ''
+        # v0 = ''
+        # v1 = ''
+        # v2 = ''
+        
+        # FM03 20180901 nadir
+        # r0b -6.56381863386000e+06 2.08243696395000e+06 -2.91596993830000e+05
+        # v0b -2.06555855200000e+03 -5.89282581200000e+03 4.35407902200000e+03
+        r0 = '-6.56381863386000e+03'
+        r1 = '2.08243696395000e+03'
+        r2 = '-2.91596993830000e+02'
+        v0 = '-2.06555855200000e+00'
+        v1 = '-5.89282581200000e+00'
+        v2 = '4.35407902200000e+00'
+
+        # FM03 20181016 nadir 
+        # r0b -4.53745458543000e+06 3.48253356348000e+06 -3.86489731594000e+06
+        # v0b -4.11216605800000e+03 -6.32995670300000e+03 -8.59537238000000e+02
+        # r0 = ''
+        # r1 = ''
+        # r2 = ''
+        # v0 = ''
+        # v1 = ''
+        # v2 = ''
+        
         # FM01 20170817 nadir:
         # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06
         # v0b 7.09842316800000e+03 -1.86796667100000e+03 -1.97307331700000e+03
@@ -334,14 +365,14 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v1 = '-6.75525474700000e+00'
         # v2 = '1.83111749000000e+00'
         
-        # # with FM08 20170901 nadir
-        r0 = '-2.28682220600000e+01'
-        r1 = '6.89905045228000e+03'
-        r2 = '3.40348034492000e+02'
-        v0 = '-6.24118211000000e+00'
-        v1 = '1.87039196000000e-01'
-        v2 = '-4.32796299000000e+00'
-
+        # # # with FM08 20170901 nadir
+        # r0 = '-2.28682220600000e+01'
+        # r1 = '6.89905045228000e+03'
+        # r2 = '3.40348034492000e+02'
+        # v0 = '-6.24118211000000e+00'
+        # v1 = '1.87039196000000e-01'
+        # v2 = '-4.32796299000000e+00'
+        
         
         # # # with FM4_20180112 start 20180113T170000
         # r0 = '3.99032691316000e+03'#'3.99031942362000e+03'
@@ -445,7 +476,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if iinter >= 59:
+            if iinter >= 0:
             #if ((iinter > 0) | ((iinter== 0) & (irho >=2))):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)

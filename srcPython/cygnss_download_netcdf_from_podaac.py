@@ -23,8 +23,8 @@
 import os
 from datetime import datetime, timedelta
 
-date_start = '2018-10-16' # 
-date_stop = '2018-10-24'
+date_start = '2018-11-22' # 
+date_stop = '2018-11-30'
 #'2018-10-16' '2018-10-24' Oct 16-25 2018
 #'2018-11-22' '2018-11-30' Nov 22-Dec 1 2018
 #'2018-12-18' '2018-12-25' Dec 18-25 2018
