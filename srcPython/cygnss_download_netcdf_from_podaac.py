@@ -16,18 +16,18 @@
 # under the License.
 
 # This scriptdownloads L1 netcdf files from
-# ftp://podaac.jpl.nasa.gov/allData/cygnss/L1/v2.1
+# https://podaac-tools.jpl.nasa.gov/drive/files/allData/cygnss/L1/v2.1
 # inputs: date_start, date_stop, cygfm, save_dir
 
 
 import os
 from datetime import datetime, timedelta
 
-date_start = '2018-11-22' # 
-date_stop = '2018-11-30'
+date_start = '2019-04-09' # 
+date_stop = '2019-04-14'
 #'2018-10-16' '2018-10-24' Oct 16-25 2018
-#'2018-11-22' '2018-11-30' Nov 22-Dec 1 2018
-#'2018-12-18' '2018-12-25' Dec 18-25 2018
+#'2018-11-06' '2018-11-14' Nov 6-Nov 15 2018
+#'2018-12-18' '2018-12-26' Dec 18-25 2018
 #'2019-01-10' '2019-01-18' Jan 10-19 2019
 #'2019-02-17' '2019-02-25' Feb 17-26 2019
 #'2019-03-20' '2019-03-28' Mar 20-29 2019

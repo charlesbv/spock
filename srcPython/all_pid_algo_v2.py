@@ -2,8 +2,12 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM1_20170817_mid']#['FM7_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['FM01']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
+pickle_root_list = ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
+# ['FM03_20190415_mid', 'FM03_20190409_mid']
+# ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
+# ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
+#['FM1_20170817_mid']#['FM7_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
+label_overwrite = ['']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
 #["fm01_20170817_mid"] 
 # ["fm4_mid", "test_mid", "2018jan12_mid", "nadir"]
@@ -17,8 +21,8 @@ label_overwrite = ['FM01']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC',
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho' # raw, amplitude, rho_control, rho
-color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen']#, 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
+toplot = 'rho_control' # raw, amplitude, rho_control, rho
+color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
 import sys
@@ -72,7 +76,7 @@ fontsize_plot = 20
 
 ######
 fig_title = ''#'Distance between SpOCK and data for different density coefficient conditions' 
-x_label = 'Time (hours)' 
+x_label = 'Time (days)' 
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
@@ -91,7 +95,8 @@ plt.rc('font', weight='bold') ## make the labels of the ticks in bold
 
 pickle_root_concatenate = ''
 nb_pickle = len(pickle_root_list)
-for ipickle in range(nb_pickle):
+date_start_all = datetime.strptime('2900-01-01', "%Y-%m-%d")
+for ipickle in range(nb_pickle): # determine the oldest start date of all simulations
     pickle_root = 'pickle/' + pickle_root_list[ipickle]
 
     [duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_arr, distance_lvlh_pid_concantenate_arr, nb_seconds_since_start_pid_average_concatenate_arr, \
@@ -101,8 +106,23 @@ for ipickle in range(nb_pickle):
                      index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
                  ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save, rho_ave_conc, rho_msis_ave_conc]= pickle.load(open(pickle_root + ".pickle"))
 
+    if date_start_save < date_start_all:
+        date_start_all = date_start_save
 
+        
+for ipickle in range(nb_pickle): # now make the plots
+    pickle_root = 'pickle/' + pickle_root_list[ipickle]
 
+    [duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_arr, distance_lvlh_pid_concantenate_arr, nb_seconds_since_start_pid_average_concatenate_arr, \
+                 distance_lvlh_pid_average_concantenate_arr, nb_seconds_since_start_pid_average_mid_concatenate_arr, \
+                 distance_lvlh_pid_average_mid_concantenate_arr, distance_lvlh_pid_amplitude_mid_concantenate_arr, ecc_average_mid_concantenate_arr, \
+                 ecc_obs_average_mid_concantenate_arr, localtime_spock_ok_pid_concatenate, phase_spock_ok_pid_concatenate_arr, argper_average_mid_concantenate_arr, \
+                     index_period_spock_concatenate_arr, argper_spock_ok_pid_concatenate_arr,\
+                 ecc_ave_conc,ecc_obs_ave_conc,localtime_per,longitude_per,latitude_per,nb_seconds_ave_conc_arr, rho_control, nb_seconds_interval, date_start_save, rho_ave_conc, rho_msis_ave_conc]= pickle.load(open(pickle_root + ".pickle"))
+
+    delta_date = date_start_save - date_start_all # !!!!!! added these three lines on 09-24-2019
+    delta_date_sec = 0# delta_date.total_seconds()
+    nb_seconds_interval_corr = np.array(nb_seconds_interval) + delta_date_sec 
 
 #     [duration_simu, nb_interval, nb_seconds_since_start_pid_concatenate_arr, distance_lvlh_pid_concantenate_arr, nb_seconds_since_start_pid_average_concatenate_arr, \
 #          distance_lvlh_pid_average_concantenate_arr, nb_seconds_since_start_pid_average_mid_concatenate_arr, distance_lvlh_pid_average_mid_concantenate_arr,\
@@ -125,9 +145,9 @@ for ipickle in range(nb_pickle):
             if label_overwrite[0] != '':
                 label = label_overwrite[ipickle]
             else:
-                label  = pickle_root_list[ipickle].replace('_mid', '')
+                label  = pickle_root_list[ipickle].replace('_mid', '').replace('FM03_', '')
         else:
-            label  = pickle_root_list[ipickle].replace('_mid', '')
+            label  = pickle_root_list[ipickle].replace('_mid', '').replace('FM03_', '')
 
 
     if ipickle == 0:
@@ -146,10 +166,11 @@ for ipickle in range(nb_pickle):
         ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr )* 1000., linewidth = 2, color = color_arr[ipickle], label = label)
 
     elif toplot == 'rho_control':
-        ax.plot(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
-        ax.scatter(np.array(nb_seconds_interval)/3600., rho_control, linewidth = 2, color = color_arr[ipickle])
-        ax.plot(np.array(nb_seconds_interval)/3600., np.zeros([len(nb_seconds_interval)]), linewidth = 2, color = 'k', linestyle = 'dashed')
-        ax.text(0.01,0.51,'MSIS', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
+        ax.plot(nb_seconds_interval_corr/3600., rho_control, linewidth = 2, color = color_arr[ipickle], label = label)
+        ax.scatter(nb_seconds_interval_corr/3600., rho_control, linewidth = 2, color = color_arr[ipickle])
+        ax.plot(nb_seconds_interval_corr/3600., np.zeros([len(nb_seconds_interval_corr)]), linewidth = 2, color = 'k', linestyle = 'dashed')
+        if ipickle == 0:
+            ax.text(0.01,0.51,'MSIS', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
     elif toplot == 'rho':
         if ipickle == 0:
             ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'MSIS')
@@ -166,7 +187,7 @@ for ipickle in range(nb_pickle):
 
     date_ref = date_start_save
     nb_ticks_xlabel = 10
-    xticks_temp = np.array(nb_seconds_interval)/3600.
+    xticks_temp = nb_seconds_interval_corr/3600.
     nticks_temp = len(xticks_temp)
     xticks = []
     for itick in range(nticks_temp):
@@ -175,7 +196,8 @@ for ipickle in range(nb_pickle):
     date_list_str = []
     date_list = [date_ref + timedelta(hours=x) for x in xticks]
     for i in range(len(xticks)):
-        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+        #date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+        date_list_str.append( format((xticks[i]/24.), ".1f"))
     ax.xaxis.set_ticks(xticks)
     ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 
@@ -334,7 +356,7 @@ fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox
 
 raise Exception
 fig_title = ''#eccentriciy and  amplitutde oscilaltion vs time
-x_label = 'Time (hours)'#'Amplitude oscillations (m)' 
+x_label = 'Time (days)'#'Amplitude oscillations (m)' 
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
@@ -428,7 +450,7 @@ raise Exception
 
 ######
 fig_title = ''#Difference in eccentricy SpOCK - observations
-x_label = 'Time (hours)' 
+x_label = 'Time (days)' 
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)

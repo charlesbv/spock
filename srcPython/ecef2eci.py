@@ -42,7 +42,7 @@ def ecef2eci(r_ecef, v_ecef, time, load_spice):
     if load_spice == 1:
         eop = "/Users/cbv/cspice/data/pck00010.tpc"
         planet_ephem = "/Users/cbv/cspice/data/de432s.bsp"
-        earth_binary_pck = "/Users/cbv/cspice/data/earth_000101_190424_190131.bpc"
+        earth_binary_pck = "/Users/cbv/cspice/data/earth_000101_191026_190804.bpc"
         #earth_000101_181125_180903.bpc"
         
         leap_sec = "/Users/cbv/cspice/data/naif0012.tls"

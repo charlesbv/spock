@@ -27,7 +27,7 @@
 import sys
 
 #sys.path.append("/Users/cbv/Google Drive/Work/PhD/Research/Code/spock/srcPython")
-sys.path.append("/home/cbv/Code/spock/srcPython")
+sys.path.append("/Users/cbv/work/spock/srcPython")
 import matplotlib
 matplotlib.use("Agg") # without this line, when running this script from a cronjob we get an error "Unable to access the X Display, is $DISPLAY set properly?"
 from gs_radius import *
@@ -152,12 +152,13 @@ point = namedtuple('point', ['x', 'y'])
 color = namedtuple('color', 'red green blue')
 
 satColors = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['lime', 'blue', 'indigo', 'purple', 'dodgerblue', 'steelblue', 'seagreen', 'limegreen']
-nb_sc = 8 # !!!!!!!!!
+nb_sc = 1 # !!!!!!!!!
 if is_cygnss == '1':
     label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
     label_arr_conversion = [3, 2, 7, 1, 0, 5, 6, 4]
     
-
+else:
+    label_arr = ['FM05','FM08']
     
 for isc in range(nb_sc):
     var_out, var_out_order = read_output_file( output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
@@ -183,16 +184,20 @@ for istep in range(1,nb_steps_ani_sc):
     print "Step " + str(istep) + ' out of ' + str(nb_steps_ani_sc-1) 
     #  positions over one orbit
     for isc_temp in range(nb_sc):
+        if lon[isc,istep*dt_index_sc] > 180:
+            lon_corr = lon[isc,istep*dt_index_sc] - 360
+        else:
+            lon_corr = lon[isc,istep*dt_index_sc]
         if is_cygnss == '1':
             isc = label_arr_conversion[isc_temp]
         else: 
             isc = isc_temp
-        spacecraft_list[isc_temp].x, spacecraft_list[isc_temp].y =  m(lon[isc,istep*dt_index_sc], lat[isc,istep*dt_index_sc])
+        spacecraft_list[isc_temp].x, spacecraft_list[isc_temp].y =  m(lon_corr, lat[isc,istep*dt_index_sc])
     # point on the plot                                                        
         if is_cygnss == '1':
             spacecraft_list[isc_temp].point_plot = m.scatter(spacecraft_list[isc_temp].x, spacecraft_list[isc_temp].y,  marker=spacecraft_list[isc_temp].marker_spacecraft, color = satColors[isc], s = 200, zorder = 4, label = label_arr[isc])
         else:
-            spacecraft_list[isc_temp].point_plot = m.scatter(spacecraft_list[isc_temp].x, spacecraft_list[isc_temp].y,  marker=spacecraft_list[isc_temp].marker_spacecraft, color = satColors[isc], s = 200, zorder = 4, label = str(isc + 1))
+            spacecraft_list[isc_temp].point_plot = m.scatter(spacecraft_list[isc_temp].x, spacecraft_list[isc_temp].y,  marker=spacecraft_list[isc_temp].marker_spacecraft, color = satColors[isc], s = 200, zorder = 4, label = label_arr[isc])#str(isc + 1))
 
     #date_map = ax.text((lon_min + lon_max)/2.,lat_min + (lat_max - lat_min)/30.,date[istep*dt_index_sc][:16]+ ':00', fontsize = fontsize_plot, weight = 'bold', horizontalalignment = 'center') # cheating with ':00'
 
@@ -230,7 +235,7 @@ for istep in range(1,nb_steps_ani_sc):
 
     # Remove the date from plot so that next one does not write on top of it but replaces it instead
     #date_map.remove()
-    raise Exception
+    #raise Exception
 video_name = input_filename.replace(".txt", "") + "_" + date_start_str.replace("-", "_").replace(":", "_") +  "_to_" +  date_stop_str.replace("-", "_").replace(":", "_") + ".mp4"
 os.system('ffmpeg -y -r 10 -i ani/%d_' +  str(nb_steps-1) + '.png -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p ' + video_name)
 

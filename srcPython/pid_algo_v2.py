@@ -1,4 +1,3 @@
-
 # find rho_control that min error in 18 hours (18 = interval (variable))
 # move 3 hours aehad, find rho_control that min error in 18 hours (3 = step_move_save (variable))
 # move 3 hours ahead, min error in 18 hours
@@ -32,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name = 'FM03_20180901'#'FM1_20170817'
+prefix_name ='FM03_20190818'# 'FM03_20180901'#'FM1_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -94,8 +93,32 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20180901-000000-e20180901-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20190818-000000-e20190818-235959.l1.power-brcs.a21.d21.txt'
 
+
+# FM03 20190818 nadir DOING - crashed on sep 20 at iinter = 58 because omniweb data was not available for epochs sooner than aug 25.
+# nadir/cyg03.ddmi.s20190818-000000-e20190818-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190715 nadir 
+# nadir/cyg03.ddmi.s20190715-000000-e20190715-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190610 nadir 
+# nadir/cyg03.ddmi.s20190610-000000-e20190610-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190515 nadir 
+# nadir/cyg03.ddmi.s20190515-000000-e20190515-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190415 nadir 
+# nadir/cyg03.ddmi.s20190415-000000-e20190415-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190409 nadir DOING
+# nadir/cyg03.ddmi.s20190409-000000-e20190409-235959.l1.power-brcs.a21.d21.txt
+# FM03 20190320 nadir 
+# nadir/cyg03.ddmi.s20190320-000000-e20190320-235959.l1.power-brcs.a21.d21.txt
+        
+# FM03 20190217 nadir 
+# nadir/cyg03.ddmi.s20190217-000000-e20190217-235959.l1.power-brcs.a21.d21.txt                                                                 
+# FM03 20190110 nadir 
+# nadir/cyg03.ddmi.s20190110-000000-e20190110-235959.l1.power-brcs.a21.d21.txt                                                                 
+# FM03 20181218 nadir 
+# nadir/cyg03.ddmi.s20181218-000000-e20181218-235959.l1.power-brcs.a21.d21.txt
+# FM03 20181106 nadir 
+# nadir/cyg03.ddmi.s20181106-000000-e20181106-235959.l1.power-brcs.a21.d21.txt                                                                        
 # FM03 20181016 nadir 
 # nadir/cyg03.ddmi.s20181016-000000-e20181016-235959.l1.power-brcs.a21.d21.txt
 # FM03 20180901 nadir
@@ -189,7 +212,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 58# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
@@ -319,25 +342,137 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v1 = ''
         # v2 = ''
         
-        # FM03 20180901 nadir
-        # r0b -6.56381863386000e+06 2.08243696395000e+06 -2.91596993830000e+05
-        # v0b -2.06555855200000e+03 -5.89282581200000e+03 4.35407902200000e+03
-        r0 = '-6.56381863386000e+03'
-        r1 = '2.08243696395000e+03'
-        r2 = '-2.91596993830000e+02'
-        v0 = '-2.06555855200000e+00'
-        v1 = '-5.89282581200000e+00'
-        v2 = '4.35407902200000e+00'
+        # FM03 20190818 nadir
+        # r0b 4.92082865873000e+06 3.06001002967000e+06 -3.73379091057000e+06
+        # v0b -4.69586622100000e+03 5.80981601100000e+03 -1.44025829800000e+03
+        r0 = '4.92082865873000e+03'
+        r1 = '3.06001002967000e+03'
+        r2 = '-3.73379091057000e+03'
+        v0 = '-4.69586622100000e+00'
+        v1 = '5.80981601100000e+00'
+        v2 = '-1.44025829800000e+00'
 
+        # FM03 20190715 nadir
+        # r0b 9.19260953396000e+05 -5.62172814501000e+06 -3.87949255757000e+06
+        # v0b 7.53668326000000e+03 6.80056218000000e+02 7.97831381000000e+02
+        # r0 = '9.19260953396000e+02'
+        # r1 = '-5.62172814501000e+03'
+        # r2 = '-3.87949255757000e+03'
+        # v0 = '7.53668326000000e+00'
+        # v1 = '6.80056218000000e-01'
+        # v2 = '7.97831381000000e-01'  
+
+        # FM03 20190610 nadir
+        # r0b -1.01501004767000e+06 5.72404068511000e+06 -3.71159477547000e+06
+        # v0b -7.12148687300000e+03 -2.22469897100000e+03 -1.46727599900000e+03
+        # r0 = '-1.01501004767000e+03'
+        # r1 = '5.72404068511000e+03'
+        # r2 = '-3.71159477547000e+03'
+        # v0 = '-7.12148687300000e+00'
+        # v1 = '-2.22469897100000e+00'
+        # v2 = '-1.46727599900000e+00'
+
+        # FM03 20190515 nadir
+        # r0b 1.53840566116000e+06 5.69642390754000e+06 3.54939116740000e+06
+        # v0b -7.33226754500000e+03 7.84688001000000e+02 1.90655466200000e+03
+        # r0 = '1.53840566116000e+03'
+        # r1 = '5.69642390754000e+03'
+        # r2 = '3.54939116740000e+03'
+        # v0 = '-7.33226754500000e+00'
+        # v1 = '7.84688001000000e-01'
+        # v2 = '1.90655466200000e+00'  
+        
+        # FM03 20190415 nadir
+        # r0b -6.66957336581000e+06 -1.68571830246000e+06 -6.27006289485000e+05
+        # v0b 1.15522108000000e+03 -6.15708064900000e+03 4.29437507800000e+03
+        # r0 = '-6.66957336581000e+03'
+        # r1 = '-1.68571830246000e+03'
+        # r2 = '-6.27006289485000e+02'
+        # v0 = '1.15522108000000e+00'
+        # v1 = '-6.15708064900000e+00'
+        # v2 = '4.29437507800000e+00'
+
+        # FM03 20190409 nadir
+        # r0b -5.20773678874000e+06 -4.25095076218000e+06 -1.58658992788000e+06
+        # v0b 3.32782199700000e+03 -5.54823261100000e+03 3.97909786800000e+03         
+        # r0 = '-5.20773678874000e+03'
+        # r1 = '-4.25095076218000e+03'
+        # r2 = '-1.58658992788000e+03'
+        # v0 = '3.32782199700000e+00'
+        # v1 = '-5.54823261100000e+00'
+        # v2 = '3.97909786800000e+00'
+        
+        # FM03 20190320 nadir
+        # r0b -6.83169998015000e+06 6.54177545886000e+05 7.51308706933000e+05
+        # v0b -1.06041073200000e+03 -6.19080410800000e+03 -4.27790060400000e+03
+        # r0 = '-6.83169998015000e+03'
+        # r1 = '6.54177545886000e+02'
+        # r2 = '7.51308706933000e+02'
+        # v0 = '-1.06041073200000e+00'
+        # v1 = '-6.19080410800000e+00'
+        # v2 = '-4.27790060400000e+00'
+
+ 
+        # FM03 20190217 nadir
+        # r0b -4.20604946179000e+06 -4.86550002638000e+06 2.46252381684000e+06
+        # v0b 5.91307322100000e+03 -3.38526737100000e+03 3.40514257600000e+03
+        # r0 = '-4.20604946179000e+03'
+        # r1 = '-4.86550002638000e+03'
+        # r2 = '2.46252381684000e+03'
+        # v0 = '5.91307322100000e+00'
+        # v1 = '-3.38526737100000e+00'
+        # v2 = '3.40514257600000e+00'
+        
+        # FM03 20190110 nadir
+        # r0b -6.46599279507000e+05 -6.79967620104000e+06 -1.02815445048000e+06
+        # v0b 6.31740874600000e+03 2.80268340000000e+01 -4.21714466700000e+03
+        # r0 = '-6.46599279507000e+02'
+        # r1 = '-6.79967620104000e+03'
+        # r2 = '-1.02815445048000e+03'
+        # v0 = '6.31740874600000e+00'
+        # v1 = '2.80268340000000e-02'
+        # v2 = '-4.21714466700000e+00'
+        
+        # FM03 20181218 nadir
+        # r0b 3.64700239010000e+06 5.58306076403000e+06 -1.73594126258000e+06
+        # v0b -5.95645542800000e+03 2.67859273100000e+03 -3.91256788800000e+03
+        # r0 = '3.64700239010000e+03'
+        # r1 = '5.58306076403000e+03'
+        # r2 = '-1.73594126258000e+03'
+        # v0 = '-5.95645542800000e+00'
+        # v1 = '2.67859273100000e+00'
+        # v2 = '-3.91256788800000e+00'
+
+        # FM03 20181106 nadir
+        # r0b -2.91320023320000e+06 -5.21640941632000e+06 3.43428558946000e+06
+        # v0b 5.67028584500000e+03 -4.58857080800000e+03 -2.17200608400000e+03
+        # r0 = '-2.91320023320000e+03'
+        # r1 = '-5.21640941632000e+03'
+        # r2 = '3.43428558946000e+03'
+        # v0 = '5.67028584500000e+00'
+        # v1 = '-4.58857080800000e+00'
+        # v2 = '-2.17200608400000e+00'
+        
         # FM03 20181016 nadir 
         # r0b -4.53745458543000e+06 3.48253356348000e+06 -3.86489731594000e+06
         # v0b -4.11216605800000e+03 -6.32995670300000e+03 -8.59537238000000e+02
-        # r0 = ''
-        # r1 = ''
-        # r2 = ''
-        # v0 = ''
-        # v1 = ''
-        # v2 = ''
+        # r0 = '-4.53745458543000e+03'
+        # r1 = '3.48253356348000e+03'
+        # r2 = '-3.86489731594000e+03'
+        # v0 = '-4.11216605800000e+00'
+        # v1 = '-6.32995670300000e+00'
+        # v2 = '-8.59537238000000e-01'
+        
+        # FM03 20180901 nadir
+        # r0b -6.56381863386000e+06 2.08243696395000e+06 -2.91596993830000e+05
+        # v0b -2.06555855200000e+03 -5.89282581200000e+03 4.35407902200000e+03
+        # r0 = '-6.56381863386000e+03'
+        # r1 = '2.08243696395000e+03'
+        # r2 = '-2.91596993830000e+02'
+        # v0 = '-2.06555855200000e+00'
+        # v1 = '-5.89282581200000e+00'
+        # v2 = '4.35407902200000e+00'
+
         
         # FM01 20170817 nadir:
         # r0b -2.39619629675000e+06 -5.42660274124000e+06 -3.52867259398000e+06
@@ -509,6 +644,8 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         argper_spock = var_out[find_in_read_input_order_variables(var_out_order, 'argument_perigee')]
         n_spock = len(date_spock)
 
+        # if iinter == 56:
+        #     ipdb.set_trace()
         if irho == 0:
             index_spock_same_date_as_obs_pid = []
             #if iinter == 0: # for the next interval, start date_obs[iobs] at the last observation of the previous interval
