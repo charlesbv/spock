@@ -152,7 +152,7 @@ point = namedtuple('point', ['x', 'y'])
 color = namedtuple('color', 'red green blue')
 
 satColors = ['black', 'blue', 'red', 'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['lime', 'blue', 'indigo', 'purple', 'dodgerblue', 'steelblue', 'seagreen', 'limegreen']
-nb_sc = 1 # !!!!!!!!!
+#nb_sc = 1 # !!!!!!!!!
 if is_cygnss == '1':
     label_arr = ['FM05', 'FM04', 'FM02', 'FM01', 'FM08', 'FM06', 'FM07', 'FM03']
     label_arr_conversion = [3, 2, 7, 1, 0, 5, 6, 4]

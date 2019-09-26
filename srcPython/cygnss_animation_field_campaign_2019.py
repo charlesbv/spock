@@ -38,7 +38,7 @@ from matplotlib.ticker import FixedLocator
 from datetime import datetime, timedelta
 from mpl_toolkits.basemap import Basemap, shiftgrid
 
-filename = '20191015T000000_to_20191031T000000_sgp4_081819.txt'
+filename = '20191015T000000_to_20191115T000000.txt'
 #'20190819T000000_to_20190823T235959_sgp4_081819.txt'#'20190825T000000_to_20190908T235959.txt'#'20190818T000000_to_20190824T235959.txt'#'20190803T000000_to_20190817T235959.txt' #'20190818T000000_to_20190824T235959.txt'
 
 
