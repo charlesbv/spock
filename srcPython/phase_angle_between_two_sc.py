@@ -101,6 +101,7 @@ for i in range(nb_steps_sat2):
     dist_between_sat1_and_sat2[i] = np.linalg.norm( rdiff )
     rdiff_lvlh[i, :] = eci_to_lvlh(r_eci_sat1[i,:], v_eci_sat1[i, :], rdiff)
     
+maglvlh = np.linalg.norm(rdiff_lvlh, axis = 1)
 
 # Plot
 dt = dt_sat1
@@ -229,6 +230,65 @@ ax.margins(0,0)
 if save_results == 1:
     fig_save_name = fig_title.replace(" ","_").lower()
     fig_save_name = fig_save_name + 'alongtrack_distance_zoom.pdf'
+    fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+    #os.system("rsync -av " + fig_save_name +" srbwks2014-0008.engin.umich.edu:./" + name_mission)
+    
+if show_plots == 1:
+    plt.show(); plt.show()
+
+
+
+ax_title = 'Sep 30, 2019'#'Distance between spacecraft 1 and 2'
+y_label = 'Cross-track distance (km)'
+y_axis = rdiff_lvlh[:, 1]
+factor_on_y = 1
+### Plot with these parameters
+fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
+fig.suptitle(fig_title, y = 0.973,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
+plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+gs = gridspec.GridSpec(1, 1)
+gs.update(left = 0.11, right=0.94, top = 0.93,bottom = 0.12, hspace = 0.01)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.plot(x_axis[:-1], y_axis[0:nb_steps:step_plot_in_index][:-1] * factor_on_y, linewidth = 2, color = 'k')#ax.plot(x_axis, y_axis[0:nb_steps:step_plot_in_index] * factor_on_y, linewidth = 2, color = 'k')
+#ax.plot([x_axis[0], x_axis[-1]], [50, 50], linestyle = 'dashed', linewidth = 2, color = 'red')
+ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+ax.set_title(ax_title, weight = 'bold', fontsize  = fontsize_plot)
+
+
+[i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
+ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
+plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+
+hour_time_step_xticks_converted_in_index_adjusted = hour_time_step_xticks / step_plot
+xticks = np.arange(0, nb_steps_adjusted, hour_time_step_xticks_converted_in_index_adjusted)
+date_list_str = []
+nb_hours_simu = nb_steps * dt/ 3600.
+date_list = [date_start + timedelta(hours=x) for x in np.arange(0, nb_hours_simu+1, hour_time_step_xticks)]
+for i in range(len(xticks)):
+    if hour_time_step_xticks < 12:
+        x_label = 'Time (hours)'
+        date_list_str.append(str(date_list[i])[11:-3])
+        # if i == 0:
+        #     date_list_str.append("h+" + str(xticks[i] * step_plot))
+        # else:
+        #     date_list_str.append("+" + str(xticks[i] * step_plot))
+    else:
+        #date_list_str.append( str(date_list[i])[5:10] + "\n(day + " + str(int(xticks[i] * step_plot / 24.)) + ")")
+        x_label = 'Time (days)'
+        date_list_str.append(str(date_list[i])[5:10])
+        # if i == 0:
+        #     date_list_str.append("d+" + str(xticks[i] * step_plot/24.))
+        # else:        
+        #     date_list_str.append("+" + str(xticks[i] * step_plot/24.))
+ax.xaxis.set_ticks(xticks)
+ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
+ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+ax.margins(0,0)
+
+if save_results == 1:
+    fig_save_name = fig_title.replace(" ","_").lower()
+    fig_save_name = fig_save_name + 'crosstrack_distance_zoom.pdf'
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
     #os.system("rsync -av " + fig_save_name +" srbwks2014-0008.engin.umich.edu:./" + name_mission)
     
