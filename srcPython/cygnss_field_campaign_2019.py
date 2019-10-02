@@ -76,7 +76,7 @@ end_date_str =  date_end
 start_date = datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S")
 end_date = datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S")
 
-os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
+#os.system("spock_cygnss_spec_parallel.py " + start_date_str + " " + end_date_str + " spec")
 
 #ipdb.set_trace()
 ## Read specular point locations
