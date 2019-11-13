@@ -2,7 +2,8 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
+pickle_root_list = ['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
+#['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
@@ -21,7 +22,7 @@ label_overwrite = ['']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho_control' # raw, amplitude, rho_control, rho
+toplot = 'raw' # raw, amplitude, rho_control, rho
 color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -156,8 +157,11 @@ for ipickle in range(nb_pickle): # now make the plots
 #         print "***! The number of interval of all runs has to be the same. The program will stop. !***"; raise Exception;
 
     if toplot == 'raw':
-        ax.plot(nb_seconds_since_start_pid_concatenate_arr/3600., distance_lvlh_pid_concantenate_arr * 1000., linewidth = 2,color = 'b', alpha = 0.3)
-        ax.plot(nb_seconds_since_start_pid_average_concatenate_arr/3600., distance_lvlh_pid_average_concantenate_arr * 1000., linewidth = 2, color = 'magenta', linestyle = 'dashed')
+        ax.plot(nb_seconds_since_start_pid_average_concatenate_arr[::2]/3600., distance_lvlh_pid_average_concantenate_arr[::2] * 1000., linewidth = 2, color = 'black')
+        #ax.plot(nb_seconds_since_start_pid_concatenate_arr/3600., distance_lvlh_pid_concantenate_arr * 1000., linewidth = 2,color = 'b', alpha = 0.3)
+        #ax.plot(nb_seconds_since_start_pid_average_concatenate_arr/3600., distance_lvlh_pid_average_concantenate_arr * 1000., linewidth = 2, color = 'magenta', linestyle = 'dashed')
+
+        #OLD
     #     ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., distance_lvlh_pid_average_mid_concantenate_arr * 1000., linewidth = 2, color = 'magenta')
     #     ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr + distance_lvlh_pid_average_mid_concantenate_arr )* 1000., linewidth = 2, color = 'red')
     #     ax.scatter(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr + distance_lvlh_pid_average_mid_concantenate_arr )* 1000., s= 500, marker = '.', color = 'red')
@@ -190,14 +194,18 @@ for ipickle in range(nb_pickle): # now make the plots
     xticks_temp = nb_seconds_interval_corr/3600.
     nticks_temp = len(xticks_temp)
     xticks = []
-    for itick in range(nticks_temp):
-        if np.mod(itick, nticks_temp / nb_ticks_xlabel ) == 0:
-            xticks.append(xticks_temp[itick])
+    # for itick in range(nticks_temp):
+    #     if np.mod(itick, nticks_temp / nb_ticks_xlabel ) == 0:
+    #         xticks.append(xticks_temp[itick])
+    for itick in range(0,6*24+1,24):
+            xticks.append(itick)
+
     date_list_str = []
     date_list = [date_ref + timedelta(hours=x) for x in xticks]
     for i in range(len(xticks)):
         #date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
-        date_list_str.append( format((xticks[i]/24.), ".1f"))
+        #date_list_str.append( format((xticks[i]/24.), ".1f"))
+        date_list_str.append( format((xticks[i]/24.), ".0f"))
     ax.xaxis.set_ticks(xticks)
     ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 
@@ -222,8 +230,10 @@ if toplot == 'rho':
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
     y_label = 'Distance (m)'
-    ax.set_ylim([-200, 1200])
-    ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'bold', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
+    ax.set_ylim([-50, 50])
+    ax.set_xlim([0, 6*24])
+    #ax.set_ylim([-200, 1200])
+    #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'bold', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
 ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
