@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name ='FM03_20190818'# 'FM03_20180901'#'FM1_20170817'
+prefix_name ='FM07_20170901'# 'FM03_20180901'#'FM1_20170817'
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -93,7 +93,7 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20190818-000000-e20190818-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg07.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
 
 
 # FM03 20190818 nadir DOING - crashed on sep 20 at iinter = 58 because omniweb data was not available for epochs sooner than aug 25.
@@ -212,7 +212,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 58# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 76# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
@@ -345,12 +345,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # FM03 20190818 nadir
         # r0b 4.92082865873000e+06 3.06001002967000e+06 -3.73379091057000e+06
         # v0b -4.69586622100000e+03 5.80981601100000e+03 -1.44025829800000e+03
-        r0 = '4.92082865873000e+03'
-        r1 = '3.06001002967000e+03'
-        r2 = '-3.73379091057000e+03'
-        v0 = '-4.69586622100000e+00'
-        v1 = '5.80981601100000e+00'
-        v2 = '-1.44025829800000e+00'
+        # r0 = '4.92082865873000e+03'
+        # r1 = '3.06001002967000e+03'
+        # r2 = '-3.73379091057000e+03'
+        # v0 = '-4.69586622100000e+00'
+        # v1 = '5.80981601100000e+00'
+        # v2 = '-1.44025829800000e+00'
 
         # FM03 20190715 nadir
         # r0b 9.19260953396000e+05 -5.62172814501000e+06 -3.87949255757000e+06
@@ -493,12 +493,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v2 = '-4.20713750600000'
 
         # with FM07 20170901 nadir
-        # r0 = '-4.97292234112000e+03'
-        # r1 = '-3.16561591680000e+03'
-        # r2 = '-3.57222390526000e+03'
-        # v0 = '2.98685859600000e+00'
-        # v1 = '-6.75525474700000e+00'
-        # v2 = '1.83111749000000e+00'
+        r0 = '-4.97292234112000e+03'
+        r1 = '-3.16561591680000e+03'
+        r2 = '-3.57222390526000e+03'
+        v0 = '2.98685859600000e+00'
+        v1 = '-6.75525474700000e+00'
+        v2 = '1.83111749000000e+00'
         
         # # # with FM08 20170901 nadir
         # r0 = '-2.28682220600000e+01'
