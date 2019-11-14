@@ -2,13 +2,13 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM7_20170901_mid']#['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
+pickle_root_list = ['FM07_20170901_mid']#['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
-#['FM1_20170817_mid']#['FM7_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
+#['FM1_20170817_mid']#['FM07_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
+label_overwrite = ['SpOCK']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
 #["fm01_20170817_mid"] 
 # ["fm4_mid", "test_mid", "2018jan12_mid", "nadir"]
@@ -22,7 +22,7 @@ label_overwrite = ['']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho' # raw, amplitude, rho_control, rho
+toplot = 'raw' # raw, amplitude, rho_control, rho
 suffix_plot = '_temp'
 color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
@@ -72,27 +72,27 @@ from eci_to_lvlh import *
 
 height_fig = 11
 ratio_fig_size = 4./3
-fontsize_plot = 20
+fontsize_plot = 25
 
 
 
 ######
 fig_title = ''#'Distance between SpOCK and data for different density coefficient conditions' 
-x_label = 'Time (days)' 
+x_label = 'Real time'#'Time (days)' 
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
-fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'bold',)
-plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 gs = gridspec.GridSpec(1, 1)
 gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
 ax = fig.add_subplot(gs[0, 0])
 
 
-ax.set_xlabel(x_label, weight = 'bold', fontsize  = fontsize_plot)
+ax.set_xlabel(x_label, weight = 'normal', fontsize  = fontsize_plot)
 
 [i.set_linewidth(2) for i in ax.spines.itervalues()] # change the width of the frame of the figure
 ax.tick_params(axis='both', which='major', labelsize=fontsize_plot, size = 10, width = 2, pad = 7) 
-plt.rc('font', weight='bold') ## make the labels of the ticks in bold
+plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
 
 pickle_root_concatenate = ''
@@ -178,7 +178,7 @@ for ipickle in range(nb_pickle): # now make the plots
             ax.text(0.01,0.51,'MSIS', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
     elif toplot == 'rho':
         if ipickle == 0:
-            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'MSIS without storm')
+            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'MSIS')
             ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen')
         ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle])
@@ -214,7 +214,7 @@ for ipickle in range(nb_pickle): # now make the plots
     date_list_str = []
     date_list = [date_ref + timedelta(hours=x) for x in xticks]
     for i in range(len(xticks)):
-        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+        date_list_str.append( str(date_list[i])[5:10])# + "\n" + str(date_list[i])[11:16] )
         #date_list_str.append( format((xticks[i]/24.), ".1f"))
         #date_list_str.append( format((xticks[i]/24.), ".0f"))
     ax.xaxis.set_ticks(xticks)
@@ -222,8 +222,8 @@ for ipickle in range(nb_pickle): # now make the plots
 
 # ax.plot([0, duration_simu], [0,0], linestyle = 'dashed', linewidth = 2, color = 'black')
 #ax.set_xlim([0, 198.]); #ax.set_ylim([-20, 20])
-# ax.text(duration_simu/2., -200, 'SpOCK in front -> need rho_control < 0', horizontalalignment = 'center', verticalalignment = 'bottom', fontsize = fontsize_plot, weight = 'bold')
-# ax.text(duration_simu/2., 1200, 'SpOCK behind -> need rho_control > 0', horizontalalignment = 'center', verticalalignment = 'top', fontsize = fontsize_plot, weight = 'bold')
+# ax.text(duration_simu/2., -200, 'SpOCK in front -> need rho_control < 0', horizontalalignment = 'center', verticalalignment = 'bottom', fontsize = fontsize_plot, weight = 'normal')
+# ax.text(duration_simu/2., 1200, 'SpOCK behind -> need rho_control > 0', horizontalalignment = 'center', verticalalignment = 'top', fontsize = fontsize_plot, weight = 'normal')
 ax.margins(0,0)
 legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="", fontsize = fontsize_plot)
 
@@ -244,8 +244,8 @@ if toplot == 'raw':
     ax.set_ylim([-50, 50])
     #ax.set_xlim([0, 6*24])
     #ax.set_ylim([-200, 1200])
-    #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'bold', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
-ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)
+    #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'normal', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
+ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
 
 raise Exception

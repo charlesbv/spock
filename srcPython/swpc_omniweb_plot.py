@@ -13,17 +13,17 @@
 # - the SWPC option is incomplete because it doesn't treat the case when date start and date stop are for two different swpc files (example:if date_start is in 2018 and date_stop in 2019)
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-source = 'omniweb'#'20170901_to_20170910_omniweb_f107_no_storm.txt'#'20170827_to_20170910_omniweb_ap_no_storm.txt' # omniweb, swpc, [filename]
+source = '/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt'#'/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'#'/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt' # omniweb, swpc, filename
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-10T12:00:00' # YYYY-mm-ddTHH:MM:SS
-var_name = ['ap'] # list: f107, ap, dst
+var_name = ['f107'] # list: f107, ap, dst
 dt_tick = 24 # in hours
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_h, fig_save_name_h):
     x_label = 'Real time'
     fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
-    fig.suptitle(fig_title_h, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
+    #fig.suptitle(fig_title_h, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
     gs = gridspec.GridSpec(1, 1)
     gs.update(left = 0.11, right=0.87, top = 0.93,bottom = 0.12, hspace = 0.01)
@@ -35,8 +35,8 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
     ax.plot(nb_seconds_since_start_h, var_h, linewidth = 2, color = 'k')
     ax.margins(0,0)
-    ax.set_ylim([0, 252])
-    #ax.set_ylim([80, 200])
+    #ax.set_ylim([0, 252])
+    ax.set_ylim([80, 200])
     #ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
     nb_seconds_in_simu = nb_seconds_since_start_h[-1] - nb_seconds_since_start_h[0]
     
@@ -55,7 +55,7 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
         if dt_tick > nb_ticks_xlabel*24*3600:
             date_list_str.append( str(date_list[i])[5:10] )
         else:
-            date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+            date_list_str.append( str(date_list[i])[5:10])# + "\n" + str(date_list[i])[11:16] )
     ax.xaxis.set_ticks(xticks)
     ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
     fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
@@ -76,7 +76,7 @@ nvar = len(var_name)
 
 ## Parameters for the figure
 height_fig = 11.  # the width is calculated as height_fig * 4/3.
-fontsize_plot = 25
+fontsize_plot = 28
 ratio_fig_size = 4./3
 
 if ((source != 'omniweb') & (source != 'swpc')):
@@ -137,9 +137,10 @@ if ((source_ok == 'omniweb') | (source_ok == 'user_file')):
 
         if source_ok == 'omniweb':
             fig_title = var_name_plot + ' as a function of time - Omniweb'
+            fig_save_name = filename_out.replace('.txt', '.pdf')
         else:
             fig_title = var_name_plot + ' as a function of time - No storm'
-        fig_save_name = filename_out.replace('.txt', '.pdf')
+            fig_save_name = filename_out.split('/')[-1].replace('.txt', '.pdf')
         plot_var(fig_title, var_name_plot, date_date[istart:istop], var[istart:istop], nb_seconds_since_start[istart:istop], fig_save_name)
         
         
