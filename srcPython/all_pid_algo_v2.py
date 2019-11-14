@@ -2,7 +2,7 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
+pickle_root_list = ['FM8_20170901_omniweb_mid']#['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
@@ -22,7 +22,8 @@ label_overwrite = ['']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'raw' # raw, amplitude, rho_control, rho
+toplot = 'rho' # raw, amplitude, rho_control, rho
+suffix_plot = '_temp'
 color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
 ispleiades = 0
@@ -177,7 +178,7 @@ for ipickle in range(nb_pickle): # now make the plots
             ax.text(0.01,0.51,'MSIS', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
     elif toplot == 'rho':
         if ipickle == 0:
-            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'MSIS')
+            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'MSIS without storm')
             ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen')
         ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle])
@@ -197,15 +198,25 @@ for ipickle in range(nb_pickle): # now make the plots
     # for itick in range(nticks_temp):
     #     if np.mod(itick, nticks_temp / nb_ticks_xlabel ) == 0:
     #         xticks.append(xticks_temp[itick])
-    for itick in range(0,6*24+1,24):
-            xticks.append(itick)
+
+    dt = 24 # in hour
+    date_arr = np.array([date_ref + timedelta(hours=i) for i in np.arange(0,nb_seconds_interval_corr[-1]/3600.,dt)])
+    nticks = len(date_arr)
+    for itick in range(nticks):
+        xticks.append((date_arr[itick] - date_ref).total_seconds()/3600)
+
+    
+    #for itick in range(0,7*24+1,24):
+    #         xticks.append(itick)
+    # for itick in range(0,7*24*3600+1, 23*3600 + 52 * 60):
+    #         xticks.append(np.float(itick) / 3600)
 
     date_list_str = []
     date_list = [date_ref + timedelta(hours=x) for x in xticks]
     for i in range(len(xticks)):
-        #date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
+        date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
         #date_list_str.append( format((xticks[i]/24.), ".1f"))
-        date_list_str.append( format((xticks[i]/24.), ".0f"))
+        #date_list_str.append( format((xticks[i]/24.), ".0f"))
     ax.xaxis.set_ticks(xticks)
     ax.xaxis.set_ticklabels(date_list_str, fontsize = fontsize_plot)#, rotation='vertical')
 
@@ -218,20 +229,20 @@ legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  t
 
 
 if toplot == 'amplitude':
-    fig_save_name = 'fig/all_amplitude_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    fig_save_name = 'fig/all_amplitude_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'Amplitude ocillations (m)'
 if toplot == 'rho_control':
-    fig_save_name = 'fig/all_rho_control_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    fig_save_name = 'fig/all_rho_control_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'rho_control'
     ax.set_ylim([-1, 1])
 if toplot == 'rho':
-    fig_save_name = 'fig/all_rho_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    fig_save_name = 'fig/all_rho_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'Density (kg/m$^3$)'    
 if toplot == 'raw':
-    fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + ".pdf"
+    fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'Distance (m)'
     ax.set_ylim([-50, 50])
-    ax.set_xlim([0, 6*24])
+    #ax.set_xlim([0, 6*24])
     #ax.set_ylim([-200, 1200])
     #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'bold', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
 ax.set_ylabel(y_label, weight = 'bold', fontsize  = fontsize_plot)

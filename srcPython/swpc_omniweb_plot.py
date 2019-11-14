@@ -17,6 +17,7 @@ source = 'omniweb'#'20170901_to_20170910_omniweb_f107_no_storm.txt'#'20170827_to
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-10T12:00:00' # YYYY-mm-ddTHH:MM:SS
 var_name = ['ap'] # list: f107, ap, dst
+dt_tick = 24 # in hours
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
 def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_h, fig_save_name_h):
@@ -37,15 +38,21 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     ax.set_ylim([0, 252])
     #ax.set_ylim([80, 200])
     #ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
-
-    nb_ticks_xlabel = 8
     nb_seconds_in_simu = nb_seconds_since_start_h[-1] - nb_seconds_since_start_h[0]
-    dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
-    xticks = np.arange(0, nb_seconds_in_simu+1, dt_xlabel)
+    
+    # nb_ticks_xlabel = 8    
+    # dt_xlabel =  nb_seconds_in_simu / nb_ticks_xlabel # dt for ticks on x axis (in seconds)
+
+    date_arr = np.array([date_start_date + timedelta(seconds=i) for i in np.arange(0, nb_seconds_in_simu, dt_tick * 3600)])
+    nb_ticks_xlabel = len(date_arr)
+    xticks = []
+    for itick in range(nb_ticks_xlabel):
+        xticks.append((date_arr[itick] - date_arr[0]).total_seconds() )
+    #xticks = np.arange(0, nb_seconds_in_simu+1, dt_tick)
     date_list_str = []
     date_list = [date_start_date + timedelta(seconds=x-xticks[0]) for x in xticks]
     for i in range(len(xticks)):
-        if dt_xlabel > nb_ticks_xlabel*24*3600:
+        if dt_tick > nb_ticks_xlabel*24*3600:
             date_list_str.append( str(date_list[i])[5:10] )
         else:
             date_list_str.append( str(date_list[i])[5:10] + "\n" + str(date_list[i])[11:16] )
