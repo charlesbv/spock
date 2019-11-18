@@ -2,13 +2,13 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM8_20170901_omniweb_mid', 'FM07_20170901_mid']
+pickle_root_list = ['FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']
 #['FM07_20170901_mid']#['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
 #['FM1_20170817_mid']#['FM07_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['FM08', 'FM07']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
+label_overwrite = ['SpOCK - with storm', 'SpOCK - without storm']#['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
 #["fm01_20170817_mid"] 
 # ["fm4_mid", "test_mid", "2018jan12_mid", "nadir"]
@@ -183,8 +183,8 @@ for ipickle in range(nb_pickle): # now make the plots
             ax.text(0.01,1.51,'NRLMSIS00e', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
     elif toplot == 'rho':
         density_pickle.append(rho_ave_conc)
-        if ipickle == 0:
-            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'NRLMSIS00e')
+        if ipickle == (nb_pickle - 1):
+            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'NRLMSIS00e - without storm')
             ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen')
         ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle])
