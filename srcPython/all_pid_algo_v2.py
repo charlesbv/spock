@@ -2,8 +2,8 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']
-#['FM07_20170901_mid']#['FM8_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
+pickle_root_list = ['FM03_20190415_mid']
+#['FM07_20170901_mid']#['FM08_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
@@ -22,7 +22,7 @@ label_overwrite = ['SpOCK - with storm', 'SpOCK - without storm']#['FM07', 'FM08
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'rho' # raw, amplitude, rho_control, rho
+toplot = 'raw' # raw, amplitude, rho_control, rho
 suffix_plot = '_temp'
 color_arr = ['blue', 'red', 'black' ,'mediumorchid', 'dodgerblue', 'magenta', 'darkgreen', 'limegreen'] #['blue', 'red', 'green', 'black', 'magenta']
 isbig = 0
@@ -78,7 +78,7 @@ fontsize_plot = 25
 
 ######
 fig_title = ''#'Distance between SpOCK and data for different density coefficient conditions' 
-x_label = 'Real time'#'Time (days)' 
+x_label = 'Time (days)' #'Real time'#'Time (days)' 
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
@@ -212,18 +212,18 @@ for ipickle in range(nb_pickle): # now make the plots
     for itick in range(nticks):
         xticks.append((date_arr[itick] - date_ref).total_seconds()/3600)
 
-    
-    #for itick in range(0,7*24+1,24):
-    #         xticks.append(itick)
+    xticks = []
+    for itick in range(0,9*24+1,24):
+        xticks.append(itick)
     # for itick in range(0,7*24*3600+1, 23*3600 + 52 * 60):
     #         xticks.append(np.float(itick) / 3600)
 
     date_list_str = []
     date_list = [date_ref + timedelta(hours=x) for x in xticks]
     for i in range(len(xticks)):
-        date_list_str.append( str(date_list[i])[5:10])# + "\n" + str(date_list[i])[11:16] )
+        #date_list_str.append( str(date_list[i])[5:10])# + "\n" + str(date_list[i])[11:16] )
         #date_list_str.append( format((xticks[i]/24.), ".1f"))
-        #date_list_str.append( format((xticks[i]/24.), ".0f"))
+        date_list_str.append( format((xticks[i]/24.), ".0f"))
 
     # # for yearlong study
     # if ipickle == (nb_pickle - 1):
