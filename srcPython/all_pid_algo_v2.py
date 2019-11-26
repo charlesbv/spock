@@ -2,13 +2,15 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']# 'FM03_20190415_interval30h_mid']#['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']
+pickle_root_list = ['FM03_20190415_interval12h_mid', 'FM03_20190415_mid', 'FM03_20190415_interval30h_mid']
+# ['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']# 'FM03_20190415_interval30h_mid']#['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']
 #['FM07_20170901_mid']#['FM08_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
 #['FM1_20170817_mid']#['FM07_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['SpOCK', 'NRLMSIS00e']#['18h', '30h']#['SpOCK - with storm', 'SpOCK - without storm']
+label_overwrite = ['12h', '18h', '30h']
+#['SpOCK', 'NRLMSIS00e']#['18h', '30h']#['SpOCK - with storm', 'SpOCK - without storm']
 #['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
 #["fm01_20170817_mid"] 
@@ -189,11 +191,11 @@ for ipickle in range(nb_pickle): # now make the plots
         ax.plot(nb_seconds_since_start_pid_average_mid_concatenate_arr/3600., ( distance_lvlh_pid_amplitude_mid_concantenate_arr )* 1000., linewidth = 2, color = color_arr[ipickle], label = label)
 
     elif toplot == 'rho_control':
-        ax.plot(nb_seconds_interval_corr/3600., rho_control+1, linewidth = 2, color = color_arr[ipickle], label = label)
         #ax.scatter(nb_seconds_interval_corr/3600., rho_control, linewidth = 2, color = 'k')#, color = color_arr[ipickle])
-        ax.plot([[0] + [i for i in nb_seconds_interval_corr/3600.]][0], np.zeros([len(nb_seconds_interval_corr)+1]) + 1, linewidth = 2, color = 'k', linestyle = 'dashed')
         if ipickle == 0:
-            ax.text(0.01,1.51,'NRLMSIS00e', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
+            ax.plot([[0] + [i for i in nb_seconds_interval_corr/3600.]][0], np.zeros([len(nb_seconds_interval_corr)+1]) + 1, linewidth = 2, color = 'limegreen', label = 'NRLMSIS00e')#, linestyle = 'dashed')
+        #     ax.text(0.01,0.51,'NRLMSIS00e', fontsize = fontsize_plot, transform = ax.transAxes, horizontalalignment = 'left')
+        ax.plot(nb_seconds_interval_corr/3600., rho_control+1, linewidth = 2, color = color_arr[ipickle], label = label)
     elif toplot == 'rho':
         density_pickle.append(rho_ave_conc)
         if ipickle == (nb_pickle - 1):
@@ -258,7 +260,7 @@ for ipickle in range(nb_pickle): # now make the plots
 # ax.text(duration_simu/2., -200, 'SpOCK in front -> need rho_control < 0', horizontalalignment = 'center', verticalalignment = 'bottom', fontsize = fontsize_plot, weight = 'normal')
 # ax.text(duration_simu/2., 1200, 'SpOCK behind -> need rho_control > 0', horizontalalignment = 'center', verticalalignment = 'top', fontsize = fontsize_plot, weight = 'normal')
 ax.margins(0,0)
-legend = ax.legend(loc='lower left', bbox_to_anchor=(0, 0), numpoints = 1,  title="", fontsize = fontsize_plot)
+legend = ax.legend(loc='upper left', bbox_to_anchor=(0, 1), numpoints = 1,  title="", fontsize = fontsize_plot)
 
 
 if toplot == 'amplitude':
@@ -275,8 +277,8 @@ if toplot == 'rho':
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'Distance (m)'
-    #ax.set_ylim([-50, 50])
-    ax.set_ylim([-7000, 500])
+    ax.set_ylim([-50, 50])
+    #ax.set_ylim([-7000, 500])
     #ax.set_xlim([0, 6*24])
     #ax.set_ylim([-200, 1200])
     #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'normal', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
