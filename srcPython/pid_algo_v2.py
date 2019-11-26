@@ -22,7 +22,7 @@ isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
 no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
-interval = 18.0 #18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
+interval = 12.0 #!!!!!!! should be 18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho_coarse = 0.1 # the rho control will vary by this amount to find the optimum rho_coarse over an interval
 step_drho_fine = 0.01 # once the rho_coarse has been found, the rho control will vary by this amount to find the optimum rho over an interval
@@ -31,7 +31,8 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name ='FM08_20170901_no_storm'# 'FM03_20180901'#'FM1_20170817'
+prefix_name ='FM03_20190415_interval12h'# 'FM03_20180901'#'FM1_20170817'
+#raise Exception #!!!!!!!!!prefix
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
 # end of PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
@@ -93,7 +94,7 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg08.ddmi.s20170901-000000-e20170901-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20190415-000000-e20190415-235959.l1.power-brcs.a21.d21.txt'
 
 
 # FM03 20190818 nadir DOING - crashed on sep 20 at iinter = 58 because omniweb data was not available for epochs sooner than aug 25.
@@ -212,7 +213,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 76# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 72#76# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
@@ -385,12 +386,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # FM03 20190415 nadir
         # r0b -6.66957336581000e+06 -1.68571830246000e+06 -6.27006289485000e+05
         # v0b 1.15522108000000e+03 -6.15708064900000e+03 4.29437507800000e+03
-        # r0 = '-6.66957336581000e+03'
-        # r1 = '-1.68571830246000e+03'
-        # r2 = '-6.27006289485000e+02'
-        # v0 = '1.15522108000000e+00'
-        # v1 = '-6.15708064900000e+00'
-        # v2 = '4.29437507800000e+00'
+        r0 = '-6.66957336581000e+03'
+        r1 = '-1.68571830246000e+03'
+        r2 = '-6.27006289485000e+02'
+        v0 = '1.15522108000000e+00'
+        v1 = '-6.15708064900000e+00'
+        v2 = '4.29437507800000e+00'
 
         # FM03 20190409 nadir
         # r0b -5.20773678874000e+06 -4.25095076218000e+06 -1.58658992788000e+06
@@ -500,13 +501,13 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v1 = '-6.75525474700000e+00'
         # v2 = '1.83111749000000e+00'
         
-        # # # with FM08 20170901 nadir
-        r0 = '-2.28682220600000e+01'
-        r1 = '6.89905045228000e+03'
-        r2 = '3.40348034492000e+02'
-        v0 = '-6.24118211000000e+00'
-        v1 = '1.87039196000000e-01'
-        v2 = '-4.32796299000000e+00'
+        # # # # with FM08 20170901 nadir
+        # r0 = '-2.28682220600000e+01'
+        # r1 = '6.89905045228000e+03'
+        # r2 = '3.40348034492000e+02'
+        # v0 = '-6.24118211000000e+00'
+        # v1 = '1.87039196000000e-01'
+        # v2 = '-4.32796299000000e+00'
         
         
         # # # with FM4_20180112 start 20180113T170000
@@ -564,7 +565,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
 
             rho_control[iinter] = rho_control[iinter-1] + drho
             rho_control_spock = 1 + rho_control[iinter]#['msis_lat_depend', 1 + rho_control[iinter], 0.7*(1 + rho_control[iinter]), rho_phase] #1 + rho_control[iinter]
-        else:# don't apply the PID for the first 3 intervals (36 horus) and take rho_control = 0
+        else:# don't apply the PI<D for the first 3 intervals (36 horus) and take rho_control = 0
             rho_control[iinter] = -0.2# -0.5 # !!!!!!uncomment
             rho_control_spock = 1 + rho_control[iinter] # not latitude dependent -> equivalent to ['msis_lat_depend', 1 + rho_control, 0, 0]
             error_change_sign = 1 #no iteration for this interval
@@ -594,7 +595,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for FORCES section
                 gravity_order, # !!!!!!!!!!! put back 20
                 "drag solar_pressure sun_gravity moon_gravity earth_pressure", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
-                ['/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt','/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'],#,!!!!!before 072919 used to be 'swpc', or 'omniweb'
+                'omniweb', #['/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt','/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'],#,!!!!!before 072919 used to be 'swpc', or 'omniweb'
                 # for OUTPUT section
                         dir_simu + "out",
                 dt_output, 
@@ -611,10 +612,10 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if ((iinter >= 1000) & (irho >= 10)):
+            if ((iinter >= 0) & (irho >= -1)):
                 if ispleiades != 1:
-                    os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
-                    #os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
+                    #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
+                    os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
                 else:
                     os.system(path_mpirun + ' /home1/cbussy/spock ' + main_input_filenam)
                 # #save position and velocity
@@ -866,6 +867,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             argper_spock_ok_pid_all_inter.append(argper_spock_ok_pid)
             step_drho = step_drho_coarse
             print 'back to coarse control for next interval, step_drho:', step_drho
+            print len(distance_lvlh_pid_orbit_average_interval_all_inter)
             print 'last_error' , last_error, last_error_previous_rho, rho_control[iinter]
             print 'OPTIMUM RHO CONTROL', rho_control[:iinter+1]
         elif ( (np.sign(last_error) != sign_last_error_previous_rho) & (step_drho == step_drho_coarse) ):
@@ -1059,6 +1061,7 @@ rho_msis_ok_pid_concatenate = []
 ecc_obs_same_spock_concatenate = []
 argper_average_mid_concantenate = []
 index_period_spock_concatenate = []
+nb_interval = len(distance_lvlh_pid_orbit_average_interval_all_inter) # have to update nb_interval. It has changed if the rho_control when outside over the limits (-1 to 1)
 for iinter_loop in range(nb_interval):
     if iinter_loop < inter_start_algo:
         iii = -1
