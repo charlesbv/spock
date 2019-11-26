@@ -65,9 +65,9 @@ fontsize_plot = 25
 
 # Integrated flux
 fig_title = ''#local time of perigee vs delta eccentricity
-ax_title = 'FISM 1-minute resolution integrated flux'
+ax_title = ''#FISM 1-minute resolution integrated flux'
 x_label = 'Real time'
-y_label = 'W/m$^2$'
+y_label = 'FISM flux (W/m$^2)$'
 
 fig = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 fig.suptitle(fig_title, y = 0.965,fontsize = (int)(fontsize_plot*1.1), weight = 'normal',)
