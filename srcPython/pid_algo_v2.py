@@ -22,16 +22,16 @@ isbig = 0 # if runnign script from Big
 ispleiades = 0 # if runnign script from Pleaides
 dir_simu = '/Users/cbv/work/spockOut/density' # directory where SpOCK simu are run (input and output files)
 no_prop = 0 # set this variable to 1 to prevent creating SpOCK main input files and propagating them
-interval = 12.0 #!!!!!!! should be 18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
+interval = 18.0 #!!!!!!! should be 18.0 # interval of time to compare the two trajectories (data and SpOCK). In hours
 step_move_save = 3.0
 step_drho_coarse = 0.1 # the rho control will vary by this amount to find the optimum rho_coarse over an interval
-step_drho_fine = 0.01 # once the rho_coarse has been found, the rho control will vary by this amount to find the optimum rho over an interval
+step_drho_fine = 0.1#!!!! put back 0.01 # once the rho_coarse has been found, the rho control will vary by this amount to find the optimum rho over an interval
 kplist = [1.] # list of proportional gains for PID
 kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name ='FM03_20190415_interval12h'# 'FM03_20180901'#'FM1_20170817'
+prefix_name ='swarmB_20170901'# 'FM03_20180901'#'FM1_20170817'
 #raise Exception #!!!!!!!!!prefix
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
@@ -94,9 +94,11 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/cyg03.ddmi.s20190415-000000-e20190415-235959.l1.power-brcs.a21.d21.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/SW_OPER_GPSBNAV_1B_20170901T000000_20170903T000000.txt'
 
 
+# Swarm B 20170901 nadir
+# nadir/SW_OPER_GPSBNAV_1B_20170901T000000_20170910T00000_5h0.txt                                                          
 # FM03 20190818 nadir DOING - crashed on sep 20 at iinter = 58 because omniweb data was not available for epochs sooner than aug 25.
 # nadir/cyg03.ddmi.s20190818-000000-e20190818-235959.l1.power-brcs.a21.d21.txt
 # FM03 20190715 nadir 
@@ -342,7 +344,17 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # v0 = ''
         # v1 = ''
         # v2 = ''
-        
+
+        # Swarm B 20170901 nadir
+        # r0b -1.90079145021000e+06 -1.53304080378000e+06 -6.44380971379000e+06
+        # v0b -4.94630225500000e+03 -5.10395398800000e+03 2.67463106200000e+03                                               
+        r0 = '-1.90079145021000e+03'
+        r1 = '-1.53304080378000e+03'
+        r2 = '-6.44380971379000e+03'
+        v0 = '-4.94630225500000e+00'
+        v1 = '-5.10395398800000e+00'
+        v2 = '2.67463106200000e+00'
+
         # FM03 20190818 nadir
         # r0b 4.92082865873000e+06 3.06001002967000e+06 -3.73379091057000e+06
         # v0b -4.69586622100000e+03 5.80981601100000e+03 -1.44025829800000e+03
@@ -386,12 +398,12 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # FM03 20190415 nadir
         # r0b -6.66957336581000e+06 -1.68571830246000e+06 -6.27006289485000e+05
         # v0b 1.15522108000000e+03 -6.15708064900000e+03 4.29437507800000e+03
-        r0 = '-6.66957336581000e+03'
-        r1 = '-1.68571830246000e+03'
-        r2 = '-6.27006289485000e+02'
-        v0 = '1.15522108000000e+00'
-        v1 = '-6.15708064900000e+00'
-        v2 = '4.29437507800000e+00'
+        # r0 = '-6.66957336581000e+03'
+        # r1 = '-1.68571830246000e+03'
+        # r2 = '-6.27006289485000e+02'
+        # v0 = '1.15522108000000e+00'
+        # v1 = '-6.15708064900000e+00'
+        # v2 = '4.29437507800000e+00'
 
         # FM03 20190409 nadir
         # r0b -5.20773678874000e+06 -4.25095076218000e+06 -1.58658992788000e+06
@@ -588,13 +600,13 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for SPACECRAFT section
                         1,
                 '0',
-                29,
-                dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
+                460, #!!!! before 011220: 29,
+                "/Users/cbv/work/spockOut/density/swarmB_geo.txt", #!!!! before 011220: dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section
                 gravity_order, # !!!!!!!!!!! put back 20
-                "drag solar_pressure sun_gravity moon_gravity earth_pressure", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
+                "drag solar_pressure sun_gravity moon_gravity", # !!!!! before 01220: "drag solar_pressure sun_gravity moon_gravity earth_pressure", # !!!!!!!!!!!!! put back to "drag sun_gravity moon_gravity"
                 'omniweb', #['/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt','/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'],#,!!!!!before 072919 used to be 'swpc', or 'omniweb'
                 # for OUTPUT section
                         dir_simu + "out",
@@ -612,10 +624,11 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if ((iinter >= 90) & (irho >= -1)):
+            if ((iinter >= 0) & (irho >= -1)):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
-                    os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
+                    # !!!!!! before 011220 used to be os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
+                    os.system(path_mpirun + ' -np 1 spock_grav_all_lat ' + main_input_filename)
                 else:
                     os.system(path_mpirun + ' /home1/cbussy/spock ' + main_input_filenam)
                 # #save position and velocity

@@ -4560,8 +4560,8 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   
 
 
-  build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
-  //	  read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  //  build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  	  read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
   }
 
 
