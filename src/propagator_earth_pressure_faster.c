@@ -4392,9 +4392,9 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.dlat_map = 0.5;
   PARAMS->EARTH.GRAVITY.dlon_map = 1.;
   PARAMS->EARTH.GRAVITY.dradius_map = 10.;//;22. ;//PARAMS->EARTH.GRAVITY.dlon_map * 100.;
-  PARAMS->EARTH.GRAVITY. min_lat_map = -40;//-0.11;
-  PARAMS->EARTH.GRAVITY.max_lat_map = 40;//0.11;
-  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 450;//200.;
+  PARAMS->EARTH.GRAVITY. min_lat_map = -90;//-0.11;
+  PARAMS->EARTH.GRAVITY.max_lat_map = 90;//0.11;
+  PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 400;//200.;
   PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 600;//501;//40000.;
   PARAMS->EARTH.GRAVITY.nlon_map = (int)(ceil( 360./PARAMS->EARTH.GRAVITY.dlon_map)) + 1;// nb lon bins
   PARAMS->EARTH.GRAVITY.nlat_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map)) + 1;// nb lat bins
@@ -4560,8 +4560,8 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   
 
 
-  //build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
-	  read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  build_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
+  //	  read_gravity_map( &(PARAMS->EARTH.GRAVITY), degree,  iProc);
   }
 
 

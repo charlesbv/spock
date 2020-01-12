@@ -55,6 +55,7 @@ sys.path.append("/Users/cbv/work/spock/srcPython")
 import pickle
 from orbit_average import *
 import matplotlib.colors as colors
+from matplotlib import pyplot as plt
 import matplotlib.cm as cmx
 from cadre_read_last_tle import *
 from get_prop_dir import *
@@ -170,8 +171,8 @@ for irun in range(nb_run):
     dt = var_in[find_in_read_input_order_variables(var_in_order, 'dt_output')]; 
     nb_steps = var_in[find_in_read_input_order_variables(var_in_order, 'nb_steps')]; 
     nb_sc = var_in[find_in_read_input_order_variables(var_in_order, 'nb_sc')];
-    thrust_start = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_start')];
-    thrust_stop = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_stop')]; 
+    # thrust_start = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_start')];
+    # thrust_stop = var_in[find_in_read_input_order_variables(var_in_order, 'thrust_stop')]; 
 
     # Convert SC # to CYGNSS name if cygnss is set to 1
     if cygnss == 1:
