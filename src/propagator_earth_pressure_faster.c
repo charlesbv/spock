@@ -463,7 +463,7 @@ int coverage_ground_station(   SPACECRAFT_T *SC, // in: spacecraft (position and
     	// // // // Now we know the current attitude of the sc, convert the ground station to sc vector from LVLH to SC body reference frame
 	//
 
-	  compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et_interpolated,  eci_sc, eci_v_sc, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+	compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et_interpolated,  eci_sc, eci_v_sc, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current, PARAMS);
     	m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
 
 
@@ -2291,7 +2291,7 @@ int compute_power(INTEGRATOR_T    *INTEGRATOR,
       compute_T_inrtl_2_lvlh(T_inrtl_2_lvlh, r_i2cg_INRTL, v_i2cg_INRTL);
       m_x_v(r_cg2sun_LVLH_normalized, T_inrtl_2_lvlh, r_cg2sun_J2000_normalized);
       /* r_cg2sun_J2000_normalized LVLH to body */
-      compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+      compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current, PARAMS);
       m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
       m_x_v(r_cg2sun_SC_normalized, T_lvlh_to_sc, r_cg2sun_LVLH_normalized ); 
 
@@ -2545,7 +2545,7 @@ int compute_solar_pressure(double          a_solar_pressure_INRTL[3],
     m_x_v(r_cg2sun_LVLH_normalized, T_inrtl_2_lvlh, r_cg2sun_J2000_normalized);
 
     /* r_cg2sun_J2000_normalized LVLH to body */
-    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current, PARAMS);
     //  compute_T_sc_to_lvlh(T_sc_to_lvlh, INTEGRATOR->attitude.lvlh_alongtrack_in_body_cartesian, INTEGRATOR->attitude.lvlh_crosstrack_in_body_cartesian, &et, r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR); 
     m_trans(T_lvlh_to_sc, T_sc_to_lvlh);
     m_x_v(r_cg2sun_SC_normalized, T_lvlh_to_sc, r_cg2sun_LVLH_normalized ); 
@@ -2904,7 +2904,7 @@ int compute_earth_pressure(double          a_earth_pressure_INRTL[3],
   cos_zenith_sc = cos_zenith_sc / ( radius_sc *  r_earth2sun_J2000_mag);
   zenith_sc = acos(cos_zenith_sc); // doesn't matter if get +-zenith angle
   if (INTEGRATOR->coll_vcm != 1){
-      compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+    compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current, PARAMS);
       double sc_normal_lvlh[3], sc_normal_eci[3], sc_normal_epf_temp[3], sc_normal_epf[3]; //epf: Earth pressure frame (see definition in function compute_T_inrtl_2_earth_pres_frame in prop_math.c)
       double T_lvlh_to_inrtl[3][3];
       double T_inrtl_2_earth_pres_frame[3][3];
@@ -3775,7 +3775,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
     //       printf("%d | %e | %e | %e \n", index_in_attitude_interpolated, v_angle[0], v_angle[1],v_angle[2]);
   }
 
-  compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current);
+  compute_T_sc_to_lvlh( T_sc_to_lvlh, v_angle, order_rotation, INTEGRATOR->attitude.attitude_profile, &et,  r_i2cg_INRTL, v_i2cg_INRTL, INTEGRATOR->file_is_quaternion, INTEGRATOR->attitude.quaternion_current, PARAMS);
 
 
 

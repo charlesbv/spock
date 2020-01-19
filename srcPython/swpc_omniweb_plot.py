@@ -13,10 +13,10 @@
 # - the SWPC option is incomplete because it doesn't treat the case when date start and date stop are for two different swpc files (example:if date_start is in 2018 and date_stop in 2019)
 
 # PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
-source = '/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt'#'/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'#'/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt' # omniweb, swpc, filename
+source = '/Users/cbv/work/spockOut/density/swarm/apmod.txt'#'/Users/cbv/work/spockOut/density/20170827_to_20170910_omniweb_ap_no_storm.txt'#'/Users/cbv/work/spockOut/density/20170901_to_20170910_omniweb_f107_no_storm.txt' # omniweb, swpc, filename
 date_start = '2017-09-01T00:00:00' # YYYY-mm-ddTHH:MM:SS
 date_stop = '2017-09-10T12:00:00' # YYYY-mm-ddTHH:MM:SS
-var_name = ['f107'] # list: f107, ap, dst
+var_name = ['ap'] # list: f107, ap, dst
 dt_tick = 24 # in hours
 # end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT
 
@@ -36,7 +36,7 @@ def plot_var(fig_title_h, y_label_h, date_date_h, var_h, nb_seconds_since_start_
     ax.plot(nb_seconds_since_start_h, var_h, linewidth = 2, color = 'k')
     ax.margins(0,0)
     #ax.set_ylim([0, 252])
-    ax.set_ylim([80, 200])
+    #ax.set_ylim([80, 200])
     #ax.set_ylim([np.min(var_h)*0.9, np.max(var_h)*1.1])
     nb_seconds_in_simu = nb_seconds_since_start_h[-1] - nb_seconds_since_start_h[0]
     

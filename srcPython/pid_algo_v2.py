@@ -15,7 +15,7 @@
 
 
 # PARAMETERS TO SET UP BEFORE RUNNIG THIS SCRIPT
-nadir = 1
+nadir = 0
 plot_var = 'ecc' # dist, ecc, argper
 rho_more = 'mid' # equator, pole, mid -> where to add more rho (pole means the ighhes tlatitude of the orbit)
 isbig = 0 # if runnign script from Big
@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name ='swarmB_20170901'# 'FM03_20180901'#'FM1_20170817'
+prefix_name ='swarmB_20170901_mass460_quaternion_minus_theta'# 'FM03_20180901'#'FM1_20170817'
 #raise Exception #!!!!!!!!!prefix
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
@@ -94,7 +94,7 @@ from collections import *
 if dir_simu[-1] != '/':
     dir_simu = dir_simu + '/'
 
-obs_rv_filename = dir_simu + 'HD_data/nadir/SW_OPER_GPSBNAV_1B_20170901T000000_20170903T000000.txt'
+obs_rv_filename = dir_simu + 'HD_data/nadir/SW_OPER_GPSBNAV_1B_20170901T000000_20170910T000000.txt'
 
 
 # Swarm B 20170901 nadir
@@ -155,7 +155,7 @@ obs_rv_filename = dir_simu + 'HD_data/nadir/SW_OPER_GPSBNAV_1B_20170901T000000_2
 # 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
 
 if nadir != 1:
-    obs_att_filename = dir_simu + 'HD_data/spock_FM4_20180112_eng_adcs_query-13840_start20180113T170000_end20180126T170000.txt'
+    obs_att_filename = dir_simu + 'HD_data/SW_OPER_STRBATT_1B_20170901T000000_20170910T000000_minus_theta.txt'
 else:
     obs_att_filename = 'nadir'
 
@@ -215,7 +215,7 @@ date_obs_start= datetime.strptime(date_obs_start_str, "%Y-%m-%dT%H:%M:%S")
 date_obs_end_str = date_obs_str[-1]
 date_obs_end= datetime.strptime(date_obs_end_str, "%Y-%m-%dT%H:%M:%S")
 interval_sec = interval * 3600.
-nb_interval = 71#76# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
+nb_interval = 76# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_save * 3600 ) )#76#55#62# (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) #56#(int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( step_move_sec ) ) # !!!!!!!! (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) ) # 62 !!!!!! should be (int) ( ( date_obs_end - date_obs_start ).total_seconds()/ ( interval_sec ) )
 
 print 'nb of intervals:', nb_interval
 nb_seconds_since_start = []
@@ -600,8 +600,8 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for SPACECRAFT section
                         1,
                 '0',
-                460, #!!!! before 011220: 29,
-                "/Users/cbv/work/spockOut/density/swarmB_geo.txt", #!!!! before 011220: dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
+                460, #!!!! 460 before 011220: 29,
+                "/Users/cbv/work/spockOut/density/swarm/swarm_geo_esa2.txt", #!!!! before 011220: dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section
@@ -624,7 +624,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if ((iinter >= 0) & (irho >= -1)):
+            if ((iinter >= 9) & (irho >= -1)):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
                     # !!!!!! before 011220 used to be os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)

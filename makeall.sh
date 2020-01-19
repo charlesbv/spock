@@ -111,7 +111,7 @@ if [ $py_only -ne 1 ];then
 	
     else
 	# SpOCK
-	make clean PATH_EXECUTABLE="$path_spock_abso"
+	#make clean PATH_EXECUTABLE="$path_spock_abso"
 	make all PATH_COMPILER=$path_compiler PATH_SPICE="$path_spice_abso" PATH_GSL="$path_gsl_abso" PATH_EXECUTABLE="$path_spock_abso"
 	#echo sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev
 	#sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev

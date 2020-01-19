@@ -1,4 +1,5 @@
-# this script converts a spp3 file from https://swarm-diss.eo.esa.int/#swarm%2FLevel1b%2FEntire_mission_data%2FGPSxNAV%2FSat_A into ECI coordinates in a format similar to the output format of cygnss_read_netcdf_to_eci_observation.py
+# this script converts a spp3 file from https://swarm-diss.eo.esa.int/#swarm%2FLevel1b%2FEntire_mission_data%2FGPSxNAV into ECI coordinates in a format similar to the output format of cygnss_read_netcdf_to_eci_observation.py
+# attitude information is availble at: https://swarm-diss.eo.esa.int/#swarm%2FLevel1b%2FEntire_mission_data%2FSTRxATT. The script that reads the attitude files and convert them into quaternion files for SpOCK in on Big in ~/cde/swarm/swarm_attitude_to_quaternion_spock.py
 
 import numpy as np
 from datetime import datetime, timedelta

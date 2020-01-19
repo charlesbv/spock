@@ -2,14 +2,23 @@
 # THis script plots the distance, amplitude, orbit average of runs amde with pid_algo_v2.py. The pickle were saved in pid_algo_v2.py
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
-pickle_root_list = ['FM03_20190415_interval12h_mid', 'FM03_20190415_mid', 'FM03_20190415_interval30h_mid']
+plot_swarm = 1
+external = ['/Users/cbv/work/spockOut/density/swarm/swarmB.txt']
+#['/Users/cbv/work/spockOut/density/swarm/swarmB.txt', '/Users/cbv/work/spockOut/density/swarm/swarmB_omniweb_mod.txt', '/Users/cbv/work/spockOut/density/swarm/cyg_omniweb_mod.txt'] 
+external_label = ['NRLMSIS00e along Swarm - actual F10.7/Ap', 'NRLMSIS00e along Swarm - corrected F10.7/Ap', 'NRLMSIS00e along CYGNSS - corrected F10.7/Ap']
+external_color = ['limegreen', 'red', 'blue']
+# ['/Users/cbv/work/spockOut/density/swarm/swarm_omniweb_mod.txt']
+# ['/Users/cbv/work/spockOut/density/swarm/cyg_omniweb_mod.txt']# simulations that were run durectly with SpOCK (like a typical SpOCK's simulations). indicate here the name of the main input file. Can only use if toplot = 'rho'
+pickle_root_list = ["swarmB_20170901_mass310_mid",  "swarmB_20170901_mass460_quaternion_minus_theta_mid"]
+# ["swarmB_20170901_mass310_mid"]
+# ['FM03_20190415_interval12h_mid', 'FM03_20190415_mid', 'FM03_20190415_interval30h_mid']
 # ['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']# 'FM03_20190415_interval30h_mid']#['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']
 #['FM07_20170901_mid']#['FM08_20170901_no_storm_mid']#['FM8_20170901_omniweb_mid']
 #['FM03_20180901_mid', 'FM03_20181016_mid', 'FM03_20181106_mid', 'FM03_20181218_mid', 'FM03_20190110_mid', 'FM03_20190217_mid']
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
 #['FM1_20170817_mid']#['FM07_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['12h', '18h', '30h']
+label_overwrite = ['SpOCK nadir', 'SpOCK quaternions']#['12h', '18h', '30h']
 #['SpOCK', 'NRLMSIS00e']#['18h', '30h']#['SpOCK - with storm', 'SpOCK - without storm']
 #['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']
@@ -25,7 +34,7 @@ label_overwrite = ['12h', '18h', '30h']
 #['localtime70percent_mid']#['localtime_pole', 'localtime_equator', 'localtime70percent_mid']
 #['solarzenith_equator', 'solarzenith_pole', 'localtime70percent_mid']# ['localtime70percentAp2_mid']#
 
-toplot = 'raw' # raw, amplitude, rho_control, rho
+toplot = 'rho' # raw, amplitude, rho_control, rho
 if 'distance_lvlh_nb_seconds_since_start_date_start_msis' in pickle_root_list:
     toplot = 'raw'
     
@@ -35,6 +44,7 @@ isbig = 0
 ispleiades = 0
 import sys
 import numpy as np
+from scipy import stats
 
 if isbig == 1:
     sys.path.append("/home/cbv/code/spock/srcPython")
@@ -59,6 +69,7 @@ import os
 
 from read_input_file import *
 from read_output_file import *
+from orbit_average import *
 from spock_main_input import *
 #if ispleiades != 1:
 from matplotlib import pyplot as plt
@@ -71,7 +82,7 @@ if ((isbig != 1) & (ispleiades !=1)):
     import ipdb
 from eci_to_lvlh import *
 #plt.ion()
-
+from find_in_read_input_order_variables import *
 
 
 #FIGURES ###################
@@ -198,11 +209,11 @@ for ipickle in range(nb_pickle): # now make the plots
         ax.plot(nb_seconds_interval_corr/3600., rho_control+1, linewidth = 2, color = color_arr[ipickle], label = label)
     elif toplot == 'rho':
         density_pickle.append(rho_ave_conc)
-        if ipickle == (nb_pickle - 1):
-            ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'NRLMSIS00e - without storm')
-            ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen')
         ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle], label = label)
         ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_ave_conc, linewidth = 2, color = color_arr[ipickle])
+        # if ipickle == (nb_pickle - 1):
+        #     ax.plot(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen', label = 'NRLMSIS00e - actual F10.7/Ap')
+        #     ax.scatter(nb_seconds_ave_conc_arr[:-1]/3600., rho_msis_ave_conc, linewidth = 2, color = 'limegreen')
 
         
     if ipickle == 0:
@@ -220,6 +231,47 @@ for ipickle in range(nb_pickle): # now make the plots
     #     if np.mod(itick, nticks_temp / nb_ticks_xlabel ) == 0:
     #         xticks.append(xticks_temp[itick])
 
+    # External density
+    if ipickle == 0:
+        if ((len(external) != 0) & (toplot == 'rho')):
+            next = len(external)
+            for iext in range(next):
+                filename_ext = external[iext]
+                dir_ext = '/'.join( filename_ext.split('/')[:-1]) + '/'
+                var_in, var_in_order = read_input_file(filename_ext)
+                isc = 0
+                output_file_path_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_path_list')]
+                output_file_name_list = var_in[find_in_read_input_order_variables(var_in_order, 'output_file_name_list')];                
+                var_to_read = ['density', 'latitude']
+                var_out, var_out_order = read_output_file( dir_ext + output_file_path_list[isc] + output_file_name_list[isc], var_to_read )
+                density = var_out[find_in_read_input_order_variables(var_out_order, 'density')]
+                latitude = var_out[find_in_read_input_order_variables(var_out_order, 'latitude')]
+                date_ext = var_out[find_in_read_input_order_variables(var_out_order, 'date')]
+                date_average_start_orbit_list = []
+                date_average_end_orbit_list = []
+                x_axis_average = []
+                density_average, time_averaged, index_time_averaged = orbit_average(density, latitude, date_ext )
+                date_average_start_orbit_list.append( np.array(time_averaged)[:,0] ) # take the date at the start of the bin
+                date_average_end_orbit_list.append( np.array(time_averaged)[:,2] ) # take the date at the end of the bin
+                norbit = len(time_averaged)
+                for iorbit in range(norbit):
+                    date_average_start_orbit = date_average_start_orbit_list[-1][iorbit]
+                    date_average_start_orbit = datetime.strptime( date_average_start_orbit, "%Y/%m/%d %H:%M:%S.%f" )
+                    nb_seconds_between_start_orbit_and_date_start = ( date_average_start_orbit - date_ref ).total_seconds()
+                    x_axis_average.append( nb_seconds_between_start_orbit_and_date_start )
+                x_axis_average = np.array(x_axis_average)
+                ax.plot(x_axis_average/3600., density_average, linewidth = 2, color = external_color[iext], label = external_label[iext])
+                ax.scatter(x_axis_average/3600., density_average, linewidth = 2, color = external_color[iext])
+    # end of external density        
+
+    # Add swarm density form pickle created on Big by code/swarm/read_swarm_rho.py
+    if plot_swarm == 1:
+        [sec_swarm, density_swarm, date_ref_swarm] = pickle.load(open('pickle/swarm.pickle'))
+        delta_sec_swarm = (date_ref_swarm - date_ref).total_seconds()
+        ax.plot((sec_swarm  + delta_sec_swarm)/3600., density_swarm, linewidth = 2, color = 'black', label = 'Swarm accelerometer')
+
+    
+    # end of add swarm density form pickle created on Big by code/swarm/read_swarm_rho.py
     
     dt = 24 # in hour
     date_arr = np.array([date_ref + timedelta(hours=i) for i in np.arange(0,nb_seconds_interval_corr[-1]/3600.,dt)])
@@ -272,8 +324,13 @@ if toplot == 'rho_control':
     ax.set_ylim([0, 2])
     ax.set_xlim([0, ax.get_xlim()[1]])
 if toplot == 'rho':
+    y_label = 'Density (kg/m$^3$)'
     fig_save_name = 'fig/all_rho_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
-    y_label = 'Density (kg/m$^3$)'    
+    if len(external) > 0:
+        fig_save_name = 'fig/all_rho_control_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + "_with_external_" + external[0].split('/')[-1].replace(".txt", ".pdf")
+    if plot_swarm == 1:
+        fig_save_name = fig_save_name.replace('.pdf', '_with_swarm.pdf')
+
 if toplot == 'raw':
     fig_save_name = 'fig/all_raw_' + pickle_root_concatenate + '_nbinter' + str(nb_interval) + suffix_plot + ".pdf"
     y_label = 'Distance (m)'
@@ -284,6 +341,69 @@ if toplot == 'raw':
     #ax.text(0.5,0.98,label.title(),fontsize = fontsize_plot, weight = 'normal', color = 'k', transform = ax.transAxes, horizontalalignment = 'center', verticalalignment = 'top')
 ax.set_ylabel(y_label, weight = 'normal', fontsize  = fontsize_plot)
 fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
+# Compare SpOCK and Swarm (correlation and nrms error)
+swarm_end_date = date_ref_swarm + timedelta(seconds = sec_swarm[-1])
+swarm_end_seconds_since_date_ref = (swarm_end_date - date_ref).total_seconds()
+swarm_time = sec_swarm  + delta_sec_swarm# np.arange(delta_sec_swarm, swarm_end_seconds_since_date_ref,)
+spock_time = nb_seconds_ave_conc_arr[:-1]
+istart_swarm_spock = np.where(swarm_time >= spock_time[0])[0][0]
+iend_swarm_spock = np.where(swarm_time <= spock_time[-1])[0][-1]
+swarm_inter_spock_time = swarm_time[istart_swarm_spock:iend_swarm_spock+1] # this is the time interval to interpolate SpOCK on
+istart_spock_swarm = np.where(spock_time >= swarm_time[0])[0][0]
+iend_spock_swarm = np.where(spock_time <= swarm_time[-1])[0][-1]
+spock_inter_swarm_time = spock_time[istart_spock_swarm:iend_spock_swarm+1]
+nspock_inter_swarm = len(spock_inter_swarm_time)
+dens_spock_inter = []
+for ispock in range(nspock_inter_swarm-1):
+    itime_spock = spock_inter_swarm_time[ispock]
+    itime_spock_next = spock_inter_swarm_time[ispock+1]
+    iinter_start = np.where(swarm_inter_spock_time >= itime_spock)[0][0]
+    iinter_end = np.where(swarm_inter_spock_time < itime_spock_next)[0][-1]
+    ainter = (rho_ave_conc[ispock+1] - rho_ave_conc[ispock]) / (itime_spock_next - itime_spock)
+    binter = rho_ave_conc[ispock] - ainter * itime_spock
+    for itime_inter in swarm_inter_spock_time[iinter_start:iinter_end+1]:
+        dens_spock_inter.append( ainter * itime_inter + binter )
+        #print itime_spock, itime_inter, itime_spock_next 
+dens_spock_inter = np.array(dens_spock_inter)
+dens_swarm_inter = density_swarm[istart_swarm_spock:iend_swarm_spock+1]
+nrms_error_swarm_spock = np.sqrt(np.mean((dens_spock_inter - dens_swarm_inter)**2)/np.mean(dens_swarm_inter**2))
+print 'Correlation Swarm SpOCK', stats.pearsonr(dens_swarm_inter, dens_spock_inter)
+print 'NRMS error Swarm SpOCK', nrms_error_swarm_spock
+
+
+# Compare MSIS and Swarm (correlation and nrms error)
+external_time = x_axis_average
+istart_swarm_external = np.where(swarm_time >= external_time[0])[0][0]
+iend_swarm_external = np.where(swarm_time <= external_time[-1])[0][-1]
+swarm_inter_external_time = swarm_time[istart_swarm_external:iend_swarm_external+1] # this is the time interval to interpolate SpOCK on
+istart_external_swarm = np.where(external_time >= swarm_time[0])[0][0]
+iend_external_swarm = np.where(external_time <= swarm_time[-1])[0][-1]
+external_inter_swarm_time = external_time[istart_external_swarm:iend_external_swarm+1]
+nexternal_inter_swarm = len(external_inter_swarm_time)
+dens_external_inter = []
+for iexternal in range(nexternal_inter_swarm-1):
+    itime_external = external_inter_swarm_time[iexternal]
+    itime_external_next = external_inter_swarm_time[iexternal+1]
+    iinter_start = np.where(swarm_inter_external_time >= itime_external)[0][0]
+    iinter_end = np.where(swarm_inter_external_time < itime_external_next)[0][-1]
+    ainter = (density_average[iexternal+1] - density_average[iexternal]) / (itime_external_next - itime_external)
+    binter = density_average[iexternal] - ainter * itime_external
+    for itime_inter in swarm_inter_external_time[iinter_start:iinter_end+1]:
+        dens_external_inter.append( ainter * itime_inter + binter )
+        #print itime_external, itime_inter, itime_external_next 
+dens_external_inter = np.array(dens_external_inter)
+dens_swarm_inter = density_swarm[istart_swarm_external:iend_swarm_external+1]
+nrms_error_swarm_external = np.sqrt(np.mean((dens_external_inter - dens_swarm_inter)**2)/np.mean(dens_swarm_inter**2))
+print '\nCorrelation Swarm MSIS', stats.pearsonr(dens_swarm_inter, dens_external_inter)
+print 'NRMS error Swarm MSIS', nrms_error_swarm_external
+
+
+
+# ax.plot(swarm_inter_spock_time/3600., dens_spock_inter, color = 'r')
+# ax.plot(swarm_inter_external_time/3600., dens_external_inter)
+# fig.savefig(fig_save_name, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')  
+
 
 raise Exception
 

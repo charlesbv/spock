@@ -1192,7 +1192,7 @@ int compute_T_inrtl_2_earth_pres_frame( double T_inrtl_2_earth_pres_frame[3][3],
 //
 /////////////////////////////////////////////////////////////////////////////////////////
                                                                                                                                                                                                                      
-int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3], double v_angle[3], int order_rotation[3], char attitude_profile[256], double *et,  double r_i2cg_INRTL[3], double v_i2cg_INRTL[3]	,int file_is_quaternion,  double quaternion[4]){
+int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3], double v_angle[3], int order_rotation[3], char attitude_profile[256], double *et,  double r_i2cg_INRTL[3], double v_i2cg_INRTL[3]	,int file_is_quaternion,  double quaternion[4], PARAMS_T *PARAMS){
 
   /* Declarations */
   int row;
@@ -1223,12 +1223,37 @@ int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3], double v_angle[3], int order
   ///////////////////// QUATERNION /////////////////////////////////////////////
 
   double *p=malloc(sizeof(double)), *r=malloc(sizeof(double)), *y=malloc(sizeof(double));
-  if (file_is_quaternion == 1){ // if attitude is set using quaternions     
-    q2m_c(quaternion,T_sc_to_lvlh);
-/*             m_print(T_sc_to_lvlh, "quat T_sc_to_lvlh"); */
+  if (file_is_quaternion == 1){ // if attitude is set using quaternions
+    // the quaternion I get from swarm are the rotation from sc to ecef so we need to convert from ecef to lvlh now
+    /// // first calculate r_ecef2cg_ECEF and v_ecef2cg_ECEF from tehir inertial coordinates
+    SpiceDouble       xform[6][6];
+    double estate[6], jstate[6];
+    double r_ecef2cg_ECEF[3], v_ecef2cg_ECEF[3];
+    estate[0] = r_i2cg_INRTL[0];estate[1] = r_i2cg_INRTL[1];estate[2] = r_i2cg_INRTL[2];
+    estate[3] = v_i2cg_INRTL[0];estate[4] = v_i2cg_INRTL[1];estate[5] = v_i2cg_INRTL[2];
+    sxform_c (  "J2000", PARAMS->EARTH.earth_fixed_frame,  *et,    xform  );
+    mxvg_c   (  xform,       estate,   6,  6, jstate );
+    r_ecef2cg_ECEF[0] = jstate[0]; r_ecef2cg_ECEF[1] = jstate[1]; r_ecef2cg_ECEF[2] = jstate[2];
+    v_ecef2cg_ECEF[0] = jstate[3]; v_ecef2cg_ECEF[1] = jstate[4]; v_ecef2cg_ECEF[2] = jstate[5];
+
+    // // then compute the transformation matrix ecef to lvlh (use the equations of the transformation eci to lvlh but it's the same equations, it's just the inputs r and v that are now ecef instead of eci)
+    double T_ecef_2_lvlh[3][3];
+    compute_T_inrtl_2_lvlh( T_ecef_2_lvlh, r_ecef2cg_ECEF, v_ecef2cg_ECEF);
+    
+    // // then compute the transformation matrix from sc to ecef from the quaternions sc to ecef
+    double T_sc_to_ecef[3][3];
+    q2m_c(quaternion,T_sc_to_ecef);
+
+    // // finally, compute the transformation matrix sc to lvlh
+    m_x_m(T_sc_to_lvlh, T_sc_to_ecef, T_ecef_2_lvlh);
+
+    //m_print(T_sc_to_lvlh, "quat T_sc_to_lvlh");
 /* 	    m2eul_c ( T_sc_to_lvlh, 2, 1, 3, p, r, y ); */
 /* 	    	    printf("%f %f %f\n",p[0]*180./M_PI, r[0]*180./M_PI, y[0]*180./M_PI ); */
-	      
+
+
+
+    
   }
 
   //////////////////////////////////////////////////////////////////////////////

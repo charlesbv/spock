@@ -105,7 +105,9 @@ int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3],
 			 double r_i2cg_INRTL[3], 
 			 double v_i2cg_INRTL[3],
 			 int file_is_quaternion,
-			 double quaternion[4]);
+			 double quaternion[4],
+			 PARAMS_T *PARAMS
+			 );
 
 
 int compute_T_enu_to_ecef( double T_enu_to_ecef[3][3],

@@ -9427,8 +9427,8 @@ int lin_interpolate_attitude(double **quaternion_after_interpo,
 
       str2et_c(text, &x_before_interpo[line_num]);  
       
-      //           etprint(x_before_interpo[line_num], "");
-/*       printf("%f %f %f %f\n",quaternion_before_interpo[line_num][0], quaternion_before_interpo[line_num][1], quaternion_before_interpo[line_num][2], quaternion_before_interpo[line_num][3]); */
+      //etprint(x_before_interpo[line_num], "");
+		 //      printf("%f %f %f %f\n",quaternion_before_interpo[line_num][0], quaternion_before_interpo[line_num][1], quaternion_before_interpo[line_num][2], quaternion_before_interpo[line_num][3]);
 /*       printf("%d %d\n", line_num, nb_elements_in_file); */
     }
 
