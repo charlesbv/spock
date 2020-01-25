@@ -56,6 +56,9 @@ typedef struct {
   double max_lat_map;
   double max_radius_map; // max radius for the map
   double min_radius_map;
+  double earth_max_radius_map; // max radius for the map
+  double earth_min_radius_map;
+  
   int nlat_map;
   int nlon_map;
   int nradius_map;

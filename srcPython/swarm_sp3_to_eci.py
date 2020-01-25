@@ -8,7 +8,7 @@ sys.path.append("/Users/cbv/work/spock/srcPython")
 from ecef2eci import *
 import os
 
-dir_sp3 = './20170901_20170910'
+dir_sp3 = './20200112'#'./20170901_20170910'
 
 filename_list = []
 for file in os.listdir(dir_sp3):

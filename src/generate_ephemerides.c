@@ -652,7 +652,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt ) ){
 	  //	  etprint(CONSTELLATION->spacecraft[ii][0].et, "");
 	  	  	  if (ii == OPTIONS->which_sc_oldest_tle_epoch){
-	    	    	    print_progress_epoch_sc_to_epoch_constellation(starttime, CONSTELLATION->spacecraft[ii][0].et, OPTIONS->et_oldest_tle_epoch, iProc, OPTIONS->nb_gps);
+			    //	    	    	    print_progress_epoch_sc_to_epoch_constellation(starttime, CONSTELLATION->spacecraft[ii][0].et, OPTIONS->et_oldest_tle_epoch, iProc, OPTIONS->nb_gps);
 
 			    	  }
 
@@ -1337,7 +1337,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 
     // Print progress to screen
     if (iProc == 0){
-                                                                         print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
+      //                                                                         print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
     }
 
     if ( ( compute_collisions == 1 )  ){       // start collision assessment when the secondary sc time enters the span of time around TCA. !!!!!!!!! CONSTELLATION->et  is temporary and assumes the reference sc have the same epoch start. If it's not the case then this needs to be changed (below and at other locations in the code)

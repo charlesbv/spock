@@ -3052,7 +3052,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
   double cos_angle_v_sc_normal;
   double normal_in_ntw_normalized;
  
-  double A_ref;
+  double A_ref = 0;
   double A_ref_tot = 0;
   double cd_tot_norm =  0;
 
@@ -4124,7 +4124,7 @@ int compute_drag(       double          adrag_i2cg_INRTL[3],
 
   /* 	etprint(et, "time"); */
   //	   printf("%e\n",cd_tot_norm);
-
+  //  printf("A_ref_tot %f\n", A_ref_tot);
   SC->density_here = *density;
   if (INTEGRATOR->coll_vcm != 1){
   SC->INTEGRATOR.sum_cd_a_cos = cd_tot_norm / 1000000;// used in the kalman filter. convert back to use km^2 on the area
@@ -4396,6 +4396,9 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   PARAMS->EARTH.GRAVITY.max_lat_map = 90;//0.11;
   PARAMS->EARTH.GRAVITY.min_radius_map = PARAMS->EARTH.radius + 400;//200.;
   PARAMS->EARTH.GRAVITY.max_radius_map = PARAMS->EARTH.radius + 600;//501;//40000.;
+  PARAMS->EARTH.GRAVITY.earth_min_radius_map = PARAMS->EARTH.radius + 450;//200.;
+  PARAMS->EARTH.GRAVITY.earth_max_radius_map = PARAMS->EARTH.radius + 600;//501;//40000.;
+  
   PARAMS->EARTH.GRAVITY.nlon_map = (int)(ceil( 360./PARAMS->EARTH.GRAVITY.dlon_map)) + 1;// nb lon bins
   PARAMS->EARTH.GRAVITY.nlat_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_lat_map- PARAMS->EARTH.GRAVITY.min_lat_map)/PARAMS->EARTH.GRAVITY.dlat_map)) + 1;// nb lat bins
   PARAMS->EARTH.GRAVITY.nradius_map = (int)(ceil( (PARAMS->EARTH.GRAVITY.max_radius_map - PARAMS->EARTH.GRAVITY.min_radius_map)/PARAMS->EARTH.GRAVITY.dradius_map)) + 1;
@@ -4489,10 +4492,10 @@ int load_params( PARAMS_T *PARAMS,  int iDebugLevel, char earth_fixed_frame[100]
   strcpy(text, "");
   strcpy(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "earthPres");
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "_alt");
-  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.min_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.earth_min_radius_map-PARAMS->EARTH.GRAVITY.radius);
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "-");
-  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.max_radius_map-PARAMS->EARTH.GRAVITY.radius);
+  sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.earth_max_radius_map-PARAMS->EARTH.GRAVITY.radius);
   strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, text);
     strcat(PARAMS->EARTH.GRAVITY.filename_earth_pressure_map, "-");
     sprintf(text, "%.1f", PARAMS->EARTH.GRAVITY.dradius_map );

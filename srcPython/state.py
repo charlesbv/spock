@@ -110,8 +110,8 @@ ratio_fig_size = 4./3
 
 
 # date start and stop of plot. If set to 0 then the start and end epochs of the propagation are used by default. PLEASE follow format YYYY-MM-DDTHH:MM:SS
-date_start_plot = 0#"2019-04-22T00:00:00.000000"
-date_stop_plot = 0#"2019-04-26T00:00:00.000000"
+date_start_plot = "2017-09-01T01:00:00.000000" #0
+date_stop_plot = "2017-09-10T00:00:00.000000"#0
 
 ############ end of PARAMETERS TO SET BEFORE RUNNING THIS SCRIPT ############
 
@@ -1796,7 +1796,7 @@ for irun in range(nb_run):
                 if ( isc_count == 0 ) & (irun == 0) : 
                     # Plot
                     fig_title = 'Total drag area as a function of time'
-                    y_label = 'A (cm$^2$)'
+                    y_label = 'A (m$^2$)'
                     x_label = 'Real time'
                     fig_tot_area_drag = plt.figure(num=None, figsize=(height_fig * ratio_fig_size, height_fig), dpi=80, facecolor='w', edgecolor='k')
 
@@ -1814,7 +1814,7 @@ for irun in range(nb_run):
                     plt.rc('font', weight='normal') ## make the labels of the ticks in bold
 
                 colorVal = scalarMap.to_rgba(isc_irun)        
-                y_axis = tot_area_drag[isc]
+                y_axis = tot_area_drag[isc] / 10000.
                 ax_tot_area_drag.plot(x_axis, y_axis, linewidth = 2, color = colorVal, label = label_arr[isc] )
 
                 if isc == nb_sc - 1:
@@ -1835,8 +1835,8 @@ for irun in range(nb_run):
                     ax_tot_area_drag.margins(0,0); ax_tot_area_drag.set_xlim([min(xticks), max(xticks)])
             #        ax_tot_area_drag.set_xlim([ax_tot_area_drag.get_xlim()[0], most_recent_tle_among_all_sc])
 
-                    legend = ax_tot_area_drag.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
-                    legend.get_title().set_fontsize(str(fontsize_plot))
+                    # legend = ax_tot_area_drag.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints = 1,  title="SC #", fontsize = fontsize_plot)
+                    # legend.get_title().set_fontsize(str(fontsize_plot))
 
                     if save_plots == 1:
                         fig_save_name = 'tot_area_drag'

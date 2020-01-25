@@ -1221,7 +1221,7 @@ int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3], double v_angle[3], int order
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   ///////////////////// QUATERNION /////////////////////////////////////////////
-
+  // the quaternion code was made to read the quaternion files of swarm at https://swarm-diss.eo.esa.int/#swarm%2FLevel1b%2FEntire_mission_data%2FSTRxATT
   double *p=malloc(sizeof(double)), *r=malloc(sizeof(double)), *y=malloc(sizeof(double));
   if (file_is_quaternion == 1){ // if attitude is set using quaternions
     // the quaternion I get from swarm are the rotation from sc to ecef so we need to convert from ecef to lvlh now
@@ -1239,15 +1239,98 @@ int compute_T_sc_to_lvlh(double T_sc_to_lvlh[3][3], double v_angle[3], int order
     // // then compute the transformation matrix ecef to lvlh (use the equations of the transformation eci to lvlh but it's the same equations, it's just the inputs r and v that are now ecef instead of eci)
     double T_ecef_2_lvlh[3][3];
     compute_T_inrtl_2_lvlh( T_ecef_2_lvlh, r_ecef2cg_ECEF, v_ecef2cg_ECEF);
-    
+    /* double T_ecef_2_ntw[3][3]; */
+    /* compute_T_inrtl_2_ntw( T_ecef_2_ntw, r_ecef2cg_ECEF, v_ecef2cg_ECEF); */
+
     // // then compute the transformation matrix from sc to ecef from the quaternions sc to ecef
+    double T_ecef_to_sc_temp[3][3];
+    q2m_c(quaternion,T_ecef_to_sc_temp);//!!!!!!q2m_c(quaternion,T_sc_to_ecef);
+
+    double T_ecef_to_sc[3][3];
+    for (i = 0; i < 3; i++){ // this i sbecause in swarm the x body is the same as the x body of spock but the y body swarm is minus the y body spock and the z body swarm is minus the z body spock
+      T_ecef_to_sc[0][i] = T_ecef_to_sc_temp[0][i];
+      T_ecef_to_sc[1][i] = -T_ecef_to_sc_temp[1][i];
+      T_ecef_to_sc[2][i] = -T_ecef_to_sc_temp[2][i];
+      }
+    
     double T_sc_to_ecef[3][3];
-    q2m_c(quaternion,T_sc_to_ecef);
-
+    m_trans(T_sc_to_ecef, T_ecef_to_sc);
     // // finally, compute the transformation matrix sc to lvlh
-    m_x_m(T_sc_to_lvlh, T_sc_to_ecef, T_ecef_2_lvlh);
+   
+    m_x_m(T_sc_to_lvlh, T_ecef_2_lvlh, T_sc_to_ecef);// don't ask me why it's not  m_x_m(T_sc_to_lvlh, T_sc_to_ecef, T_ecef_2_lvlh)...
 
-    //m_print(T_sc_to_lvlh, "quat T_sc_to_lvlh");
+    /* etprint(*et, "time"); */
+    /*     m_print(T_sc_to_lvlh, "T_sc_to_lvlh"); */
+    /* // TEST */
+    /* double x_sat_in_ecef[3], x_sat_in_body[3], r_ecef2cg_ECEF_normalized[3], r_ecef2cg_ECEF_normalized_in_lvlh[3], z_sat_in_body[3], z_sat_in_lvlh[3], z_lvlh_in_lvlh[3], x_lvlh_in_lvlh[3], x_sat_in_lvlh[3], y_sat_in_lvlh[3], y_lvlh_in_lvlh[3], y_sat_in_body[3], z_sat_in_ecef[3], v_ecef2cg_ECEF_normalized[3], v_ecef2cg_ECEF_normalized_in_lvlh[3]; */
+    /* x_sat_in_body[0] = 1; x_sat_in_body[1] = 0; x_sat_in_body[2] = 0; */
+    /* z_sat_in_body[0] = 0; z_sat_in_body[1] = 0; z_sat_in_body[2] = 1; */
+    /* y_sat_in_body[0] = 0; y_sat_in_body[1] = 1; y_sat_in_body[2] = 0; */
+    /* z_lvlh_in_lvlh[0] = 0; z_lvlh_in_lvlh[1] = 0; z_lvlh_in_lvlh[2] = 1; */
+    /* x_lvlh_in_lvlh[0] = 1; x_lvlh_in_lvlh[1] = 0; x_lvlh_in_lvlh[2] = 0; */
+    /* y_lvlh_in_lvlh[0] = 0; y_lvlh_in_lvlh[1] = 1; y_lvlh_in_lvlh[2] = 0; */
+    /* m_x_v(x_sat_in_ecef, T_sc_to_ecef, x_sat_in_body); */
+    /* m_x_v(z_sat_in_ecef, T_sc_to_ecef, z_sat_in_body); */
+    /* v_print(x_sat_in_ecef, "x_sat_in_ecef"); */
+    /* v_norm(r_ecef2cg_ECEF_normalized, r_ecef2cg_ECEF); */
+    /* v_norm(v_ecef2cg_ECEF_normalized, v_ecef2cg_ECEF); */
+    /* v_print(r_ecef2cg_ECEF_normalized, "r_ecef2cg_ECEF_normalized"); */
+    /* v_print(z_sat_in_ecef, "z_sat_in_ecef should be similar to r_ecef2cg_ECEF_normalized"); */
+    /* m_x_v(r_ecef2cg_ECEF_normalized_in_lvlh, T_ecef_2_lvlh, r_ecef2cg_ECEF_normalized); */
+    /* m_x_v(v_ecef2cg_ECEF_normalized_in_lvlh, T_ecef_2_lvlh, v_ecef2cg_ECEF_normalized); */
+    /* v_print(r_ecef2cg_ECEF_normalized_in_lvlh, "r_ecef2cg_ECEF_normalized_in_lvlh should be 0 0 1"); */
+    /* v_print(v_ecef2cg_ECEF_normalized_in_lvlh, "r_ecef2cg_ECEF_normalized_in_lvlh should close (not equal) to 1 0 0"); */
+    /* m_x_v(z_sat_in_lvlh, T_sc_to_lvlh, z_sat_in_body); */
+    /* v_print(z_sat_in_lvlh, "z_sat_in_lvlh");// if sc was nadir (ie pitch roll yaw wrt lvlh are 0 then this should be 0 0 1) */
+    /* double z_sat_in_lvlh_dot_z_lvlh_in_lvlh, x_sat_in_lvlh_dot_x_lvlh_in_lvlh; */
+    /* v_dot(&z_sat_in_lvlh_dot_z_lvlh_in_lvlh, z_sat_in_lvlh, z_lvlh_in_lvlh); */
+    /* printf("dot z %f\n", z_sat_in_lvlh_dot_z_lvlh_in_lvlh); */
+    /* m_x_v(x_sat_in_lvlh, T_sc_to_lvlh, x_sat_in_body); */
+    /* m_x_v(y_sat_in_lvlh, T_sc_to_lvlh, y_sat_in_body); */
+    /* v_print(x_sat_in_lvlh, "x_sat_in_lvlh"); */
+    /* v_print(y_sat_in_lvlh, "y_sat_in_lvlh"); */
+    /* v_dot(&x_sat_in_lvlh_dot_x_lvlh_in_lvlh, x_sat_in_lvlh, x_lvlh_in_lvlh); */
+    /* printf("dot x %f\n", x_sat_in_lvlh_dot_x_lvlh_in_lvlh); */
+    // end of TEST
+
+    // OTHER OLDER TEST BELOW
+    /* double ex_ntw_in_ecef_coord[3], ex_ntw_in_ntw_coord[3]; */
+    /* v_norm(ex_ntw_in_ecef_coord, v_ecef2cg_ECEF); */
+    /* v_print(ex_ntw_in_ecef_coord, "ex_ntw_in_ecef_coord"); */
+    /* m_x_v(ex_ntw_in_ntw_coord, T_ecef_2_ntw, ex_ntw_in_ecef_coord); */
+    /* v_print(ex_ntw_in_ntw_coord, "ex_ntw_in_ntw_coord"); */
+    /* double T_sc_to_ntw[3][3]; */
+    /* m_x_m(T_sc_to_ntw, T_sc_to_ecef, T_ecef_2_ntw); */
+    
+    /* double x_sat_in_body[3], x_ecef1[3], x_sat_in_ntw[3]; */
+    /* x_sat_in_body[0] = 1; x_sat_in_body[1] = 0; x_sat_in_body[2] = 0; */
+    /*  m_x_v(x_ecef1, T_sc_to_ecef, x_sat_in_body); */
+    /* m_x_v(x_sat_in_ntw, T_sc_to_ntw, x_sat_in_body); */
+    /* double x_sat_in_ntw2[3]; */
+    /* m_x_v(x_sat_in_ntw2, T_ecef_2_ntw, x_ecef1); */
+
+    /* m_print(T_body_to_ntw, "T_body_to_ntw"); */
+    /* m_print(T_sc_to_ntw, "T_sc_to_ntw"); */
+    /* double x_sat_in_ntw3[3]; */
+    /*     double T_body_to_ntw[3][3]; */
+    /* m_x_m(T_body_to_ntw, T_ecef_2_ntw, T_sc_to_ecef); */
+
+    /* m_x_v(x_sat_in_ntw3, T_body_to_ntw, x_sat_in_body); */
+    /* v_print(x_sat_in_ntw, "x_sat_in_ntw"); */
+    /* //        v_print(x_ecef1, "x_ecef1"); */
+    /* v_print(x_sat_in_ntw2, "x_sat_in_ntw2"); */
+    /* v_print(x_sat_in_ntw3, "x_sat_in_ntw3"); */
+    /* double x_sat_dot_x_ntw; */
+    /* v_dot(&x_sat_dot_x_ntw, x_sat_in_ntw3, ex_ntw_in_ntw_coord); */
+    /* printf("dot %f\n", x_sat_dot_x_ntw); */
+    /* //    v_print(v_ecef2cg_ECEF, "v_ecef2cg_ECEF"); */
+    /* //    printf("%f %f %f %f\n", quaternion[0], quaternion[1], quaternion[2], quaternion[3]); */
+    /* //m_print(T_sc_to_ecef, "T_sc_to_ecef"); */
+    /*   //        m_print(T_sc_to_lvlh, "T_sc_to_lvlh");// ++++++ */
+    /* /\* /\\* m_print(T_sc_to_lvlh_bis, "quat T_sc_to_lvlh"); *\\/ *\/ */
+    // END OF  OTHER OLDER TEST BELOW
+    //      print_test();exitf();
+
 /* 	    m2eul_c ( T_sc_to_lvlh, 2, 1, 3, p, r, y ); */
 /* 	    	    printf("%f %f %f\n",p[0]*180./M_PI, r[0]*180./M_PI, y[0]*180./M_PI ); */
 

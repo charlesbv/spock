@@ -3,13 +3,14 @@
 # inputs: pickle_root_list stores each pickle to load (one per run in pid_algo_v2.py) (the pickles are assumed ot be in ./pickle)
 # (pickle_root =  prefix_name + '_' + rho_more in pid_algo_v2.py)
 plot_swarm = 1
-external = ['/Users/cbv/work/spockOut/density/swarm/swarmB.txt']
+external = ['/Users/cbv/work/spockOut/density/swarm/nadir.txt']
 #['/Users/cbv/work/spockOut/density/swarm/swarmB.txt', '/Users/cbv/work/spockOut/density/swarm/swarmB_omniweb_mod.txt', '/Users/cbv/work/spockOut/density/swarm/cyg_omniweb_mod.txt'] 
 external_label = ['NRLMSIS00e along Swarm - actual F10.7/Ap', 'NRLMSIS00e along Swarm - corrected F10.7/Ap', 'NRLMSIS00e along CYGNSS - corrected F10.7/Ap']
 external_color = ['limegreen', 'red', 'blue']
 # ['/Users/cbv/work/spockOut/density/swarm/swarm_omniweb_mod.txt']
 # ['/Users/cbv/work/spockOut/density/swarm/cyg_omniweb_mod.txt']# simulations that were run durectly with SpOCK (like a typical SpOCK's simulations). indicate here the name of the main input file. Can only use if toplot = 'rho'
-pickle_root_list = ["swarmB_20170901_mass310_mid",  "swarmB_20170901_mass460_quaternion_minus_theta_mid"]
+pickle_root_list = ["swarmB_20170901_mass460_quaternion_pleiades_mid"]
+# ["swarmB_20170901_mass310_mid",  "swarmB_20170901_mass460_quaternion_minus_theta_mid", "swarmB_20170901_mass460_quaternion_mid"]
 # ["swarmB_20170901_mass310_mid"]
 # ['FM03_20190415_interval12h_mid', 'FM03_20190415_mid', 'FM03_20190415_interval30h_mid']
 # ['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']# 'FM03_20190415_interval30h_mid']#['FM03_20190415_mid', 'distance_lvlh_nb_seconds_since_start_date_start_msis']
@@ -18,7 +19,7 @@ pickle_root_list = ["swarmB_20170901_mass310_mid",  "swarmB_20170901_mass460_qua
 # ['FM03_20190415_mid', 'FM03_20190409_mid']
 # ['FM03_20190320_mid', 'FM03_20190415_mid', 'FM03_20190515_mid', 'FM03_20190610_mid', 'FM03_20190715_mid', 'FM03_20190818_mid']
 #['FM1_20170817_mid']#['FM07_20170901_mid', 'FM8_20170901_omniweb_mid', 'FM8_20170901_no_storm_mid']# ['FM8_20170901_omniweb_mid', 'FM8_20170901_again_mid', 'FM8_20170901_no_storm_mid'] #['FM8_20170901_mid']
-label_overwrite = ['SpOCK nadir', 'SpOCK quaternions']#['12h', '18h', '30h']
+label_overwrite = ['SpOCK nadir', 'SpOCK quaternions', 'bad']#['12h', '18h', '30h']
 #['SpOCK', 'NRLMSIS00e']#['18h', '30h']#['SpOCK - with storm', 'SpOCK - without storm']
 #['FM07', 'FM08', 'FM08 no storm']#['Omniweb', 'SWPC', 'No storm']
 #['FM4_20180112_fine_mid'] ['FM4_20180112_mid']

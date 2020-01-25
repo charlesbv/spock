@@ -31,7 +31,7 @@ kdlist = [1.] # list of derivative gains for PID
 kilist = [0.000] # list of integral gains for PID
 plot_or_not = 1
 inter_start_algo = 0.0 # !!!!!!!! used to be 1.0 before 04/04/19
-prefix_name ='swarmB_20170901_mass460_quaternion_minus_theta'# 'FM03_20180901'#'FM1_20170817'
+prefix_name ='swarmB_20170901_mass460_quaternion_pleiades_with_front'# 'FM03_20180901'#'FM1_20170817'
 #raise Exception #!!!!!!!!!prefix
 #'grav80'#'rho0_grav50_solarzenith'#'dt0_1s_solarzenith'
 #'grav50_solarzenith'#'solarzenith'#localtime70percent'
@@ -155,7 +155,7 @@ obs_rv_filename = dir_simu + 'HD_data/nadir/SW_OPER_GPSBNAV_1B_20170901T000000_2
 # 'HD_data/spock_FM5_20171216_eng_adcs_query-13528_2days.txt'
 
 if nadir != 1:
-    obs_att_filename = dir_simu + 'HD_data/SW_OPER_STRBATT_1B_20170901T000000_20170910T000000_minus_theta.txt'
+    obs_att_filename = dir_simu + 'HD_data/SW_OPER_STRBATT_1B_20170901T000000_20170910T000000_ok2.txt'
 else:
     obs_att_filename = 'nadir'
 
@@ -348,13 +348,36 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
         # Swarm B 20170901 nadir
         # r0b -1.90079145021000e+06 -1.53304080378000e+06 -6.44380971379000e+06
         # v0b -4.94630225500000e+03 -5.10395398800000e+03 2.67463106200000e+03                                               
-        r0 = '-1.90079145021000e+03'
-        r1 = '-1.53304080378000e+03'
-        r2 = '-6.44380971379000e+03'
-        v0 = '-4.94630225500000e+00'
-        v1 = '-5.10395398800000e+00'
-        v2 = '2.67463106200000e+00'
+        # r0 = '-1.90079145021000e+03'
+        # r1 = '-1.53304080378000e+03'
+        # r2 = '-6.44380971379000e+03'
+        # v0 = '-4.94630225500000e+00'
+        # v1 = '-5.10395398800000e+00'
+        # v2 = '2.67463106200000e+00'
 
+        # with the quaternions and geometry and geometry swarm_geo_ok_acc09.txt
+        # it 23 min dist 6.07748339107 min distance to beat 6.11156341443
+        # r0b -1.90079264274000e+06 -1.53304283954000e+06 -6.44381279370000e+06
+        # v0b -4.94629672100000e+03 -5.10395340800000e+03 2.67463075700000e+03
+        r0 = '-1.90079264274000e+03'
+        r1 = '-1.53304283954000e+03'
+        r2 = '-6.44381279370000e+03'
+        v0 = '-4.94629672100000e+00'
+        v1 = '-5.10395340800000e+00'
+        v2 = '2.67463075700000e+00'
+        
+	# with the quaternions and geometry swarm_geo_ok_acc09_with_front.txt mass 430
+        #it 18 min dist 5.36591042131 min distance to beat 5.42360653036                                                      
+	# r0b -1.90079216019000e+06 -1.53304161732000e+06 -6.44381322143000e+06                                               
+        # v0b -4.94630088900000e+03 -5.10395027100000e+03 2.67462942100000e+03                                                
+        r0 = '-1.90079216019000e+03'
+        r1 = '-1.53304161732000e+03'
+        r2 = '-6.44381322143000e+03'
+        v0 = '-4.94630088900000e+00'
+        v1 = '-5.10395027100000e+00'
+        v2 = '2.67462942100000e+00'
+
+        
         # FM03 20190818 nadir
         # r0b 4.92082865873000e+06 3.06001002967000e+06 -3.73379091057000e+06
         # v0b -4.69586622100000e+03 5.80981601100000e+03 -1.44025829800000e+03
@@ -600,8 +623,8 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
                 # for SPACECRAFT section
                         1,
                 '0',
-                460, #!!!! 460 before 011220: 29,
-                "/Users/cbv/work/spockOut/density/swarm/swarm_geo_esa2.txt", #!!!! before 011220: dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
+                430, #!!!! 460 before 011220: 29,
+                "/Users/cbv/work/spockOut/density/swarm/swarm_geo_ok_acc09.txt", #!!!! before 011220: dir_simu + "cygnss_geometry_2016_acco09_sp11.txt", #cygnss_geometry_2016_acco09.txt", 
                 # for ORBIT section
                     ['state_eci','(' + r0 + '; ' + r1 + '; ' + r2 + ') (' + v0 + '; ' + v1 + '; ' + v2 + ')' ],
                 # for FORCES section
@@ -624,7 +647,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             #Run SpOCK
 
 
-            if ((iinter >= 9) & (irho >= -1)):
+            if ((iinter >= 0) & (irho >= -1)):
                 if ispleiades != 1:
                     #os.system(path_mpirun + ' -np 1 spock_dev ' + main_input_filename)
                     # !!!!!! before 011220 used to be os.system(path_mpirun + ' -np 1 spock ' + main_input_filename)
@@ -843,7 +866,7 @@ for iinter in range(nb_interval):#!!!!! shoul be nb_interval):
             date_start = date_start + timedelta(seconds = step_move_sec)
             date_start_str = datetime.strftime(date_start, "%Y-%m-%dT%H:%M:%S")
             date_end_str = datetime.strftime(date_start + timedelta(seconds = interval_sec), "%Y-%m-%dT%H:%M:%S")
-
+            print date_start_str
             # initials tate of next interval is final state of current inter with optim rho
             if iinter < inter_start_algo:
                 iii = 0
