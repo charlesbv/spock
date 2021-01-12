@@ -1,6 +1,6 @@
 
 # To set 
-path_spock="/Users/cbv" # don't include the last '/' in the path
+path_spock=$HOME # don't include the last '/' in the path
 is_sift=0 # set this variable to 1 if you want to use SpOCK as part of SIFT. But if you want to use SpOCK independtly of SIFT, set it to 0
 py_only=0 # if set to 1 and is_sift is 1 then doesnt compile SpOCK but just move the python scripts to ../ so that the demo can be run before installing SpOCK. cbv should st py_only to 1 before distributing SIFT so that users alreay ahve all these python scripts in ../ and can run the demo without running this makeall.sh
 # end of to set
@@ -111,15 +111,13 @@ if [ $py_only -ne 1 ];then
 	
     else
 	# SpOCK
-	#make clean PATH_EXECUTABLE="$path_spock_abso"
+	make clean PATH_EXECUTABLE="$path_spock_abso"
 	make all PATH_COMPILER=$path_compiler PATH_SPICE="$path_spice_abso" PATH_GSL="$path_gsl_abso" PATH_EXECUTABLE="$path_spock_abso"
 	#echo sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev
 	#sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spock_dev
 	# # Specular points binary files
-	echo $path_compiler -o "$path_spock_abso"/spec ./src/find_specular_points_aspherical_dev.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here
-	#echo $path_compiler -o "$path_spock_abso"/spec_asph_which_ant_debug ./src/find_specular_points_aspherical.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here
-	#$path_compiler -o "$path_spock_abso"/spec_asph ./src/find_specular_points_aspherical.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here  	
-#   	$path_compiler -o "$path_spock_abso"/spec_gnss ./src/find_specular_points_gnssAll.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here  	
+	#echo $path_compiler -o "$path_spock_abso"/spec ./src/find_specular_points_aspherical_dev.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here
+	echo $path_compiler -o "$path_spock_abso"/spec_gnss_rcg ./src/find_specular_points_aspherical_dev_gnss.c -lm -w -I"$path_spice_abso" -I"$path_spice_abso"/include "$path_spice_abso"/lib/csupport.a "$path_spice_abso"/lib/cspice.a # change the path of the executable here	# added on 2020-05-19
 # 	sudo /usr/libexec/ApplicationFirewall/socketfilterfw -add "$path_spock_abso"/spec_gnss
 # 	# Convert specular points binary files to txt files
 	#cd ./src/storm

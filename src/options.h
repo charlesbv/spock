@@ -178,6 +178,7 @@ typedef struct {
 
   char            earth_fixed_frame[100]; // Earth body-fixed rotating frame for conversion ECI to ECEF
   double          dt;             // Integrator step size (s)
+  double dt_pos_neg;                     // Integrator timestep (negative if backward propagation)
   double          dt_output;             // time step to output the results
   int             nb_density_drivers;  // number of density drivers (ex: f10.7, Ap)
   double          Ap_static, f107_static, f107A_static;

@@ -721,7 +721,10 @@
   
   str2et_c(OPTIONS->final_epoch, &et_end);
   str2et_c(OPTIONS->initial_epoch, &et_start);
-
+  OPTIONS->dt_pos_neg = OPTIONS->dt;
+  if (et_start > et_end){
+    OPTIONS->dt_pos_neg = -OPTIONS->dt;
+  }
   //  if ( fabs(OPTIONS->dt -  fmod( et_end - et_start, OPTIONS->dt ) ) > 0.01 ){ // 0.01 for numerical reasons
   if ( fabs(fmod( et_end - et_start, OPTIONS->dt ) ) > 1e-6 ){ // 0.01 for numerical reasons
     /* printf("X = %f\n", fabs(OPTIONS->dt - fmod( et_end - et_start, OPTIONS->dt ) )); */
@@ -2077,15 +2080,22 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
       if (strcmp(OPTIONS->test_omniweb_or_external_file, "omniweb") == 0){ // if the user chose to automatically download F10.7 and Ap from omniweb
       //	str2et_c(OPTIONS->initial_epoch, &et_initial_epoch);
 	//	et2utc_c(et_initial_epoch, "ISOC" ,0 ,11 , initial_epoch_wget_temp);
-	et2utc_c(OPTIONS->et_oldest_tle_epoch, "ISOC" ,0 ,11 , initial_epoch_wget_temp); // tle
+	str2et_c(OPTIONS->final_epoch, &et_final_epoch);
+	double et_oldest_tle_epoch_corr = OPTIONS->et_oldest_tle_epoch;
+	double et_final_epoch_corr = et_final_epoch;
+	if (OPTIONS->et_oldest_tle_epoch > et_final_epoch){ // backward propagation
+	  et_oldest_tle_epoch_corr = et_final_epoch;
+	  et_final_epoch_corr = OPTIONS->et_oldest_tle_epoch;
+	  }
+		      
+	et2utc_c(et_oldest_tle_epoch_corr, "ISOC" ,0 ,11 , initial_epoch_wget_temp); // tle
 	strcpy(initial_epoch_wget, "");
 	next_wget_initial = &initial_epoch_wget_temp[0];
 	find_wget_initial = (int)(strchr(next_wget_initial, '-') - next_wget_initial);
 	strncat(initial_epoch_wget, initial_epoch_wget_temp, 4);
 	strncat(initial_epoch_wget, initial_epoch_wget_temp+5, 2);
 	strncat(initial_epoch_wget, initial_epoch_wget_temp+8, 2);
-	str2et_c(OPTIONS->final_epoch, &et_final_epoch);
-	et2utc_c(et_final_epoch, "ISOC" ,0 ,11 , final_epoch_wget_temp);
+	et2utc_c(et_final_epoch_corr, "ISOC" ,0 ,11 , final_epoch_wget_temp);
 	strcpy(final_epoch_wget, "");
 	next_wget_final = &final_epoch_wget_temp[0];
 	find_wget_final = (int)(strchr(next_wget_final, '-') - next_wget_final);
@@ -2098,7 +2108,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strcat(str_wget, "&end_date=");
 	strcat(str_wget, final_epoch_wget);
 	strcat(str_wget,"&vars=50&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=\"");
-	strcat(str_wget, " https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ");
+	strcat(str_wget, " https://omniweb.gsfc.nasa.gov/cgi/nx1.cgi -O ");
 	strcpy(filename_f107, "");
 	//newstructure
 /* 	strcat(filename_f107, OPTIONS->dir_input_density_msis); */
@@ -2155,7 +2165,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	  str2et_c(correct_end_date_omniweb, &et_correct_end_date_omniweb);
 	  // // // compare et_correct_end_date_omniweb to et_initial_epoch and et_final_epoch
 
-	  if  ( ( et_correct_end_date_omniweb < OPTIONS->et_oldest_tle_epoch ) || ( et_correct_end_date_omniweb < et_final_epoch ) ){ // if start or end date of epoch is older than correct_end_date_omniweb then the user can not run msis dynamic with omniweb because he/she uses the inital or final epoch of the constellation (including TLEs epoch if TLEs are used to initialize the trajectories) older than the most recent f107 available in omniweb
+	  if  ( ( et_correct_end_date_omniweb < et_oldest_tle_epoch_corr ) || ( et_correct_end_date_omniweb < et_final_epoch_corr ) ){ // if start or end date of epoch is older than correct_end_date_omniweb then the user can not run msis dynamic with omniweb because he/she uses the inital or final epoch of the constellation (including TLEs epoch if TLEs are used to initialize the trajectories) older than the most recent f107 available in omniweb
 	    printf("***! Omniweb data (used for the thermospheric density model) is not available for this epoch. You need to choose epoch times more recent than: %s. Or you can use data from the Space Weather Prediction Center (SWPC), which is more up to date. For this, replace 'omniweb' by 'swpc' in the main input file.\nThe program will stop. !***\n", correct_end_date_omniweb);
 	    ierr =  MPI_Finalize();
 	    exit(0);
@@ -2165,7 +2175,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	// Download the omniweb f10.7 that starts 40.5 days before initial_epoch_wget and ends 40.5 days after final_epoch_wget to compute F10.7 81-day average.
 	// There should be data for 40.5 days before initial_epoch_wget. But there might not be data for 40.5 days after final_epoch_wget. In that case, upload until the most recent date in omniweb. F10.7 average will be computed a this shorter period (instead of 81 days)
 	// // et_initial_epoch minus 40.5 days
-	et2utc_c(OPTIONS->et_oldest_tle_epoch-40.5*24*3600, "ISOC" ,0 ,11 , initial_epoch_wget_minus40_5days_temp);
+	et2utc_c(et_oldest_tle_epoch_corr-40.5*24*3600, "ISOC" ,0 ,11 , initial_epoch_wget_minus40_5days_temp);
 	strcpy(initial_epoch_wget_minus40_5days, "");
 	next_wget_initial = &initial_epoch_wget_minus40_5days_temp[0];
 	find_wget_initial = (int)(strchr(next_wget_initial, '-') - next_wget_initial);
@@ -2173,7 +2183,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strncat(initial_epoch_wget_minus40_5days, initial_epoch_wget_minus40_5days_temp+5, 2);
 	strncat(initial_epoch_wget_minus40_5days, initial_epoch_wget_minus40_5days_temp+8, 2);
 
-	et2utc_c(et_final_epoch+41.5*24*3600, "ISOC" ,0 ,11 , final_epoch_wget_plus40_5days_temp); // 41.5 to make sure we cover up to et_final + 40.5 days (because the f107 file stops at 23:00 so problem if et_final _40.5 ends between 23:00 and 23:59)
+	et2utc_c(et_final_epoch_corr+41.5*24*3600, "ISOC" ,0 ,11 , final_epoch_wget_plus40_5days_temp); // 41.5 to make sure we cover up to et_final + 40.5 days (because the f107 file stops at 23:00 so problem if et_final _40.5 ends between 23:00 and 23:59)
 	strcpy(final_epoch_wget_plus40_5days, "");
 	next_wget_final = &final_epoch_wget_plus40_5days_temp[0];
 	find_wget_final = (int)(strchr(next_wget_final, '-') - next_wget_final);
@@ -2186,7 +2196,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strcat(str_wget, "&end_date=");
 	strcat(str_wget, final_epoch_wget_plus40_5days);
 	strcat(str_wget,"&vars=50&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=\"");
-	strcat(str_wget, " https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ");
+	strcat(str_wget, " https://omniweb.gsfc.nasa.gov/cgi/nx1.cgi -O ");
 	strcpy(filename_f107_to_calculate_f107_average, "");
 	  //newstructure 
 /* 	  strcat(filename_f107_to_calculate_f107_average, OPTIONS->dir_input_density_msis); */
@@ -2234,8 +2244,8 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	  et2utc_c(et_correct_end_date_omniweb_minus_40_5_days, "ISOC" ,0 ,255 , correct_end_date_omniweb_minus_40_5_days);
 	  // // // compare et_correct_end_date_omniweb to epoch end + 40.5 days (actually 41.5, cf previous comment (look for "41.5" to find comment))
 
-	  if ( et_correct_end_date_omniweb < et_final_epoch + 41.5*24*3600 ){ // the most recent data available at omniweb is too old to compute the average of F10.7 over 81 days. Therefore, upload until the most recent date in omniweb. F10.7 average will be computed a this shorter period (instead of 81 days)
-	    printf("*********************************************************************\n***************************** IMPORTANT *****************************\nThe most recent data available at omniweb is too old to compute the average of F10.7 over 81 days. The most recent data available is on %s.\nTherefore, the 81-day average of F10.7 for times later than %s (%s minus 40.5 days) will be calculated over a shorter period than 81 days: 40.5 days + the number of days from this particular time until %s. For example, for the last time step of the propagation, the value of F10.7 81-day average is calculated over %d days.\n*********************************************************************\n*********************************************************************\n", correct_end_date_omniweb, correct_end_date_omniweb_minus_40_5_days, correct_end_date_omniweb, correct_end_date_omniweb, (int)( 41.5 + (et_correct_end_date_omniweb-et_final_epoch)/3600./24. ));
+	  if ( et_correct_end_date_omniweb < et_final_epoch_corr + 41.5*24*3600 ){ // the most recent data available at omniweb is too old to compute the average of F10.7 over 81 days. Therefore, upload until the most recent date in omniweb. F10.7 average will be computed a this shorter period (instead of 81 days)
+	    printf("*********************************************************************\n***************************** IMPORTANT *****************************\nThe most recent data available at omniweb is too old to compute the average of F10.7 over 81 days. The most recent data available is on %s.\nTherefore, the 81-day average of F10.7 for times later than %s (%s minus 40.5 days) will be calculated over a shorter period than 81 days: 40.5 days + the number of days from this particular time until %s. For example, for the last time step of the propagation, the value of F10.7 81-day average is calculated over %d days.\n*********************************************************************\n*********************************************************************\n", correct_end_date_omniweb, correct_end_date_omniweb_minus_40_5_days, correct_end_date_omniweb, correct_end_date_omniweb, (int)( 41.5 + (et_correct_end_date_omniweb-et_final_epoch_corr)/3600./24. ));
 	  }
 
 	  fclose(file_f107_to_calculate_f107_average);
@@ -2247,7 +2257,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	  strcat(str_wget, "&end_date=");
 	  strcat(str_wget, correct_end_date_omniweb_temp);
 	  strcat(str_wget,"&vars=50&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=\"");
-	  strcat(str_wget, " https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ");
+	  strcat(str_wget, " https://omniweb.gsfc.nasa.gov/cgi/nx1.cgi -O ");
 	  strcpy(filename_f107_to_calculate_f107_average, "");
 	//newstructure 
 /* 	strcat(filename_f107_to_calculate_f107_average, OPTIONS->dir_input_density_msis); */
@@ -2280,7 +2290,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strcpy(str_wget, "wget --no-check-certificate --post-data ");
 	strcat(str_wget, "\"activity=retrieve&res=hour&spacecraft=omni2&start_date=");
 	// // remove 57 hours ot inital epoch since ap historical starts 57 hours before current time
-	et2utc_c(OPTIONS->et_oldest_tle_epoch-57*3600., "ISOC" ,0 ,11 , initial_epoch_wget_minus_57hours_temp);
+	et2utc_c(et_oldest_tle_epoch_corr-57*3600., "ISOC" ,0 ,11 , initial_epoch_wget_minus_57hours_temp);
 	strcpy(initial_epoch_wget_minus_57hours, "");
 	next_wget_initial = &initial_epoch_wget_minus_57hours_temp[0];
 	find_wget_initial = (int)(strchr(next_wget_initial, '-') - next_wget_initial);
@@ -2291,7 +2301,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	strcat(str_wget, "&end_date=");
 	strcat(str_wget, final_epoch_wget);
 	strcat(str_wget,"&vars=49&scale=Linear&ymin=&ymax=&view=0&charsize=&xstyle=0&ystyle=0&symbol=0&symsize=&linestyle=solid&table=0&imagex=640&imagey=480&color=&back=\"");
-	strcat(str_wget, " https://omniweb.sci.gsfc.nasa.gov/cgi/nx1.cgi -O ");
+	strcat(str_wget, " https://omniweb.gsfc.nasa.gov/cgi/nx1.cgi -O ");
 	strcpy(filename_ap, "");
 	//newstructure 
 /* 	strcat(filename_ap, OPTIONS->dir_input_density_msis); */
@@ -2332,7 +2342,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	  strcat(correct_end_date_omniweb, "00:00");
 	  str2et_c(correct_end_date_omniweb, &et_correct_end_date_omniweb);
 	  // // // compare et_correct_end_date_omniweb to et_initial_epoch
-	  if  ( ( et_correct_end_date_omniweb < OPTIONS->et_oldest_tle_epoch-57*3600. ) || ( et_correct_end_date_omniweb < et_final_epoch ) ){ // if start or end date of epoch is older than correct_end_date_omniweb then the user can not run msis dynamic with omniweb because he/she uses the inital or final epoch of the constellation older than the most recent ap available in omniweb
+	  if  ( ( et_correct_end_date_omniweb < et_oldest_tle_epoch_corr-57*3600. ) || ( et_correct_end_date_omniweb < et_final_epoch_corr ) ){ // if start or end date of epoch is older than correct_end_date_omniweb then the user can not run msis dynamic with omniweb because he/she uses the inital or final epoch of the constellation older than the most recent ap available in omniweb
 	    printf("***! Omniweb data (used for the thermospheric density model) is not available for this epoch. You need to choose epoch times more recent than: %s. Or you can use data from the Space Weather Prediction Center (SWPC), which is more up to date. For this, replace 'omniweb' by 'swpc' in the main input file.\nThe program will stop. !***\n", correct_end_date_omniweb);
 	    ierr =  MPI_Finalize();
 	    exit(0);
@@ -2344,7 +2354,7 @@ OPTIONS->et_oldest_tle_epoch =  OPTIONS->et_vcm[1];
 	//      calculate_f107_average(filename_f107_to_calculate_f107_average, "omniweb");
 	OPTIONS->use_ap_hist = 0;
 	
-	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107_to_calculate_f107_average, filename_ap, "omniweb", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch,OPTIONS->et_oldest_tle_epoch, OPTIONS->final_epoch,OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method
+	lin_interpolate(OPTIONS->f107, OPTIONS->f107A, OPTIONS->Ap, OPTIONS->Ap_hist, OPTIONS->et_interpo, &OPTIONS->use_ap_hist, filename_f107_to_calculate_f107_average, filename_ap, "omniweb", OPTIONS->nb_time_steps * 2, OPTIONS->initial_epoch,et_oldest_tle_epoch_corr, OPTIONS->final_epoch,OPTIONS->dt, 999.9,iDebugLevel, iProc);       // "* 2.0" because of the Runge Kunta orfer 4 method
 
 	getline(&line, &len, fp);
 /* 	for (ccc = 0; ccc < OPTIONS->nb_time_steps * 2; ccc++){ */
@@ -9678,6 +9688,10 @@ int nb_time_steps(int *nb_time_steps_simu,
   str2et_c(final_epoch, &et_final);
   *nb_time_steps_simu = (int)(ceil( ( et_final - et_initial_epoch ) / dt ) ) + 1; 
 
+  if (*nb_time_steps_simu < 0){
+    *nb_time_steps_simu = -(*nb_time_steps_simu);
+  }
+  
   return 0;
 
 }

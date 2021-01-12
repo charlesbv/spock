@@ -1627,6 +1627,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
 
 	// Integrator
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt            = OPTIONS->dt;
+	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt_pos_neg            = OPTIONS->dt_pos_neg;
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces   = OPTIONS->n_surfaces;   // Number of surfaces on the SC
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.nb_surfaces_eff   = OPTIONS->n_surfaces_eff;   // Number of surfaces on the SC
 	CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.mass          = OPTIONS->mass;         // Mass of spacecraft
@@ -3047,6 +3048,7 @@ v_radial_all[ii] = malloc( ( OPTIONS->nb_ensembles_min) * sizeof(double) );
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.sc_ensemble_nb = 0;
 
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt            = OPTIONS->dt;
+      CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg            = OPTIONS->dt_pos_neg;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.nb_surfaces   = 1;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.nb_surfaces_eff   = 1;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.mass          = 1630.0; // Wikipedia...

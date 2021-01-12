@@ -639,6 +639,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	    save_solar_cell_efficiency = CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency;
 
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = OPTIONS->dt;
+	    	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt_pos_neg = OPTIONS->dt_pos_neg;
 /* 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag  = 0; // do not include drag until the epoch becomes the epoch start time of the constellation (for now! (this is for interpolation of the thermospheric drivers reasons)) */
 /* 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure  = 0; // do not include solar_pressure until the epoch becomes the epoch start time of the constellation (for now! (this is for interpolation of the thermospheric drivers reasons)) */
 /* 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.solar_cell_efficiency  = -1; // do not include solar_power until the epoch becomes t */
@@ -649,7 +650,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       //      if (iProc == 0){
       if (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) != 0 ){ // if tle_sgp4 then we directly jump from the tle epoch to the constellation start time (ie we don't calculate the r/v at every time step between those two times)
       if ( start_ensemble[ii] == 0){ // if this iProc runs main sc ii
-	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt ) ){
+	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg ) ){
 	  //	  etprint(CONSTELLATION->spacecraft[ii][0].et, "");
 	  	  	  if (ii == OPTIONS->which_sc_oldest_tle_epoch){
 			    //	    	    	    print_progress_epoch_sc_to_epoch_constellation(starttime, CONSTELLATION->spacecraft[ii][0].et, OPTIONS->et_oldest_tle_epoch, iProc, OPTIONS->nb_gps);
@@ -658,7 +659,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 
 	  propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel,  start_ensemble, array_sc ); // don't care about starttime here because this is used for linear interpolation with the density drivers (F10.7, Ap, ...) and the attitude, which we do not care for the satellites from their TLE epoch time to the constellation epoch start time (for now!) (this is for interpolation of the thermospheric drivers reasons)
 	  if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 ) ){
-	  write_output( CONSTELLATION->spacecraft[ii] , 2, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	    write_output( CONSTELLATION->spacecraft[ii] , 2, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       }
 	} // end while propagation
       } // end of if this iProc runs main sc ii
@@ -666,7 +667,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 
       if ( OPTIONS->nb_ensembles_min > 0 ) { // if running ensembles
 
-	while ( ( ( CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].et ) > CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].INTEGRATOR.dt ) ){
+	while ( ( ( CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].et ) > CONSTELLATION->spacecraft[ii][1L + iProc * OPTIONS->nb_ensemble_min_per_proc].INTEGRATOR.dt_pos_neg ) ){
 
 	  // ENSEMBLES SPACECRAFT (BUT NOT FOR GPS SATELLITES)
 	  if (ii < OPTIONS->n_satellites - OPTIONS-> nb_gps){
@@ -686,20 +687,22 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       //      if (iProc == 0){
             if (fabs(starttime-CONSTELLATION->spacecraft[ii][0].et) > OPTIONS->dt/1.e6){ //// if sc.et not equal to constellation initial epoch
       if (start_ensemble[ii] == 0){ // if this iProc runs main sc ii
-	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = starttime - CONSTELLATION->spacecraft[ii][0].et;
+	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = fabs(starttime - CONSTELLATION->spacecraft[ii][0].et);
+	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg = starttime - CONSTELLATION->spacecraft[ii][0].et;
 	propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel, start_ensemble, array_sc );
       }      //      }
       // // ENSEMBLES SPACECRAFT (BUT NOT FOR GPS SATELLITES)
       if (ii < OPTIONS->n_satellites - OPTIONS-> nb_gps){ // if main sc is not a gps
 	if ( OPTIONS->nb_ensembles_min > 0 ) { // if running ensembles
 	  for (eee = 1L + iProc * OPTIONS->nb_ensemble_min_per_proc; eee< 1 + iProc * OPTIONS->nb_ensemble_min_per_proc + OPTIONS->nb_ensemble_min_per_proc ; eee++){ // go over all ensemble sc
-	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = starttime - CONSTELLATION->spacecraft[ii][eee].et;
+	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = fabs(starttime - CONSTELLATION->spacecraft[ii][eee].et);
+	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt_pos_neg = starttime - CONSTELLATION->spacecraft[ii][eee].et;
 	    propagate_spacecraft( &CONSTELLATION->spacecraft[ii][eee], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel,  start_ensemble, array_sc );
 	  } // end of go over all ensemble sc
 	} // end of if running ensembles
       } // end of if main sc is not a gps
       if ((strcmp( OPTIONS->type_orbit_initialisation, "tle" ) == 0) || (strcmp(OPTIONS->type_orbit_initialisation, "tle_sgp4" ) == 0 )){
-      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps, OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble,previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       }
       // END OF PROPAGATE ONE LAST TIME UNTIL THE SATELLITE EPOCH IS THE SAME AS THE CONSTELLATION EPOCH
   } // if sc.et not "equal" to constellation initial epoch
@@ -707,6 +710,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
       //      if (iProc == 0){
       if (start_ensemble[ii] == 0){ // if this iProc runs main sc ii
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = OPTIONS->dt;
+      CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg = OPTIONS->dt_pos_neg;
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_drag  = save_include_drag; // the drag is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
       CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_solar_pressure  = save_include_solar_pressure; // the solar_pressure is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
             CONSTELLATION->spacecraft[ii][0].INTEGRATOR.include_earth_pressure  = save_include_earth_pressure; // the earth_pressure is now computed (if the user decided so) because the epoch reached the epoch start time of the constellation
@@ -718,6 +722,7 @@ CONSTELLATION->spacecraft[ii][0].fpecef = fopen( CONSTELLATION->spacecraft[ii][0
 	if ( OPTIONS->nb_ensembles_min > 0 ) {
 	  for (eee = 1L + iProc * OPTIONS->nb_ensemble_min_per_proc; eee< 1 + iProc * OPTIONS->nb_ensemble_min_per_proc + OPTIONS->nb_ensemble_min_per_proc ; eee++){
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt = OPTIONS->dt;
+	    	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.dt_pos_neg = OPTIONS->dt_pos_neg;
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_drag  = save_include_drag;
 	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_solar_pressure  = save_include_solar_pressure;
 	    	    CONSTELLATION->spacecraft[ii][eee].INTEGRATOR.include_earth_pressure  = save_include_earth_pressure;
@@ -748,18 +753,19 @@ if (iProc == 0){
 
 	time_between_last_gps_epoch_and_constellation_epoch_starttime = -1.0;
 	new_dt_for_gps = -1.0;
-	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt ) ){
+	while ( ( ( CONSTELLATION->spacecraft[ii][0].et - twrite ) < 0 ) && ( ( twrite - CONSTELLATION->spacecraft[ii][0].et ) > CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg ) ){
 	  propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc , iDebugLevel, start_ensemble, array_sc); // don't care about starttime here because this is used for linear interpolation with the density drivers (F10.7, Ap, ...) and the attitude, which we do not care for the GPS satellites (for now!)
 	}
 
-	time_between_last_gps_epoch_and_constellation_epoch_starttime = starttime - CONSTELLATION->spacecraft[ii][0].et;
+	time_between_last_gps_epoch_and_constellation_epoch_starttime =fabs( starttime - CONSTELLATION->spacecraft[ii][0].et);
 	new_dt_for_gps = time_between_last_gps_epoch_and_constellation_epoch_starttime;
 	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = new_dt_for_gps;
 	propagate_spacecraft( &CONSTELLATION->spacecraft[ii][0], PARAMS, starttime, OPTIONS->et_oldest_tle_epoch, &density, GROUND_STATION, OPTIONS, CONSTELLATION, iProc, iDebugLevel, start_ensemble, array_sc );
 
-	write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps,OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit, ii, OPTIONS->n_satellites,OPTIONS->nb_gps,OPTIONS->nb_ensembles_min,  OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
 
 	CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt = OPTIONS->dt;
+		CONSTELLATION->spacecraft[ii][0].INTEGRATOR.dt_pos_neg = OPTIONS->dt_pos_neg;
       } // end of if this iProc runs main sc ii
     } // end of going through all GPS sc
   } // end of if (OPTIONS->nb_gps > 0)
@@ -800,7 +806,7 @@ if (iProc == 0){
 
 
  // if (iProc == 0){
-   if (compute_collisions == 1){ // if computing the probability of collision
+   if (compute_collisions == 1){ // if computing the probability of collision 2020-11-13 i don't want to worry about dt_pos_neg (backward propagation) for collision avoidance
      if ( ( iDebugLevel >= 2 ) ){
        printf("--- (generate_ephemerides) Allocating memory for other collision assessment variables (only by main node). (iProc %d)\n", iProc);
      }
@@ -886,13 +892,13 @@ if (iProc == 0){
 
      OPTIONS->first_run_to_find_tca_before_collision_assessment = 1;
 
-     while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 100.0) ){ // propagate all unrpertubed orbits to determine times of close approach
+     while ( ( fabs(CONSTELLATION->et - endtime) < 0.01 ) && ( min_altitude_constellation > 100.0) ){ // propagate all unrpertubed orbits to determine times of close approach
        already_propagated_ref_sc = 1;
 
 
        // PRINT PROGRESS TO SCREEN
        if (iProc == 0){
-              printf("\033[A\33[2K\rPropagating the unpertubed orbits to compute times of close approach... %.0f%%\n", ( CONSTELLATION->et - starttime ) / ( endtime - starttime ) *100.0);
+              printf("\033[A\33[2K\rPropagating the unpertubed orbits to compute times of close approach... %.0f%%\n", ( CONSTELLATION->et - starttime ) / fabs( endtime - starttime ) *100.0);
        }
 
        for (ii = 0; ii < OPTIONS->nb_satellites_not_including_gps; ii++) {
@@ -942,7 +948,7 @@ if (iProc == 0){
 	   tca1 = -1; dca1 = 1e6; tca2 = -1; dca2 = 1e6; tca3 = -1; dca3 = 1e6;
 	   close_approach_exists = 0;
 
-	   if ( ( CONSTELLATION->et + OPTIONS->dt > starttime + 3 * OPTIONS->dt ) && (CONSTELLATION->et + OPTIONS->dt <  endtime - OPTIONS->dt)  ){ // To use the collision assessment algorithm, the propagation needs to start at least three 3 time steps before TCA and needs to end at least one time step after TCA. Therefore, do not try to find TCA earlier than 3 times steps after initial epoch or later than 1 time step before final epoch
+	   if ( ( CONSTELLATION->et + OPTIONS->dt > starttime + 3 * OPTIONS->dt )  && (CONSTELLATION->et + OPTIONS->dt <  endtime - OPTIONS->dt)  ){ // To use the collision assessment algorithm, the propagation needs to start at least three 3 time steps before TCA and needs to end at least one time step after TCA. Therefore, do not try to find TCA earlier than 3 times steps after initial epoch or later than 1 time step before final epoch. 2020-11-13 i don't want to worry about dt_pos_neg (backward propagation) for collision avoidance
 	     //	     	     print_test(); printf("XXXXXXXXXXXXXX\n%d\nXXXXXXXXX\n",iProc);
 
 	     ancas_existence_of_min_using_two_values_of_function_and_two_values_of_its_derivative( CONSTELLATION->et, OPTIONS->dt, previous_eci_r[ii-1], previous_eci_v[ii-1], previous_eci_a[ii-1], CONSTELLATION->spacecraft[ii-1][0].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii-1][0].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii-1][0].a_i2cg_INRTL, previous_eci_r[ii], previous_eci_v[ii], previous_eci_a[ii], CONSTELLATION->spacecraft[ii][0].r_i2cg_INRTL, CONSTELLATION->spacecraft[ii][0].v_i2cg_INRTL, CONSTELLATION->spacecraft[ii][0].a_i2cg_INRTL, &close_approach_exists, &gamma0, &gamma1, &gamma2, &gamma3);
@@ -991,7 +997,7 @@ if (iProc == 0){
 	   if ( ( fmod( CONSTELLATION->spacecraft[ii][0].et - starttime, OPTIONS->dt_output ) < OPTIONS->dt / 2. ) || ( fabs( fmod( CONSTELLATION->spacecraft[ii][0].et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) < OPTIONS->dt / 2. ) || ( CONSTELLATION->spacecraft[ii][0].et > endtime - 0.01) )  {
 
 
-	     write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,0, ( CONSTELLATION->et + OPTIONS->dt) , nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	     write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,0, ( CONSTELLATION->et + OPTIONS->dt_pos_neg) , nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
 	     et2utc_c(CONSTELLATION->spacecraft[ii][0].et, "ISOC" ,6 ,255 , times_att);
 /* 	     if (write_density == 1){ */
 /* 	       	       fprintf(density_file,"%s %e %f %f %e\n", times_att, density, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.Ta, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.cd_tot_norm, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.A_ref_tot/1000000.); // in output A_ref_tot in km^2 */
@@ -1322,14 +1328,13 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
     while ( ( fabs( CONSTELLATION->et - endtime ) > OPTIONS->dt / 2. ) && ( min_altitude_constellation > 100.0) ){ // propagate the constellation by dt //  while ( ( CONSTELLATION->et < endtime -0.01 ) && ( min_altitude_constellation > 200.0) ){ // propagate the constellation by dt
     /* printf("\n"); */
     /* pti(iProc, "iProc"); */
-      //                     etprint(CONSTELLATION->et, "t");
-
+      //                           etprint(CONSTELLATION->et, "t");
 
 
     // Time to stop the propgation
     min_end_time = endtime;
     //    etprint(min_end_time, "end");
-    if ( ( compute_collisions == 1 ) ){
+    if ( ( compute_collisions == 1 ) ){//2020-11-13 i don't want to worry about dt_pos_neg (backward propagation) for collision avoidance
       if ( max_tca + ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt ) < endtime ){
 	min_end_time =  max_tca + ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt );
       }
@@ -1337,10 +1342,10 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 
     // Print progress to screen
     if (iProc == 0){
-      //                                                                         print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
+                                                                                     print_progress( min_end_time, CONSTELLATION->et , starttime, iProc, OPTIONS->nb_gps )  ;
     }
 
-    if ( ( compute_collisions == 1 )  ){       // start collision assessment when the secondary sc time enters the span of time around TCA. !!!!!!!!! CONSTELLATION->et  is temporary and assumes the reference sc have the same epoch start. If it's not the case then this needs to be changed (below and at other locations in the code)
+    if ( ( compute_collisions == 1 )  ){       // start collision assessment when the secondary sc time enters the span of time around TCA. !!!!!!!!! CONSTELLATION->et  is temporary and assumes the reference sc have the same epoch start. If it's not the case then this needs to be changed (below and at other locations in the code) //2020-11-13 i don't want to worry about dt_pos_neg (backward propagation) for collision avoidance
       itca = -1; // if itca is different from -1 then it means that the time is in the time spanning TCA (unpertubed)
       time_step_of_tca = -1;
       for ( ccc = start_itca; ccc < nb_tca; ccc++ ){
@@ -1391,7 +1396,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 	    /* 	      min_altitude_constellation =  CONSTELLATION->spacecraft[ii][eee].GEODETIC.altitude; */
 	    /* 	    } */
 
-	    ispan_constellation = (int)( ( CONSTELLATION->et + OPTIONS->dt - et_start_of_span ) / OPTIONS->dt );
+	    ispan_constellation = (int)( fabs( CONSTELLATION->et + OPTIONS->dt_pos_neg - et_start_of_span ) / OPTIONS->dt );
 	    /* if (iProc == 1){ */
 	    /* etprint(CONSTELLATION->et + OPTIONS->dt, "out" ); */
 	    /* printf("%d %d\n", ispan_constellation,nb_time_steps_in_tca_time_span-1); */
@@ -1520,12 +1525,12 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
       /*   printf("----- (generate_ephemerides) Writing the output (iProc %d).\n",  iProc); */
       /* } */
 
-      if ( ( already_propagated_ref_sc == 1 )   ){
+      if ( ( already_propagated_ref_sc == 1 )   ){ //2020-11-13 i don't want to worry about dt_pos_neg (backward propagation) for ensemble propagation
 	if ( output_only_at_tca != 1 ){
 	  if ( (array_sc[start_ensemble[ii]] >= 0) && ((CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et - twrite) >= OPTIONS->dt - 0.01) ){// && ( itca != -1 ) ) { // (array_sc[start_ensemble[ii]] >= 0): if this iProc runs main sc ii (start_ensemble[ii] = 0, array_sc[0] = 0) or this iProc does not run main sc ii but runs ensembles for main sc ii (start_ensemble[ii] = 1, array_sc[1] > 0) (if none of these two, so if this iProc does not run main sc ii and that this iProc does not run ensembles for main sc ii, then we don't want this iProc to write anything for main sc ii (start_ensemble[ii] = 1 and array_sc[1] = -1).
 
 	    if ( ( fmod( CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et - starttime, OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( fabs( fmod( CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) < OPTIONS->dt / 2. ) || ( CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et > min_end_time - 0.01) )  {
-	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,0,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,0,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
 	    }
 	  }
 	  if ( ( ii == (OPTIONS->n_satellites - 1) ) && (compute_collisions == 0) ) {
@@ -1544,7 +1549,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 	    // if ( fabs(CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et - et_current_tca) <= 0.01) {// && ( itca != -1 ) ) { // write output
 	      if ( ( CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et >= et_current_tca - OPTIONS->dt ) && ( CONSTELLATION->spacecraft[ii][1 + iProc * OPTIONS->nb_ensemble_min_per_proc].et <= et_current_tca + OPTIONS->dt  ) ){ // !!!!!!!!! REMOVE THIS IF AND UNCOMMENT THE ONE RIGHT ABOVE                                     \
 	      //		      print_test();
-	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,0,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,0,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
 	    }
 	    // end of to output only at tca of unperturbed orbit !!!!!!!!!!!
 	  }
@@ -1558,7 +1563,7 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 /* 	    printf("iProc %d has array_sc[start_ensemble[%d]] = %d \n", iProc, ii, array_sc[start_ensemble[ii]] ); */
 /* 	  } */
 
-	if ( (array_sc[start_ensemble[ii]] >= 0) && ((CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - twrite) >= OPTIONS->dt - 0.01) ){// && ( itca != -1 ) ) { // (array_sc[start_ensemble[ii]] >= 0): if this iProc runs main sc ii (start_ensemble[ii] = 0, array_sc[0] = 0) or this iProc does not run main sc ii but runs ensembles for main sc ii (start_ensemble[ii] = 1, array_sc[1] > 0) (if none of these two, so if this iProc does not run main sc ii and that this iProc does not run ensembles for main sc ii, then we don't want this iProc to write anything for main sc ii (start_ensemble[ii] = 1 and array_sc[1] = -1). array_sc[start_ensemble[ii]] in the second condition (after '&&') represents main sc ii if this iProc runs main sc ii (because array_sc[start_ensemble[ii]] = 0), or it represents the first ensemble run by this iProc if this iProc does not run main sc ii
+	if ( (array_sc[start_ensemble[ii]] >= 0) && (fabs(CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - twrite) >= OPTIONS->dt - 0.01) ){// && ( itca != -1 ) ) { // (array_sc[start_ensemble[ii]] >= 0): if this iProc runs main sc ii (start_ensemble[ii] = 0, array_sc[0] = 0) or this iProc does not run main sc ii but runs ensembles for main sc ii (start_ensemble[ii] = 1, array_sc[1] > 0) (if none of these two, so if this iProc does not run main sc ii and that this iProc does not run ensembles for main sc ii, then we don't want this iProc to write anything for main sc ii (start_ensemble[ii] = 1 and array_sc[1] = -1). array_sc[start_ensemble[ii]] in the second condition (after '&&') represents main sc ii if this iProc runs main sc ii (because array_sc[start_ensemble[ii]] = 0), or it represents the first ensemble run by this iProc if this iProc does not run main sc ii
 	  //	    test_print("A")
 	  //    etprint(CONSTELLATION->et, "1");
 	  /* 	    etprint(starttime, "start"); */
@@ -1566,13 +1571,14 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 	  //	    printf("%e %e %e %f %d || %f\n", CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et-starttime, OPTIONS->dt_output, starttime, fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) , ( fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) < 0.01), fabs( fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) );
 	  
 	  //	  printf("%f\n", CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et);
+	  if (OPTIONS->dt_pos_neg >= 0){
 	    if ( ( fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( fabs( fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et > min_end_time - 0.01) )  {
 	    //    test_print("B");
 /* 	  if (iProc > 4){ */
 /* 	    printf("%d\n", iProc); */
 /* 	  } */
 
-	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
       	    et2utc_c(CONSTELLATION->spacecraft[ii][0].et, "ISOC" ,6 ,255 , times_att);
 /* 	     if (write_density == 1){ */
 /* 	       fprintf(density_file,"%s %e %f %f %e\n", times_att, density, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.Ta, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.cd_tot_norm, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.A_ref_tot/1000000.); // in output A_ref_tot in km^2 */
@@ -1587,14 +1593,39 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
 /*   } */
 
       	  }
+	  }
+	  else{
+	    if ( ( fmod(fabs( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime), OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( fabs( fmod( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et - starttime, OPTIONS->dt_output ) - OPTIONS->dt_output ) < OPTIONS->dt / 2.) || ( CONSTELLATION->spacecraft[ii][array_sc[start_ensemble[ii]]].et < min_end_time + 0.01) )  {
+	    //    test_print("B");
+/* 	  if (iProc > 4){ */
+/* 	    printf("%d\n", iProc); */
+/* 	  } */
+
+	      write_output( CONSTELLATION->spacecraft[ii] , 0, choose_tle_to_initialise_orbit,ii, OPTIONS->n_satellites,OPTIONS->nb_gps,  OPTIONS->nb_ensembles_min, OPTIONS->nb_ensemble_min_per_proc,  iProc,  OPTIONS->nb_ensembles_output_files, OPTIONS->filename_output_ensemble, previous_lat,OPTIONS,PARAMS->EARTH.earth_fixed_frame,1,1, ( CONSTELLATION->et + OPTIONS->dt_pos_neg ), nProcs, iDebugLevel, compute_collisions, start_ensemble, array_sc, CONSTELLATION, PARAMS);
+      	    et2utc_c(CONSTELLATION->spacecraft[ii][0].et, "ISOC" ,6 ,255 , times_att);
+/* 	     if (write_density == 1){ */
+/* 	       fprintf(density_file,"%s %e %f %f %e\n", times_att, density, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.Ta, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.cd_tot_norm, CONSTELLATION->spacecraft[ii][0].INTEGRATOR.A_ref_tot/1000000.); // in output A_ref_tot in km^2 */
+/* 	       //	       printf("%e %e\n", density, CONSTELLATION->spacecraft[ii][0].density_here); */
+/* 	     } */
+/* char  time_temp_str[256]; */
+/*   double time_temp; */
+/*   strcpy(time_temp_str, "2017-05-04T00:00:40.999261"); */
+/*   str2et_c(time_temp_str, &time_temp); */
+/*   if (CONSTELLATION->spacecraft[ii][0].et >= time_temp){ */
+/*     MPI_Finalize(); exit(0); */
+/*   } */
+
+      	  }
+
+	  }
 	}
 
       	
       	if ( ( ii == (OPTIONS->n_satellites - 1) ) && (compute_collisions == 0) ) {
-      	  twrite = CONSTELLATION->et + OPTIONS->dt;
+      	  twrite = CONSTELLATION->et + OPTIONS->dt_pos_neg;
       	}
       	if ( ( ii == (OPTIONS->n_satellites - 1) ) && (compute_collisions == 1) ) {
-      	  twrite = CONSTELLATION->et + OPTIONS->dt;
+      	  twrite = CONSTELLATION->et + OPTIONS->dt_pos_neg;
       	}
 
       } // end of else (so end of if already_propagated_ref_sc != 1)
@@ -1607,9 +1638,11 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
       //          test_print_iproc( iProc, "F");
     } // go through all reference satellites (and their associated ensembles deeper in the loop)  (END OF LOOP OVER ALL MAIN SATELLITES)
 
-    if ( ( compute_collisions == 1 ) && ( ( CONSTELLATION->et + OPTIONS->dt ) > max_tca + ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt )   ) ){ // if collision assessment is on, then the ensembles are propagated until the time of closest approach (+ a certain time, ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt ) )
+    if ( ( compute_collisions == 1 )){
+      if ( ( CONSTELLATION->et + OPTIONS->dt ) > max_tca + ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt )   ){// if collision assessment is on, then the ensembles are propagated until the time of closest approach (+ a certain time, ((int)(nb_time_steps_in_tca_time_span / 2) * OPTIONS->dt ) )
       //        test_print_iproc( iProc, "B");
       break;
+      }
     }
     /// !!!!!!!!!!!!!!!!!!!!!! COMMENT THIS BLOCK!!!!!!!!!!!!!!!!!!!!!
     /* if (( CONSTELLATION->et + OPTIONS->dt ) > remove_this_var) { */
@@ -1617,7 +1650,8 @@ if (iProc < nProcs_that_are_gonna_run_ensembles){
     /* } */
     /// !!!!!!!!!!!!!!!!!!!!!! END OF COMMENT THIS BLOCK!!!!!!!!!!!!!!!!!!!!!
     // UPDATE THE CONSTELLATION TIME
-    CONSTELLATION->et = CONSTELLATION->et + OPTIONS->dt;
+    
+    CONSTELLATION->et = CONSTELLATION->et + OPTIONS->dt_pos_neg;
   } // end of propagate the constellation by dt  (END OF WHILE PROPAGATION OF ALL SATELLITES AND ENSEMBLES)
   //////////////////// END OF PROPAGATION
 

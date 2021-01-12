@@ -1,0 +1,71 @@
+The directory where SpOCK is installed is noted <spock_dir>. 
+
+To install SpOCK, administrator privileges are not required.
+
+You first need to install Cygwin, see document "Cygwin_INSTALL". 
+Once Cygwin is installed, follow the instructions below.
+
+- open a Cygwin terminal 
+- cd <spock_dir>
+- mkdir gsl_installation
+
+- Download and install GSL C version:
+   - go online to http://www.gnu.org/software/gsl/ 
+   - in Section "Downloading GSL", select the link of "your nearest GNU mirror"
+   - scroll all the way to the bottom of the page and select "gsl-latest.tar.gz"
+   - in Cygwin terminal: 
+      - cd to the Downloads directory (usually /cygdrive/c/Users/<username>/Downloads)
+      - tar -zxvf gsl-latest.tar.gz (if there is no gsl-latest.tar.gz then 
+      try "tar -zxvf gsl-latest.tar")
+      - cd to the GSL folder created by this previous "tar -zxvf gsl-latest.tar.gz" step 
+      (at the time of writing: cd gsl-2.4)
+      - ./configure --prefix=<spock_dir>/gsl_installation/ (the --prefix option will install GSL 
+	 in the gsl_installation folder previously created so that administrator privileges are not 
+	 required for the installation. If you don't want to install GSL in this directory, you'll have 
+	 to modify the makeall.sh accordingly (see further step))
+      - make (this step might take several minutes)
+      - make install (IF (and only if) you didn't use the option --prefix two steps before, then you might need 
+	 administrator privileges: sudo make install)
+You're done installing GSL.
+
+- Download and install SPICE for C:
+   - go online to: http://naif.jpl.nasa.gov/naif/toolkit_C.html
+   - select the 64-bit Cygwin version "PC, CYGWIN, gCC, 64bit"
+   - download cspice.tar.gz (you don't need to download the other files. In particular, 
+   don't follow the instructions of the README file. At the time of writing, they don't work properly. 
+   Instead, follow the following steps.)
+   - in the Cygwin terminal:
+      - cd to the Download directory (usually /cygdrive/c/Users/<username>/Downloads)
+      - cp cspice.tar.gz <spock_dir>
+      - cd <spock_dir>
+      - tar -zxvf cspice.tar.gz
+      - cd cspice
+      - ./makeall.csh (this might take a few minutes)
+You're done installing SPICE.
+
+- Install SpOCK:
+   - still in the Cygwin terminal:
+      - cd <spock_dir> 
+      - ./makeall.sh (IF (and only if) you installed GSL in another directory than gsl_installation 
+      (see step "./configure in the installation of GSL") then modify the variable "path_gsl" in makeall.sh)
+      - source ~/.bash_profile
+You're done installing SpOCK.
+
+- Give it a try!
+   - open the file <spock_dir>/Examples/try_spock.txt and modify the line below #SPICE to: <spock_dir>/cspice/data (don't forget 
+   to change <spock_dir> with the directory where SpOCK was installed). For example, if spock_dir is 
+   /cygdrive/c/Users/smith/spock then the line under #SPICE should be /cygdrive/c/Users/smith/spock/cspice/data. 
+   Then save try_spock.txt and go back to the Cygwin terminal
+   - cd <spock_dir>/Examples
+   - mpirun -np 2 spock.exe try_spock.txt
+If the installation of SpOCK went well, then you shouldn't see any error. 
+The message:
+"SpOCK is propagating the spacecraft... 100%
+
+- Done propagating the spacecraft."
+should be printed on the Cygwin terminal.
+You might see a window that pops up asking you the authorization to run the executable spock or orterun. You 
+can hit Cancel. It shouldn't pop up next time. 
+
+
+

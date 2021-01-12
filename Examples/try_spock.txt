@@ -1,5 +1,5 @@
 #SPICE
-/Users/cbv/sift/code/spock/cspice/data
+/Users/cbv/cspice/data
 
 #TIME
 2017-08-20T12:00:00

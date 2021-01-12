@@ -1139,17 +1139,24 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   v_scale(k1v, k1v, SC->INTEGRATOR.dt);
 
   // Compute k2
-  etk = SC->et + SC->INTEGRATOR.dt / 2.0;
+  etk = SC->et + SC->INTEGRATOR.dt_pos_neg / 2.0;
     
   v_copy( dr, k1r);
-  v_scale(dr, dr, 0.5);
-  v_add(rk, SC->r_i2cg_INRTL, dr);
-    
+  v_scale(dr, dr, 0.5);    
   v_copy( dv, k1v);
-
   v_scale(dv, dv, 0.5);
-  v_add(vk, SC->v_i2cg_INRTL, dv);
-
+  /* v_print(k1r, "k1r"); */
+  /* v_print(k1v, "k1v"); */
+  /* exitf(); */
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+    v_add(rk, SC->r_i2cg_INRTL, dr);
+    v_add(vk, SC->v_i2cg_INRTL, dv);
+  }
+  else{// backward propagation
+    v_sub(rk, SC->r_i2cg_INRTL, dr);
+    v_sub(vk, SC->v_i2cg_INRTL, dv);
+  }
+  
   if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 ) || (GROUND_STATION->nb_ground_stations > 0) ){
     //    if (SC->et >= et_initial_epoch){ //  that's because if the initializtion of the orbit was made with a TLE, we don't want index_in_attitude_interpolated to be incremented for times between the TLE epoch and the inital epoch 
       SC->INTEGRATOR.index_in_attitude_interpolated =  SC->INTEGRATOR.index_in_attitude_interpolated + 1;
@@ -1197,31 +1204,45 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   v_scale(k2v, k2v, SC->INTEGRATOR.dt);
 
   // Compute k3
-  etk = SC->et + SC->INTEGRATOR.dt / 2.0;
+  etk = SC->et + SC->INTEGRATOR.dt_pos_neg / 2.0;
     
   v_copy( dr, k2r);
   v_scale(dr, dr, 0.5);
-  v_add(rk, SC->r_i2cg_INRTL, dr);
 
   v_copy( dv, k2v);
   v_scale(dv, dv, 0.5);
-  v_add(vk, SC->v_i2cg_INRTL, dv);
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+      v_add(rk, SC->r_i2cg_INRTL, dr);
+      v_add(vk, SC->v_i2cg_INRTL, dv);
+  }
+  else{// backward propagation
+    v_sub(rk, SC->r_i2cg_INRTL, dr);
+    v_sub(vk, SC->v_i2cg_INRTL, dv);
+  }
 
-
+  
   compute_dxdt( k3r, k3v, &etk, rk, vk, PARAMS, &SC->INTEGRATOR, et_initial_epoch, et_sc_initial, density, SC->INTEGRATOR.index_in_attitude_interpolated, SC->INTEGRATOR.index_in_driver_interpolated, CONSTELLATION, OPTIONS, iProc, iDebugLevel, SC);
 
   v_scale(k3r, k3r, SC->INTEGRATOR.dt);
   v_scale(k3v, k3v, SC->INTEGRATOR.dt);
     
   // Compute k4
-  etk = SC->et + SC->INTEGRATOR.dt;
+  etk = SC->et + SC->INTEGRATOR.dt_pos_neg;
 
   v_copy( dr, k3r);
-  v_add(rk, SC->r_i2cg_INRTL, dr);
-    
   v_copy( dv, k3v);
-  v_add(vk, SC->v_i2cg_INRTL, dv);
 
+
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+      v_add(rk, SC->r_i2cg_INRTL, dr);
+      v_add(vk, SC->v_i2cg_INRTL, dv);
+  }
+  else{// backward propagation
+      v_sub(rk, SC->r_i2cg_INRTL, dr);
+      v_sub(vk, SC->v_i2cg_INRTL, dv);
+  }
+
+  
   if ( ( SC->INTEGRATOR.include_drag != 0 ) || ( SC->INTEGRATOR.include_solar_pressure != 0 ) || ( SC->INTEGRATOR.solar_cell_efficiency != -1 )  || (GROUND_STATION->nb_ground_stations > 0) ){
     //    if (SC->et >= et_initial_epoch){ //  that's because if the initializtion of the orbit was made with a TLE, we don't want index_in_attitude_interpolated to be incremented for times between the TLE epoch and the inital epoch 
       SC->INTEGRATOR.index_in_attitude_interpolated =  SC->INTEGRATOR.index_in_attitude_interpolated + 1;
@@ -1265,24 +1286,62 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   //  Compute the delta r, delta v
   v_copy( dr, k4r);
   v_scale( k3r, k3r, 2.0);
-  v_add(dr, dr, k3r);
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+    v_add(dr, dr, k3r);    
+  }
+  else{// backward propagation 
+    v_add(dr, dr, k3r);
+  }
+
   v_scale( k2r, k2r, 2.0);
-  v_add(dr, dr, k2r);
-  v_add(dr, dr, k1r);
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+      v_add(dr, dr, k2r);
+      v_add(dr, dr, k1r);
+
+  }
+  else{// backward propagation
+      v_add(dr, dr, k2r);
+      v_add(dr, dr, k1r);
+  }
+
   v_scale( dr, dr, (1.0/6.0));
     
   v_copy( dv, k4v);
   v_scale( k3v, k3v, 2.0);
-  v_add(dv, dv, k3v);
+  if (SC->INTEGRATOR.dt_pos_neg >=0){
+    v_add(dv, dv, k3v);
+  }
+  else{// backward propagation
+    v_add(dv, dv, k3v);
+  }
   v_scale( k2v, k2v, 2.0);
-  v_add(dv, dv, k2v);
+
+    if (SC->INTEGRATOR.dt_pos_neg >=0){
+      v_add(dv, dv, k2v);
   v_add(dv, dv, k1v);
+
+  }
+  else{// backward propagation
+    v_add(dv, dv, k2v);
+  v_add(dv, dv, k1v);
+  }
   v_scale( dv, dv, (1.0/6.0));
 
+  
   // Update Inertial State
-  SC->et = SC->et + SC->INTEGRATOR.dt;
-  v_add( SC->r_i2cg_INRTL, SC->r_i2cg_INRTL, dr);
+  SC->et = SC->et + SC->INTEGRATOR.dt_pos_neg;
+
+    if (SC->INTEGRATOR.dt_pos_neg >=0){
+        v_add( SC->r_i2cg_INRTL, SC->r_i2cg_INRTL, dr);
   v_add( SC->v_i2cg_INRTL, SC->v_i2cg_INRTL, dv);
+
+  }
+  else{// backward propagation
+    v_sub( SC->r_i2cg_INRTL, SC->r_i2cg_INRTL, dr);// the dr is the sum of k1, k2, k3, k4 for either the fowrward or backward propagation so for backward propagation we need to remove this entire dr
+  v_sub( SC->v_i2cg_INRTL, SC->v_i2cg_INRTL, dv);
+  }
+
+
 
   double starttime;
   str2et_c(OPTIONS->initial_epoch, &starttime);
@@ -1313,7 +1372,7 @@ int propagate_spacecraft(   SPACECRAFT_T *SC,
   else{ // if sgp4 eqautions are not used for the orbit propagation
     	    // !!!!!!!!!!!!! TEMP remove 080619
     SpiceDouble state[6];
-    SC->et = SC->et + SC->INTEGRATOR.dt;
+    SC->et = SC->et + SC->INTEGRATOR.dt_pos_neg;
     	    extern /* Subroutine */ int ev2lin_(SpiceDouble *, SpiceDouble *,
 	    					SpiceDouble *, SpiceDouble *);
 

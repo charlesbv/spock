@@ -1,0 +1,113 @@
+The directory where SpOCK is installed is noted <spock_dir>. 
+
+To install SpOCK, administrator privileges are not required.
+
+Running SpOCK assumes you're using the bash shell. 
+To check if your default shell is bash, type in a Terminal command prompt: echo $SHELL
+If it returns: /bin/bash
+then your default shell is bash and you're good to start the installation.
+If it returns something else, it means your default shell isn't bash. You can either temporarily or 
+permanently change your shell to bash.
+To permanently change your shell to bash, type in a Terminal command prompt: chsh -s /bin/bash
+It will ask for your password. After typing your password, close and open a new Terminal window for this 
+change to be effective.
+To temporarily change you shell to bash, type in a Terminal command prompt: /bin/bash
+(echo $SHELL will still return a different shell but that's ok).
+If you choose to change your shell only temporarily, you'll need to type this command ("/bin/bash") in the Terminal 
+each time you open a new window to run SpOCK.
+
+
+- test if mpirun is already installed on your computer: 
+   - in a Terminal command line, type: mpirun
+   - if the following message is returned then you need to download and install OpenMpi: 
+   "mpirun: command not found". 
+   If you get a message with "OpenMpi could not find anything to do" then you already have 
+   OpenMpi installed so you can skip the next step "download and install OpenMpi" and go to 
+   the step "In a new Terminal window"
+- download and install OpenMpi (if you don't already have it):
+   - go online to: https://www.open-mpi.org/software/
+   - in the first table, select the version "openmpi-X.Y.Z.tar.gz" (where X, Y, and Z are numbers)
+   - in the Terminal, cd to the Downloads directory (usually /Users/<username>/Downloads)
+   - tar -zxvf openmpi-X.Y.Z.tar.gz
+   - cd to the folder created by the previous "tar -zxvf openmpi-X.Y.Z.tar.gz" step (at the time 
+   of writing: cd openmpi-4.1.0)
+   - if you have administrator privileges: 
+      - ./configure 
+      - sudo make all install (this step takes time) 
+   - if you don't have administrator privileges:
+      - ./configure --prefix=/Users/<username> (don't forget to replace <username> with your username)
+      - make all install (this step takes time)
+      - open the file /Users/<username>/.bash_profile (if this file doesn't exist then create it)
+      - add the following line in the file /Users/<username>/.bash_profile: 
+	 PATH=$PATH:/Users/<username>/bin
+   	 (don't forget to replace <username> with your username)
+      - save the file /Users/<username>/.bash_profile
+You're done installing OpenMpi.
+
+In a NEW Terminal window:
+- cd <spock_dir>
+- mkdir gsl_installation
+
+- Download and install GSL C version:
+   - go online to http://www.gnu.org/software/gsl/ 
+   - in Section "Downloading GSL", select the link of "your nearest GNU mirror"
+   - scroll all the way to the bottom of the page and select "gsl-latest.tar.gz"
+   - in Terminal: 
+      - cd to the Downloads directory (usually /Users/<username>/Downloads)
+      - tar -zxvf gsl-latest.tar.gz (if there is no gsl-latest.tar.gz then try "tar -zxvf gsl-latest.tar")
+      - cd to the GSL folder created by this previous "tar -zxvf gsl-latest.tar.gz" step (at the time of 
+      writing: cd gsl-2.6)
+      - ./configure --prefix=<spock_dir>/gsl_installation/ (the --prefix option will install GSL in the 
+	 gsl_installation folder previously created so that administrator privileges are not required for 
+	 the installation. If you don't want to install GSL in this directory, you'll have to modify the 
+	 makeall.sh accordingly (see further step))
+      - make (this step might take several minutes)
+      - make install (IF (and only if) you didn't use the option --prefix two steps before, then you might 
+	 need administrator privileges: sudo make install)
+You're done installing GSL.
+
+- Download and install SPICE for C:
+   - go online to: http://naif.jpl.nasa.gov/naif/toolkit_C.html
+   - select the 64-bit of your OS
+   - download cspice.tar.Z (you don't need to download the other files. In particular, don't follow the 
+   instructions of the README file. At the time of writing, they don't work properly. Instead, follow
+    the following steps)
+   - in the Terminal:
+      - cd to the Download directory (usually /Users/<username>/Downloads)
+      - cp cspice.tar.Z <spock_dir>
+      - cd <spock_dir>
+      - tar -zxvf cspice.tar.Z
+      - cd cspice
+      - ./makeall.csh (this might take a few minutes)
+You're done installing SPICE.
+
+- Install wget:
+   - you might already have wget. To find out, type in a Terminal command prompt: wget. If it returns:
+   "wget: command not found" then you need to install wget. If if returns something else, then you 
+   don't need to install wget and you can directly go to the final step "Install SpOCK".
+   - go online to: http://rudix.org/packages/wget.html
+   - select the .pkg file corresponding to your platform
+   - follow the steps for the installation. If you need administrator privileges for the installation 
+   and you don't have them, there are other ways you can install wget (email cbv@umich.edu for help)
+
+- Install SpOCK:
+   - still in the Terminal:
+      - cd <spock_dir> 
+      - ./makeall.sh (IF (and only if) you installed GSL in another directory than gsl_installation 
+      (see step "./configure in the installation of GSL") then modify the variable "path_gsl" in makeall.sh)
+      - source ~/.bash_profile 
+You're done installing SpOCK.
+
+- Give it a try!
+   - open the file <spock_dir>/Examples/try_spock.txt and modify the line below #SPICE to: <spock_dir>/cspice/data 
+   (don't forget to change <spock_dir> with the directory where SpOCK was installed).  
+   For example, if spock_dir is /Users/smith/spock then the line under #SPICE should be 
+   /Users/smith/spock/cspice/data. Then save try_spock.txt and go back to the Terminal 
+   - cd <spock_dir>/Examples
+   - mpirun -np 2 spock try_spock.txt
+If the installation of SpOCK went well, then you shouldn't see any error. 
+The message:
+"SpOCK is propagating the spacecraft... 100%
+
+- Done propagating the spacecraft."
+should be printed on the terminal.

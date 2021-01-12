@@ -10,7 +10,7 @@
 
 
 // Constants
-#define N_SATS 140
+#define N_SATS 160
 #define N_STORM 20
 #define N_GROUND_STATION 100
 #define N_ENSEMBLES 600// not used anymore
@@ -246,6 +246,7 @@ typedef struct {
   double *f107A;                  // 81 day average of F10.7 flux
   double *density;                // density from the input density file if the user chooses to input the density like this
   double dt;                     // Integrator timestep
+  double dt_pos_neg;                     // Integrator timestep (negative if backward propagation)
   double mass;                   // Mass of spacecraft
   double solar_cell_efficiency;  // Efficiency of the solar cells
   char opengl_filename_solar_power[1000]; // name of file with corners of solar panels, read by opengl
