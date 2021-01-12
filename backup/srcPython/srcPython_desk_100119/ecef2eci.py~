@@ -1,2 +1,0 @@
-# This function converts ECEF coordinates to ECI (J2000) coordinates using the NASA Spice library. It uses the same algorithm as in SpOCK to convert ECEF to ECI.
-
