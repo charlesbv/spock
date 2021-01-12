@@ -1,9 +1,0 @@
-# This script:
-# 1- runs SpOCK with all 8 CYGNSS satellites (no GPS) between date_start and date_stop
-# 2- runs cygnss_camp2ex.py to output the lon/lat/alt and solar zenith angle
-# ASSUMPTIONS:
-# - see sections PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-
-# PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT
-# none
-# end of PARAMETERS TO SET UP BEFORE RUNNING THIS SCRIPT

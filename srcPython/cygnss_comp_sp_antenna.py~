@@ -1,3 +1,0 @@
-# This script compares the specular point position and selection algorithm between two runs by SpOCK.
-# It was build to compare the SP outputs using a merged antenna gain pattern file and the SP outputs using two antenna gain pattern files (port and starboard, like the onboard algorithm does).
-# These tests were done in preparation of the CYGNSS beacon campaign in 2019.
