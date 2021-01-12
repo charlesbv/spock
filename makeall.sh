@@ -85,7 +85,7 @@ fi
 if [ $py_only -ne 1 ];then
     # cp SPICE files to SPICE directory if this has not already been done. Same for gravitational spherical harmonincs and specular points
     if [ ! -f "$path_spice_abso"/data/naif0012.tls ]; then
-	cp ./src/naif0012.tls ./src/de432s.bsp ./src/earth_000101_180418_180125.bpc ./src/pck00010.tpc "$path_spice_abso"/data
+	cp ./src/naif0012.tls ./src/de432s.bsp ./src/earth_000101_210404_210111.bpc ./src/pck00010.tpc "$path_spice_abso"/data
 	cp ./src/egm96_to360_not_norm.txt "$path_spice_abso"/data
 	cp ./src/{antenna.bin,antenna.info,sigma0_table.bin} "$path_spice_abso"/data
     fi
