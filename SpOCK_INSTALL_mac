@@ -111,3 +111,7 @@ The message:
 
 - Done propagating the spacecraft."
 should be printed on the terminal.
+To plot the altitude, longitude and latitude of the simulation you just run:
+python plot_output.py try_spock.txt
+It will create 3 plots in the current directory: altitude.pdf, longitude.pdf,
+and latitude.pdf (one line per satellite on each plot).

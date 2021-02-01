@@ -66,6 +66,7 @@ The message:
 should be printed on the Cygwin terminal.
 You might see a window that pops up asking you the authorization to run the executable spock or orterun. You 
 can hit Cancel. It shouldn't pop up next time. 
-
-
-
+To plot the altitude, longitude and latitude of the simulation you just run:
+python plot_output.py try_spock.txt
+It will create 3 plots in the current directory: altitude.pdf, longitude.pdf,
+and latitude.pdf (one line per satellite on each plot).
