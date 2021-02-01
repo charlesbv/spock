@@ -1,8 +1,0 @@
-#BEGINNINGOFHEADER
-This is a header
-#ENDOFHEADER
-#START
-hawaii 21. -157. 0 5
-chile -33. -70. 0 5
-australia -31. 115. 0 5
-#END
