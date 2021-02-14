@@ -19,7 +19,7 @@ if [ $is_sift -eq 1 ];then
     path_spice=./cspice # when distributing: ./cspice
     path_gsl=./gsl_installation # when distributing: ./gsl_installation
 else
-    path_spice=/Users/cbv/cspice   #$3 don't include the last '/' in the path
+    path_spice=${PWD}/cspice   #$3 don't include the last '/' in the path
     path_gsl=/usr/local    #$4 you can put ./ for current directory but don't put ../ for one level up. in this case, put absolute path. also, don't include the last '/' in the path
 fi
 
